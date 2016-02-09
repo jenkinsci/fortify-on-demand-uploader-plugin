@@ -1,0 +1,61 @@
+
+
+WORKING:
+
+GET https://www.hpfod.com/api/v1/Application/{applicationId}
+GET https://www.hpfod.com/api/v1/Application?q=applicationName:{applicationName}
+GET https://www.hpfod.com/api/v1/Application?q=ApplicationName:{applicationName}
+GET https://www.hpfod.com/api/v1/Application?q=applicationName:{applicationName}&fields=applicationId
+GET https://www.hpfod.com/api/v1/Application/?q=assessmentType:{assessmentTypeName}
+GET https://www.hpfod.com/api/v1/Application/?q=assessmentType: {assessmentTypeName}
+GET https://www.hpfod.com/api/v1/Application/?q=canAuditIssue:{true|false}
+GET https://www.hpfod.com/api/v1/Application/?q=dynamicScanStatus:{scanStatusId}
+GET https://www.hpfod.com/api/v1/Application/?q=firstAssessmentType:{assessmentTypeName}
+GET https://www.hpfod.com/api/v1/Application/?q=isMobile:true
+GET https://www.hpfod.com/api/v1/Application/?q=mobileScanStatus:{scanStatusId}
+GET https://www.hpfod.com/api/v1/Application/?q=starRating:{0-5}
+GET https://www.hpfod.com/api/v1/Application/?q=staticScanStatus:{scanStatusId}
+GET https://www.hpfod.com/api/v1/Application/?fields=applicationId,applicationName,applicationTitle
+GET https://www.hpfod.com/api/v1/Application/?fields=applicationId,applicationName,isMobile
+
+GET https://www.hpfod.com/api/v1/Scan/
+
+GET https://www.hpfod.com/api/v2/Releases/?q=applicationId:{applicationId}
+GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}
+GET https://www.hpfod.com/api/v2/Releases/?q=releaseName:{releaseName}
+GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}&fields=releaseId,releaseName
+GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}&fields=releaseId,releaseName,currentStaticScanId
+
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Scans/{staticScanId}
+
+GET https://www.hpfod.com/api/v2/releases/{releaseId}/scan-results
+
+POST https://www.hpfod.com/api/v1/release/{releaseId}/scan/?assessmentTypeId=105&technologyStack=JAVA/J2EE&languageLevel=1.5&fragNo=-1&len={}&offset=0
+
+
+NOT WORKING
+
+GET https://www.hpfod.com/api/v1/Application/{applicationId}/release/?q=ReleaseName:{releaseName}
+
+GET https://www.hpfod.com/api/v1/Application/?q=ReleaseName:{releaseName}
+GET https://www.hpfod.com/api/v1/Application?q=ReleaseName:{releaseName}
+GET https://www.hpfod.com/api/v1/Application/?q=projectTitle:{applicationName}
+GET https://www.hpfod.com/api/v1/Application/?q=isDynamicSetup:true
+GET https://www.hpfod.com/api/v1/Application/?q=staticScanStatusValue:{scanStatusId}
+GET https://www.hpfod.com/api/v1/Application/?q=firstAssessmentType:{scanTypeName};assessmentType:{scanTypeName}
+GET https://www.hpfod.com/api/v1/Application/?q=firstAssessmentType:{scanTypeName},assessmentType:{scanTypeName}
+
+GET https://www.hpfod.com/api/v1/Scan/{staticScanId}
+GET https://www.hpfod.com/api/v1/Scan/?q=StaticScanId:{staticScanId}
+GET https://www.hpfod.com/api/v1/Scan/?field=ProjectVersionId,StaticScanId
+GET https://www.hpfod.com/api/v1/Scan?q=RollupHistoryId:{RollupHistoryId}
+GET https://www.hpfod.com/api/v1/Scan/?q=RollupHistoryId:{RollupHistoryId}
+
+GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName},releaseName:{releaseName}
+GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}|releaseName:{releaseName}
+GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName} releaseName:{releaseName}
+GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}%20releaseName:{releaseName}
+
+GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}&q=releaseName:{ReleaseName}
+

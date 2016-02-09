@@ -1,0 +1,34 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+
+    See global.jelly for a general discussion about jelly script.
+  -->
+
+  <!--
+    Creates a text field that shows the value of the "name" property.
+    When submitted, it will be passed to the corresponding constructor parameter.
+  -->
+  <f:entry title="Upload File Path" field="zipLocation">
+    <f:textbox />
+  </f:entry>
+  <f:entry title="Application Name" field="applicationName">
+    <f:select />
+  </f:entry>
+  <f:entry title="Release Name" field="releaseName">
+    <f:select />
+  </f:entry>
+  <f:entry title="Scan Preference" field="assessmentTypeId">
+    <f:select />
+  </f:entry>
+  <f:entry title="Technology Stack" field="technologyStack">
+    <f:select />
+  </f:entry>
+  <f:entry title="Language Level" field="languageLevel">
+    <f:select />
+  </f:entry>
+  <f:entry title="Run Sonatype scan" field="runSonatypeScan">
+    <f:checkbox name="runSonatypeScan"/>
+  </f:entry>
+</j:jelly>
