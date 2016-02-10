@@ -675,19 +675,19 @@ public class FoDAPI {
 //					{
 //						fragUrl += "&auditPreferenceId=" + argMap.get("auditPreferenceId");
 //					}
-					Boolean runSonatypeScan = req.getRunSonatypeScan();
-
-					if( null != runSonatypeScan )
-					{
-						if( runSonatypeScan )
-						{
-							fragUrl += "&doSonatypeScan=1";
-						}
-						else
-						{
-							fragUrl += "&doSonatypeScan=0";
-						}
-					}
+//					Boolean runSonatypeScan = req.getRunSonatypeScan();
+//
+//					if( null != runSonatypeScan )
+//					{
+//						if( runSonatypeScan )
+//						{
+//							fragUrl += "&doSonatypeScan=1";
+//						}
+//						else
+//						{
+//							fragUrl += "&doSonatypeScan=0";
+//						}
+//					}
 					String postErrorMessage = "";
 					out.println(METHOD_NAME+": calling sendPost ...");
 					SendPostResponse postResponse = sendPost(fragUrl, sendByteArray, httpClient, sessionToken, postErrorMessage);
