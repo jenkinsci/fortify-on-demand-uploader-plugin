@@ -2,6 +2,9 @@
 
 WORKING:
 
+
+POST https://www.hpfod.com/oauth/token
+
 GET https://www.hpfod.com/api/v1/Application/{applicationId}
 GET https://www.hpfod.com/api/v1/Application?q=applicationName:{applicationName}
 GET https://www.hpfod.com/api/v1/Application?q=ApplicationName:{applicationName}
@@ -17,6 +20,8 @@ GET https://www.hpfod.com/api/v1/Application/?q=starRating:{0-5}
 GET https://www.hpfod.com/api/v1/Application/?q=staticScanStatus:{scanStatusId}
 GET https://www.hpfod.com/api/v1/Application/?fields=applicationId,applicationName,applicationTitle
 GET https://www.hpfod.com/api/v1/Application/?fields=applicationId,applicationName,isMobile
+
+GET https://www.hpfod.com/api/v1/AssessmentType/
 
 GET https://www.hpfod.com/api/v1/Scan/
 
@@ -59,3 +64,65 @@ GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}%2
 
 GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}&q=releaseName:{ReleaseName}
 
+
+UNTESTED
+
+POST https://www.hpfod.com/api/v1/Application/
+GET https://www.hpfod.com/api/v1/Application/{appid}/autoreport/
+POST https://www.hpfod.com/api/v1/Application/{appid}/autoreport/
+PUT https://www.hpfod.com/api/v1/Application/{appid}
+DELETE https://www.hpfod.com/api/v1/Application/{appid}
+GET https://www.hpfod.com/api/v1/AssessmentCategory/
+GET https://www.hpfod.com/api/v2/Attributes
+POST https://www.hpfod.com/api/v1/CustomReport/
+POST https://www.hpfod.com/api/v1/DynamicScan/
+POST https://www.hpfod.com/api/v2/DynamicScan/{releaseId}/StartScan
+GET https://www.hpfod.com/api/v1/Fpr/
+POST https://www.hpfod.com/api/v2/MobileScans/{releaseId}/scan
+PUT https://www.hpfod.com/api/v2/MobileScans/{id:int}
+POST https://www.hpfod.com/api/v2/MultiFactorAuthorizationCode/
+GET https://www.hpfod.com/api/v1/Release/{releaseId}/categoryrollups/
+GET https://www.hpfod.com/api/v1/Release/{releaseId}/fpr/
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Scans/{scanId}
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/AllData
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/Details
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/Headers
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/History
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/Parameters
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/Recommendations
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/RequestResponse
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/Screenshots
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/Screenshot/{screenshotId}
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/Summary
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/Traces
+GET https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/{vulnId}/Traces/{traceIndex}/{traceEntryIndex}/Code
+POST https://www.hpfod.com/api/v1/Release/
+POST https://www.hpfod.com/api/v2/Releases/{releaseId}/Vulnerabilities/BulkEdit
+PUT https://www.hpfod.com/api/v1/Release/{id}
+DELETE https://www.hpfod.com/api/v1/Release/{id}
+GET https://www.hpfod.com/api/v1/ReleaseExport/
+GET https://www.hpfod.com/api/v1/ReleaseExport/
+GET https://www.hpfod.com/api/v1/Report/
+GET https://www.hpfod.com/api/v1/Report/{id}
+GET https://www.hpfod.com/api/v1/Report/{reportId}/download/
+POST https://www.hpfod.com/api/v1/Report/
+DELETE https://www.hpfod.com/api/v1/Report/{reportId}
+GET https://www.hpfod.com/api/v1/ReportType/
+GET https://www.hpfod.com/api/v1/Role/
+GET https://www.hpfod.com/api/v2/tenant-roles/
+GET https://www.hpfod.com/api/v1/Scan/
+GET https://www.hpfod.com/api/v2/TenantEntitlements
+GET https://www.hpfod.com/api/v1/TenantHeatMap/
+GET https://www.hpfod.com/api/v1/TenantSummary/
+GET https://www.hpfod.com/api/v2/users/
+GET https://www.hpfod.com/api/v2/users/{id}
+POST https://www.hpfod.com/api/v1/User/
+PUT https://www.hpfod.com/api/v1/User/{id}
+DELETE https://www.hpfod.com/api/v1/User/{id}
+GET https://www.hpfod.com/api/v1/UserAccess/
+POST https://www.hpfod.com/api/v1/UserAccess/{userId}
+DELETE https://www.hpfod.com/api/v1/UserAccess/
+GET https://www.hpfod.com/api/v1/Vulnerability/
+GET https://www.hpfod.com/api/v1/Role/
+GET https://www.hpfod.com/api/v1/User/
+GET https://www.hpfod.com/api/v1/User/{id}
