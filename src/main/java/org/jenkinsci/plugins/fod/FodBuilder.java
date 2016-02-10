@@ -243,7 +243,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					File tmpZipFile = File.createTempFile(prefix, suffix, dir);
 					
 					FileOutputStream fos = new FileOutputStream(tmpZipFile);
-					//OutputStream os = null;
+					
 					FileFilter filter = new FileFilter()
 					{
 						private final String CLASS_NAME = FodBuilder.CLASS_NAME+".anon(FileFilter)";
@@ -259,7 +259,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						}
 					};
 					workspace.zip(fos, filter);
-//					workspace.zip(os, zipLocation);
 					
 					fos.flush();
 					fos.close();
@@ -439,6 +438,32 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					logger.println(METHOD_NAME+": upload failure!");
 					build.setResult(Result.UNSTABLE);
 				}
+		        
+		        if( null != uploadFile && uploadFile.exists() )
+		        {
+		        	try 
+		        	{
+		        		boolean fileDeleted = uploadFile.delete();
+		        		if( fileDeleted )
+		        		{
+			        		logger.println(METHOD_NAME+": upload file "+uploadFile.getName()+" deleted");
+		        		}
+		        		else 
+		        		{
+			        		logger.println(METHOD_NAME+": upload file deletion failed!");
+		        		}
+		        	}
+		        	catch( RuntimeException rte )
+		        	{
+		        		logger.println(METHOD_NAME+": upload file deletion failed! see Jenkins server log for details");
+		        		rte.printStackTrace(logger);
+		        		rte.printStackTrace();
+		        	}
+		        }
+		        else
+		        {
+	        		logger.println(METHOD_NAME+": upload file does not exist - not attempting to delete");
+		        }
 	        }
 	        else
 	        {
@@ -913,4 +938,3 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		return tmpFile;
 	}
 }
-
