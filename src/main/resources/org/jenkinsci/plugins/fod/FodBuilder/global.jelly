@@ -19,6 +19,7 @@
     <f:entry title="Secret Code" field="clientSecret">
      <f:password />
     </f:entry>
+    <!--
     <f:advanced title="Proxy settings">
 	  <f:entry title="Proxy Host" field="proxyHost">
 	    <f:textbox />
@@ -39,6 +40,7 @@
 	    <f:textbox />
 	  </f:entry>
     </f:advanced>
+    -->
     
     <f:advanced title="Advanced settings">
       
