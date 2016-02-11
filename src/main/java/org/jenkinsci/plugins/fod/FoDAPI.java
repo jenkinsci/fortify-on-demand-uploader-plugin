@@ -204,7 +204,8 @@ public class FoDAPI {
 			Integer statusCode = Integer.valueOf(sl.getStatusCode());
 			out.println(METHOD_NAME+": statusCode = "+statusCode);
 			
-			if (statusCode.toString().startsWith("2")) {
+			if (statusCode.toString().startsWith("2"))
+			{
 				HttpEntity respopnseEntity = postResponse.getEntity();
 				InputStream is = respopnseEntity.getContent();
 				StringBuffer content = collectInputStream(is);
@@ -225,6 +226,8 @@ public class FoDAPI {
 				out.println(METHOD_NAME+": expires_in = "+expiresInInt);
 				//TODO handle remaining two fields in response
 			}
+			EntityUtils.consumeQuietly(postResponse.getEntity());
+			httppost.releaseConnection();
 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
