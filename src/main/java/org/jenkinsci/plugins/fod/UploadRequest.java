@@ -8,7 +8,6 @@ public class UploadRequest {
     private String tenantCode;
     private String username;
     private String password;
-    private String zipLocation;
     private File uploadZip;
 	private String applicationName;
 	private String releaseName;
@@ -54,12 +53,6 @@ public class UploadRequest {
 	}
 	public void setPassword(String password) {
 		this.password = password;
-	}
-	public String getZipLocation() {
-		return zipLocation;
-	}
-	public void setZipLocation(String zipLocation) {
-		this.zipLocation = zipLocation;
 	}
 	public File getUploadZip() {
 		return uploadZip;
