@@ -14,6 +14,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
@@ -46,11 +48,15 @@ public class FoDAPITest {
 	
 	private String FOD_BASE_URL = "https://www.hpfod.com";
 	
-	private FoDAPI api = new FoDAPI(FOD_BASE_URL);
+	private FoDAPI api = null;
 	
 	@Before
 	public void setUp() {
 		final String METHOD_NAME = CLASS_NAME+".setUp()";
+		
+		api = new FoDAPI();
+		api.setBaseUrl(FOD_BASE_URL);
+		api.setPrincipal(clientId, clientSecret);
 		
 		if( !api.isLoggedIn() )
 		{
@@ -320,5 +326,20 @@ public class FoDAPITest {
 		System.out.println(METHOD_NAME+": Bytes sent: "+status.getBytesSent());
 		assertFalse(status.isSendPostFailed());
 		assertTrue(status.isUploadSucceeded());
+	}
+	
+	@Test
+	public void testClientIdRegex()
+	{
+		//String regex = "\\w{8}-\\w{4}-\\w{4}-\\w{12}";
+		//String regex = ".{8}-.{4}-.{4}-.{12}";
+		String regex = "........-....-....-....-............";
+    	String clientId = "b3756c3e-4058-4f66-bf31-68fa471b9fa5";
+		
+    	Pattern p = Pattern.compile(regex);
+    	
+    	Matcher m = p.matcher(clientId);
+    	
+    	assertTrue(m.matches());
 	}
 }
