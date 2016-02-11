@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fod;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -74,9 +76,10 @@ public class FoDAPITest {
 	        if( args.length > 2 )
 	            sock.bind (new InetSocketAddress (args[2], args.length>3? Integer.parseInt(args[3]): 0));
 	        sock.connect (new InetSocketAddress (args[0], Integer.parseInt(args[1])));
-	        System.out.println (sock.getInetAddress().getHostName() + " = " + sock.getInetAddress().getHostAddress());
+	        System.out.println(sock.getInetAddress().getHostName() + " = " + sock.getInetAddress().getHostAddress());
 	        ((SSLSocket)sock).startHandshake();
-	        System.out.println ("connect okay " + ((SSLSocket)sock).getSession().getCipherSuite());
+	        SSLSession session = ((SSLSocket)sock).getSession();
+	        System.out.println("connect okay " + session.getCipherSuite());
 	        success = true;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -194,11 +197,6 @@ public class FoDAPITest {
 			System.out.println(METHOD_NAME+": release["+i+"].applicationName = "+release.getApplicationName());
 			System.out.println(METHOD_NAME+": release["+i+"].releaseId = "+release.getReleaseId());
 			System.out.println(METHOD_NAME+": release["+i+"].releaseName = "+release.getReleaseName());
-			System.out.println(METHOD_NAME+": release["+i+"].staticScanStatus = "+release.getStaticScanStatus());
-			System.out.println(METHOD_NAME+": release["+i+"].staticScanStatusId = "+release.getStaticScanStatusId());
-			System.out.println(METHOD_NAME+": release["+i+"].staticScanDate = "+release.getStaticScanDate());
-			System.out.println(METHOD_NAME+": release["+i+"].isPassed = "+release.getIsPassed());
-			System.out.println(METHOD_NAME+": release["+i+"].passFailReasonId = "+release.getPassFailReasonId());
 		}
 	}
 
@@ -290,7 +288,7 @@ public class FoDAPITest {
 		req.setAssessmentTypeId(assessmentTypeId);
 		req.setTechnologyStack(technologyStack);
 		req.setLanguageLevel(languageLevel);
-		req.setZipLocation(zipLocation);
+		req.setUploadZip(new File(zipLocation));
 		UploadStatus status = null;
 		//status = api.uploadFile(req);
 		assertNotNull(status);
@@ -312,7 +310,7 @@ public class FoDAPITest {
 		req.setAssessmentTypeId(assessmentTypeId);
 		req.setTechnologyStack(technologyStack);
 		req.setLanguageLevel(languageLevel);
-		req.setZipLocation(zipLocation);
+		req.setUploadZip(new File(zipLocation));
 		UploadStatus status = null;
 		//status = api.uploadFile(req);
 		assertNotNull(status);
