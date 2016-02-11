@@ -47,6 +47,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 
@@ -69,7 +71,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
      */
 	private static final Long DEFAULT_POLLING_INTERVAL = 5l;
 
-    private String zipLocation;
+    private String filePatterns;
 	private String applicationName;
 	private String releaseName;
 	private Long assessmentTypeId;
@@ -79,7 +81,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public FodBuilder(String zipLocation
+    public FodBuilder(String filePatterns
     		,String applicationName
     		,String releaseName
     		,Long assessmentTypeId
@@ -87,7 +89,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
     		,String languageLevel
     		,Boolean runSonatypeScan)
     {
-        this.zipLocation = zipLocation;
+        this.filePatterns = filePatterns;
         this.applicationName = applicationName;
         this.releaseName = releaseName;
         this.assessmentTypeId = assessmentTypeId;
@@ -99,9 +101,9 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
     /**
      * We'll use this from the <tt>config.jelly</tt>.
      */
-    public String getZipLocation()
+    public String getFilePatterns()
     {
-        return zipLocation;
+        return filePatterns;
     }
 
 	public String getApplicationName()
@@ -197,7 +199,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
         logger.println(METHOD_NAME+": ntWorkstation = "+ntWorkstation);
         logger.println(METHOD_NAME+": ntDomain = "+ntDomain);
         
-        logger.println(METHOD_NAME+": zipLocation = "+zipLocation);
+        logger.println(METHOD_NAME+": filePatterns = \""+filePatterns+"\"");
         logger.println(METHOD_NAME+": applicationName = "+applicationName);
         logger.println(METHOD_NAME+": releaseName = "+releaseName);
         logger.println(METHOD_NAME+": assessmentTypeId = "+assessmentTypeId);
@@ -244,18 +246,40 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					
 					FileOutputStream fos = new FileOutputStream(tmpZipFile);
 					
+					String localFilePatterns = null;
+					if( null == filePatterns || filePatterns.isEmpty() )
+					{
+						localFilePatterns = ".*";
+					}
+					else
+					{
+						localFilePatterns = filePatterns;
+					}
+					final Pattern p = Pattern.compile(localFilePatterns, Pattern.CASE_INSENSITIVE);
+					
 					FileFilter filter = new FileFilter()
 					{
 						private final String CLASS_NAME = FodBuilder.CLASS_NAME+".anon(FileFilter)";
+						
+						private final Pattern filePattern = p;
 						
 						@Override
 						public boolean accept(File pathname)
 						{
 							final String METHOD_NAME = CLASS_NAME+".accept";
-							logger.println(METHOD_NAME+": pathname = "+pathname.getPath());
+							logger.println(METHOD_NAME+": pathname.path = "+pathname.getPath());
+							logger.println(METHOD_NAME+": pathname.name = "+pathname.getName());
 							
-							return !(pathname.getName().endsWith(".zip")
-									&& pathname.getName().contains("fodupload"));
+							boolean matches = false;
+							
+//							matches = !(pathname.getName().endsWith(".zip")
+//									&& pathname.getName().contains("fodupload"));
+							
+							Matcher m = filePattern.matcher(pathname.getName());
+							matches = m.matches();
+							logger.println(METHOD_NAME+": pathname accepted : "+matches);
+							
+							return matches;
 						}
 					};
 					workspace.zip(fos, filter);
@@ -301,6 +325,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					e.printStackTrace();
 				}
 	        	
+				//TODO set global parameters on FoDAPI object instead
 	        	UploadRequest req = new UploadRequest();
 	        	req.setClientId(clientId);
 	        	req.setClientSecret(clientSecret);
@@ -314,7 +339,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	        	req.setProxyPassword(proxyPassword);
 	        	req.setNtWorkstation(ntWorkstation);
 	        	req.setNtDomain(ntDomain);
-	        	req.setZipLocation(zipLocation);
 	        	req.setUploadZip(uploadFile);
 	        	req.setApplicationName(applicationName);
 	        	req.setReleaseName(releaseName);
@@ -335,12 +359,16 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					Release release = null;
 					
 					//FIXME make configurable based on timeout in hours and pollingInterval in minutes
-					Long attempts = 12l;
+					Long maxAttempts = 3l;
+					Long attempts = 0l;
 					
 					Long pollingWait = null;
 					try
 					{
-						pollingWait = Long.parseLong(pollingInterval);
+						if( null != pollingInterval && !pollingInterval.isEmpty() )
+						{
+							pollingWait = Long.parseLong(pollingInterval);
+						}
 					}
 					catch( NumberFormatException nfe )
 					{
@@ -367,7 +395,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						}
 						release = api.getRelease(releaseId);
 						
-						--attempts;
+						++attempts;
 						
 						logger.println(METHOD_NAME+": scan status ID: "+release.getStaticScanStatusId().intValue());
 						logger.println(METHOD_NAME+": attempts: "+attempts);
@@ -375,7 +403,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						continueLoop = 
 								(ScanStatus.IN_PROGRESS.getId().intValue() 
 										== release.getStaticScanStatusId().intValue() )
-								&& ( 0 <= attempts );
+								&& ( attempts < maxAttempts);
 						
 						logger.println(METHOD_NAME+": continueLoop: "+continueLoop);
 					} while( continueLoop );
@@ -760,7 +788,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		public ListBoxModel doFillLanguageLevelItems(@QueryParameter("technologyStack") String technologyStack) {
 			ListBoxModel items = new ListBoxModel();
 			
-			// log is null reference?! ==> no TaskListener in global config, duh.
+			// log is null reference?!
 			//log.info("doFillLanguageLevelItems: technologyStack = "+technologyStack);
 			//System.out.println("doFillLanguageLevelItems: technologyStack = "+technologyStack);
 			
