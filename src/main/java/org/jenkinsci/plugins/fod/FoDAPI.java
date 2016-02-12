@@ -54,6 +54,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
@@ -75,6 +77,7 @@ public class FoDAPI {
 	private static final String UTF_8 = "UTF-8";
 	private String sessionToken;
 	private long tokenExpiry;
+	private AuthPrincipal principal;
 	private String baseUrl;
 	private String proxyHostname = null;
 	private int proxyPort;
@@ -87,22 +90,62 @@ public class FoDAPI {
 	long bytesSent = 0;
 	HttpClient httpClient = null;
 
+	static final String PUBLIC_FOD_BASE_URL = "https://www.hpfod.com";
+
 	private static final String CLASS_NAME = FoDAPI.class.getName();
 
 	/** Timeout in milliseconds */
 	private static final int CONNECTION_TIMEOUT = 30*1000;
 
-	public FoDAPI(String baseUrl) {
-		this.baseUrl = baseUrl;
+	public FoDAPI() {
 	}
 	
+	public void setPrincipal(String clientId, String clientSecret)
+	{
+		AuthPrincipal principal = new AuthApiKey(clientId,clientSecret);
+		this.principal = principal;
+		resetConnection();
+	}
+
+	//TODO refactor authorization code
+//	public boolean authorize()
+//	{
+//		AuthTokenRequest authRequest = new AuthTokenRequest();
+//		authRequest.setGrantType(AuthCredentialType.CLIENT_CREDENTIALS.getName());
+//		authRequest.setScope(FOD_SCOPE_TENANT);
+//		authRequest.setPrincipal(principal);
+//		AuthTokenResponse authResponse = this.authorize(this.baseUrl,authRequest,this.httpClient);
+//		...
+//	}
+	
+	/**
+	 * Authenticates against FoD API and caches session token.
+	 * 
+	 * @param clientId
+	 * @param clientSecret
+	 * @return success
+	 * @throws IOException
+	 */
 	public boolean authorize(String clientId, String clientSecret)
-			throws IOException {
-		final String METHOD_NAME = CLASS_NAME+".authorize(String,String)";
-		PrintStream logger = FodBuilder.getLogger();
+			throws IOException
+	{
+		this.setPrincipal(clientId, clientSecret);
+		return this.authorize();
+	}
 		
-		logger.println(METHOD_NAME+": clientId = "+clientId);
-		logger.println(METHOD_NAME+": clientSecret = "+clientSecret);
+	
+	/**
+	 * Authenticates against FoD API and caches session token.
+	 * Requires auth principal to be set beforehand.
+	 * 
+	 * @return success
+	 * @throws IOException
+	 */
+	public boolean authorize()
+			throws IOException
+	{
+		final String METHOD_NAME = CLASS_NAME+".authorize()";
+		PrintStream logger = FodBuilder.getLogger();
 		
 		if( null == this.httpClient )
 		{
@@ -117,17 +160,46 @@ public class FoDAPI {
 			this.httpClient = builder.build();
 		}
 		
-		logger.println(METHOD_NAME+": url = "+this.baseUrl);
+		String fodBaseUrl = null;
+		
+		if( null != this.baseUrl && !this.baseUrl.isEmpty() )
+		{
+			fodBaseUrl = this.baseUrl;
+		}
+		else
+		{
+			fodBaseUrl = PUBLIC_FOD_BASE_URL;
+		}
+		
+		logger.println(METHOD_NAME+": url = "+fodBaseUrl);
 		AuthTokenRequest authRequest = new AuthTokenRequest();
-		authRequest.setGrantType(AuthCredentialType.CLIENT_CREDENTIALS.getName());
+		
+		if( null == principal )
+		{
+			logger.println(METHOD_NAME+": auth principal is null!");
+			return false;
+		}
+		else if( principal instanceof AuthApiKey )
+		{
+			authRequest.setGrantType(AuthCredentialType.CLIENT_CREDENTIALS.getName());
+		}
+		else if( principal instanceof AuthUsernamePassword )
+		{
+			authRequest.setGrantType(AuthCredentialType.PASSWORD.getName());
+		}
+		else
+		{
+			logger.println(METHOD_NAME+": unrecognized auth principal object class: "+principal);
+		}
+		logger.println(METHOD_NAME+": principal = "+principal);
+		authRequest.setPrincipal(principal);
+		
 		authRequest.setScope(FOD_SCOPE_TENANT);
-		AuthApiKey principal = new AuthApiKey();
-		principal.setClientId(clientId);
-		principal.setClientSecret(clientSecret);
-		authRequest.setPrincipal(principal );
+		
 		long tokenReqSubmitTs = System.currentTimeMillis();
-		AuthTokenResponse authResponse = this.authorize(this.baseUrl,authRequest,this.httpClient);
+		AuthTokenResponse authResponse = this.authorize(fodBaseUrl,authRequest,this.httpClient);
 		String token = authResponse.getAccessToken();
+		
 		logger.println(METHOD_NAME+": token = "+token);
 		if (token != null && 0 < token.length() )
 		{
@@ -142,12 +214,20 @@ public class FoDAPI {
 		return false;
 	}
 
+	/**
+	 * Given a URL, request, and HTTP client, authenticates with FoD API. 
+	 * This is just a utility method which uses none of the class member fields.
+	 * 
+	 * @param baseUrl URL for FoD
+	 * @param request request to authenticate
+	 * @param client HTTP client object
+	 * @return
+	 */
 	private AuthTokenResponse authorize(String baseUrl, AuthTokenRequest request, HttpClient client)
 	{
 		final String METHOD_NAME = CLASS_NAME+".authorize";
 		PrintStream out = FodBuilder.getLogger();
 		
-		//String accessToken = null;
 		AuthTokenResponse response = new AuthTokenResponse();
 		try
 		{
@@ -204,7 +284,8 @@ public class FoDAPI {
 			Integer statusCode = Integer.valueOf(sl.getStatusCode());
 			out.println(METHOD_NAME+": statusCode = "+statusCode);
 			
-			if (statusCode.toString().startsWith("2")) {
+			if (statusCode.toString().startsWith("2"))
+			{
 				HttpEntity respopnseEntity = postResponse.getEntity();
 				InputStream is = respopnseEntity.getContent();
 				StringBuffer content = collectInputStream(is);
@@ -225,6 +306,8 @@ public class FoDAPI {
 				out.println(METHOD_NAME+": expires_in = "+expiresInInt);
 				//TODO handle remaining two fields in response
 			}
+			EntityUtils.consumeQuietly(postResponse.getEntity());
+			httppost.releaseConnection();
 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -253,6 +336,7 @@ public class FoDAPI {
 		return tokenValid;
 	}
 
+	//TODO replace with something more appropriate than Map<String,String>
 	public Map<String, String> getAssessmentTypeList() throws IOException {
 		String endpoint = baseUrl + "/api/v1/assessmenttype";
 		URL url = new URL(endpoint);
@@ -386,6 +470,7 @@ public class FoDAPI {
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
 
 		// Get Response
+		connection.getResponseCode();
 		InputStream is = connection.getInputStream();
 		StringBuffer response = collectInputStream(is);
 		JsonArray arr = getDataJsonArray(response);
@@ -480,7 +565,6 @@ public class FoDAPI {
 	 */
 	public List<ScanSnapshot> getScanSnapshotList() throws IOException
 	{
-		//String endpoint = baseUrl + "/api/v1/Scan/?q=ProjectVersionId:10398"; // this call's parameters are ignored by FoD!!
 		String endpoint = baseUrl + "/api/v1/Scan";
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
@@ -656,6 +740,8 @@ public class FoDAPI {
 					{
 						sendByteArray = readByteArray;
 					}
+					
+					//TODO change fragUrl to StringBuilder, so fewer objects created in background for mixed-mode expressions
 					String fragUrl = "";
 					if(req.getLanguageLevel() != null)
 					{
@@ -675,19 +761,25 @@ public class FoDAPI {
 //					{
 //						fragUrl += "&auditPreferenceId=" + argMap.get("auditPreferenceId");
 //					}
-//					Boolean runSonatypeScan = req.getRunSonatypeScan();
-//
-//					if( null != runSonatypeScan )
-//					{
-//						if( runSonatypeScan )
-//						{
-//							fragUrl += "&doSonatypeScan=1";
-//						}
+					Boolean runSonatypeScan = req.getRunSonatypeScan();
+
+					if( null != runSonatypeScan )
+					{
+						if( runSonatypeScan )
+						{
+							fragUrl += "&doSonatypeScan=1";
+						}
+						// Specifying this parameter if sonatype feature not enabled for 
+						//  a tenant results in an HTTP 500 error, even if set to 0. 
+						//  Unsure how exactly to handle right now. No error if 
+						//  parameter omitted. Commenting out for now, so this error
+						//  will only occur if a tenant without this feature attempts
+						//  to use it.
 //						else
 //						{
 //							fragUrl += "&doSonatypeScan=0";
 //						}
-//					}
+					}
 					String postErrorMessage = "";
 					out.println(METHOD_NAME+": calling sendPost ...");
 					SendPostResponse postResponse = sendPost(fragUrl, sendByteArray, httpClient, sessionToken, postErrorMessage);
@@ -710,7 +802,6 @@ public class FoDAPI {
 						if( !statusCode.toString().startsWith("2") )
 						{
 							status.setErrorMessage(sl.toString());
-							//System.out.println("errorMessage="+errorMessage);
 							break;
 						}
 						else
@@ -868,7 +959,14 @@ public class FoDAPI {
 	}
 
 	public void setBaseUrl(String baseUrl) {
+		try {
+			URL test = new URL(baseUrl);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		this.baseUrl = baseUrl;
+		resetConnection();
 	}
 
 	public Proxy getProxy() {
@@ -879,6 +977,8 @@ public class FoDAPI {
 		InetSocketAddress address = ((InetSocketAddress)proxy.address());
 		this.proxyHostname = address.getHostName();
 		this.proxyPort = address.getPort();
+		
+		resetConnection();
 	}
 	
 	public void setProxy(String hostname, int port) {
@@ -888,11 +988,18 @@ public class FoDAPI {
 		SocketAddress sa = new InetSocketAddress(hostname,port);
 		Proxy proxy = new Proxy(Proxy.Type.HTTP,sa);
 		this.proxy = proxy;
+		
+		resetConnection();
+	}
+	
+	private void resetConnection()
+	{
+		this.sessionToken = null;
+		this.tokenExpiry = 0l;
 	}
 	
 	protected HttpURLConnection getHttpUrlConnection(String requestMethod, URL url) throws IOException
 	{
-		
 		HttpURLConnection connection = null;
 		
 		if (proxy != null) {

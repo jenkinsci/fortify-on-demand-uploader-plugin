@@ -41,12 +41,16 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 
@@ -56,20 +60,18 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 
 	protected static final String CLASS_NAME = FodBuilder.class.getName();
 
-	private static final String DEFAULT_FOD_BASE_URL = "https://www.hpfod.com";
-
 	private static Logger log = LogManager.getLogManager().getLogger(FodBuilder.class.getCanonicalName());
 	
-    // Thread local variable containing each thread's taskListener. for use during a build only.
-    private static final ThreadLocal<TaskListener> taskListener =
-        new ThreadLocal<TaskListener>();
+	// Thread local variable containing each thread's taskListener. for use during a build only.
+	private static final ThreadLocal<TaskListener> taskListener =
+		new ThreadLocal<TaskListener>();
 
-    /**
-     * Default time between queries to FoD API for scan status, in minutes.
-     */
+	/**
+	 * Default time between queries to FoD API for scan status, in minutes.
+	 */
 	private static final Long DEFAULT_POLLING_INTERVAL = 5l;
 
-    private String zipLocation;
+	private String filePatterns;
 	private String applicationName;
 	private String releaseName;
 	private Long assessmentTypeId;
@@ -77,32 +79,32 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	private String languageLevel;
 	private Boolean runSonatypeScan;
 
-    // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
-    @DataBoundConstructor
-    public FodBuilder(String zipLocation
-    		,String applicationName
-    		,String releaseName
-    		,Long assessmentTypeId
-    		,String technologyStack
-    		,String languageLevel
-    		,Boolean runSonatypeScan)
-    {
-        this.zipLocation = zipLocation;
-        this.applicationName = applicationName;
-        this.releaseName = releaseName;
-        this.assessmentTypeId = assessmentTypeId;
-        this.technologyStack = technologyStack;
-        this.languageLevel = languageLevel;
-        this.runSonatypeScan = runSonatypeScan;
-    }
+	// Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
+	@DataBoundConstructor
+	public FodBuilder(String filePatterns
+			,String applicationName
+			,String releaseName
+			,Long assessmentTypeId
+			,String technologyStack
+			,String languageLevel
+			,Boolean runSonatypeScan)
+	{
+		this.filePatterns = filePatterns;
+		this.applicationName = applicationName;
+		this.releaseName = releaseName;
+		this.assessmentTypeId = assessmentTypeId;
+		this.technologyStack = technologyStack;
+		this.languageLevel = languageLevel;
+		this.runSonatypeScan = runSonatypeScan;
+	}
 
-    /**
-     * We'll use this from the <tt>config.jelly</tt>.
-     */
-    public String getZipLocation()
-    {
-        return zipLocation;
-    }
+	/**
+	 * We'll use this from the <tt>config.jelly</tt>.
+	 */
+	public String getFilePatterns()
+	{
+		return filePatterns;
+	}
 
 	public String getApplicationName()
 	{
@@ -163,12 +165,12 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 
 	public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 	{
-        // This is where you 'build' the project.
-        // Since this is a dummy, we just say 'hello world' and call that a build.
+		// This is where you 'build' the project.
+		// Since this is a dummy, we just say 'hello world' and call that a build.
 		final String METHOD_NAME = CLASS_NAME+".perform";
 		setTaskListener(listener);
 
-        // This also shows how you can consult the global configuration of the builder
+		// This also shows how you can consult the global configuration of the builder
 		DescriptorImpl descriptor = this.getDescriptor();
 		String fodUrl = descriptor.getFodUrl();
 		String clientId = descriptor.getClientId();
@@ -177,55 +179,65 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		String tenantCode = descriptor.getTenantCode();
 		String username = descriptor.getUsername();
 		String password = descriptor.getPassword();
-    	String proxyHost = descriptor.getProxyHost();
-    	String proxyPort = descriptor.getProxyPort();
-    	String proxyUser = descriptor.getProxyUser();
-    	String proxyPassword = descriptor.getProxyPassword();
-    	String ntWorkstation = descriptor.getNtWorkstation();
-    	String ntDomain = descriptor.getNtDomain();
+		String proxyHost = descriptor.getProxyHost();
+		String proxyPort = descriptor.getProxyPort();
+		String proxyUser = descriptor.getProxyUser();
+		String proxyPassword = descriptor.getProxyPassword();
+		String ntWorkstation = descriptor.getNtWorkstation();
+		String ntDomain = descriptor.getNtDomain();
 		
 		final PrintStream logger = listener.getLogger();
-    	
-    	logger.println(METHOD_NAME+": foDUrl = "+fodUrl);
+		
+		logger.println(METHOD_NAME+": foDUrl = "+fodUrl);
 		logger.println(METHOD_NAME+": clientId = "+clientId);
 		logger.println(METHOD_NAME+": clientSecret = "+clientSecret);
 		logger.println(METHOD_NAME+": pollingInterval = "+pollingInterval);
-        logger.println(METHOD_NAME+": proxyHost = "+proxyHost);
-        logger.println(METHOD_NAME+": proxyPort = "+proxyPort);
-        logger.println(METHOD_NAME+": proxyUser = "+proxyUser);
-        logger.println(METHOD_NAME+": proxyPassword = "+proxyPassword);
-        logger.println(METHOD_NAME+": ntWorkstation = "+ntWorkstation);
-        logger.println(METHOD_NAME+": ntDomain = "+ntDomain);
-        
-        logger.println(METHOD_NAME+": zipLocation = "+zipLocation);
-        logger.println(METHOD_NAME+": applicationName = "+applicationName);
-        logger.println(METHOD_NAME+": releaseName = "+releaseName);
-        logger.println(METHOD_NAME+": assessmentTypeId = "+assessmentTypeId);
-        logger.println(METHOD_NAME+": technologyStack = "+technologyStack);
-        logger.println(METHOD_NAME+": languageLevel = "+languageLevel);
-               
-        logger.println(METHOD_NAME+": Attempting to authorize ...");
-        boolean authSuccess = false;
-        try
-        {
-        	
-	        String baseURL = DEFAULT_FOD_BASE_URL;
-	        FoDAPI api = new FoDAPI(baseURL);
-	        authSuccess = api.authorize(clientId,clientSecret);
-	        
-	        if( authSuccess )
-	        {
-	            logger.println(METHOD_NAME+": Auth success!");
-	        }
-	        else
-	        {
-	            logger.println(METHOD_NAME+": Auth failed!");
-	        }
-	        
-	        if(authSuccess)
-	        {
-	        	//FilePath zipFile = workspace.child(zipLocation);
-	        	String prefix = "fodupload";
+		logger.println(METHOD_NAME+": proxyHost = "+proxyHost);
+		logger.println(METHOD_NAME+": proxyPort = "+proxyPort);
+		logger.println(METHOD_NAME+": proxyUser = "+proxyUser);
+		logger.println(METHOD_NAME+": proxyPassword = "+proxyPassword);
+		logger.println(METHOD_NAME+": ntWorkstation = "+ntWorkstation);
+		logger.println(METHOD_NAME+": ntDomain = "+ntDomain);
+		
+		logger.println(METHOD_NAME+": filePatterns = \""+filePatterns+"\"");
+		logger.println(METHOD_NAME+": applicationName = "+applicationName);
+		logger.println(METHOD_NAME+": releaseName = "+releaseName);
+		logger.println(METHOD_NAME+": assessmentTypeId = "+assessmentTypeId);
+		logger.println(METHOD_NAME+": technologyStack = "+technologyStack);
+		logger.println(METHOD_NAME+": languageLevel = "+languageLevel);
+			   
+		logger.println(METHOD_NAME+": Attempting to authorize ...");
+		boolean authSuccess = false;
+		try
+		{
+			
+			String baseUrl = null;
+			if( null != fodUrl && !fodUrl.isEmpty() )
+			{
+				baseUrl = fodUrl;
+			}
+			else
+			{
+				baseUrl = FoDAPI.PUBLIC_FOD_BASE_URL;
+			}
+			
+			FoDAPI api = new FoDAPI();
+			api.setBaseUrl(baseUrl);
+			authSuccess = api.authorize(clientId,clientSecret);
+			
+			if( authSuccess )
+			{
+				logger.println(METHOD_NAME+": Auth success!");
+			}
+			else
+			{
+				logger.println(METHOD_NAME+": Auth failed!");
+			}
+			
+			if(authSuccess)
+			{
+				//FilePath zipFile = workspace.child(zipLocation);
+				String prefix = "fodupload";
 				String suffix = ".zip";
 				logger.println(METHOD_NAME+": workspace = "+workspace.toString());
 				File uploadFile = null;
@@ -244,18 +256,40 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					
 					FileOutputStream fos = new FileOutputStream(tmpZipFile);
 					
+					String localFilePatterns = null;
+					if( null == filePatterns || filePatterns.isEmpty() )
+					{
+						localFilePatterns = ".*";
+					}
+					else
+					{
+						localFilePatterns = filePatterns;
+					}
+					final Pattern p = Pattern.compile(localFilePatterns, Pattern.CASE_INSENSITIVE);
+					
 					FileFilter filter = new FileFilter()
 					{
 						private final String CLASS_NAME = FodBuilder.CLASS_NAME+".anon(FileFilter)";
+						
+						private final Pattern filePattern = p;
 						
 						@Override
 						public boolean accept(File pathname)
 						{
 							final String METHOD_NAME = CLASS_NAME+".accept";
-							logger.println(METHOD_NAME+": pathname = "+pathname.getPath());
+							logger.println(METHOD_NAME+": pathname.path = "+pathname.getPath());
+							logger.println(METHOD_NAME+": pathname.name = "+pathname.getName());
 							
-							return !(pathname.getName().endsWith(".zip")
-									&& pathname.getName().contains("fodupload"));
+							boolean matches = false;
+							
+//							matches = !(pathname.getName().endsWith(".zip")
+//									&& pathname.getName().contains("fodupload"));
+							
+							Matcher m = filePattern.matcher(pathname.getName());
+							matches = m.matches();
+							logger.println(METHOD_NAME+": pathname accepted : "+matches);
+							
+							return matches;
 						}
 					};
 					workspace.zip(fos, filter);
@@ -300,29 +334,29 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-	        	
-	        	UploadRequest req = new UploadRequest();
-	        	req.setClientId(clientId);
-	        	req.setClientSecret(clientSecret);
-	        	req.setPollingInterval(pollingInterval);
-	        	req.setTenantCode(tenantCode);
-	        	req.setUsername(username);
-	        	req.setPassword(password);
-	        	req.setProxyHost(proxyHost);
-	        	req.setProxyPort(proxyPort);
-	        	req.setProxyUser(proxyUser);
-	        	req.setProxyPassword(proxyPassword);
-	        	req.setNtWorkstation(ntWorkstation);
-	        	req.setNtDomain(ntDomain);
-	        	req.setZipLocation(zipLocation);
-	        	req.setUploadZip(uploadFile);
-	        	req.setApplicationName(applicationName);
-	        	req.setReleaseName(releaseName);
-	        	req.setAssessmentTypeId(assessmentTypeId);
-	        	req.setTechnologyStack(technologyStack);
-	        	req.setLanguageLevel(languageLevel);
-	        	req.setRunSonatypeScan(runSonatypeScan);
-	        	
+				
+				//TODO set global parameters on FoDAPI object instead
+				UploadRequest req = new UploadRequest();
+//				req.setClientId(clientId);
+//				req.setClientSecret(clientSecret);
+//				req.setPollingInterval(pollingInterval);
+//				req.setTenantCode(tenantCode);
+//				req.setUsername(username);
+//				req.setPassword(password);
+//				req.setProxyHost(proxyHost);
+//				req.setProxyPort(proxyPort);
+//				req.setProxyUser(proxyUser);
+//				req.setProxyPassword(proxyPassword);
+//				req.setNtWorkstation(ntWorkstation);
+//				req.setNtDomain(ntDomain);
+				req.setUploadZip(uploadFile);
+				req.setApplicationName(applicationName);
+				req.setReleaseName(releaseName);
+				req.setAssessmentTypeId(assessmentTypeId);
+				req.setTechnologyStack(technologyStack);
+				req.setLanguageLevel(languageLevel);
+				req.setRunSonatypeScan(runSonatypeScan);
+				
 				UploadStatus status = api.uploadFile(req);
 				logger.println(METHOD_NAME+": HTTP status code: "+status.getHttpStatusCode());
 				logger.println(METHOD_NAME+": POST failed: "+status.isSendPostFailed());
@@ -335,12 +369,16 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					Release release = null;
 					
 					//FIXME make configurable based on timeout in hours and pollingInterval in minutes
-					Long attempts = 12l;
+					Long maxAttempts = 3l;
+					Long attempts = 0l;
 					
 					Long pollingWait = null;
 					try
 					{
-						pollingWait = Long.parseLong(pollingInterval);
+						if( null != pollingInterval && !pollingInterval.isEmpty() )
+						{
+							pollingWait = Long.parseLong(pollingInterval);
+						}
 					}
 					catch( NumberFormatException nfe )
 					{
@@ -367,7 +405,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						}
 						release = api.getRelease(releaseId);
 						
-						--attempts;
+						++attempts;
 						
 						logger.println(METHOD_NAME+": scan status ID: "+release.getStaticScanStatusId().intValue());
 						logger.println(METHOD_NAME+": attempts: "+attempts);
@@ -375,7 +413,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						continueLoop = 
 								(ScanStatus.IN_PROGRESS.getId().intValue() 
 										== release.getStaticScanStatusId().intValue() )
-								&& ( 0 <= attempts );
+								&& ( attempts < maxAttempts);
 						
 						logger.println(METHOD_NAME+": continueLoop: "+continueLoop);
 					} while( continueLoop );
@@ -438,164 +476,209 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					logger.println(METHOD_NAME+": upload failure!");
 					build.setResult(Result.UNSTABLE);
 				}
-		        
-		        if( null != uploadFile && uploadFile.exists() )
-		        {
-		        	try 
-		        	{
-		        		boolean fileDeleted = uploadFile.delete();
-		        		if( fileDeleted )
-		        		{
-			        		logger.println(METHOD_NAME+": upload file "+uploadFile.getName()+" deleted");
-		        		}
-		        		else 
-		        		{
-			        		logger.println(METHOD_NAME+": upload file deletion failed!");
-		        		}
-		        	}
-		        	catch( RuntimeException rte )
-		        	{
-		        		logger.println(METHOD_NAME+": upload file deletion failed! see Jenkins server log for details");
-		        		rte.printStackTrace(logger);
-		        		rte.printStackTrace();
-		        	}
-		        }
-		        else
-		        {
-	        		logger.println(METHOD_NAME+": upload file does not exist - not attempting to delete");
-		        }
-	        }
-	        else
-	        {
+				
+				if( null != uploadFile && uploadFile.exists() )
+				{
+					try 
+					{
+						boolean fileDeleted = uploadFile.delete();
+						if( fileDeleted )
+						{
+							logger.println(METHOD_NAME+": upload file "+uploadFile.getName()+" deleted");
+						}
+						else 
+						{
+							logger.println(METHOD_NAME+": upload file deletion failed!");
+						}
+					}
+					catch( RuntimeException rte )
+					{
+						logger.println(METHOD_NAME+": upload file deletion failed! see Jenkins server log for details");
+						rte.printStackTrace(logger);
+						rte.printStackTrace();
+					}
+				}
+				else
+				{
+					logger.println(METHOD_NAME+": upload file does not exist - not attempting to delete");
+				}
+			}
+			else
+			{
 				logger.println(METHOD_NAME+": auth failure!");
-	        }
-        }
-        catch (RuntimeException rte)
-        {
-        	rte.printStackTrace();
-        	logger.println(rte.toString());
+			}
+		}
+		catch (RuntimeException rte)
+		{
+			rte.printStackTrace();
+			logger.println(rte.toString());
 			build.setResult(Result.FAILURE);
-        }
-        
-        catch (IOException ioe)
-        {
-        	ioe.printStackTrace();
-        	logger.println(ioe.toString());
+		}
+		
+		catch (IOException ioe)
+		{
+			ioe.printStackTrace();
+			logger.println(ioe.toString());
 			build.setResult(Result.FAILURE);
 		}
 
-    	clearTaskListener();
-    }
+		clearTaskListener();
+	}
 
-    // Overridden for better type safety.
-    // If your plugin doesn't really define any property on Descriptor,
-    // you don't have to do this.
-    @Override
-    public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl)super.getDescriptor();
-    }
+	// Overridden for better type safety.
+	// If your plugin doesn't really define any property on Descriptor,
+	// you don't have to do this.
+	@Override
+	public DescriptorImpl getDescriptor() {
+		return (DescriptorImpl)super.getDescriptor();
+	}
 
 	@Override
 	public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.NONE;
+		return BuildStepMonitor.NONE;
 	}
 
-    /**
-     * Descriptor for {@link FodBuilder}. Used as a singleton.
-     * The class is marked as public so that it can be accessed from views.
-     *
-     * <p>
-     * See <tt>src/main/resources/hudson/plugins/fod/FodBuilder/*.jelly</tt>
-     * for the actual HTML fragment for the configuration screen.
-     */
-    @Extension // This indicates to Jenkins that this is an implementation of an extension point.
-    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+	/**
+	 * Descriptor for {@link FodBuilder}. Used as a singleton.
+	 * The class is marked as public so that it can be accessed from views.
+	 *
+	 * <p>
+	 * See <tt>src/main/resources/hudson/plugins/fod/FodBuilder/*.jelly</tt>
+	 * for the actual HTML fragment for the configuration screen.
+	 */
+	@Extension // This indicates to Jenkins that this is an implementation of an extension point.
+	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
 		private static final String CLASS_NAME = DescriptorImpl.class.getName();
-    	
-    	private static Logger log = LogManager.getLogManager().getLogger(DescriptorImpl.class.getName());
-    	
-        private static final String TS_DOTNET_KEY = ".NET";
+		
+		private static Logger log = LogManager.getLogManager().getLogger(DescriptorImpl.class.getName());
+		
+		private static final String TS_DOTNET_KEY = ".NET";
 		private static final String TS_JAVA_KEY = "JAVA/J2EE";
 		
 		/**
-         * To persist global configuration information,
-         * simply store it in a field and call save().
-         *
-         * <p>
-         * If you don't want fields to be persisted, use <tt>transient</tt>.
-         */
-        private String clientId;
-        private String clientSecret;
-        private String fodUrl;
+		 * To persist global configuration information,
+		 * simply store it in a field and call save().
+		 *
+		 * <p>
+		 * If you don't want fields to be persisted, use <tt>transient</tt>.
+		 */
+		private String clientId;
+		private String clientSecret;
+		private String fodUrl;
 		private String pollingInterval;
-        private String tenantCode;
-        private String username;
-        private String password;
-    	private String proxyHost;
-    	private String proxyPort;
-    	private String proxyUser;
-    	private String proxyPassword;
-    	private String ntWorkstation;
-    	private String ntDomain;
-    	
-    	private transient FoDAPI api;
-
-        /**
-         * In order to load the persisted global configuration, you have to 
-         * call load() in the constructor.
-         */
-        public DescriptorImpl() {
-            load();
-        }
-        
-        /**
-         * Performs on-the-fly validation of the form field 'password'.
-         *
-         * @param value
-         *      This parameter receives the value that the user has typed.
-         * @return
-         *      Indicates the outcome of the validation. This is sent to the browser.
-         *      <p>
-         *      Note that returning {@link FormValidation#error(String)} does not
-         *      prevent the form from being saved. It just means that a message
-         *      will be displayed to the user. 
-         */
-//        public FormValidation doCheckPassword(@QueryParameter String value)
-//                throws IOException, ServletException {
-//            if (value.length() == 0)
-//                return FormValidation.error("Please set a password");
-//            if (value.length() < 4)
-//                return FormValidation.warning("Invalid password");
-//            return FormValidation.ok();
-//        }
+		private String tenantCode;
+		private String username;
+		private String password;
+		private String proxyHost;
+		private String proxyPort;
+		private String proxyUser;
+		private String proxyPassword;
+		private String ntWorkstation;
+		private String ntDomain;
+		
+		private transient FoDAPI api;
 
 		/**
-         * Performs on-the-fly validation of the form field 'zipLocation'.
-         *
-         * @param value
-         *      This parameter receives the value that the user has typed.
-         * @return
-         *      Indicates the outcome of the validation. This is sent to the browser.
-         *      <p>
-         *      Note that returning {@link FormValidation#error(String)} does not
-         *      prevent the form from being saved. It just means that a message
-         *      will be displayed to the user. 
-         */
-        public FormValidation doCheckZipLocation(@QueryParameter String value)
-                throws IOException, ServletException {
-            if (value.length() == 0)
-                return FormValidation.error("Please set a zip location");
-            if (value.length() < 4)
-                return FormValidation.warning("Invalid zip location");
-            return FormValidation.ok();
-        }
-        
+		 * In order to load the persisted global configuration, you have to 
+		 * call load() in the constructor.
+		 */
+		public DescriptorImpl() {
+			load();
+		}
+		
+		public FormValidation doCheckClientId(@QueryParameter String value)
+				throws IOException, ServletException
+		{
+			FormValidation returnValue = null;
+			if (value.length() == 0)
+			{
+			  returnValue = FormValidation.error("Please set an API key");
+			}
+			else
+			{
+				//TODO get less verbose regex working
+				String clientIdRegex = "........-....-....-....-............";
+				Pattern p = Pattern.compile(clientIdRegex);
+				Matcher m = p.matcher(value);
+				if( m.matches() )
+				{
+					returnValue = FormValidation.ok();
+				}
+				else
+				{
+					returnValue = FormValidation.error("Invalid API key");
+				}
+			}
+			return returnValue;
+		}
+		
+		public FormValidation doCheckClientSecret(@QueryParameter String value)
+				throws IOException, ServletException
+		{
+			FormValidation returnValue = null;
+			if (value.length() == 0)
+			{
+			  returnValue = FormValidation.error("Please set a secret key");
+			}
+			else
+			{
+				if( 40 == value.length() )
+				{
+					returnValue = FormValidation.ok();
+				}
+				else
+				{
+					returnValue = FormValidation.error("Invalid secret key");
+				}
+			}
+			return returnValue;
+		}
+
+
+		/**
+		 * Performs on-the-fly validation of the form field 'fodUrl'.
+		 *
+		 * @param value
+		 *	  This parameter receives the value that the user has typed.
+		 * @return
+		 *	  Indicates the outcome of the validation. This is sent to the browser.
+		 *	  <p>
+		 *	  Note that returning {@link FormValidation#error(String)} does not
+		 *	  prevent the form from being saved. It just means that a message
+		 *	  will be displayed to the user. 
+		 */
+		public FormValidation doCheckFodUrl(@QueryParameter String value)
+				throws IOException, ServletException
+		{
+			FormValidation returnValue = null;
+			if (value.length() == 0)
+			{
+				returnValue = FormValidation.ok();
+			}
+			else
+			{
+				try
+				{
+					URL tmpFodUrl = new URL(value);
+					tmpFodUrl.getPath(); // can't remember if URL immediately parsed ==> force parse
+				}
+				catch (MalformedURLException e)
+				{
+					returnValue = FormValidation.error("Invalid URL");
+				}
+				if( null == returnValue )
+				{
+					returnValue = FormValidation.ok();
+				}
+			}
+			return returnValue;
+		}
+		
 		public ListBoxModel doFillApplicationNameItems()
 		{
 			final String METHOD_NAME = CLASS_NAME+".doFillApplicationNameItems()";
 			PrintStream out = null;
-			//out = FodBuilder.getLogger();
 			out = System.out;
 			
 			ListBoxModel items = new ListBoxModel();
@@ -735,7 +818,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 //				items.add(new Option(name,id,selected));
 //			}
 //			Jenkins.getInstance().getGlobalNodeProperties()
-//		       .get(EnvironmentVariablesNodeProperty.class).getEnvVars().get(name);
+//			   .get(EnvironmentVariablesNodeProperty.class).getEnvVars().get(name);
 			
 //			items.add(new Option("Static Express", "105",false));
 //			items.add(new Option("Static Assessment", "170",false));
@@ -760,7 +843,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		public ListBoxModel doFillLanguageLevelItems(@QueryParameter("technologyStack") String technologyStack) {
 			ListBoxModel items = new ListBoxModel();
 			
-			// log is null reference?! ==> no TaskListener in global config, duh.
+			// log is null reference?!
 			//log.info("doFillLanguageLevelItems: technologyStack = "+technologyStack);
 			//System.out.println("doFillLanguageLevelItems: technologyStack = "+technologyStack);
 			
@@ -794,39 +877,85 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			return items;
 		}
 
-        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-            // Indicates that this builder can be used with all kinds of project types 
-            //return aClass.isAssignableFrom(MavenModule.class) ||  aClass.isAssignableFrom(FreeStyleProject.class);
-            return true;
-        }
+		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+			// Indicates that this builder can be used with all kinds of project types 
+			//return aClass.isAssignableFrom(MavenModule.class) ||  aClass.isAssignableFrom(FreeStyleProject.class);
+			return true;
+		}
 
-        /**
-         * This human readable name is used in the configuration screen.
-         */
-        public String getDisplayName() {
-            return "Fortify on Demand Upload";
-        }
+		/**
+		 * This human readable name is used in the configuration screen.
+		 */
+		public String getDisplayName() {
+			return "Fortify on Demand Upload";
+		}
 
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            // To persist global configuration information,
-            // set that to properties and call save().
-            //useFrench = formData.getBoolean("useFrench");
-            // ^Can also use req.bindJSON(this, formData);
-            //  (easier when there are many fields; need set* methods for this, like setUseFrench)
-            save();
-            clientId = formData.getString("clientId");
-            clientSecret = formData.getString("clientSecret");
-            fodUrl = formData.getString("fodUrl");
-            pollingInterval = formData.getString("pollingInterval");
-            proxyHost = formData.getString("proxyHost");
-            proxyPort = formData.getString("proxyPort");
-            proxyUser = formData.getString("proxyUser");
-            proxyPassword = formData.getString("proxyPassword");
-            ntWorkstation = formData.getString("ntWorkstation");
-            ntDomain = formData.getString("ntDomain");
-            return super.configure(req,formData);
-        }
+		@Override
+		public boolean configure(StaplerRequest req, JSONObject formData)
+				throws FormException
+		{
+			final String METHOD_NAME = CLASS_NAME+".configure";
+			PrintStream out = getLogger();
+			
+			// To persist global configuration information,
+			// set that to properties and call save().
+			//useFrench = formData.getBoolean("useFrench");
+			// ^Can also use req.bindJSON(this, formData);
+			//  (easier when there are many fields; need set* methods for this, like setUseFrench)
+			
+			String newClientId = formData.getString("clientId");
+			if( null != newClientId && !newClientId.isEmpty() && !newClientId.equals(this.clientId) )
+			{
+				this.clientId = newClientId;
+				if( null != this.api )
+				{
+					this.api.setPrincipal(this.clientId, this.clientSecret);
+				}
+				out.println(METHOD_NAME+": clientId = "+this.clientId);
+			}
+			
+			String newClientSecret = formData.getString("clientSecret");
+			if( null != newClientSecret && !newClientSecret.isEmpty() && !newClientSecret.equals(this.clientSecret) )
+			{
+				this.clientSecret = newClientSecret;
+				if( null != this.api )
+				{
+					this.api.setPrincipal(this.clientSecret, this.clientSecret);
+				}
+				out.println(METHOD_NAME+": clientSecret = "+this.clientSecret);
+			}
+			
+			
+			String newFodUrl = formData.getString("fodUrl");
+			if( null != newFodUrl && !newFodUrl.isEmpty() && !newFodUrl.equals(this.fodUrl))
+			{
+				this.fodUrl = newFodUrl;
+				
+				if( null != api )
+				{
+					this.api.setBaseUrl(this.fodUrl);
+				}
+				out.println(METHOD_NAME+": fodUrl = "+this.fodUrl);
+			}
+			
+			String newPollingInterval = formData.getString("pollingInterval");
+			if( null != pollingInterval && !newPollingInterval.isEmpty() && !newPollingInterval.equals(this.pollingInterval) )
+			{
+				this.pollingInterval = newPollingInterval;
+				out.println(METHOD_NAME+": pollingInterval = "+this.pollingInterval);
+			}
+			
+//		  proxyHost = formData.getString("proxyHost");
+//		  proxyPort = formData.getString("proxyPort");
+//		  proxyUser = formData.getString("proxyUser");
+//		  proxyPassword = formData.getString("proxyPassword");
+//		  ntWorkstation = formData.getString("ntWorkstation");
+//		  ntDomain = formData.getString("ntDomain");
+			
+			out.println(METHOD_NAME+": calling save");
+			save();
+			return super.configure(req,formData);
+		}
 
 		public String getClientId() {
 			return clientId;
@@ -839,24 +968,24 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		public String getFodUrl() {
 			return fodUrl;
 		}
-        
-        public String getPollingInterval() {
+		
+		public String getPollingInterval() {
 			return pollingInterval;
 		}
 
-	    public String getTenantCode() {
-	        return tenantCode;
-	    }
+		public String getTenantCode() {
+			return tenantCode;
+		}
 
-	    public String getUsername() {
-	        return username;
-	    }
+		public String getUsername() {
+			return username;
+		}
 
-	    public String getPassword() {
-	        return password;
-	    }
-	    
-	    public String getProxyHost() {
+		public String getPassword() {
+			return password;
+		}
+		
+		public String getProxyHost() {
 			return proxyHost;
 		}
 
@@ -880,21 +1009,28 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			return ntDomain;
 		}
 
-//        /**
-//         * This method returns true if the global configuration says we should use proxy.
-//         *
-//         * The method name is bit awkward because global.jelly calls this method to determine
-//         * the initial state of the checkbox by the naming convention.
-//         */
-//        public boolean getUseProxy() {
-//            return useProxy;
-//        }
+//		/**
+//		 * This method returns true if the global configuration says we should use proxy.
+//		 *
+//		 * The method name is bit awkward because global.jelly calls this method to determine
+//		 * the initial state of the checkbox by the naming convention.
+//		 */
+//		public boolean getUseProxy() {
+//			return useProxy;
+//		}
 		
 		/**
 		 * Retrieves a reference to the FoDAPI class, creating this object if necessary.
 		 * @return
 		 */
 		protected FoDAPI getApi() {
+			final String METHOD_NAME = CLASS_NAME+".getApi()";
+			PrintStream out = null;
+			out = FodBuilder.getLogger();
+			if( null == out ){
+				out = System.out;
+			}
+			
 			if( null == api)
 			{
 				synchronized(this)
@@ -902,14 +1038,17 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					if( null == api )
 					{
 						String configFodUrl = getFodUrl();
+						out.println(METHOD_NAME+": fodUrl = "+configFodUrl);
 						
+						api = new FoDAPI();
 						if( null != configFodUrl && !configFodUrl.isEmpty() )
 						{
-							api = new FoDAPI(configFodUrl);
+							api.setBaseUrl(configFodUrl);
 						}
 						else
 						{
-							api = new FoDAPI(DEFAULT_FOD_BASE_URL);
+							out.println(METHOD_NAME+": using default FoD URL : "+FoDAPI.PUBLIC_FOD_BASE_URL);
+							api.setBaseUrl(FoDAPI.PUBLIC_FOD_BASE_URL);
 						}
 					}
 				}
@@ -917,24 +1056,5 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			
 			return this.api;
 		}
-    }
-    
-    /**
-     * Copies file from remote worker to local temp dir.
-     * Shamelessly stolen from Jenkins F360 plugin.
-     * 
-     * @param file A file, assumed to be remote.
-     * @return local file
-     * @throws IOException
-     * @throws InterruptedException
-     */
-	private File copyToLocalTmp(FilePath file) throws IOException, InterruptedException {
-		UUID uuid = UUID.randomUUID();
-		String tmp = System.getProperty("java.io.tmpdir");
-		String s = System.getProperty("file.separator");
-		File tmpFile = new File(tmp + s + uuid + s + file.getName());
-		FilePath tmpFP = new FilePath(tmpFile);
-		file.copyTo(tmpFP);
-		return tmpFile;
 	}
 }
