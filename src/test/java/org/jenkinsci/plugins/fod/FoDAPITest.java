@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.fod;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -14,10 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -48,15 +44,11 @@ public class FoDAPITest {
 	
 	private String FOD_BASE_URL = "https://www.hpfod.com";
 	
-	private FoDAPI api = null;
+	private FoDAPI api = new FoDAPI(FOD_BASE_URL);
 	
 	@Before
 	public void setUp() {
 		final String METHOD_NAME = CLASS_NAME+".setUp()";
-		
-		api = new FoDAPI();
-		api.setBaseUrl(FOD_BASE_URL);
-		api.setPrincipal(clientId, clientSecret);
 		
 		if( !api.isLoggedIn() )
 		{
@@ -82,10 +74,9 @@ public class FoDAPITest {
 	        if( args.length > 2 )
 	            sock.bind (new InetSocketAddress (args[2], args.length>3? Integer.parseInt(args[3]): 0));
 	        sock.connect (new InetSocketAddress (args[0], Integer.parseInt(args[1])));
-	        System.out.println(sock.getInetAddress().getHostName() + " = " + sock.getInetAddress().getHostAddress());
+	        System.out.println (sock.getInetAddress().getHostName() + " = " + sock.getInetAddress().getHostAddress());
 	        ((SSLSocket)sock).startHandshake();
-	        SSLSession session = ((SSLSocket)sock).getSession();
-	        System.out.println("connect okay " + session.getCipherSuite());
+	        System.out.println ("connect okay " + ((SSLSocket)sock).getSession().getCipherSuite());
 	        success = true;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -203,6 +194,11 @@ public class FoDAPITest {
 			System.out.println(METHOD_NAME+": release["+i+"].applicationName = "+release.getApplicationName());
 			System.out.println(METHOD_NAME+": release["+i+"].releaseId = "+release.getReleaseId());
 			System.out.println(METHOD_NAME+": release["+i+"].releaseName = "+release.getReleaseName());
+			System.out.println(METHOD_NAME+": release["+i+"].staticScanStatus = "+release.getStaticScanStatus());
+			System.out.println(METHOD_NAME+": release["+i+"].staticScanStatusId = "+release.getStaticScanStatusId());
+			System.out.println(METHOD_NAME+": release["+i+"].staticScanDate = "+release.getStaticScanDate());
+			System.out.println(METHOD_NAME+": release["+i+"].isPassed = "+release.getIsPassed());
+			System.out.println(METHOD_NAME+": release["+i+"].passFailReasonId = "+release.getPassFailReasonId());
 		}
 	}
 
@@ -294,7 +290,7 @@ public class FoDAPITest {
 		req.setAssessmentTypeId(assessmentTypeId);
 		req.setTechnologyStack(technologyStack);
 		req.setLanguageLevel(languageLevel);
-		req.setUploadZip(new File(zipLocation));
+		req.setZipLocation(zipLocation);
 		UploadStatus status = null;
 		//status = api.uploadFile(req);
 		assertNotNull(status);
@@ -316,7 +312,7 @@ public class FoDAPITest {
 		req.setAssessmentTypeId(assessmentTypeId);
 		req.setTechnologyStack(technologyStack);
 		req.setLanguageLevel(languageLevel);
-		req.setUploadZip(new File(zipLocation));
+		req.setZipLocation(zipLocation);
 		UploadStatus status = null;
 		//status = api.uploadFile(req);
 		assertNotNull(status);
@@ -326,20 +322,5 @@ public class FoDAPITest {
 		System.out.println(METHOD_NAME+": Bytes sent: "+status.getBytesSent());
 		assertFalse(status.isSendPostFailed());
 		assertTrue(status.isUploadSucceeded());
-	}
-	
-	@Test
-	public void testClientIdRegex()
-	{
-		//String regex = "\\w{8}-\\w{4}-\\w{4}-\\w{12}";
-		//String regex = ".{8}-.{4}-.{4}-.{12}";
-		String regex = "........-....-....-....-............";
-    	String clientId = "b3756c3e-4058-4f66-bf31-68fa471b9fa5";
-		
-    	Pattern p = Pattern.compile(regex);
-    	
-    	Matcher m = p.matcher(clientId);
-    	
-    	assertTrue(m.matches());
 	}
 }

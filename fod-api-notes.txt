@@ -21,15 +21,9 @@ GET https://www.hpfod.com/api/v1/Application/?q=staticScanStatus:{scanStatusId}
 GET https://www.hpfod.com/api/v1/Application/?fields=applicationId,applicationName,applicationTitle
 GET https://www.hpfod.com/api/v1/Application/?fields=applicationId,applicationName,isMobile
 
-GET https://www.hpfod.com/api/v2/AssessmentCategory/
 GET https://www.hpfod.com/api/v1/AssessmentType/
 
-GET https://www.hpfod.com/api/v1/Fpr/?projectName={applicationName}&projectVersionName={releaseName}
-
 GET https://www.hpfod.com/api/v1/Scan/
-
-GET https://www.hpfod.com/api/v2/tenant-roles/
-GET https://www.hpfod.com/api/v2/TenantEntitlements/
 
 GET https://www.hpfod.com/api/v2/Releases/?q=applicationId:{applicationId}
 GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}
@@ -45,7 +39,7 @@ GET https://www.hpfod.com/api/v2/releases/{releaseId}/scan-results
 POST https://www.hpfod.com/api/v1/release/{releaseId}/scan/?assessmentTypeId=105&technologyStack=JAVA/J2EE&languageLevel=1.5&fragNo=-1&len={}&offset=0
 
 
-NOT WORKING:
+NOT WORKING
 
 GET https://www.hpfod.com/api/v1/Application/{applicationId}/release/?q=ReleaseName:{releaseName}
 
@@ -70,23 +64,20 @@ GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}%2
 
 GET https://www.hpfod.com/api/v2/Releases/?q=applicationName:{applicationName}&q=releaseName:{ReleaseName}
 
-GET https://www.hpfod.com/api/v1/Role/
- ==> response data indicates this call is obsolete, likely replaced by tenant-roles call
 
-https://www.hpfod.com/api/v2/TenantEntitlements?q=assessmentTypeId:{assessmentTypeId}
-
-
-UNTESTED:
+UNTESTED
 
 POST https://www.hpfod.com/api/v1/Application/
 GET https://www.hpfod.com/api/v1/Application/{appid}/autoreport/
 POST https://www.hpfod.com/api/v1/Application/{appid}/autoreport/
 PUT https://www.hpfod.com/api/v1/Application/{appid}
 DELETE https://www.hpfod.com/api/v1/Application/{appid}
+GET https://www.hpfod.com/api/v1/AssessmentCategory/
 GET https://www.hpfod.com/api/v2/Attributes
 POST https://www.hpfod.com/api/v1/CustomReport/
 POST https://www.hpfod.com/api/v1/DynamicScan/
 POST https://www.hpfod.com/api/v2/DynamicScan/{releaseId}/StartScan
+GET https://www.hpfod.com/api/v1/Fpr/
 POST https://www.hpfod.com/api/v2/MobileScans/{releaseId}/scan
 PUT https://www.hpfod.com/api/v2/MobileScans/{id:int}
 POST https://www.hpfod.com/api/v2/MultiFactorAuthorizationCode/
@@ -118,6 +109,9 @@ POST https://www.hpfod.com/api/v1/Report/
 DELETE https://www.hpfod.com/api/v1/Report/{reportId}
 GET https://www.hpfod.com/api/v1/ReportType/
 GET https://www.hpfod.com/api/v1/Role/
+GET https://www.hpfod.com/api/v2/tenant-roles/
+GET https://www.hpfod.com/api/v1/Scan/
+GET https://www.hpfod.com/api/v2/TenantEntitlements
 GET https://www.hpfod.com/api/v1/TenantHeatMap/
 GET https://www.hpfod.com/api/v1/TenantSummary/
 GET https://www.hpfod.com/api/v2/users/
@@ -129,5 +123,6 @@ GET https://www.hpfod.com/api/v1/UserAccess/
 POST https://www.hpfod.com/api/v1/UserAccess/{userId}
 DELETE https://www.hpfod.com/api/v1/UserAccess/
 GET https://www.hpfod.com/api/v1/Vulnerability/
+GET https://www.hpfod.com/api/v1/Role/
 GET https://www.hpfod.com/api/v1/User/
 GET https://www.hpfod.com/api/v1/User/{id}
