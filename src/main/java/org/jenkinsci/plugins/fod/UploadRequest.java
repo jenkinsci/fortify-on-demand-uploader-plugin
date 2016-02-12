@@ -40,7 +40,7 @@ public class UploadRequest {
 		this.releaseId = releaseId2;
 	}
 	public Long getAssessmentTypeId() {
-		return assessmentTypeId;
+		return (long) 170; //always a standard, "express" setting controlled by scanPreferenceId param
 	}
 	public void setAssessmentTypeId(Long assessmentTypeId) {
 		this.assessmentTypeId = assessmentTypeId;

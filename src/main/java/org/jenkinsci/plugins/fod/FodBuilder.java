@@ -203,13 +203,13 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		final PrintStream logger = listener.getLogger();
 		
 		logger.println(METHOD_NAME+": foDUrl = "+fodUrl);
-		logger.println(METHOD_NAME+": clientId = "+clientId);
-		logger.println(METHOD_NAME+": clientSecret = "+clientSecret);
+	//	logger.println(METHOD_NAME+": clientId = "+clientId);
+	//	logger.println(METHOD_NAME+": clientSecret = "+clientSecret);
 		logger.println(METHOD_NAME+": pollingInterval = "+pollingInterval);
 		logger.println(METHOD_NAME+": proxyHost = "+proxyHost);
 		logger.println(METHOD_NAME+": proxyPort = "+proxyPort);
-		logger.println(METHOD_NAME+": proxyUser = "+proxyUser);
-		logger.println(METHOD_NAME+": proxyPassword = "+proxyPassword);
+	//	logger.println(METHOD_NAME+": proxyUser = "+proxyUser);
+	//	logger.println(METHOD_NAME+": proxyPassword = "+proxyPassword);
 		logger.println(METHOD_NAME+": ntWorkstation = "+ntWorkstation);
 		logger.println(METHOD_NAME+": ntDomain = "+ntDomain);
 		
@@ -826,7 +826,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			}
 		}
 
-		public ListBoxModel doFillAssessmentTypeIdItems() {
+/*		public ListBoxModel doFillAssessmentTypeIdItems() {
 			ListBoxModel items = new ListBoxModel();
 			
 			// 
@@ -843,7 +843,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			items.add(new Option("Express Scan", "105", false));
 			items.add(new Option("Standard Scan", "170", false));
 			return items;
-		}
+		}*/
 
 		public ListBoxModel doFillTechnologyStackItems() {
 			ListBoxModel items = new ListBoxModel();
@@ -928,7 +928,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				{
 					this.api.setPrincipal(this.clientId, this.clientSecret);
 				}
-				out.println(METHOD_NAME+": clientId = "+this.clientId);
+			//	out.println(METHOD_NAME+": clientId = "+this.clientId);
 			}
 			
 			String newClientSecret = formData.getString("clientSecret");
@@ -939,7 +939,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				{
 					this.api.setPrincipal(this.clientSecret, this.clientSecret);
 				}
-				out.println(METHOD_NAME+": clientSecret = "+this.clientSecret);
+			//	out.println(METHOD_NAME+": clientSecret = "+this.clientSecret);
 			}
 			
 			

@@ -206,7 +206,7 @@ public class FoDAPITest {
 		}
 	}
 
-	@Test
+/*	@Test
 	public void testGetAssessmentTypeList() throws IOException {
 		final String METHOD_NAME = CLASS_NAME+".testGetAssessmentTypeList";
 		
@@ -216,7 +216,7 @@ public class FoDAPITest {
 		{
 			System.out.println(METHOD_NAME+": name="+entry.getKey()+" / id=" + entry.getValue() );
 		}
-	}
+	}*/
 
 	@Test
 	public void testGetScanSnapshotList() throws IOException {

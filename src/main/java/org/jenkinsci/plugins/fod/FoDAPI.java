@@ -106,6 +106,17 @@ public class FoDAPI {
 		this.principal = principal;
 		resetConnection();
 	}
+	
+	/**
+	 * @param param
+	 * @return UTF-8 encoded parameter for requests
+	 * @throws UnsupportedEncodingException
+	 */
+	public String encodeURLParamUTF8(String param) throws UnsupportedEncodingException
+	{
+		param = URLEncoder.encode(param, UTF_8);
+		return param;
+	}
 
 	//TODO refactor authorization code
 //	public boolean authorize()
@@ -200,7 +211,7 @@ public class FoDAPI {
 		AuthTokenResponse authResponse = this.authorize(fodBaseUrl,authRequest,this.httpClient);
 		String token = authResponse.getAccessToken();
 		
-		logger.println(METHOD_NAME+": token = "+token);
+	//	logger.println(METHOD_NAME+": token = "+token);
 		if (token != null && 0 < token.length() )
 		{
 			this.sessionToken = token;
@@ -256,8 +267,8 @@ public class FoDAPI {
 				
 				out.println(METHOD_NAME+": request.scope = "+FOD_SCOPE_TENANT);
 				out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
-				out.println(METHOD_NAME+": request.clientId = "+cred.getClientId());
-				out.println(METHOD_NAME+": request.clientSecret = "+cred.getClientSecret());
+			//	out.println(METHOD_NAME+": request.clientId = "+cred.getClientId());
+			//	out.println(METHOD_NAME+": request.clientSecret = "+cred.getClientSecret());
 			}
 			else if( AuthCredentialType.PASSWORD.getName().equals(request.getGrantType()) )
 			{
@@ -269,8 +280,8 @@ public class FoDAPI {
 				
 				out.println(METHOD_NAME+": request.scope = "+FOD_SCOPE_TENANT);
 				out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
-				out.println(METHOD_NAME+": request.username = "+cred.getUsername());
-				out.println(METHOD_NAME+": request.password = "+cred.getPassword());
+			//	out.println(METHOD_NAME+": request.username = "+cred.getUsername());
+			//	out.println(METHOD_NAME+": request.password = "+cred.getPassword());
 			}
 			else
 			{
@@ -298,7 +309,7 @@ public class FoDAPI {
 				if (null != tokenElement && !tokenElement.isJsonNull() && tokenElement.isJsonPrimitive()) {
 					//accessToken = tokenElement.getAsString();
 					response.setAccessToken(tokenElement.getAsString());
-					out.println(METHOD_NAME+": access_token = "+tokenElement.getAsString());
+			//		out.println(METHOD_NAME+": access_token = "+tokenElement.getAsString());
 				}
 				JsonElement expiresIn = jsonObject.getAsJsonPrimitive("expires_in");
 				Integer expiresInInt = expiresIn.getAsInt();
@@ -323,7 +334,7 @@ public class FoDAPI {
 	{
 		final String METHOD_NAME = CLASS_NAME + ".isLoggedIn";
 		PrintStream out = FodBuilder.getLogger();
-		out.println(METHOD_NAME+": sessionToken = "+sessionToken);
+	//	out.println(METHOD_NAME+": sessionToken = "+sessionToken);
 		out.println(METHOD_NAME+": tokenExpiry = "+tokenExpiry+" ("+(new Date(tokenExpiry))+")");
 		
 		boolean tokenValid = 
@@ -336,7 +347,7 @@ public class FoDAPI {
 		return tokenValid;
 	}
 
-	//TODO replace with something more appropriate than Map<String,String>
+/*	//TODO replace with something more appropriate than Map<String,String>
 	public Map<String, String> getAssessmentTypeList() throws IOException {
 		String endpoint = baseUrl + "/api/v1/assessmenttype";
 		URL url = new URL(endpoint);
@@ -359,7 +370,7 @@ public class FoDAPI {
 		}
 
 		return map;
-	}
+	}*/
 
 	public Map<String, String> getApplicationList() throws IOException {
 		final String METHOD_NAME = CLASS_NAME+".getApplicationList";
@@ -502,8 +513,9 @@ public class FoDAPI {
 	public List<Release> getReleaseList(String applicationName)
 			throws IOException
 	{
-		//FIXME URLEncoder deprecated?
-		applicationName = URLEncoder.encode(applicationName);
+		//FIXME URLEncoder deprecated? 
+		// encode(String, String) to specify the encoding, will avoid issues with default encoding
+		applicationName = encodeURLParamUTF8(applicationName);
 		String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+applicationName+"&fields=applicationId,applicationName,releaseId,releaseName";
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
@@ -745,22 +757,15 @@ public class FoDAPI {
 					String fragUrl = "";
 					if(req.getLanguageLevel() != null)
 					{
-						fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId=" + req.getAssessmentTypeId() + "&technologyStack=" + req.getTechnologyStack() + "&languageLevel=" + req.getLanguageLevel() +  "&fragNo=" + fragmentNumber++ + "&len=" + byteCount + "&offset=" + offset;
+						fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId=" + req.getAssessmentTypeId() + "&technologyStack=" + encodeURLParamUTF8(req.getTechnologyStack()) + "&languageLevel=" + req.getLanguageLevel() +  "&fragNo=" + fragmentNumber++ + "&len=" + byteCount + "&offset=" + offset;
 						out.println(METHOD_NAME+": fragUrl = "+fragUrl);
 					}
 					else
 					{
-						fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId=" + req.getAssessmentTypeId() + "&technologyStack=" + req.getTechnologyStack() +  "&fragNo=" + fragmentNumber++ + "&len=" + byteCount + "&offset=" + offset;
+						fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId=" + req.getAssessmentTypeId() + "&technologyStack=" + encodeURLParamUTF8(req.getTechnologyStack()) +  "&fragNo=" + fragmentNumber++ + "&len=" + byteCount + "&offset=" + offset;
 						out.println(METHOD_NAME+": fragUrl = "+fragUrl);
 					}
-//					if(argMap.containsKey("scanPreferenceId"))
-//					{
-//						fragUrl += "&scanPreferenceId=" + argMap.get("scanPreferenceId");
-//					}
-//					if(argMap.containsKey("auditPreferenceId"))
-//					{
-//						fragUrl += "&auditPreferenceId=" + argMap.get("auditPreferenceId");
-//					}
+
 					Boolean runSonatypeScan = req.getRunSonatypeScan();
 					Boolean isExpressScan = req.getIsExpressScan();
 					Boolean isExpressAudit = req.getIsExpressAudit();
@@ -773,19 +778,6 @@ public class FoDAPI {
 							fragUrl += "&doSonatypeScan=true";
 						}
 						
-						// this param expects true
-						
-						// Specifying this parameter if sonatype feature not enabled for 
-						//  a tenant results in an HTTP 500 error, even if set to 0. 
-						//  Unsure how exactly to handle right now. No error if 
-						//  parameter omitted. Commenting out for now, so this error
-						//  will only occur if a tenant without this feature attempts
-						//  to use it.
-//						else
-//						{
-//							fragUrl += "&doSonatypeScan=0";
-//						}
-					}
 					
 					if (null != isExpressScan)
 					{
@@ -807,7 +799,6 @@ public class FoDAPI {
 						
 					}
 					
-					out.println("URL: " + fragUrl);
 					String postErrorMessage = "";
 					out.println(METHOD_NAME+": calling sendPost ...");
 					SendPostResponse postResponse = sendPost(fragUrl, sendByteArray, httpClient, sessionToken, postErrorMessage);
@@ -885,7 +876,7 @@ public class FoDAPI {
 		
 		PrintStream out = FodBuilder.getLogger();
 		out.println(METHOD_NAME+": url="+url);
-		out.println(METHOD_NAME+": token="+token);
+	//	out.println(METHOD_NAME+": token="+token);
 		
 		SendPostResponse result = new SendPostResponse();
 		try {

@@ -19,9 +19,6 @@
   <f:entry title="Release Name" field="releaseName">
     <f:select />
   </f:entry>
-  <f:entry title="Scan Preference" field="assessmentTypeId">
-    <f:select />
-  </f:entry>
   <f:entry title="Technology Stack" field="technologyStack">
     <f:select />
   </f:entry>
