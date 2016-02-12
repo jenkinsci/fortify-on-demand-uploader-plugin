@@ -44,8 +44,8 @@
     
     <f:advanced title="Advanced settings">
       
-      <f:entry title="Polling Interval" field="pollingInterval">
-        <f:textbox />
+      <f:entry title="Polling Interval" description="Scan status check in minutes" field="pollingInterval">
+        <f:textbox default="30"/>
       </f:entry>
       <f:entry title="Fortify on Demand URL" description="Link to HP FOD">
         <f:textbox name="fodUrl" field="fodUrl" id="fodUrl"/>

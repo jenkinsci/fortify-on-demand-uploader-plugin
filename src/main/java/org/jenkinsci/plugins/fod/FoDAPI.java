@@ -777,7 +777,7 @@ public class FoDAPI {
 						{
 							fragUrl += "&doSonatypeScan=true";
 						}
-						
+					}	
 					
 					if (null != isExpressScan)
 					{
@@ -866,9 +866,9 @@ public class FoDAPI {
 		{
 			status.setUploadSucceeded(false);
 			status.setErrorMessage("Combination of applicationName of \""+req.getApplicationName()+"\" and releaseName of \""+req.getApplicationName()+"\" is not valid");
-		}
+		}		
 		return status;
-	}
+}
 	
 	private SendPostResponse sendPost(String url, byte[] bytesToSend, HttpClient client, String token, String errorMessage)
 	{
