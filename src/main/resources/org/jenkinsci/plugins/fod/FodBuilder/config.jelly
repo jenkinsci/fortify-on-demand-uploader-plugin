@@ -10,7 +10,7 @@
     Creates a text field that shows the value of the "name" property.
     When submitted, it will be passed to the corresponding constructor parameter.
   -->
-  <f:entry title="Upload File Path" field="zipLocation">
+  <f:entry title="Upload Files" field="filePatterns">
     <f:textbox />
   </f:entry>
   <f:entry title="Application Name" field="applicationName">
@@ -30,5 +30,11 @@
   </f:entry>
   <f:entry title="Run Sonatype scan" field="runSonatypeScan">
     <f:checkbox name="runSonatypeScan"/>
+  </f:entry>
+    <f:entry title="Enable Express scan mode" field="isExpressScan">
+    <f:checkbox name="isExpressScan"/>
+  </f:entry>
+    <f:entry title="Enable Express audit mode" field="isExpressAudit">
+    <f:checkbox name="isExpressAudit"/>
   </f:entry>
 </j:jelly>
