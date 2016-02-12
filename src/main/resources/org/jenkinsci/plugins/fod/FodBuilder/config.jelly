@@ -25,7 +25,7 @@
   <f:entry title="Language Level" field="languageLevel">
     <f:select />
   </f:entry>
-  <f:entry title="Run Sonatype scan" field="runSonatypeScan">
+  <f:entry title="Request Sonatype report" field="runSonatypeScan">
     <f:checkbox name="runSonatypeScan"/>
   </f:entry>
     <f:entry title="Enable Express scan mode" field="isExpressScan">
