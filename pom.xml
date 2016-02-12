@@ -12,11 +12,11 @@
 	</parent>
 
 	<groupId>org.jenkins-ci.plugins</groupId>
-	<artifactId>Fortify-on-Demand-Assessment-Uploader</artifactId>
+	<artifactId>fortify-on-demand-uploader</artifactId>
 	<version>1.0</version>
 	<packaging>hpi</packaging>
 
-	<name>Fortify on Demand Plugin</name>
+	<name>Fortify on Demand Uploader Plugin</name>
 	<description>Gathers build artifacts and uploads them to Fortify on Demand service with user-specified options.</description>
 	<url>https://wiki.jenkins-ci.org/display/JENKINS/Fortify-on-Demand-Assessment-Uploader</url>
 	<licenses>
