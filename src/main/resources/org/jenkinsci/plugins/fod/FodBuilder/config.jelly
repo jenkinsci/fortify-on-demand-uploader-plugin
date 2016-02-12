@@ -31,4 +31,10 @@
   <f:entry title="Run Sonatype scan" field="runSonatypeScan">
     <f:checkbox name="runSonatypeScan"/>
   </f:entry>
+    <f:entry title="Enable Express scan mode" field="isExpressScan">
+    <f:checkbox name="isExpressScan"/>
+  </f:entry>
+    <f:entry title="Enable Express audit mode" field="isExpressAudit">
+    <f:checkbox name="isExpressAudit"/>
+  </f:entry>
 </j:jelly>

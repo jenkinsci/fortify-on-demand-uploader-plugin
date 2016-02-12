@@ -762,13 +762,19 @@ public class FoDAPI {
 //						fragUrl += "&auditPreferenceId=" + argMap.get("auditPreferenceId");
 //					}
 					Boolean runSonatypeScan = req.getRunSonatypeScan();
+					Boolean isExpressScan = req.getIsExpressScan();
+					Boolean isExpressAudit = req.getIsExpressAudit();
+					
 
 					if( null != runSonatypeScan )
 					{
 						if( runSonatypeScan )
 						{
-							fragUrl += "&doSonatypeScan=1";
+							fragUrl += "&doSonatypeScan=true";
 						}
+						
+						// this param expects true
+						
 						// Specifying this parameter if sonatype feature not enabled for 
 						//  a tenant results in an HTTP 500 error, even if set to 0. 
 						//  Unsure how exactly to handle right now. No error if 
@@ -780,6 +786,28 @@ public class FoDAPI {
 //							fragUrl += "&doSonatypeScan=0";
 //						}
 					}
+					
+					if (null != isExpressScan)
+					{
+						if (isExpressScan)
+						{
+							fragUrl += "&scanPreferenceId=2";
+							
+						}
+						
+					}
+					
+					if (null != isExpressAudit)
+					{
+						if (isExpressAudit)
+						{
+							fragUrl += "&auditPreferenceId=2";
+							
+						}
+						
+					}
+					
+					out.println("URL: " + fragUrl);
 					String postErrorMessage = "";
 					out.println(METHOD_NAME+": calling sendPost ...");
 					SendPostResponse postResponse = sendPost(fragUrl, sendByteArray, httpClient, sessionToken, postErrorMessage);

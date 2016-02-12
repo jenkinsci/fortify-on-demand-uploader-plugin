@@ -11,6 +11,9 @@ public class UploadRequest {
 	private String technologyStack;
 	private String languageLevel;
 	private Boolean runSonatypeScan;
+	private Boolean isExpressScan;
+	private Boolean isExpressAudit;
+	
 	
 	public File getUploadZip() {
 		return uploadZip;
@@ -59,6 +62,18 @@ public class UploadRequest {
 	}
 	public void setRunSonatypeScan(Boolean runSonatypeScan) {
 		this.runSonatypeScan = runSonatypeScan;
+	}
+	public Boolean getIsExpressScan() {
+		return isExpressScan;
+	}
+	public void setIsExpressScan(Boolean isExpressScan) {
+		this.isExpressScan = isExpressScan;
+	}
+	public Boolean getIsExpressAudit() {
+		return isExpressAudit;
+	}
+	public void setIsExpressAudit(Boolean isExpressAudit) {
+		this.isExpressAudit = isExpressAudit;
 	}
 
 }

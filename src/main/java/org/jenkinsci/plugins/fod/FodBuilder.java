@@ -78,6 +78,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	private String technologyStack;
 	private String languageLevel;
 	private Boolean runSonatypeScan;
+	private Boolean isExpressScan;
+	private Boolean isExpressAudit;
 
 	// Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
 	@DataBoundConstructor
@@ -87,7 +89,9 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			,Long assessmentTypeId
 			,String technologyStack
 			,String languageLevel
-			,Boolean runSonatypeScan)
+			,Boolean runSonatypeScan
+			,Boolean isExpressScan
+			,Boolean isExpressAudit)
 	{
 		this.filePatterns = filePatterns;
 		this.applicationName = applicationName;
@@ -96,6 +100,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		this.technologyStack = technologyStack;
 		this.languageLevel = languageLevel;
 		this.runSonatypeScan = runSonatypeScan;
+		this.isExpressScan = isExpressScan;
+		this.isExpressAudit = isExpressAudit;
 	}
 
 	/**
@@ -134,6 +140,14 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	public Boolean getRunSonatypeScan()
 	{
 		return runSonatypeScan;
+	}
+	public Boolean getIsExpressScan()
+	{
+		return isExpressScan;
+	}
+	public Boolean getIsExpressAudit()
+	{
+		return isExpressAudit;
 	}
 	
 	protected static TaskListener getTaskListener()
@@ -356,6 +370,9 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				req.setTechnologyStack(technologyStack);
 				req.setLanguageLevel(languageLevel);
 				req.setRunSonatypeScan(runSonatypeScan);
+				req.setIsExpressScan(isExpressScan);
+				req.setIsExpressAudit(isExpressAudit);
+				
 				
 				UploadStatus status = api.uploadFile(req);
 				logger.println(METHOD_NAME+": HTTP status code: "+status.getHttpStatusCode());
