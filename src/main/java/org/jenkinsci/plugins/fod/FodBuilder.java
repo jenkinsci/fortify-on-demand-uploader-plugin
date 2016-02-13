@@ -44,6 +44,8 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -190,9 +192,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		String clientId = descriptor.getClientId();
 		String clientSecret = descriptor.getClientSecret();
 		String pollingInterval = descriptor.getPollingInterval();
-		String tenantCode = descriptor.getTenantCode();
-		String username = descriptor.getUsername();
-		String password = descriptor.getPassword();
 		String proxyHost = descriptor.getProxyHost();
 		String proxyPort = descriptor.getProxyPort();
 		String proxyUser = descriptor.getProxyUser();
@@ -219,7 +218,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		logger.println(METHOD_NAME+": assessmentTypeId = "+assessmentTypeId);
 		logger.println(METHOD_NAME+": technologyStack = "+technologyStack);
 		logger.println(METHOD_NAME+": languageLevel = "+languageLevel);
-			   
+		
 		logger.println(METHOD_NAME+": Attempting to authorize ...");
 		boolean authSuccess = false;
 		try
@@ -256,13 +255,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				logger.println(METHOD_NAME+": workspace = "+workspace.toString());
 				File uploadFile = null;
 				
-				try {
-//					logger.println(METHOD_NAME+": creating temp file ...");
-//					FilePath tmpZipFile = workspace.createTempFile(prefix,suffix);
-//					
-//					logger.println(METHOD_NAME+": tmpZipFile.URI = "+tmpZipFile.toURI());
-//					logger.println(METHOD_NAME+": zipping up workspace contents ...");
-//					workspace.zip(tmpZipFile);
+				try
+				{
 					
 					String tmpDir = System.getProperty("java.io.tmpdir");
 					File dir = new File(tmpDir);
@@ -296,9 +290,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							
 							boolean matches = false;
 							
-//							matches = !(pathname.getName().endsWith(".zip")
-//									&& pathname.getName().contains("fodupload"));
-							
 							Matcher m = filePattern.matcher(pathname.getName());
 							matches = m.matches();
 							logger.println(METHOD_NAME+": pathname accepted : "+matches);
@@ -315,16 +306,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					
 					File localTmpZipFile = tmpZipFile;
 					
-//					logger.println(METHOD_NAME+": tmpZipFile.isRemote = "+tmpZipFile.isRemote());
-//					File localTmpZipFile = null;
-//					if( tmpZipFile.isRemote() )
-//					{
-//						localTmpZipFile = copyToLocalTmp(tmpZipFile);
-//					}
-//					else
-//					{
-//						localTmpZipFile = new File(tmpZipFile.toURI());
-//					}
 					logger.println(METHOD_NAME+": localTmpZipFile = "+localTmpZipFile);
 					logger.println(METHOD_NAME+": localTmpZipFile.exists = "+localTmpZipFile.exists());
 					
@@ -332,15 +313,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					{
 						uploadFile = localTmpZipFile;
 					}
-					// build.getRootDir()
-					
-					//boolean exists = zipFile.exists();
-					//logger.println(METHOD_NAME+": zipFile.exists = "+exists);
-					
-					//File f = new File(zipFile.toURI());
-					
-					//workspace.zip(os, filter);
-					//zipFile.zip(out, scanner)
 
 				}
 				catch (InterruptedException e)
@@ -351,18 +323,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				
 				//TODO set global parameters on FoDAPI object instead
 				UploadRequest req = new UploadRequest();
-//				req.setClientId(clientId);
-//				req.setClientSecret(clientSecret);
-//				req.setPollingInterval(pollingInterval);
-//				req.setTenantCode(tenantCode);
-//				req.setUsername(username);
-//				req.setPassword(password);
-//				req.setProxyHost(proxyHost);
-//				req.setProxyPort(proxyPort);
-//				req.setProxyUser(proxyUser);
-//				req.setProxyPassword(proxyPassword);
-//				req.setNtWorkstation(ntWorkstation);
-//				req.setNtDomain(ntDomain);
 				req.setUploadZip(uploadFile);
 				req.setApplicationName(applicationName);
 				req.setReleaseName(releaseName);
@@ -564,7 +524,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	 * for the actual HTML fragment for the configuration screen.
 	 */
 	@Extension // This indicates to Jenkins that this is an implementation of an extension point.
-	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
 		private static final String CLASS_NAME = DescriptorImpl.class.getName();
 		
@@ -595,6 +555,12 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		private String ntDomain;
 		
 		private transient FoDAPI api;
+		private transient Object apiLockMonitor = new Object();
+
+		private transient Long releaseListRetentionTime = 5l*60*1000;
+		private transient List<Release> releaseListCache = null;
+		private transient Long releaseListRetrieveTime = null;
+		private transient Object releaseListLockMonitor = new Object();
 
 		/**
 		 * In order to load the persisted global configuration, you have to 
@@ -610,7 +576,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			FormValidation returnValue = null;
 			if (value.length() == 0)
 			{
-			  returnValue = FormValidation.error("Please set an API key");
+				returnValue = FormValidation.error("Please set an API key");
 			}
 			else
 			{
@@ -636,7 +602,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			FormValidation returnValue = null;
 			if (value.length() == 0)
 			{
-			  returnValue = FormValidation.error("Please set a secret key");
+				returnValue = FormValidation.error("Please set a secret key");
 			}
 			else
 			{
@@ -708,15 +674,13 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				
 				if( api.isLoggedIn() )
 				{
-					try
-					{
 						out.println(METHOD_NAME+": getting application list");
-						Map<String,String> appList = api.getApplicationList();
+						List<String> appNameList = this.getApplicationNameList(api);
 						
-						if( null != appList && !appList.isEmpty() )
+						if( null != appNameList && !appNameList.isEmpty() )
 						{
-							out.println(METHOD_NAME+": appList.size = "+appList.size());
-							for( String appName : appList.keySet() )
+							out.println(METHOD_NAME+": appNameList.size = "+appNameList.size());
+							for( String appName : appNameList )
 							{
 								out.println(METHOD_NAME+": adding application \""+appName+"\" to menu");
 								items.add(new Option(appName,appName,false));
@@ -726,11 +690,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						{
 							out.println(METHOD_NAME+": application list empty or null");
 						}
-						
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 				} else {
 					out.println(METHOD_NAME+": secondary login check failed");
 				}
@@ -745,7 +704,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		{
 			final String METHOD_NAME = CLASS_NAME+".doFillReleaseNameItems()";
 			PrintStream out = null;
-			//out = FodBuilder.getLogger();
 			out = System.out;
 			
 			ListBoxModel items = new ListBoxModel();
@@ -762,68 +720,40 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					
 					if( api.isLoggedIn() )
 					{
-						try
+						out.println(METHOD_NAME+": getting release list for applicationName = "+applicationName);
+
+						List<String> releaseNameList = this.getReleaseNameList(api, applicationName);
+
+						if (null != releaseNameList && !releaseNameList.isEmpty())
 						{
-							out.println(METHOD_NAME+": getting release list for applicationName = "+applicationName);
-							List<Release> relList = api.getReleaseList(applicationName);
-							
-							if( null != relList && !relList.isEmpty() )
+							out.println(METHOD_NAME+": relList.size = "+releaseNameList.size());
+							for (String releaseName : releaseNameList)
 							{
-								out.println(METHOD_NAME+": relList.size = "+relList.size());
-								for( Release release : relList )
-								{
-									String releaseName = release.getReleaseName();
-									out.println(METHOD_NAME+": adding release \""+releaseName+"\" to menu");
-									items.add(new Option(releaseName,releaseName,false));
-								}
+								out.println(METHOD_NAME+": adding release \""+releaseName+"\" to menu");
+								items.add(new Option(releaseName,releaseName,false));
 							}
-							else
-							{
-								out.println(METHOD_NAME+": release list empty or null");
-							}
-							
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
 						}
-					} else {
+						else
+						{
+							out.println(METHOD_NAME+": release list empty or null");
+						}
+					}
+					else
+					{
 						out.println(METHOD_NAME+": secondary login check failed");
 					}
-				} else {
+				}
+				else
+				{
 					out.println(METHOD_NAME+": getApi() returned null");
 				}
-			} else {
+			}
+			else
+			{
 				out.println(METHOD_NAME+": applicationName is null. doing nothing.");
 			}
 			
 			return items;
-		}
-
-		protected void ensureLogin(FoDAPI api)
-		{
-			final String METHOD_NAME = CLASS_NAME+".ensureLogin";
-			PrintStream out = getLogger();
-			
-			if( !api.isLoggedIn() )
-			{
-				// timeout must be configured, or else a hung call here blocks everything
-				synchronized(this)
-				{
-					if( !api.isLoggedIn() )
-					{
-						try
-						{
-							out.println(METHOD_NAME+": logging in to FoD API");
-							api.authorize(this.getClientId(), this.getClientSecret());
-						}
-						catch (IOException e)
-						{
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}
-			}
 		}
 
 /*		public ListBoxModel doFillAssessmentTypeIdItems() {
@@ -831,11 +761,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			
 			// 
 			//TODO populate dynamically ... how to get config values?
-//			for (...) {
-//				items.add(new Option(name,id,selected));
-//			}
-//			Jenkins.getInstance().getGlobalNodeProperties()
-//			   .get(EnvironmentVariablesNodeProperty.class).getEnvVars().get(name);
 			
 //			items.add(new Option("Static Express", "105",false));
 //			items.add(new Option("Static Assessment", "170",false));
@@ -928,7 +853,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				{
 					this.api.setPrincipal(this.clientId, this.clientSecret);
 				}
-			//	out.println(METHOD_NAME+": clientId = "+this.clientId);
+				this.releaseListRetrieveTime = 0l;
+				out.println(METHOD_NAME+": clientId = "+this.clientId);
 			}
 			
 			String newClientSecret = formData.getString("clientSecret");
@@ -939,6 +865,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				{
 					this.api.setPrincipal(this.clientSecret, this.clientSecret);
 				}
+				this.releaseListRetrieveTime = 0l;
 			//	out.println(METHOD_NAME+": clientSecret = "+this.clientSecret);
 			}
 			
@@ -952,6 +879,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				{
 					this.api.setBaseUrl(this.fodUrl);
 				}
+				this.releaseListRetrieveTime = 0l;
 				out.println(METHOD_NAME+": fodUrl = "+this.fodUrl);
 			}
 			
@@ -962,12 +890,12 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				out.println(METHOD_NAME+": pollingInterval = "+this.pollingInterval);
 			}
 			
-//		  proxyHost = formData.getString("proxyHost");
-//		  proxyPort = formData.getString("proxyPort");
-//		  proxyUser = formData.getString("proxyUser");
-//		  proxyPassword = formData.getString("proxyPassword");
-//		  ntWorkstation = formData.getString("ntWorkstation");
-//		  ntDomain = formData.getString("ntDomain");
+//			proxyHost = formData.getString("proxyHost");
+//			proxyPort = formData.getString("proxyPort");
+//			proxyUser = formData.getString("proxyUser");
+//			proxyPassword = formData.getString("proxyPassword");
+//			ntWorkstation = formData.getString("ntWorkstation");
+//			ntDomain = formData.getString("ntDomain");
 			
 			out.println(METHOD_NAME+": calling save");
 			save();
@@ -1050,7 +978,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			
 			if( null == api)
 			{
-				synchronized(this)
+				synchronized(this.apiLockMonitor)
 				{
 					if( null == api )
 					{
@@ -1073,5 +1001,162 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			
 			return this.api;
 		}
-	}
+		
+		
+		protected void ensureLogin(FoDAPI api)
+		{
+			final String METHOD_NAME = CLASS_NAME+".ensureLogin";
+			PrintStream out = getLogger();
+			
+			if( !api.isLoggedIn() )
+			{
+				// timeout must be configured, or else a hung call here blocks everything
+				synchronized(this.apiLockMonitor)
+				{
+					if( !api.isLoggedIn() )
+					{
+						try
+						{
+							out.println(METHOD_NAME+": logging in to FoD API");
+							api.authorize(this.getClientId(), this.getClientSecret());
+						}
+						catch (IOException e)
+						{
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+
+		protected List<String> getApplicationNameList(FoDAPI api)
+		{
+			List<String> appNameList = null;
+			
+			refreshReleaseListCache(api);
+			
+			if( null != this.releaseListCache && !this.releaseListCache.isEmpty() )
+			{
+				appNameList = new LinkedList<String>();
+				for( Release release : this.releaseListCache )
+				{
+					String appName = release.getApplicationName();
+					if( null != appName && !appName.isEmpty() 
+							&& !appNameList.contains(appName) )
+					{
+						appNameList.add(appName);
+					}
+				}
+			}
+			
+			return appNameList;
+		}
+		
+		/**
+		 * Get list of release names, using cached list of names
+		 * @param api
+		 * @param applicationName
+		 * @return
+		 */
+		protected List<String> getReleaseNameList(FoDAPI api, String applicationName)
+		{
+			List<String> releaseNameList = null;
+			
+			refreshReleaseListCache(api);
+			
+			if( null != this.releaseListCache && !this.releaseListCache.isEmpty() )
+			{
+				releaseNameList = new LinkedList<String>();
+				for( Release release : this.releaseListCache )
+				{
+					String appName = release.getApplicationName();
+					String relName = release.getReleaseName();
+					if( null != relName && !relName.isEmpty() 
+							&& null != appName && appName.equals(applicationName) )
+					{
+						releaseNameList.add(relName);
+					}
+				}
+			}
+			
+			return releaseNameList;
+		}
+
+		protected void refreshReleaseListCache(FoDAPI api)
+		{
+			if( this.isReleaseListCacheStale() )
+			{
+				synchronized(this.releaseListLockMonitor)
+				{
+					if( this.isReleaseListCacheStale() )
+					{
+						List<Release> releases = getReleasesWithRetry(api, 5);
+						
+						if( null != releases && !releases.isEmpty() )
+						{
+							this.releaseListCache = releases;
+							this.releaseListRetrieveTime = System.currentTimeMillis();
+						}
+					}
+				}
+			}
+		}
+		
+		protected List<Release> getReleasesWithRetry(FoDAPI api, int maxAttempts)
+		{
+			final String METHOD_NAME = CLASS_NAME + ".getReleasesWithRetry";
+			PrintStream out = getLogger();
+			
+			List<Release> releases = null;
+			int attempts = 0;
+			
+			out.println(METHOD_NAME+": attempting to retrieve new list of application / release names");
+			out.println(METHOD_NAME+": maxAttempts = "+maxAttempts);
+			
+			while( (null == releases || releases.isEmpty()) && (attempts < maxAttempts) )
+			{
+				out.println(METHOD_NAME+": calling FoDAPI.getReleaseList() ; attempt number "+attempts);
+				try
+				{
+					releases = api.getReleaseList();
+				}
+				catch (IOException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				++attempts;
+			}
+			
+			if( null == releases || releases.isEmpty() )
+			{
+				out.println(METHOD_NAME+": failed to retrieve release list");
+			}
+			else
+			{
+				out.println(METHOD_NAME+": retrieved list of "+releases.size()+" releases from FoD");
+			}
+			
+			return releases;
+		}
+		
+		protected boolean isReleaseListCacheStale()
+		{
+			final String METHOD_NAME = CLASS_NAME+".isReleaseListCacheStale";
+			PrintStream out = getLogger();
+			
+			out.println(METHOD_NAME+": releaseListCache = "+releaseListCache);
+			
+			boolean returnValue = 
+					null == releaseListCache
+					|| releaseListCache.isEmpty()
+					|| null == releaseListRetrieveTime
+					|| null == releaseListRetentionTime
+					|| (releaseListRetrieveTime+releaseListRetentionTime < System.currentTimeMillis());
+			
+			out.println(METHOD_NAME+": releaseListCacheStale = "+returnValue);
+			return returnValue;
+		}
+	} // end class DescriptorImpl
 }
