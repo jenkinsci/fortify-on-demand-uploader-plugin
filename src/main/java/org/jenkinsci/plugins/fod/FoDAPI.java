@@ -473,21 +473,33 @@ public class FoDAPI {
 	public List<Release> getReleaseList() throws IOException
 	{
 		final String METHOD_NAME = CLASS_NAME+".getReleaseList";
+		PrintStream out = FodBuilder.getLogger();
+		if( null == out )
+		{
+			out = System.out;
+		}
+		
+		System.out.println(METHOD_NAME+": called");
 		
 		List<Release> releaseList = new LinkedList<Release>();
 		
 		String endpoint = baseUrl + "/api/v2/Releases?fields=applicationId,applicationName,releaseId,releaseName";
+		out.println(METHOD_NAME+": baseUrl = "+baseUrl);
 		URL url = new URL(endpoint);
+		out.println(METHOD_NAME+": calling GET "+url);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
 
 		// Get Response
-		connection.getResponseCode();
+		int responseCode = connection.getResponseCode();
+		out.println(METHOD_NAME+": responseCode = "+responseCode);
 		InputStream is = connection.getInputStream();
 		StringBuffer response = collectInputStream(is);
+		out.println(METHOD_NAME+": response = "+response);
 		JsonArray arr = getDataJsonArray(response);
 		
 		Gson gson = getGson();
 		
+		out.println(METHOD_NAME+": arr.size = "+arr.size());
 		for (int ix = 0; ix < arr.size(); ix++) {
 			Release release = new Release();
 			
@@ -866,9 +878,9 @@ public class FoDAPI {
 		{
 			status.setUploadSucceeded(false);
 			status.setErrorMessage("Combination of applicationName of \""+req.getApplicationName()+"\" and releaseName of \""+req.getApplicationName()+"\" is not valid");
-		}		
+		}
 		return status;
-}
+	}
 	
 	private SendPostResponse sendPost(String url, byte[] bytesToSend, HttpClient client, String token, String errorMessage)
 	{
