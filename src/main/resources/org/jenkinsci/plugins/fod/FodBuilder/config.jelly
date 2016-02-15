@@ -25,6 +25,9 @@
   <f:entry title="Language Level" field="languageLevel">
     <f:select />
   </f:entry>
+    <f:entry title="Don't wait for FoD security results" field="doSkipFortifyResults">
+    <f:checkbox name="doSkipFortifyResults"/>
+  </f:entry>
   <f:entry title="Request Sonatype report" field="runSonatypeScan">
     <f:checkbox name="runSonatypeScan"/>
   </f:entry>

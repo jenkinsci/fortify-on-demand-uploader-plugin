@@ -528,7 +528,7 @@ public class FoDAPI {
 		//FIXME URLEncoder deprecated? 
 		// encode(String, String) to specify the encoding, will avoid issues with default encoding
 		applicationName = encodeURLParamUTF8(applicationName);
-		String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+applicationName+"&fields=applicationId,applicationName,releaseId,releaseName";
+		String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+encodeURLParamUTF8(applicationName)+"&fields=applicationId,applicationName,releaseId,releaseName";
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
 
