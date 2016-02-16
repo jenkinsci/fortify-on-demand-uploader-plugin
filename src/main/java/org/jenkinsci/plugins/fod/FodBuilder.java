@@ -293,14 +293,14 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						public boolean accept(File pathname)
 						{
 							final String METHOD_NAME = CLASS_NAME+".accept";
-							logger.println(METHOD_NAME+": pathname.path = "+pathname.getPath());
-							logger.println(METHOD_NAME+": pathname.name = "+pathname.getName());
+			//				logger.println(METHOD_NAME+": pathname.path = "+pathname.getPath());
+			//				logger.println(METHOD_NAME+": pathname.name = "+pathname.getName());
 							
 							boolean matches = false;
 							
 							Matcher m = filePattern.matcher(pathname.getName());
 							matches = m.matches();
-							logger.println(METHOD_NAME+": pathname accepted : "+matches);
+			//				logger.println(METHOD_NAME+": pathname accepted : "+matches);
 							
 							return matches;
 						}

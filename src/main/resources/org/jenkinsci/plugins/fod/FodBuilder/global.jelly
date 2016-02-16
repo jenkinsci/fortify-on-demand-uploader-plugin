@@ -42,7 +42,7 @@
     </f:advanced>
     -->
     
-    <f:advanced title="Advanced settings">
+    <f:advanced title="Advanced Settings">
       
       <f:entry title="Polling Interval" description="Scan status check in minutes" field="pollingInterval">
         <f:textbox default="30"/>
