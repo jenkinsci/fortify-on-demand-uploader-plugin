@@ -42,13 +42,13 @@
     </f:advanced>
     -->
     
-    <f:advanced title="Advanced settings">
+    <f:advanced title="Advanced Settings">
       
       <f:entry title="Polling Interval" description="Scan status check in minutes" field="pollingInterval">
         <f:textbox default="30"/>
       </f:entry>
-      <f:entry title="Fortify on Demand URL" description="Link to HP FOD">
-        <f:textbox name="fodUrl" field="fodUrl" id="fodUrl"/>
+      <f:entry title="Fortify on Demand URL" description="Link to HP FOD" field="fodUrl">
+        <f:textbox default="https://hpfod.com"/>
       </f:entry>
       
       <!--

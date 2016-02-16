@@ -82,6 +82,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	private Boolean runSonatypeScan;
 	private Boolean isExpressScan;
 	private Boolean isExpressAudit;
+	private Boolean doSkipFortifyResults;
+	
 
 	// Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
 	@DataBoundConstructor
@@ -93,7 +95,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			,String languageLevel
 			,Boolean runSonatypeScan
 			,Boolean isExpressScan
-			,Boolean isExpressAudit)
+			,Boolean isExpressAudit
+			,Boolean doSkipFortifyResults)
 	{
 		this.filePatterns = filePatterns;
 		this.applicationName = applicationName;
@@ -104,6 +107,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		this.runSonatypeScan = runSonatypeScan;
 		this.isExpressScan = isExpressScan;
 		this.isExpressAudit = isExpressAudit;
+		this.doSkipFortifyResults = doSkipFortifyResults;
 	}
 
 	/**
@@ -150,6 +154,10 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	public Boolean getIsExpressAudit()
 	{
 		return isExpressAudit;
+	}
+	public Boolean doSkipFortifyReults()
+	{
+		return doSkipFortifyResults;
 	}
 	
 	protected static TaskListener getTaskListener()
@@ -285,14 +293,14 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						public boolean accept(File pathname)
 						{
 							final String METHOD_NAME = CLASS_NAME+".accept";
-							logger.println(METHOD_NAME+": pathname.path = "+pathname.getPath());
-							logger.println(METHOD_NAME+": pathname.name = "+pathname.getName());
+			//				logger.println(METHOD_NAME+": pathname.path = "+pathname.getPath());
+			//				logger.println(METHOD_NAME+": pathname.name = "+pathname.getName());
 							
 							boolean matches = false;
 							
 							Matcher m = filePattern.matcher(pathname.getName());
 							matches = m.matches();
-							logger.println(METHOD_NAME+": pathname accepted : "+matches);
+			//				logger.println(METHOD_NAME+": pathname accepted : "+matches);
 							
 							return matches;
 						}
@@ -340,10 +348,12 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				logger.println(METHOD_NAME+": Error message: "+status.getErrorMessage());
 				logger.println(METHOD_NAME+": Bytes sent: "+status.getBytesSent());
 				
-				if( status.isUploadSucceeded() )
+				if( status.isUploadSucceeded() && !doSkipFortifyResults)
 				{
 					Long releaseId = api.getReleaseId(applicationName, releaseName);
 					Release release = null;
+					
+					logger.println(METHOD_NAME+": build will await Fortify scan results for: "+ applicationName + " - " + releaseName);
 					
 					//FIXME make configurable based on timeout in hours and pollingInterval in minutes
 					Long maxAttempts = 3l;
@@ -439,8 +449,9 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					}
 					else if( ScanStatus.WAITING.getId().equals(release.getStaticScanStatusId().intValue()) )
 					{
-						logger.println("Scan status is 'WAITING'. Response to this status not yet implemented in plugin!");
-						build.setResult(Result.UNSTABLE);
+						logger.println("Scan status is 'WAITING'. Please contact your Technical Account Manager for details."); 
+						//this should loop until the scan completes after a question from the FoD team or the scan is ultimately canceled.
+					//	build.setResult(Result.UNSTABLE);
 					}
 					else
 					{
@@ -448,10 +459,15 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						build.setResult(Result.UNSTABLE);
 					}
 				}
-				else
+				else if (!status.isUploadSucceeded())
 				{
 					logger.println(METHOD_NAME+": upload failure!");
 					build.setResult(Result.UNSTABLE);
+				}
+				else
+				{
+					logger.println(METHOD_NAME+": continuing Jenkins build without awaiting Fortify assessment results.");
+					
 				}
 				
 				if( null != uploadFile && uploadFile.exists() )
