@@ -13,6 +13,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -525,27 +526,27 @@ public class FoDAPI {
 	public List<Release> getReleaseList(String applicationName)
 			throws IOException
 	{
-		//FIXME URLEncoder deprecated? 
-		// encode(String, String) to specify the encoding, will avoid issues with default encoding
-		applicationName = encodeURLParamUTF8(applicationName);
-		String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+encodeURLParamUTF8(applicationName)+"&fields=applicationId,applicationName,releaseId,releaseName";
-		URL url = new URL(endpoint);
-		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+			//FIXME URLEncoder deprecated? 
+			// encode(String, String) to specify the encoding, will avoid issues with default encoding
+			applicationName = encodeURLParamUTF8(applicationName);
+			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+encodeURLParamUTF8(applicationName)+"&fields=applicationId,applicationName,releaseId,releaseName";
+			URL url = new URL(endpoint);
+			HttpURLConnection connection = getHttpUrlConnection("GET",url);
 
-		// Get Response
-		InputStream is = connection.getInputStream();
-		StringBuffer response = collectInputStream(is);
-		JsonArray arr = getDataJsonArray(response);
-		List<Release> list = new LinkedList<Release>();
-		
-		Gson gson = getGson();
-		for (int ix = 0; ix < arr.size(); ix++) {
-			JsonElement entity = arr.get(ix);
-			Release release = gson.fromJson(entity, Release.class);
-			list.add(release);
-		}
+			// Get Response
+			InputStream is = connection.getInputStream();
+			StringBuffer response = collectInputStream(is);
+			JsonArray arr = getDataJsonArray(response);
+			List<Release> list = new LinkedList<Release>();
+			
+			Gson gson = getGson();
+			for (int ix = 0; ix < arr.size(); ix++) {
+				JsonElement entity = arr.get(ix);
+				Release release = gson.fromJson(entity, Release.class);
+				list.add(release);
+			}
 
-		return list;
+			return list;
 	}
 
 	/**
