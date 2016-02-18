@@ -342,8 +342,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					//FIXME make configurable based on timeout in hours and pollingInterval in minutes
 					// for now, we'll allow it to poll forever until it receives a response from FoD (complete, cancelled, etc.)
 					
-			//		Long maxAttempts = 3l;
-			//		Long attempts = 0l;
+					Long maxAttempts = 3l;
+					Long attempts = 0l;
 					
 					Long pollingWait = null;
 					try
@@ -376,19 +376,16 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						release = api.getRelease(releaseId);
-						
-				//		++attempts;
-						
-				//		logger.println(METHOD_NAME+": scan status ID: "+release.getStaticScanStatusId().intValue());
-				//		logger.println(METHOD_NAME+": attempts: "+attempts);
-						
+						try {
+							release = api.getRelease(releaseId);
+						} catch (Exception e) {
+							attempts++;
+							logger.println(METHOD_NAME+": Error retrieving assessment status information from Fortify on Demand after "+attempts+ " attempts! Will retry "+(maxAttempts - attempts)+ " more time(s)");
+						}
+					
 						continueLoop = 
-								(ScanStatus.IN_PROGRESS.getId().intValue() 
-										== release.getStaticScanStatusId().intValue() );
-						// TODO Implement max waiting period in line with SLO and/or user preference
-						// currently until we see another response aside from "in progress" we'll keep checking FoD
-						//		&& ( attempts < maxAttempts); 
+								((ScanStatus.IN_PROGRESS.getId().intValue() 
+										== release.getStaticScanStatusId().intValue() ) && (attempts < maxAttempts));
 						
 					} while( continueLoop );
 					
