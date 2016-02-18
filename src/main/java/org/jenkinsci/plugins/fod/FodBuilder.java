@@ -204,7 +204,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		final PrintStream logger = listener.getLogger();
 		
 		logger.println(METHOD_NAME+": foDUrl = "+fodUrl);
-		logger.println(METHOD_NAME+": pollingInterval = "+pollingInterval);	
+		logger.println(METHOD_NAME+": Set polling interval = "+pollingInterval);	
 		logger.println(METHOD_NAME+": filePatterns = \""+filePatterns+"\"");
 		logger.println(METHOD_NAME+": applicationName = "+applicationName);
 		logger.println(METHOD_NAME+": releaseName = "+releaseName);
@@ -254,45 +254,54 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					File dir = new File(tmpDir);
 					File tmpZipFile = File.createTempFile(prefix, suffix, dir);
 					
-					FileOutputStream fos = new FileOutputStream(tmpZipFile);
+					FileOutputStream fos = null;
 					
-					String localFilePatterns = null;
-					if( null == filePatterns || filePatterns.isEmpty() )
-					{
-						localFilePatterns = ".*";
-					}
-					else
-					{
-						localFilePatterns = filePatterns;
-					}
-					final Pattern p = Pattern.compile(localFilePatterns, Pattern.CASE_INSENSITIVE);
-					
-					FileFilter filter = new FileFilter()
-					{
-			//			private final String CLASS_NAME = FodBuilder.CLASS_NAME+".anon(FileFilter)";
-						
-						private final Pattern filePattern = p;
-						
-						@Override
-						public boolean accept(File pathname)
-						{
-			//				final String METHOD_NAME = CLASS_NAME+".accept";
-			//				logger.println(METHOD_NAME+": pathname.path = "+pathname.getPath());
-			//				logger.println(METHOD_NAME+": pathname.name = "+pathname.getName());
-							
-							boolean matches = false;
-							
-							Matcher m = filePattern.matcher(pathname.getName());
-							matches = m.matches();
-			//				logger.println(METHOD_NAME+": pathname accepted : "+matches);
-							
-							return matches;
+					try {
+						fos = new FileOutputStream(tmpZipFile);
+						String localFilePatterns = null;
+						if (null == filePatterns || filePatterns.isEmpty()) {
+							localFilePatterns = ".*";
+						} else {
+							localFilePatterns = filePatterns;
 						}
-					};
-					workspace.zip(fos, filter);
-					
-					fos.flush();
-					fos.close();
+						final Pattern p = Pattern.compile(localFilePatterns, Pattern.CASE_INSENSITIVE);
+						FileFilter filter = new FileFilter() {
+							//			private final String CLASS_NAME = FodBuilder.CLASS_NAME+".anon(FileFilter)";
+
+							private final Pattern filePattern = p;
+
+							@Override
+							public boolean accept(File pathname) {
+								//				final String METHOD_NAME = CLASS_NAME+".accept";
+								//				logger.println(METHOD_NAME+": pathname.path = "+pathname.getPath());
+								//				logger.println(METHOD_NAME+": pathname.name = "+pathname.getName());
+
+								boolean matches = false;
+
+								Matcher m = filePattern.matcher(pathname.getName());
+								matches = m.matches();
+								//				logger.println(METHOD_NAME+": pathname accepted : "+matches);
+
+								return matches;
+							}
+						};
+						
+						workspace.zip(fos, filter);
+						
+					} finally {
+						if (fos != null){
+							try {
+								fos.flush();
+							} catch (IOException e){
+
+							}
+							try {
+								fos.close();
+							} catch (IOException e){
+								
+							}
+						}
+					}
 					
 					logger.println(METHOD_NAME+": zipped up workspace contents.");
 					
@@ -324,14 +333,9 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				req.setRunSonatypeScan(runSonatypeScan);
 				req.setIsExpressScan(isExpressScan);
 				req.setIsExpressAudit(isExpressAudit);
-				
-				
+								
 				UploadStatus status = api.uploadFile(req);
-				logger.println(METHOD_NAME+": HTTP status code: "+status.getHttpStatusCode());
-				logger.println(METHOD_NAME+": POST failed: "+status.isSendPostFailed());
-				logger.println(METHOD_NAME+": Error message: "+status.getErrorMessage());
-				logger.println(METHOD_NAME+": Bytes sent: "+status.getBytesSent());
-				
+
 				if( status.isUploadSucceeded() && !doSkipFortifyResults)
 				{
 					Long releaseId = api.getReleaseId(applicationName, releaseName);
@@ -355,14 +359,17 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					}
 					catch( NumberFormatException nfe )
 					{
-						nfe.printStackTrace();
+					//	nfe.printStackTrace();
+						pollingWait = DEFAULT_POLLING_INTERVAL;
+						logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait);
 					}
 					
-					if( null == pollingWait || 0 < pollingWait )
+					if( null == pollingWait || 1 > pollingWait ) // minimum 1 minutes between polling
 					{
 						pollingWait = DEFAULT_POLLING_INTERVAL;
+						logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait);
 					}
-					
+										
 					boolean continueLoop = true;
 					do
 					{
@@ -378,15 +385,23 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						}
 						try {
 							release = api.getRelease(releaseId);
-						} catch (Exception e) {
+							
+							if (release != null){							
+								
+								continueLoop = 
+										((ScanStatus.IN_PROGRESS.getId().intValue() 
+												== release.getStaticScanStatusId().intValue() ) && (attempts < maxAttempts));
+							}
+							else{
+								attempts++;
+								logger.println(METHOD_NAME+": Error retrieving assessment status information from Fortify on Demand after "+attempts+ " attempts! Will retry "+(maxAttempts - attempts)+ " more time(s)");
+								continueLoop = false;
+							}
+						} catch (Exception e) {							
+							logger.println(METHOD_NAME+"Exception: "+e.getMessage());
 							attempts++;
-							logger.println(METHOD_NAME+": Error retrieving assessment status information from Fortify on Demand after "+attempts+ " attempts! Will retry "+(maxAttempts - attempts)+ " more time(s)");
+							continueLoop = false;
 						}
-					
-						continueLoop = 
-								((ScanStatus.IN_PROGRESS.getId().intValue() 
-										== release.getStaticScanStatusId().intValue() ) && (attempts < maxAttempts));
-						
 					} while( continueLoop );
 					
 					logger.println(METHOD_NAME+": scan status ID: "+release.getStaticScanStatusId());

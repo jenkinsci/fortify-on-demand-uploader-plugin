@@ -38,6 +38,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.LogManager;
@@ -162,13 +163,6 @@ public class FoDAPI {
 		if( null == this.httpClient )
 		{
 			HttpClientBuilder builder = HttpClientBuilder.create();
-			if( null != proxyHostname && !proxyHostname.isEmpty() )
-			{
-				logger.println(METHOD_NAME+": proxyHostname = "+this.proxyHostname);
-				logger.println(METHOD_NAME+": proxyPort = "+this.proxyPort);
-				HttpHost proxyHttpHost = new HttpHost(this.proxyHostname,this.proxyPort);
-				builder.setProxy(proxyHttpHost);
-			}
 			this.httpClient = builder.build();
 		}
 		
@@ -194,10 +188,6 @@ public class FoDAPI {
 		else if( principal instanceof AuthApiKey )
 		{
 			authRequest.setGrantType(AuthCredentialType.CLIENT_CREDENTIALS.getName());
-		}
-		else if( principal instanceof AuthUsernamePassword )
-		{
-			authRequest.setGrantType(AuthCredentialType.PASSWORD.getName());
 		}
 		else
 		{
@@ -271,19 +261,6 @@ public class FoDAPI {
 			//	out.println(METHOD_NAME+": request.clientId = "+cred.getClientId());
 			//	out.println(METHOD_NAME+": request.clientSecret = "+cred.getClientSecret());
 			}
-			else if( AuthCredentialType.PASSWORD.getName().equals(request.getGrantType()) )
-			{
-				AuthUsernamePassword cred = (AuthUsernamePassword)request.getPrincipal();
-				formparams.add(new BasicNameValuePair("scope",FOD_SCOPE_TENANT));
-				formparams.add(new BasicNameValuePair("grant_type", request.getGrantType()));
-				formparams.add(new BasicNameValuePair("username", cred.getTenantCode()+ "\\" + cred.getUsername()));
-				formparams.add(new BasicNameValuePair("password", cred.getPassword()));
-				
-				out.println(METHOD_NAME+": request.scope = "+FOD_SCOPE_TENANT);
-				out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
-			//	out.println(METHOD_NAME+": request.username = "+cred.getUsername());
-			//	out.println(METHOD_NAME+": request.password = "+cred.getPassword());
-			}
 			else
 			{
 				out.println(METHOD_NAME+": unrecognized grant type");
@@ -298,29 +275,39 @@ public class FoDAPI {
 			
 			if (statusCode.toString().startsWith("2"))
 			{
-				HttpEntity respopnseEntity = postResponse.getEntity();
-				InputStream is = respopnseEntity.getContent();
-				StringBuffer content = collectInputStream(is);
-				is.close();
-				String x = content.toString();
-				JsonParser parser = new JsonParser();
-				JsonElement jsonElement = parser.parse(x);
-				JsonObject jsonObject = jsonElement.getAsJsonObject();
-				JsonElement tokenElement = jsonObject.getAsJsonPrimitive("access_token");
+				InputStream is = null;
 				
-				if (null != tokenElement && !tokenElement.isJsonNull() && tokenElement.isJsonPrimitive()) {
-					//accessToken = tokenElement.getAsString();
-					response.setAccessToken(tokenElement.getAsString());
-			//		out.println(METHOD_NAME+": access_token = "+tokenElement.getAsString());
+				try {
+					HttpEntity respopnseEntity = postResponse.getEntity();
+					is = respopnseEntity.getContent();
+					StringBuffer content = collectInputStream(is);
+					String x = content.toString();
+					JsonParser parser = new JsonParser();
+					JsonElement jsonElement = parser.parse(x);
+					JsonObject jsonObject = jsonElement.getAsJsonObject();
+					JsonElement tokenElement = jsonObject.getAsJsonPrimitive("access_token");
+					if (null != tokenElement && !tokenElement.isJsonNull() && tokenElement.isJsonPrimitive()) {
+						//accessToken = tokenElement.getAsString();
+						response.setAccessToken(tokenElement.getAsString());
+						//		out.println(METHOD_NAME+": access_token = "+tokenElement.getAsString());
+					}
+					JsonElement expiresIn = jsonObject.getAsJsonPrimitive("expires_in");
+					Integer expiresInInt = expiresIn.getAsInt();
+					response.setExpiresIn(expiresInInt);
+					out.println(METHOD_NAME + ": expires_in = " + expiresInInt);
+					//TODO handle remaining two fields in response
+				} finally {
+					if (is != null){
+						try {
+							is.close();
+						} catch (IOException e){
+							
+						}
+					}
+					EntityUtils.consumeQuietly(postResponse.getEntity());
+					httppost.releaseConnection();
 				}
-				JsonElement expiresIn = jsonObject.getAsJsonPrimitive("expires_in");
-				Integer expiresInInt = expiresIn.getAsInt();
-				response.setExpiresIn(expiresInInt);
-				out.println(METHOD_NAME+": expires_in = "+expiresInInt);
-				//TODO handle remaining two fields in response
 			}
-			EntityUtils.consumeQuietly(postResponse.getEntity());
-			httppost.releaseConnection();
 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -357,33 +344,34 @@ public class FoDAPI {
 		String endpoint = baseUrl + "/api/v1/Application/?fields=applicationId,applicationName,isMobile";
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		InputStream is = null;
 
-		// Get Response
-		InputStream is = connection.getInputStream();
-		StringBuffer response = collectInputStream(is);
-		is.close();
-		JsonArray arr = getDataJsonArray(response);
-		Map<String, String> map = new TreeMap<String, String>();
-		
-		for (int ix = 0; ix < arr.size(); ix++)
-		{
-			JsonElement entity = arr.get(ix);
-			JsonObject obj = entity.getAsJsonObject();
-			JsonPrimitive name = obj.getAsJsonPrimitive("applicationName");
-			JsonPrimitive id = obj.getAsJsonPrimitive("applicationID");
-			JsonPrimitive isMobile = obj.getAsJsonPrimitive("isMobile");
-			
-			if (map.containsKey(name.getAsString()))
-			{
-				continue;
+		try {
+			// Get Response
+			is = connection.getInputStream();
+			StringBuffer response = collectInputStream(is);
+			JsonArray arr = getDataJsonArray(response);
+			Map<String, String> map = new TreeMap<String, String>();
+			for (int ix = 0; ix < arr.size(); ix++) {
+				JsonElement entity = arr.get(ix);
+				JsonObject obj = entity.getAsJsonObject();
+				JsonPrimitive name = obj.getAsJsonPrimitive("applicationName");
+				JsonPrimitive id = obj.getAsJsonPrimitive("applicationID");
+				JsonPrimitive isMobile = obj.getAsJsonPrimitive("isMobile");
+
+				if (map.containsKey(name.getAsString())) {
+					continue;
+				}
+				if (!isMobile.getAsBoolean()) {
+					map.put(name.getAsString(), id.getAsString());
+				}
 			}
-			if ( !isMobile.getAsBoolean() )
-			{
-				map.put(name.getAsString(), id.getAsString());
+			return map;
+		} finally {
+			if (is != null){
+				is.close();
 			}
 		}
-
-		return map;
 	}
 	
 	public Long getReleaseId(String applicationName, String releaseName) throws IOException
@@ -412,17 +400,26 @@ public class FoDAPI {
 		String endpoint = baseUrl+"/api/v2/Releases/"+releaseId;
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		InputStream is = null;
+		Release release;
+		
+		try {
+			// Get Response
+			is = connection.getInputStream();
+			StringBuffer response = collectInputStream(is);
+			String responseStr = response.toString();
+			JsonElement dataElement = getDataJsonElement(responseStr);
+			Gson gson = getGson();
+			release = gson.fromJson(dataElement, Release.class);
+			
+			return release;
+			
+		} finally {
+			if(is != null){
+				is.close();
+			}
+		}
 
-		// Get Response
-		InputStream is = connection.getInputStream();
-		StringBuffer response = collectInputStream(is);
-		String responseStr = response.toString();
-		JsonElement dataElement = getDataJsonElement(responseStr);
-		
-		Gson gson = getGson();
-		Release release = gson.fromJson(dataElement, Release.class);
-		
-		return release;
 	}
 
 	/**
@@ -471,26 +468,30 @@ public class FoDAPI {
 		// Get Response
 		int responseCode = connection.getResponseCode();
 		out.println(METHOD_NAME+": responseCode = "+responseCode);
-		InputStream is = connection.getInputStream();
-		StringBuffer response = collectInputStream(is);
-		out.println(METHOD_NAME+": response = "+response);
-		JsonArray arr = getDataJsonArray(response);
 		
-		Gson gson = getGson();
+		InputStream is = null;
 		
-		out.println(METHOD_NAME+": arr.size = "+arr.size());
-		for (int ix = 0; ix < arr.size(); ix++) {
-			Release release = new Release();
-			
-			JsonElement entity = arr.get(ix);
-			//JsonObject obj = entity.getAsJsonObject();
-			
-			release = gson.fromJson(entity, Release.class);
+		try {
+			is = connection.getInputStream();
+			StringBuffer response = collectInputStream(is);
+			out.println(METHOD_NAME + ": response = " + response);
+			JsonArray arr = getDataJsonArray(response);
+			Gson gson = getGson();
+			out.println(METHOD_NAME + ": arr.size = " + arr.size());
+			for (int ix = 0; ix < arr.size(); ix++) {
+				Release release = new Release();
 
-			releaseList.add(release);
+				JsonElement entity = arr.get(ix);
+				release = gson.fromJson(entity, Release.class);
+
+				releaseList.add(release);
+			}
+			return releaseList;
+		} finally {
+			if (is != null){
+				is.close();
+			}
 		}
-
-		return releaseList;
 	}
 
 	/**
@@ -505,26 +506,35 @@ public class FoDAPI {
 			throws IOException
 	{
 			//FIXME URLEncoder deprecated? 
-			// encode(String, String) to specify the encoding, will avoid issues with default encoding
+			// encode(String, String) to specify the encoding, will avoid issues with default encoding - RB
 			applicationName = encodeURLParamUTF8(applicationName);
 			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+encodeURLParamUTF8(applicationName)+"&fields=applicationId,applicationName,releaseId,releaseName";
 			URL url = new URL(endpoint);
 			HttpURLConnection connection = getHttpUrlConnection("GET",url);
+			InputStream is = null;
 
-			// Get Response
-			InputStream is = connection.getInputStream();
-			StringBuffer response = collectInputStream(is);
-			JsonArray arr = getDataJsonArray(response);
-			List<Release> list = new LinkedList<Release>();
+			List<Release> list;
 			
-			Gson gson = getGson();
-			for (int ix = 0; ix < arr.size(); ix++) {
-				JsonElement entity = arr.get(ix);
-				Release release = gson.fromJson(entity, Release.class);
-				list.add(release);
+			try {
+				// Get Response
+				is = connection.getInputStream();
+				StringBuffer response = collectInputStream(is);
+				JsonArray arr = getDataJsonArray(response);
+				list = new LinkedList<Release>();
+				Gson gson = getGson();
+				for (int ix = 0; ix < arr.size(); ix++) {
+					JsonElement entity = arr.get(ix);
+					Release release = gson.fromJson(entity, Release.class);
+					list.add(release);
+				} 
+				
+				return list;
+				
+			} finally {
+				if (is != null){
+					is.close();
+				}
 			}
-
-			return list;
 	}
 
 	/**
@@ -541,21 +551,30 @@ public class FoDAPI {
 		String endpoint = baseUrl+"/api/v2/Releases/?q=applicationId:"+applicationId+"&fields=applicationId,applicationName,releaseId,releaseName";
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		InputStream is = null;
 
-		// Get Response
-		InputStream is = connection.getInputStream();
-		StringBuffer response = collectInputStream(is);
-		JsonArray arr = getDataJsonArray(response);
-		List<Release> list = new LinkedList<Release>();
+		List<Release> list;
 		
-		Gson gson = getGson();
-		for (int ix = 0; ix < arr.size(); ix++) {
-			JsonElement entity = arr.get(ix);
-			Release release = gson.fromJson(entity, Release.class);
-			list.add(release);
+		try {
+			// Get Response
+			is = connection.getInputStream();
+			StringBuffer response = collectInputStream(is);
+			JsonArray arr = getDataJsonArray(response);
+			list = new LinkedList<Release>();
+			Gson gson = getGson();
+			for (int ix = 0; ix < arr.size(); ix++) {
+				JsonElement entity = arr.get(ix);
+				Release release = gson.fromJson(entity, Release.class);
+				list.add(release);
+			}
+			
+			return list;
+			
+		} finally {
+			if (is != null){
+				is.close();
+			}
 		}
-
-		return list;
 	}
 	
 	/**
@@ -571,53 +590,53 @@ public class FoDAPI {
 		String endpoint = baseUrl + "/api/v1/Scan";
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		InputStream is = null;
 
-		// Get Response
-		InputStream is = connection.getInputStream();
-		StringBuffer response = collectInputStream(is);
-		JsonArray arr = getDataJsonArray(response);
-		List<ScanSnapshot> snapshots = new LinkedList<ScanSnapshot>();
-		
-		for (int ix = 0; ix < arr.size(); ix++) {
-			JsonElement entity = arr.get(ix);
-			JsonObject obj = entity.getAsJsonObject();
-			
-			//FIXME GSON not setting fields on Scan obj, need to troubleshoot 
-			//Scan scan = getGson().fromJson(obj, Scan.class);
-			//Scan scan = getGson().fromJson(entity, Scan.class);
-			
-			ScanSnapshot scan = new ScanSnapshot();
-			if( !obj.get("ProjectVersionId").isJsonNull() )
-			{
-				JsonPrimitive releaseIdObj = obj.getAsJsonPrimitive("ProjectVersionId");
-				scan.setProjectVersionId(releaseIdObj.getAsLong());
+		try {
+			// Get Response
+			is = connection.getInputStream();
+			StringBuffer response = collectInputStream(is);
+			JsonArray arr = getDataJsonArray(response);
+			List<ScanSnapshot> snapshots = new LinkedList<ScanSnapshot>();
+			for (int ix = 0; ix < arr.size(); ix++) {
+				JsonElement entity = arr.get(ix);
+				JsonObject obj = entity.getAsJsonObject();
+
+				//FIXME GSON not setting fields on Scan obj, need to troubleshoot 
+				//Scan scan = getGson().fromJson(obj, Scan.class);
+				//Scan scan = getGson().fromJson(entity, Scan.class);
+
+				ScanSnapshot scan = new ScanSnapshot();
+				if (!obj.get("ProjectVersionId").isJsonNull()) {
+					JsonPrimitive releaseIdObj = obj.getAsJsonPrimitive("ProjectVersionId");
+					scan.setProjectVersionId(releaseIdObj.getAsLong());
+				}
+				if (!obj.get("StaticScanId").isJsonNull()) {
+					JsonPrimitive staticScanIdObj = obj.getAsJsonPrimitive("StaticScanId");
+					scan.setStaticScanId(staticScanIdObj.getAsLong());
+				}
+				if (!obj.get("DynamicScanId").isJsonNull()) {
+					JsonPrimitive dynamicScanIdObj = obj.getAsJsonPrimitive("DynamicScanId");
+					scan.setDynamicScanId(dynamicScanIdObj.getAsLong());
+				}
+				if (!obj.get("MobileScanId").isJsonNull()) {
+					JsonPrimitive mobileScanIdObj = obj.getAsJsonPrimitive("MobileScanId");
+					scan.setMobileScanId(mobileScanIdObj.getAsLong());
+				}
+				//FIXME translate CategoryRollups
+				if (!obj.get("RollupHistoryId").isJsonNull()) {
+					JsonPrimitive rollupHistoryIdObj = obj.getAsJsonPrimitive("RollupHistoryId");
+					scan.setHistoryRollupId(rollupHistoryIdObj.getAsLong());
+				}
+
+				snapshots.add(scan);
 			}
-			if( !obj.get("StaticScanId").isJsonNull() )
-			{
-				JsonPrimitive staticScanIdObj = obj.getAsJsonPrimitive("StaticScanId");
-				scan.setStaticScanId(staticScanIdObj.getAsLong());
+			return snapshots;
+		} finally {
+			if (is != null){				
+				is.close();
 			}
-			if( !obj.get("DynamicScanId").isJsonNull() )
-			{
-				JsonPrimitive dynamicScanIdObj = obj.getAsJsonPrimitive("DynamicScanId");
-				scan.setDynamicScanId(dynamicScanIdObj.getAsLong());
-			}
-			if( !obj.get("MobileScanId").isJsonNull() )
-			{
-				JsonPrimitive mobileScanIdObj = obj.getAsJsonPrimitive("MobileScanId");
-				scan.setMobileScanId(mobileScanIdObj.getAsLong());
-			}
-			//FIXME translate CategoryRollups
-			if( !obj.get("RollupHistoryId").isJsonNull() )
-			{
-				JsonPrimitive rollupHistoryIdObj = obj.getAsJsonPrimitive("RollupHistoryId");
-				scan.setHistoryRollupId(rollupHistoryIdObj.getAsLong());
-			}
-			
-			snapshots.add(scan);
 		}
-
-		return snapshots;
 	}
 	
 	/**
@@ -634,26 +653,29 @@ public class FoDAPI {
 		
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		InputStream is = null;
 
-		// Get Response
-		InputStream is = connection.getInputStream();
-		StringBuffer response = collectInputStream(is);
-		
-		List<ScanSnapshot> scanList = new LinkedList<ScanSnapshot>();
-		JsonArray arr = getDataJsonArray(response);
-		
-		Gson gson = getGson();
-		
-		for (int ix = 0; ix < arr.size(); ix++) {
-			
-			JsonElement entity = arr.get(ix);
-			
-			ScanSnapshot scan = gson.fromJson(entity, ScanSnapshot.class);
+		try {
+			// Get Response
+			is = connection.getInputStream();
+			StringBuffer response = collectInputStream(is);
+			List<ScanSnapshot> scanList = new LinkedList<ScanSnapshot>();
+			JsonArray arr = getDataJsonArray(response);
+			Gson gson = getGson();
+			for (int ix = 0; ix < arr.size(); ix++) {
 
-			scanList.add(scan);
+				JsonElement entity = arr.get(ix);
+
+				ScanSnapshot scan = gson.fromJson(entity, ScanSnapshot.class);
+
+				scanList.add(scan);
+			}
+			return scanList;
+		} finally {
+			if (is != null){
+				is.close();
+			}
 		}
-		
-		return scanList;
 	}
 	
 	/**
@@ -673,18 +695,25 @@ public class FoDAPI {
 		
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		InputStream is = null;
 
-		// Get Response
-		InputStream is = connection.getInputStream();
-		StringBuffer response = collectInputStream(is);
-		
-		String responseString = response.toString();
-		JsonElement dataObject = getDataJsonElement(responseString);
-		
-		Gson gson = getGson();
-		
-		Scan scan = gson.fromJson(dataObject, Scan.class);
-		return scan;
+		Scan scan;
+		try {
+			// Get Response
+			is = connection.getInputStream();
+			StringBuffer response = collectInputStream(is);
+			String responseString = response.toString();
+			JsonElement dataObject = getDataJsonElement(responseString);
+			Gson gson = getGson();
+			scan = gson.fromJson(dataObject, Scan.class);
+			
+			return scan;
+			
+		} finally {
+			if (is != null){
+				is.close();
+			}
+		}
 	}
 	
 	/**
@@ -813,7 +842,7 @@ public class FoDAPI {
 									HttpEntity entity = response.getEntity();
 									String finalResponse = EntityUtils.toString(entity).trim();
 									out.println(METHOD_NAME + ": finalResponse=" + finalResponse);
-									if (finalResponse.toUpperCase().equals("ACK")) {
+									if (finalResponse.toUpperCase(Locale.ROOT).equals("ACK")) {
 										status.setUploadSucceeded(true);
 										status.setBytesSent(offset);
 									} else {
@@ -886,6 +915,8 @@ public class FoDAPI {
 		PrintStream out = FodBuilder.getLogger();
 		
 		HttpURLConnection connection = null;
+		DataOutputStream wr = null;
+		InputStream is = null;
 		try {
 			out.println(METHOD_NAME+": baseUrl="+baseUrl);
 			String endpoint = baseUrl + endpointData 
@@ -893,21 +924,17 @@ public class FoDAPI {
 					+ "&offset=" + offset;
 			URL url = new URL(endpoint);
 			out.println(METHOD_NAME+": endpoint="+endpoint);
-
-			out.println(METHOD_NAME+": proxy="+proxy);
 			connection = getHttpUrlConnection("POST", url);
 			connection.setRequestProperty("Content-Type","application/octet-stream");
 			connection.setDoOutput(true);
 
 			// Send request
-			DataOutputStream wr = new DataOutputStream(
+			wr = new DataOutputStream(
 					connection.getOutputStream());
 			wr.write(data, 0, (int) len);
-			wr.flush();
-			wr.close();
 
 			// Get Response
-			InputStream is = connection.getInputStream();
+			is = connection.getInputStream();
 			StringBuffer response = collectInputStream(is);
 			return response.toString();
 
@@ -920,6 +947,28 @@ public class FoDAPI {
 
 			if (connection != null) {
 				connection.disconnect();
+			}
+			if (is != null){
+				try {
+					is.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+				//	e.printStackTrace();
+				}
+			}
+			if (wr != null){
+				try {
+					wr.flush();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+			//		e1.printStackTrace();
+				}
+				try {
+					wr.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+			//		e.printStackTrace();
+				}
 			}
 		}
 	}
