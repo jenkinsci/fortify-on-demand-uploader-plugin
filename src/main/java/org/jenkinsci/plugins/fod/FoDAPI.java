@@ -301,6 +301,7 @@ public class FoDAPI {
 				HttpEntity respopnseEntity = postResponse.getEntity();
 				InputStream is = respopnseEntity.getContent();
 				StringBuffer content = collectInputStream(is);
+				is.close();
 				String x = content.toString();
 				JsonParser parser = new JsonParser();
 				JsonElement jsonElement = parser.parse(x);
@@ -348,30 +349,6 @@ public class FoDAPI {
 		return tokenValid;
 	}
 
-/*	//TODO replace with something more appropriate than Map<String,String>
-	public Map<String, String> getAssessmentTypeList() throws IOException {
-		String endpoint = baseUrl + "/api/v1/assessmenttype";
-		URL url = new URL(endpoint);
-		HttpURLConnection connection = getHttpUrlConnection("GET",url);
-
-		// Get Response
-		InputStream is = connection.getInputStream();
-		StringBuffer response = collectInputStream(is);
-		JsonArray arr = getDataJsonArray(response);
-		Map<String, String> map = new TreeMap<String, String>();
-		
-		for (int ix = 0; ix < arr.size(); ix++) {
-			JsonElement entity = arr.get(ix);
-			JsonObject obj = entity.getAsJsonObject();
-			JsonPrimitive name = obj.getAsJsonPrimitive("Name");
-			JsonPrimitive id = obj.getAsJsonPrimitive("AssessmentTypeId");
-			if (map.containsKey(name.getAsString()))
-				continue;
-			map.put(name.getAsString(), id.getAsString());
-		}
-
-		return map;
-	}*/
 
 	public Map<String, String> getApplicationList() throws IOException {
 		final String METHOD_NAME = CLASS_NAME+".getApplicationList";
@@ -384,6 +361,7 @@ public class FoDAPI {
 		// Get Response
 		InputStream is = connection.getInputStream();
 		StringBuffer response = collectInputStream(is);
+		is.close();
 		JsonArray arr = getDataJsonArray(response);
 		Map<String, String> map = new TreeMap<String, String>();
 		
@@ -743,7 +721,6 @@ public class FoDAPI {
 			if(sessionToken != null && !sessionToken.isEmpty())	
 			{
 				FileInputStream fs = new FileInputStream(req.getUploadZip());
-				//FileInputStream fs = new FileInputStream(zipLocation);
 				out.println(METHOD_NAME+": FileInputStream created. Creating buffer of size "+seglen);
 				byte[] readByteArray = new byte[seglen];
 				byte[] sendByteArray = null;
@@ -751,129 +728,112 @@ public class FoDAPI {
 				int byteCount = 0;
 				long offset = 0;
 				out.println(METHOD_NAME+": reading in file contents ...");
-				while((byteCount = fs.read(readByteArray)) != -1)
-				{
-					out.println(METHOD_NAME+": read in "+byteCount+" bytes of zip file");
-					if(byteCount < seglen)
-					{
-						out.println(METHOD_NAME+": resizing buffer to fit end of file contents");
-						fragmentNumber = -1;
-						lastFragment = true;
-						sendByteArray = Arrays.copyOf(readByteArray, byteCount);
-					}
-					else
-					{
-						sendByteArray = readByteArray;
-					}
-					
-					//TODO change fragUrl to StringBuilder, so fewer objects created in background for mixed-mode expressions
-					String fragUrl = "";
-					if(req.getLanguageLevel() != null)
-					{
-						fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId=" + req.getAssessmentTypeId() + "&technologyStack=" + encodeURLParamUTF8(req.getTechnologyStack()) + "&languageLevel=" + req.getLanguageLevel() +  "&fragNo=" + fragmentNumber++ + "&len=" + byteCount + "&offset=" + offset;
-						out.println(METHOD_NAME+": fragUrl = "+fragUrl);
-					}
-					else
-					{
-						fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId=" + req.getAssessmentTypeId() + "&technologyStack=" + encodeURLParamUTF8(req.getTechnologyStack()) +  "&fragNo=" + fragmentNumber++ + "&len=" + byteCount + "&offset=" + offset;
-						out.println(METHOD_NAME+": fragUrl = "+fragUrl);
-					}
+				try {
+					while ((byteCount = fs.read(readByteArray)) != -1) {
+						out.println(METHOD_NAME + ": read in " + byteCount + " bytes of zip file");
+						if (byteCount < seglen) {
+							out.println(METHOD_NAME + ": resizing buffer to fit end of file contents");
+							fragmentNumber = -1;
+							lastFragment = true;
+							sendByteArray = Arrays.copyOf(readByteArray, byteCount);
+						} else {
+							sendByteArray = readByteArray;
+						}
 
-					Boolean runSonatypeScan = req.getRunSonatypeScan();
-					Boolean isExpressScan = req.getIsExpressScan();
-					Boolean isExpressAudit = req.getIsExpressAudit();
-					
+						//TODO change fragUrl to StringBuilder, so fewer objects created in background for mixed-mode expressions
+						String fragUrl = "";
+						if (req.getLanguageLevel() != null) {
+							fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId="
+									+ req.getAssessmentTypeId() + "&technologyStack="
+									+ encodeURLParamUTF8(req.getTechnologyStack()) + "&languageLevel="
+									+ req.getLanguageLevel() + "&fragNo=" + fragmentNumber++ + "&len=" + byteCount
+									+ "&offset=" + offset;
+							out.println(METHOD_NAME + ": fragUrl = " + fragUrl);
+						} else {
+							fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId="
+									+ req.getAssessmentTypeId() + "&technologyStack="
+									+ encodeURLParamUTF8(req.getTechnologyStack()) + "&fragNo=" + fragmentNumber++
+									+ "&len=" + byteCount + "&offset=" + offset;
+							out.println(METHOD_NAME + ": fragUrl = " + fragUrl);
+						}
 
-					if( null != runSonatypeScan )
-					{
-						if( runSonatypeScan )
-						{
-							fragUrl += "&doSonatypeScan=true";
-						}
-					}	
-					
-					if (null != isExpressScan)
-					{
-						if (isExpressScan)
-						{
-							fragUrl += "&scanPreferenceId=2";
-							
-						}
-						
-					}
-					
-					if (null != isExpressAudit)
-					{
-						if (isExpressAudit)
-						{
-							fragUrl += "&auditPreferenceId=2";
-							
-						}
-						
-					}
-					
-					String postErrorMessage = "";
-					out.println(METHOD_NAME+": calling sendPost ...");
-					SendPostResponse postResponse = sendPost(fragUrl, sendByteArray, httpClient, sessionToken, postErrorMessage);
-					HttpResponse response = postResponse.getResponse();
-					if(response == null)
-					{
-						out.println(METHOD_NAME+": HttpResponse from sendPost is null!");
-						status.setErrorMessage(postResponse.getErrorMessage());
-						status.setSendPostFailed(true);
-						break;
-					}
-					else
-					{
+						Boolean runSonatypeScan = req.getRunSonatypeScan();
+						Boolean isExpressScan = req.getIsExpressScan();
+						Boolean isExpressAudit = req.getIsExpressAudit();
 
-						StatusLine sl = response.getStatusLine();
-						Integer statusCode = Integer.valueOf(sl.getStatusCode()); 
-						out.println(METHOD_NAME+": HttpResponse.StatusLine.statusCode = "+statusCode);
-						out.println(METHOD_NAME+": HttpResponse.StatusLine.reasonPhrase = "+sl.getReasonPhrase());
-						status.setHttpStatusCode(statusCode);
-						if( !statusCode.toString().startsWith("2") )
-						{
-							status.setErrorMessage(sl.toString());
-							break;
-						}
-						else
-						{
-							if(fragmentNumber != 0 && fragmentNumber % 5 == 0)
-							{
-								out.println(METHOD_NAME+": Upload Status - Bytes sent:" + offset);
-								status.setBytesSent(offset);
+						if (null != runSonatypeScan) {
+							if (runSonatypeScan) {
+								fragUrl += "&doSonatypeScan=true";
 							}
-							if(lastFragment)
-							{
-								HttpEntity entity = response.getEntity();
-								String finalResponse = EntityUtils.toString(entity).trim();
-								out.println(METHOD_NAME+": finalResponse="+finalResponse);
-								if(finalResponse.toUpperCase().equals("ACK") )
-								{
-									status.setUploadSucceeded(true);
+						}
+
+						if (null != isExpressScan) {
+							if (isExpressScan) {
+								fragUrl += "&scanPreferenceId=2";
+
+							}
+
+						}
+
+						if (null != isExpressAudit) {
+							if (isExpressAudit) {
+								fragUrl += "&auditPreferenceId=2";
+
+							}
+
+						}
+
+						String postErrorMessage = "";
+						out.println(METHOD_NAME + ": calling sendPost ...");
+						SendPostResponse postResponse = sendPost(fragUrl, sendByteArray, httpClient, sessionToken,
+								postErrorMessage);
+						HttpResponse response = postResponse.getResponse();
+						if (response == null) {
+							out.println(METHOD_NAME + ": HttpResponse from sendPost is null!");
+							status.setErrorMessage(postResponse.getErrorMessage());
+							status.setSendPostFailed(true);
+							break;
+						} else {
+
+							StatusLine sl = response.getStatusLine();
+							Integer statusCode = Integer.valueOf(sl.getStatusCode());
+							out.println(METHOD_NAME + ": HttpResponse.StatusLine.statusCode = " + statusCode);
+							out.println(
+									METHOD_NAME + ": HttpResponse.StatusLine.reasonPhrase = " + sl.getReasonPhrase());
+							status.setHttpStatusCode(statusCode);
+							if (!statusCode.toString().startsWith("2")) {
+								status.setErrorMessage(sl.toString());
+								break;
+							} else {
+								if (fragmentNumber != 0 && fragmentNumber % 5 == 0) {
+									out.println(METHOD_NAME + ": Upload Status - Bytes sent:" + offset);
 									status.setBytesSent(offset);
 								}
-								else
-								{
-									status.setUploadSucceeded(false);
-									status.setErrorMessage(finalResponse);
-									status.setBytesSent(bytesSent);
+								if (lastFragment) {
+									HttpEntity entity = response.getEntity();
+									String finalResponse = EntityUtils.toString(entity).trim();
+									out.println(METHOD_NAME + ": finalResponse=" + finalResponse);
+									if (finalResponse.toUpperCase().equals("ACK")) {
+										status.setUploadSucceeded(true);
+										status.setBytesSent(offset);
+									} else {
+										status.setUploadSucceeded(false);
+										status.setErrorMessage(finalResponse);
+										status.setBytesSent(bytesSent);
+									}
 								}
 							}
+							EntityUtils.consume(response.getEntity());
 						}
-						EntityUtils.consume(response.getEntity());
-					}
-					out.println(METHOD_NAME+": byteCount="+byteCount);
-					offset += byteCount;
+						out.println(METHOD_NAME + ": byteCount=" + byteCount);
+						offset += byteCount;
+					} 
+				} finally {
+					fs.close();
 				}
 				bytesSent = offset;
 				out.println(METHOD_NAME+": bytesSent="+bytesSent);
-				fs.close();
 			}
-//			else
-//			{
-//				errorMessage = "Failed to authenticate";
-//			}
 		}
 		else
 		{

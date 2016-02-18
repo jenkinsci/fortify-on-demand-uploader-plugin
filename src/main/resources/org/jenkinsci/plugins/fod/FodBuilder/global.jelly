@@ -12,6 +12,8 @@
     tags they use. Views are always organized according to its owner class,
     so it should be straightforward to find them.
   -->
+  
+  
   <f:section title="HPE Security Fortify on Demand">
     <f:entry title="API Key" field="clientId">
       <f:textbox />
@@ -19,28 +21,8 @@
     <f:entry title="Secret Code" field="clientSecret">
      <f:password />
     </f:entry>
-    <!--
-    <f:advanced title="Proxy settings">
-	  <f:entry title="Proxy Host" field="proxyHost">
-	    <f:textbox />
-	  </f:entry>
-	  <f:entry title="Proxy Port" field="proxyPort">
-	    <f:textbox />
-	  </f:entry>
-	  <f:entry title="Proxy User" field="proxyUser">
-	    <f:textbox />
-	  </f:entry>
-	  <f:entry title="Proxy Password" field="proxyPassword">
-	    <f:textbox />
-	  </f:entry>
-	  <f:entry title="NT Workstation" field="ntWorkstation">
-	    <f:textbox />
-	  </f:entry>
-	  <f:entry title="NT Domain" field="ntDomain">
-	    <f:textbox />
-	  </f:entry>
-    </f:advanced>
-    -->
+    
+    
     
     <f:advanced title="Advanced Settings">
       
@@ -51,10 +33,7 @@
         <f:textbox default="https://hpfod.com"/>
       </f:entry>
       
-      <!--
-      <f:validateButton title="Test Connection" progress="Testing..."
-         method="testConnection" with="url,token" />
-      -->
+
         
     </f:advanced>
   </f:section>

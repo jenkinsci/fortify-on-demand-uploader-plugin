@@ -200,26 +200,11 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		String clientId = descriptor.getClientId();
 		String clientSecret = descriptor.getClientSecret();
 		String pollingInterval = descriptor.getPollingInterval();
-		String proxyHost = descriptor.getProxyHost();
-		String proxyPort = descriptor.getProxyPort();
-		String proxyUser = descriptor.getProxyUser();
-		String proxyPassword = descriptor.getProxyPassword();
-		String ntWorkstation = descriptor.getNtWorkstation();
-		String ntDomain = descriptor.getNtDomain();
 		
 		final PrintStream logger = listener.getLogger();
 		
 		logger.println(METHOD_NAME+": foDUrl = "+fodUrl);
-	//	logger.println(METHOD_NAME+": clientId = "+clientId);
-	//	logger.println(METHOD_NAME+": clientSecret = "+clientSecret);
-		logger.println(METHOD_NAME+": pollingInterval = "+pollingInterval);
-		logger.println(METHOD_NAME+": proxyHost = "+proxyHost);
-		logger.println(METHOD_NAME+": proxyPort = "+proxyPort);
-	//	logger.println(METHOD_NAME+": proxyUser = "+proxyUser);
-	//	logger.println(METHOD_NAME+": proxyPassword = "+proxyPassword);
-		logger.println(METHOD_NAME+": ntWorkstation = "+ntWorkstation);
-		logger.println(METHOD_NAME+": ntDomain = "+ntDomain);
-		
+		logger.println(METHOD_NAME+": pollingInterval = "+pollingInterval);	
 		logger.println(METHOD_NAME+": filePatterns = \""+filePatterns+"\"");
 		logger.println(METHOD_NAME+": applicationName = "+applicationName);
 		logger.println(METHOD_NAME+": releaseName = "+releaseName);
@@ -257,10 +242,9 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			
 			if(authSuccess)
 			{
-				//FilePath zipFile = workspace.child(zipLocation);
 				String prefix = "fodupload";
 				String suffix = ".zip";
-				logger.println(METHOD_NAME+": workspace = "+workspace.toString());
+				logger.println(METHOD_NAME+": workspace = "+workspace);
 				File uploadFile = null;
 				
 				try
@@ -285,14 +269,14 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					
 					FileFilter filter = new FileFilter()
 					{
-						private final String CLASS_NAME = FodBuilder.CLASS_NAME+".anon(FileFilter)";
+			//			private final String CLASS_NAME = FodBuilder.CLASS_NAME+".anon(FileFilter)";
 						
 						private final Pattern filePattern = p;
 						
 						@Override
 						public boolean accept(File pathname)
 						{
-							final String METHOD_NAME = CLASS_NAME+".accept";
+			//				final String METHOD_NAME = CLASS_NAME+".accept";
 			//				logger.println(METHOD_NAME+": pathname.path = "+pathname.getPath());
 			//				logger.println(METHOD_NAME+": pathname.name = "+pathname.getName());
 							
@@ -356,8 +340,10 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					logger.println(METHOD_NAME+": build will await Fortify scan results for: "+ applicationName + " - " + releaseName);
 					
 					//FIXME make configurable based on timeout in hours and pollingInterval in minutes
-					Long maxAttempts = 3l;
-					Long attempts = 0l;
+					// for now, we'll allow it to poll forever until it receives a response from FoD (complete, cancelled, etc.)
+					
+			//		Long maxAttempts = 3l;
+			//		Long attempts = 0l;
 					
 					Long pollingWait = null;
 					try
@@ -392,17 +378,18 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						}
 						release = api.getRelease(releaseId);
 						
-						++attempts;
+				//		++attempts;
 						
-						logger.println(METHOD_NAME+": scan status ID: "+release.getStaticScanStatusId().intValue());
-						logger.println(METHOD_NAME+": attempts: "+attempts);
+				//		logger.println(METHOD_NAME+": scan status ID: "+release.getStaticScanStatusId().intValue());
+				//		logger.println(METHOD_NAME+": attempts: "+attempts);
 						
 						continueLoop = 
 								(ScanStatus.IN_PROGRESS.getId().intValue() 
-										== release.getStaticScanStatusId().intValue() )
-								&& ( attempts < maxAttempts);
+										== release.getStaticScanStatusId().intValue() );
+						// TODO Implement max waiting period in line with SLO and/or user preference
+						// currently until we see another response aside from "in progress" we'll keep checking FoD
+						//		&& ( attempts < maxAttempts); 
 						
-						logger.println(METHOD_NAME+": continueLoop: "+continueLoop);
 					} while( continueLoop );
 					
 					logger.println(METHOD_NAME+": scan status ID: "+release.getStaticScanStatusId());
@@ -561,14 +548,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		private String fodUrl;
 		private String pollingInterval;
 		private String tenantCode;
-		private String username;
-		private String password;
-		private String proxyHost;
-		private String proxyPort;
-		private String proxyUser;
-		private String proxyPassword;
-		private String ntWorkstation;
-		private String ntDomain;
 		
 		private transient FoDAPI api;
 		private transient Object apiLockMonitor = new Object();
@@ -772,20 +751,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			return items;
 		}
 
-/*		public ListBoxModel doFillAssessmentTypeIdItems() {
-			ListBoxModel items = new ListBoxModel();
-			
-			// 
-			//TODO populate dynamically ... how to get config values?
-			
-//			items.add(new Option("Static Express", "105",false));
-//			items.add(new Option("Static Assessment", "170",false));
-			
-			items.add(new Option("Express Scan", "105", false));
-			items.add(new Option("Standard Scan", "170", false));
-			return items;
-		}*/
-
 		public ListBoxModel doFillTechnologyStackItems() {
 			ListBoxModel items = new ListBoxModel();
 			
@@ -800,11 +765,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 
 		public ListBoxModel doFillLanguageLevelItems(@QueryParameter("technologyStack") String technologyStack) {
 			ListBoxModel items = new ListBoxModel();
-			
-			// log is null reference?!
-			//log.info("doFillLanguageLevelItems: technologyStack = "+technologyStack);
-			//System.out.println("doFillLanguageLevelItems: technologyStack = "+technologyStack);
-			
+					
 			if( TS_JAVA_KEY.equalsIgnoreCase(technologyStack)
 					|| "".equals(technologyStack)
 					|| null == technologyStack)
@@ -906,13 +867,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				out.println(METHOD_NAME+": pollingInterval = "+this.pollingInterval);
 			}
 			
-//			proxyHost = formData.getString("proxyHost");
-//			proxyPort = formData.getString("proxyPort");
-//			proxyUser = formData.getString("proxyUser");
-//			proxyPassword = formData.getString("proxyPassword");
-//			ntWorkstation = formData.getString("ntWorkstation");
-//			ntDomain = formData.getString("ntDomain");
-			
 			out.println(METHOD_NAME+": calling save");
 			save();
 			return super.configure(req,formData);
@@ -938,38 +892,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			return tenantCode;
 		}
 
-		public String getUsername() {
-			return username;
-		}
-
-		public String getPassword() {
-			return password;
-		}
-		
-		public String getProxyHost() {
-			return proxyHost;
-		}
-
-		public String getProxyPort() {
-			return proxyPort;
-		}
-
-		public String getProxyUser() {
-			return proxyUser;
-		}
-
-		public String getProxyPassword() {
-			return proxyPassword;
-		}
-
-		public String getNtWorkstation() {
-			return ntWorkstation;
-		}
-
-		public String getNtDomain() {
-			return ntDomain;
-		}
-
 //		/**
 //		 * This method returns true if the global configuration says we should use proxy.
 //		 *
@@ -991,9 +913,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			if( null == out ){
 				out = System.out;
 			}
-			
-			if( null == api)
-			{
 				synchronized(this.apiLockMonitor)
 				{
 					if( null == api )
@@ -1013,8 +932,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						}
 					}
 				}
-			}
-			
+
 			return this.api;
 		}
 		
@@ -1024,8 +942,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			final String METHOD_NAME = CLASS_NAME+".ensureLogin";
 			PrintStream out = getLogger();
 			
-			if( !api.isLoggedIn() )
-			{
 				// timeout must be configured, or else a hung call here blocks everything
 				synchronized(this.apiLockMonitor)
 				{
@@ -1043,7 +959,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						}
 					}
 				}
-			}
 		}
 
 		protected List<String> getApplicationNameList(FoDAPI api)
@@ -1101,8 +1016,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 
 		protected void refreshReleaseListCache(FoDAPI api)
 		{
-			if( this.isReleaseListCacheStale() )
-			{
 				synchronized(this.releaseListLockMonitor)
 				{
 					if( this.isReleaseListCacheStale() )
@@ -1116,7 +1029,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						}
 					}
 				}
-			}
 		}
 		
 		protected List<Release> getReleasesWithRetry(FoDAPI api, int maxAttempts)
