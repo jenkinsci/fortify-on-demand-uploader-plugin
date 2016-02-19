@@ -341,7 +341,7 @@ public class FoDAPI {
 		final String METHOD_NAME = CLASS_NAME+".getApplicationList";
 		
 		//String endpoint = baseUrl + "/api/v1/application";
-		String endpoint = baseUrl + "/api/v1/Application/?fields=applicationId,applicationName,isMobile";
+		String endpoint = baseUrl + "/api/v1/Application/?fields=applicationId,applicationName,isMobile&limit=9999"; //TODO make this consistent elsewhere by a global config
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
 		InputStream is = null;
@@ -459,7 +459,7 @@ public class FoDAPI {
 		
 		List<Release> releaseList = new LinkedList<Release>();
 		
-		String endpoint = baseUrl + "/api/v2/Releases?fields=applicationId,applicationName,releaseId,releaseName";
+		String endpoint = baseUrl + "/api/v2/Releases?fields=applicationId,applicationName,releaseId,releaseName&limit=9999";
 		out.println(METHOD_NAME+": baseUrl = "+baseUrl);
 		URL url = new URL(endpoint);
 		out.println(METHOD_NAME+": calling GET "+url);
@@ -508,7 +508,7 @@ public class FoDAPI {
 			//FIXME URLEncoder deprecated? 
 			// encode(String, String) to specify the encoding, will avoid issues with default encoding - RB
 			applicationName = encodeURLParamUTF8(applicationName);
-			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+encodeURLParamUTF8(applicationName)+"&fields=applicationId,applicationName,releaseId,releaseName";
+			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+encodeURLParamUTF8(applicationName)+"&fields=applicationId,applicationName,releaseId,releaseName&limit=9999";
 			URL url = new URL(endpoint);
 			HttpURLConnection connection = getHttpUrlConnection("GET",url);
 			InputStream is = null;
@@ -548,7 +548,7 @@ public class FoDAPI {
 	public List<Release> getReleaseList(Long applicationId)
 			throws IOException
 	{
-		String endpoint = baseUrl+"/api/v2/Releases/?q=applicationId:"+applicationId+"&fields=applicationId,applicationName,releaseId,releaseName";
+		String endpoint = baseUrl+"/api/v2/Releases/?q=applicationId:"+applicationId+"&fields=applicationId,applicationName,releaseId,releaseName&limit=9999";
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
 		InputStream is = null;

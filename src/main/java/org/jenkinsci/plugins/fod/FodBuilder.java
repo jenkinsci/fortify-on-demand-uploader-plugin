@@ -43,6 +43,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.Collator;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -53,6 +54,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Collections;
 
 /**
  * 
@@ -683,6 +685,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				{
 						out.println(METHOD_NAME+": getting application list");
 						List<String> appNameList = this.getApplicationNameList(api);
+						Collections.sort(appNameList, Collator.getInstance());
 						
 						if( null != appNameList && !appNameList.isEmpty() )
 						{
@@ -1086,7 +1089,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			final String METHOD_NAME = CLASS_NAME+".isReleaseListCacheStale";
 			PrintStream out = getLogger();
 			
-			out.println(METHOD_NAME+": releaseListCache = "+releaseListCache);
+		//	out.println(METHOD_NAME+": releaseListCache = "+releaseListCache);
 			
 			boolean returnValue = 
 					null == releaseListCache
@@ -1095,7 +1098,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					|| null == releaseListRetentionTime
 					|| (releaseListRetrieveTime+releaseListRetentionTime < System.currentTimeMillis());
 			
-			out.println(METHOD_NAME+": releaseListCacheStale = "+returnValue);
+		//	out.println(METHOD_NAME+": releaseListCacheStale = "+returnValue);
 			return returnValue;
 		}
 	} // end class DescriptorImpl
