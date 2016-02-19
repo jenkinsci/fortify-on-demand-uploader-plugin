@@ -1,60 +1,48 @@
 package org.jenkinsci.plugins.fod;
-import hudson.Launcher;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-import hudson.util.ListBoxModel.Option;
-import hudson.model.AbstractProject;
-import hudson.model.Descriptor;
-import hudson.model.FreeStyleProject;
-import hudson.model.Result;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Builder;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Notifier;
-import hudson.tasks.Publisher;
-import hudson.tasks.Recorder;
-import jenkins.model.Jenkins;
-import jenkins.tasks.SimpleBuildStep;
-import jenkins.util.VirtualFile;
-import net.sf.json.JSONObject;
-
-import org.jenkinsci.plugins.fod.schema.AssessmentType;
-import org.jenkinsci.plugins.fod.schema.PassFailReason;
-import org.jenkinsci.plugins.fod.schema.Release;
-import org.jenkinsci.plugins.fod.schema.ScanStatus;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.QueryParameter;
-
-import javax.servlet.ServletException;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
-import java.text.NumberFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Collections;
+
+import javax.servlet.ServletException;
+
+import org.jenkinsci.plugins.fod.schema.AssessmentType;
+import org.jenkinsci.plugins.fod.schema.Release;
+import org.jenkinsci.plugins.fod.schema.ScanStatus;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractProject;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Publisher;
+import hudson.tasks.Recorder;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import hudson.util.ListBoxModel.Option;
+import jenkins.tasks.SimpleBuildStep;
+import net.sf.json.JSONObject;
 
 /**
  * 
@@ -73,7 +61,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	/**
 	 * Default time between queries to FoD API for scan status, in minutes.
 	 */
-	private static final Long DEFAULT_POLLING_INTERVAL = 5l;
+	private static final Long DEFAULT_POLLING_INTERVAL = 1l;
 
 	private String filePatterns;
 	private String applicationName;
@@ -352,6 +340,10 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					Long attempts = 0l;
 					
 					Long pollingWait = null;
+					
+					DateFormat df = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+					Date startTime = new Date();
+					
 					try
 					{
 						if( null != pollingInterval && !pollingInterval.isEmpty() )
@@ -386,6 +378,21 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							e.printStackTrace();
 						}
 						try {
+							
+							Date dateobj = new Date();
+							String pollingTimestamp = df.format(dateobj.getTime());
+							
+							if(!api.isLoggedIn()){
+								logger.println(METHOD_NAME+" "+pollingTimestamp+": Session stale, re-authenticating.");
+								try {
+									authSuccess = api.authorize(clientId, clientSecret);
+								} catch (IOException e) {
+									logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue re-authenticating to Fortify on Demand, will retry "+(maxAttempts - attempts)+" times.");
+									attempts++;
+								}
+							}
+							
+							logger.println(METHOD_NAME+" "+pollingTimestamp+": Polling Fortify on Demand for assessment status.");
 							release = api.getRelease(releaseId);
 							
 							if (release != null){							
@@ -433,7 +440,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					}
 					else if( ScanStatus.CANCELLED.getId().equals(release.getStaticScanStatusId().intValue()) )
 					{
-						logger.println("Scan was cancelled after uploading. Marking build as unstable.");
+						logger.println("Scan was cancelled after uploading. Marking build as unstable. Please contact your Technical Account Manager for details.");
 						build.setResult(Result.UNSTABLE);
 					}
 					else if( ScanStatus.COMPLETED.getId().equals(release.getStaticScanStatusId().intValue()) )

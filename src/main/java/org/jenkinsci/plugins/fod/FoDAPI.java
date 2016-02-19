@@ -177,7 +177,7 @@ public class FoDAPI {
 			fodBaseUrl = PUBLIC_FOD_BASE_URL;
 		}
 		
-		logger.println(METHOD_NAME+": url = "+fodBaseUrl);
+	//	logger.println(METHOD_NAME+": url = "+fodBaseUrl);
 		AuthTokenRequest authRequest = new AuthTokenRequest();
 		
 		if( null == principal )
@@ -193,7 +193,7 @@ public class FoDAPI {
 		{
 			logger.println(METHOD_NAME+": unrecognized auth principal object class: "+principal);
 		}
-		logger.println(METHOD_NAME+": principal = "+principal);
+	//	logger.println(METHOD_NAME+": principal = "+principal);
 		authRequest.setPrincipal(principal);
 		
 		authRequest.setScope(FOD_SCOPE_TENANT);
@@ -246,7 +246,7 @@ public class FoDAPI {
 			
 			List<NameValuePair> formparams = new ArrayList<NameValuePair>();
 			
-			out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
+	//		out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
 			
 			if( AuthCredentialType.CLIENT_CREDENTIALS.getName().equals(request.getGrantType()) )
 			{
@@ -256,8 +256,8 @@ public class FoDAPI {
 				formparams.add(new BasicNameValuePair("client_id", cred.getClientId()));
 				formparams.add(new BasicNameValuePair("client_secret", cred.getClientSecret()));
 				
-				out.println(METHOD_NAME+": request.scope = "+FOD_SCOPE_TENANT);
-				out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
+	//			out.println(METHOD_NAME+": request.scope = "+FOD_SCOPE_TENANT);
+	//			out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
 			//	out.println(METHOD_NAME+": request.clientId = "+cred.getClientId());
 			//	out.println(METHOD_NAME+": request.clientSecret = "+cred.getClientSecret());
 			}
@@ -271,7 +271,7 @@ public class FoDAPI {
 			HttpResponse postResponse = client.execute(httppost);
 			StatusLine sl = postResponse.getStatusLine();
 			Integer statusCode = Integer.valueOf(sl.getStatusCode());
-			out.println(METHOD_NAME+": statusCode = "+statusCode);
+	//		out.println(METHOD_NAME+": statusCode = "+statusCode);
 			
 			if (statusCode.toString().startsWith("2"))
 			{
@@ -294,7 +294,7 @@ public class FoDAPI {
 					JsonElement expiresIn = jsonObject.getAsJsonPrimitive("expires_in");
 					Integer expiresInInt = expiresIn.getAsInt();
 					response.setExpiresIn(expiresInInt);
-					out.println(METHOD_NAME + ": expires_in = " + expiresInInt);
+		//			out.println(METHOD_NAME + ": expires_in = " + expiresInInt);
 					//TODO handle remaining two fields in response
 				} finally {
 					if (is != null){
@@ -324,7 +324,7 @@ public class FoDAPI {
 		final String METHOD_NAME = CLASS_NAME + ".isLoggedIn";
 		PrintStream out = FodBuilder.getLogger();
 	//	out.println(METHOD_NAME+": sessionToken = "+sessionToken);
-		out.println(METHOD_NAME+": tokenExpiry = "+tokenExpiry+" ("+(new Date(tokenExpiry))+")");
+	//	out.println(METHOD_NAME+": tokenExpiry = "+tokenExpiry+" ("+(new Date(tokenExpiry))+")");
 		
 		boolean tokenValid = 
 				null != sessionToken
@@ -332,7 +332,7 @@ public class FoDAPI {
 				&& System.currentTimeMillis() < tokenExpiry
 				;
 		
-		out.println(METHOD_NAME+": tokenValid = "+tokenValid);
+	//	out.println(METHOD_NAME+": tokenValid = "+tokenValid);
 		return tokenValid;
 	}
 
@@ -459,7 +459,7 @@ public class FoDAPI {
 		
 		List<Release> releaseList = new LinkedList<Release>();
 		
-		String endpoint = baseUrl + "/api/v2/Releases?fields=applicationId,applicationName,releaseId,releaseName&limit=9999";
+		String endpoint = baseUrl + "/api/v2/Releases?fields=applicationId,applicationName,releaseId,releaseName";
 		out.println(METHOD_NAME+": baseUrl = "+baseUrl);
 		URL url = new URL(endpoint);
 		out.println(METHOD_NAME+": calling GET "+url);
@@ -508,7 +508,7 @@ public class FoDAPI {
 			//FIXME URLEncoder deprecated? 
 			// encode(String, String) to specify the encoding, will avoid issues with default encoding - RB
 			applicationName = encodeURLParamUTF8(applicationName);
-			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+encodeURLParamUTF8(applicationName)+"&fields=applicationId,applicationName,releaseId,releaseName&limit=9999";
+			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+encodeURLParamUTF8(applicationName)+"&fields=applicationId,applicationName,releaseId,releaseName";
 			URL url = new URL(endpoint);
 			HttpURLConnection connection = getHttpUrlConnection("GET",url);
 			InputStream is = null;
@@ -548,7 +548,7 @@ public class FoDAPI {
 	public List<Release> getReleaseList(Long applicationId)
 			throws IOException
 	{
-		String endpoint = baseUrl+"/api/v2/Releases/?q=applicationId:"+applicationId+"&fields=applicationId,applicationName,releaseId,releaseName&limit=9999";
+		String endpoint = baseUrl+"/api/v2/Releases/?q=applicationId:"+applicationId+"&fields=applicationId,applicationName,releaseId,releaseName";
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
 		InputStream is = null;
