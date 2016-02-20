@@ -331,7 +331,11 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					Long releaseId = api.getReleaseId(applicationName, releaseName);
 					Release release = null;
 					
+					DateFormat df = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+					Date startTime = new Date();
+					
 					logger.println(METHOD_NAME+": build will await Fortify scan results for: "+ applicationName + " - " + releaseName);
+					logger.println(METHOD_NAME+": polling start: "+ df.format(startTime.getTime()));
 					
 					//FIXME make configurable based on timeout in hours and pollingInterval in minutes
 					// for now, we'll allow it to poll forever until it receives a response from FoD (complete, cancelled, etc.)
@@ -340,9 +344,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					Long attempts = 0l;
 					
 					Long pollingWait = null;
-					
-					DateFormat df = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
-					Date startTime = new Date();
 					
 					try
 					{
@@ -355,13 +356,13 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					{
 					//	nfe.printStackTrace();
 						pollingWait = DEFAULT_POLLING_INTERVAL;
-						logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait);
+						logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait+" minutes.");
 					}
 					
 					if( null == pollingWait || 1 > pollingWait ) // minimum 1 minutes between polling
 					{
 						pollingWait = DEFAULT_POLLING_INTERVAL;
-						logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait);
+						logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait+" minutes.");
 					}
 										
 					boolean continueLoop = true;
@@ -381,6 +382,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							
 							Date dateobj = new Date();
 							String pollingTimestamp = df.format(dateobj.getTime());
+							
 							
 							if(!api.isLoggedIn()){
 								logger.println(METHOD_NAME+" "+pollingTimestamp+": Session stale, re-authenticating.");
@@ -413,9 +415,9 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						}
 					} while( continueLoop );
 					
-					logger.println(METHOD_NAME+": scan status ID: "+release.getStaticScanStatusId());
-					logger.println(METHOD_NAME+": scan status: "+release.getStaticScanStatus());
-					logger.println(METHOD_NAME+": isPassed: "+release.getIsPassed());
+			//		logger.println(METHOD_NAME+": scan status ID: "+release.getStaticScanStatusId());
+			//		logger.println(METHOD_NAME+": scan status: "+release.getStaticScanStatus());
+			//		logger.println(METHOD_NAME+": isPassed: "+release.getIsPassed());
 					String passFailReasonId = release.getPassFailReasonId();
 					String passFailReasonStr = null;
 					if( null != passFailReasonId && !passFailReasonId.isEmpty() )
@@ -431,7 +433,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						} catch(NumberFormatException nfe) {}
 					}
 					
-					logger.println(METHOD_NAME+": passFailReasonId: "+release.getPassFailReasonId()+(passFailReasonStr==null?"":" ("+passFailReasonStr+")"));
+				//	logger.println(METHOD_NAME+": passFailReasonId: "+release.getPassFailReasonId()+(passFailReasonStr==null?"":" ("+passFailReasonStr+")"));
 					
 					if( ScanStatus.IN_PROGRESS.getId().equals(release.getStaticScanStatusId().intValue()) )
 					{
@@ -494,7 +496,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					}
 					catch( RuntimeException rte )
 					{
-						logger.println(METHOD_NAME+": upload file deletion failed! see Jenkins server log for details");
+						logger.println(METHOD_NAME+": upload file deletion failed! See Jenkins server log for details");
 						rte.printStackTrace(logger);
 						rte.printStackTrace();
 					}
