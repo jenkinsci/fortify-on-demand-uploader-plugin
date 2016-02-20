@@ -340,8 +340,9 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					//FIXME make configurable based on timeout in hours and pollingInterval in minutes
 					// for now, we'll allow it to poll forever until it receives a response from FoD (complete, cancelled, etc.)
 					
-					Long maxAttempts = 3l;
+					Long maxAttempts = 12l;
 					Long attempts = 0l;
+					Long errorStatePollingWait = 60l;
 					
 					Long pollingWait = null;
 					
@@ -364,13 +365,15 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						pollingWait = DEFAULT_POLLING_INTERVAL;
 						logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait+" minutes.");
 					}
-										
+						
+					Long originalPollingWait = pollingWait;  // save desired polling rate for reset upon successful retry with FoD
+					
 					boolean continueLoop = true;
 					do
 					{
 						try
 						{
-							//FIXME make configurable
+							//FIXME make configurable														
 							Thread.sleep(pollingWait*60*1000l);
 						}
 						catch (InterruptedException e)
@@ -395,7 +398,22 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							}
 							
 							logger.println(METHOD_NAME+" "+pollingTimestamp+": Polling Fortify on Demand for assessment status.");
-							release = api.getRelease(releaseId);
+							try{ 
+								release = api.getRelease(releaseId); //may see a 503 during maintenance etc. need to be able to withstand a longer outage in this case
+								
+								if (pollingWait != originalPollingWait){
+									
+									logger.println(METHOD_NAME+" "+pollingTimestamp+": Resetting poll time after retry extension to " + originalPollingWait + " minutes.");
+								}
+								
+								pollingWait = originalPollingWait;   // reset polling wait since call didn't throw an exception, needed if retrying
+								
+							} catch (IOException e){
+								attempts++;
+								pollingWait = errorStatePollingWait; // set to longer error state wait to give time for the FoD service to recover
+								logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue reading status from Fortify on Demand, will retry up to"+(maxAttempts - attempts)+" times at rate " + 
+								pollingWait + " minutes.");																							
+							}
 							
 							if (release != null){							
 								
@@ -407,7 +425,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 												) && (attempts < maxAttempts));
 								
 								if (ScanStatus.WAITING.getId().intValue() == release.getStaticScanStatusId().intValue()){
-									logger.println(METHOD_NAME+" "+pollingTimestamp+": Assessment is paused with a question from Fortify on Demand, pleae contact your Technical Account Manager. Polling will continue.");
+									logger.println(METHOD_NAME+" "+pollingTimestamp+": Assessment is paused with a question from Fortify on Demand,"
+											+ " please contact your Technical Account Manager. Polling will continue.");
 								}
 								
 							}
@@ -422,10 +441,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							continueLoop = false;
 						}
 					} while( continueLoop );
-					
-			//		logger.println(METHOD_NAME+": scan status ID: "+release.getStaticScanStatusId());
-			//		logger.println(METHOD_NAME+": scan status: "+release.getStaticScanStatus());
-			//		logger.println(METHOD_NAME+": isPassed: "+release.getIsPassed());
+
 					String passFailReasonId = release.getPassFailReasonId();
 					String passFailReasonStr = null;
 					if( null != passFailReasonId && !passFailReasonId.isEmpty() )
