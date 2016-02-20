@@ -385,7 +385,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							
 							
 							if(!api.isLoggedIn()){
-								logger.println(METHOD_NAME+" "+pollingTimestamp+": Session stale, re-authenticating.");
+								logger.println(METHOD_NAME+" "+pollingTimestamp+": Session stale, re-authenticating...");
 								try {
 									authSuccess = api.authorize(clientId, clientSecret);
 								} catch (IOException e) {
@@ -401,7 +401,15 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 								
 								continueLoop = 
 										((ScanStatus.IN_PROGRESS.getId().intValue() 
-												== release.getStaticScanStatusId().intValue() ) && (attempts < maxAttempts));
+												== release.getStaticScanStatusId().intValue() 
+												|| ScanStatus.WAITING.getId().intValue() 
+												== release.getStaticScanStatusId().intValue()
+												) && (attempts < maxAttempts));
+								
+								if (ScanStatus.WAITING.getId().intValue() == release.getStaticScanStatusId().intValue()){
+									logger.println(METHOD_NAME+" "+pollingTimestamp+": Assessment is paused with a question from Fortify on Demand, pleae contact your Technical Account Manager. Polling will continue.");
+								}
+								
 							}
 							else{
 								attempts++;
