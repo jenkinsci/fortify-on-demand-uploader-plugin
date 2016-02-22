@@ -92,6 +92,38 @@
 		<skipTests>true</skipTests>
 	</configuration>
     </plugin>
+    <plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-dependency-plugin</artifactId>
+  <version>2.6</version>
+  <executions>
+    <execution>
+      <id>copy-dependencies</id>
+      <phase>prepare-package</phase>
+      <goals>
+        <goal>copy-dependencies</goal>
+      </goals>
+      <configuration>
+        <outputDirectory>target/classes/lib</outputDirectory>
+        <overWriteIfNewer>true</overWriteIfNewer>
+        <excludeGroupIds>
+          junit,org.easymock,${project.groupId}
+        </excludeGroupIds>
+      </configuration>
+    </execution>
+    <execution>
+      <phase>generate-sources</phase>
+      <goals>
+        <goal>sources</goal>
+      </goals>
+    </execution>
+  </executions>
+  <configuration>
+    <verbose>true</verbose>
+    <detail>true</detail>
+    <outputDirectory>${project.build.directory}</outputDirectory>
+  </configuration>
+</plugin>
 		</plugins>
 	</build>
 
