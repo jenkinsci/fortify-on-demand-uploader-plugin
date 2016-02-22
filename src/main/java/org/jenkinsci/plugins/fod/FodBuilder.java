@@ -7,10 +7,10 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
-import java.util.Collections;
-import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.LogManager;
@@ -44,7 +44,9 @@ import hudson.util.ListBoxModel.Option;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 
-/**
+/*
+ * @author ryancblack
+ * @author Michael.A.Marshall
  * 
  */
 public class FodBuilder extends Recorder implements SimpleBuildStep
@@ -401,7 +403,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							try{ 
 								release = api.getRelease(releaseId); //may see a 503 during maintenance etc. need to be able to withstand a longer outage in this case
 								
-								if (pollingWait != originalPollingWait){
+								if (!pollingWait.equals(originalPollingWait)){
 									
 									logger.println(METHOD_NAME+" "+pollingTimestamp+": Resetting poll time after retry extension to " + originalPollingWait + " minutes.");
 								}
@@ -983,8 +985,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 
 			return this.api;
 		}
-		
-		
+				
 		protected void ensureLogin(FoDAPI api)
 		{
 			final String METHOD_NAME = CLASS_NAME+".ensureLogin";

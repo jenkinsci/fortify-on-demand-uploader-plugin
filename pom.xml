@@ -32,7 +32,12 @@
     <developer>
       <id>ryancblack</id>
       <name>Ryan Black</name>
-      <email>ryan.black@hpe.com</email>
+      <email>ryanblack@gmail.com</email>
+    </developer>
+        <developer>
+      <id>michael-a-marshall</id>
+      <name>Michael Marshall</name>
+      <email>michaelmarshallatwork@gmail.com</email>
     </developer>
   </developers>
 	<repositories>
