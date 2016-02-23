@@ -806,7 +806,7 @@ public class FoDAPI {
 						}
 
 						String postErrorMessage = "";
-						out.println(METHOD_NAME + ": calling sendPost ...");
+					//	out.println(METHOD_NAME + ": calling sendPost ...");
 						SendPostResponse postResponse = sendPost(fragUrl, sendByteArray, httpClient, sessionToken,
 								postErrorMessage);
 						HttpResponse response = postResponse.getResponse();
@@ -819,9 +819,8 @@ public class FoDAPI {
 
 							StatusLine sl = response.getStatusLine();
 							Integer statusCode = Integer.valueOf(sl.getStatusCode());
-							out.println(METHOD_NAME + ": HttpResponse.StatusLine.statusCode = " + statusCode);
-							out.println(
-									METHOD_NAME + ": HttpResponse.StatusLine.reasonPhrase = " + sl.getReasonPhrase());
+						//	out.println(METHOD_NAME + ": HttpResponse.StatusLine.statusCode = " + statusCode);
+						//	out.println(METHOD_NAME + ": HttpResponse.StatusLine.reasonPhrase = " + sl.getReasonPhrase());
 							status.setHttpStatusCode(statusCode);
 							if (!statusCode.toString().startsWith("2")) {
 								status.setErrorMessage(sl.toString());
@@ -847,7 +846,7 @@ public class FoDAPI {
 							}
 							EntityUtils.consume(response.getEntity());
 						}
-						out.println(METHOD_NAME + ": byteCount=" + byteCount);
+					//	out.println(METHOD_NAME + ": byteCount=" + byteCount);
 						offset += byteCount;
 					} 
 				} finally {
@@ -870,7 +869,7 @@ public class FoDAPI {
 		final String METHOD_NAME = CLASS_NAME+".sendPost";
 		
 		PrintStream out = FodBuilder.getLogger();
-		out.println(METHOD_NAME+": url="+url);
+	//	out.println(METHOD_NAME+": url="+url);
 	//	out.println(METHOD_NAME+": token="+token);
 		
 		SendPostResponse result = new SendPostResponse();
