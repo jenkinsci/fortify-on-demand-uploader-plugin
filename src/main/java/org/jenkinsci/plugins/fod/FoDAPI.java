@@ -743,18 +743,18 @@ public class FoDAPI {
 			if(sessionToken != null && !sessionToken.isEmpty())	
 			{
 				FileInputStream fs = new FileInputStream(req.getUploadZip());
-				out.println(METHOD_NAME+": FileInputStream created. Creating buffer of size "+seglen);
+			//	out.println(METHOD_NAME+": FileInputStream created. Creating buffer of size "+seglen);
 				byte[] readByteArray = new byte[seglen];
 				byte[] sendByteArray = null;
 				int fragmentNumber = 0;
 				int byteCount = 0;
 				long offset = 0;
-				out.println(METHOD_NAME+": reading in file contents ...");
+			//	out.println(METHOD_NAME+": reading in file contents ...");
 				try {
 					while ((byteCount = fs.read(readByteArray)) != -1) {
-						out.println(METHOD_NAME + ": read in " + byteCount + " bytes of zip file");
+					//	out.println(METHOD_NAME + ": read in " + byteCount + " bytes of zip file");
 						if (byteCount < seglen) {
-							out.println(METHOD_NAME + ": resizing buffer to fit end of file contents");
+					//		out.println(METHOD_NAME + ": resizing buffer to fit end of file contents");
 							fragmentNumber = -1;
 							lastFragment = true;
 							sendByteArray = Arrays.copyOf(readByteArray, byteCount);
@@ -770,13 +770,13 @@ public class FoDAPI {
 									+ encodeURLParamUTF8(req.getTechnologyStack()) + "&languageLevel="
 									+ req.getLanguageLevel() + "&fragNo=" + fragmentNumber++ + "&len=" + byteCount
 									+ "&offset=" + offset;
-							out.println(METHOD_NAME + ": fragUrl = " + fragUrl);
+						//	out.println(METHOD_NAME + ": fragUrl = " + fragUrl);
 						} else {
 							fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId="
 									+ req.getAssessmentTypeId() + "&technologyStack="
 									+ encodeURLParamUTF8(req.getTechnologyStack()) + "&fragNo=" + fragmentNumber++
 									+ "&len=" + byteCount + "&offset=" + offset;
-							out.println(METHOD_NAME + ": fragUrl = " + fragUrl);
+						//	out.println(METHOD_NAME + ": fragUrl = " + fragUrl);
 						}
 
 						Boolean runSonatypeScan = req.getRunSonatypeScan();
