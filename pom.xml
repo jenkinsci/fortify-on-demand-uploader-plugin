@@ -10,7 +10,7 @@
 		<relativePath />
 	</parent>
 	<artifactId>fortify-on-demand-uploader</artifactId>
-	<version>1.01-SNAPSHOT</version>
+	<version>1.01</version>
 	<packaging>hpi</packaging>
 
 	<name>Fortify on Demand Uploader Plugin</name>
