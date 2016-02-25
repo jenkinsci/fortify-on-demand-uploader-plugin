@@ -342,9 +342,9 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					//FIXME make configurable based on timeout in hours and pollingInterval in minutes
 					// for now, we'll allow it to poll forever until it receives a response from FoD (complete, cancelled, etc.)
 					
-					Long maxAttempts = 12l;
+					Long maxErrorAttempts = 12l;
 					Long attempts = 0l;
-					Long errorStatePollingWait = 60l;
+					Long errorStatePollingWait = 60l; // Time in minutes * maxErrorAttempts = max error state period, applies to portal outages, or anything but authentication issues.
 					
 					Long pollingWait = null;
 					
@@ -394,7 +394,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 								try {
 									authSuccess = api.authorize(clientId, clientSecret);
 								} catch (IOException e) {
-									logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue re-authenticating to Fortify on Demand, will retry "+(maxAttempts - attempts)+" times.");
+									logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue re-authenticating to Fortify on Demand, will retry "+(maxErrorAttempts - attempts)+" times.");
 									attempts++;
 								}
 							}
@@ -413,7 +413,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							} catch (IOException e){
 								attempts++;
 								pollingWait = errorStatePollingWait; // set to longer error state wait to give time for the FoD service to recover
-								logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue reading status from Fortify on Demand, will retry up to"+(maxAttempts - attempts)+" times at rate " + 
+								logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue reading status from Fortify on Demand, will retry up to"+(maxErrorAttempts - attempts)+" times at rate " + 
 								pollingWait + " minutes.");																							
 							}
 							
@@ -424,7 +424,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 												== release.getStaticScanStatusId().intValue() 
 												|| ScanStatus.WAITING.getId().intValue() 
 												== release.getStaticScanStatusId().intValue()
-												) && (attempts < maxAttempts));
+												) && (attempts < maxErrorAttempts));
 								
 								if (ScanStatus.WAITING.getId().intValue() == release.getStaticScanStatusId().intValue()){
 									logger.println(METHOD_NAME+" "+pollingTimestamp+": Assessment is paused with a question from Fortify on Demand,"
@@ -434,7 +434,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							}
 							else{
 								attempts++;
-								logger.println(METHOD_NAME+": Error retrieving assessment status information from Fortify on Demand after "+attempts+ " attempts! Will retry "+(maxAttempts - attempts)+ " more time(s)");
+								logger.println(METHOD_NAME+": Error retrieving assessment status information from Fortify on Demand after "+attempts+ " attempts! Will retry "+(maxErrorAttempts - attempts)+ " more time(s)");
 								continueLoop = false;
 							}
 						} catch (Exception e) {							
