@@ -650,14 +650,18 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			}
 			else
 			{
-				if( 40 == value.length() )
+/*				if( 40 == value.length() )
 				{
 					returnValue = FormValidation.ok();
 				}
 				else
 				{
 					returnValue = FormValidation.error("Invalid secret key");
-				}
+				}*/
+				
+				// FoD 5.0 release changed the format of these keys, for now the key must not be blank but due to varying length no other validation will be performed in this release.
+				
+				returnValue = FormValidation.ok();
 			}
 			return returnValue;
 		}
