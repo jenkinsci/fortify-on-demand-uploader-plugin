@@ -251,13 +251,17 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					try {
 						fos = new FileOutputStream(tmpZipFile);
 						String localFilePatterns = null;
-						if (null == filePatterns || filePatterns.isEmpty()) {
-							localFilePatterns = ".*";
-						} else {
-							localFilePatterns = filePatterns;
-						}
+						if (null == filePatterns || filePatterns.isEmpty()) 
+							{
+								localFilePatterns = ".*";
+							} else {
+								localFilePatterns = filePatterns;
+							}
 						final Pattern p = Pattern.compile(localFilePatterns, Pattern.CASE_INSENSITIVE);
-						FileFilter filter = new FileFilter() {
+						
+						FileFilter filter = new FileFilter() 
+						
+						{
 							//			private final String CLASS_NAME = FodBuilder.CLASS_NAME+".anon(FileFilter)";
 
 							private final Pattern filePattern = p;
@@ -280,20 +284,22 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 						
 						workspace.zip(fos, filter);
 						
-					} finally {
-						if (fos != null){
-							try {
-								fos.flush();
-							} catch (IOException e){
-
-							}
-							try {
-								fos.close();
-							} catch (IOException e){
-								
+					} finally 
+						{
+							if (fos != null)
+							{
+								try {
+									fos.flush();
+								} catch (IOException e){
+	
+								}
+								try {
+									fos.close();
+								} catch (IOException e){
+									
+								}
 							}
 						}
-					}
 					
 					logger.println(METHOD_NAME+": zipped up workspace contents.");
 					
@@ -389,35 +395,39 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							String pollingTimestamp = df.format(dateobj.getTime());
 							
 							
-							if(!api.isLoggedIn()){
-								logger.println(METHOD_NAME+" "+pollingTimestamp+": Session stale, re-authenticating...");
-								try {
-									authSuccess = api.authorize(clientId, clientSecret);
-								} catch (IOException e) {
-									logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue re-authenticating to Fortify on Demand, will retry "+(maxErrorAttempts - attempts)+" times.");
-									attempts++;
+							if(!api.isLoggedIn())								
+								{
+									logger.println(METHOD_NAME+" "+pollingTimestamp+": Session stale, re-authenticating...");
+									try {
+										authSuccess = api.authorize(clientId, clientSecret);
+									} catch (IOException e) {
+										logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue re-authenticating to Fortify on Demand, will retry "+(maxErrorAttempts - attempts)+" times.");
+										attempts++;
+									}
 								}
-							}
 							
 							logger.println(METHOD_NAME+" "+pollingTimestamp+": Polling Fortify on Demand for assessment status.");
 							try{ 
 								release = api.getRelease(releaseId); //may see a 503 during maintenance etc. need to be able to withstand a longer outage in this case
 								
-								if (!pollingWait.equals(originalPollingWait)){
+								if (!pollingWait.equals(originalPollingWait))
+									{
+										
+										logger.println(METHOD_NAME+" "+pollingTimestamp+": Resetting poll time after retry extension to " + originalPollingWait + " minutes.");
+									}
 									
-									logger.println(METHOD_NAME+" "+pollingTimestamp+": Resetting poll time after retry extension to " + originalPollingWait + " minutes.");
-								}
-								
 								pollingWait = originalPollingWait;   // reset polling wait since call didn't throw an exception, needed if retrying
 								
-							} catch (IOException e){
-								attempts++;
-								pollingWait = errorStatePollingWait; // set to longer error state wait to give time for the FoD service to recover
-								logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue reading status from Fortify on Demand, will retry up to"+(maxErrorAttempts - attempts)+" times at rate " + 
-								pollingWait + " minutes.");																							
-							}
+							} catch (IOException e)
+								{
+									attempts++;
+									pollingWait = errorStatePollingWait; // set to longer error state wait to give time for the FoD service to recover
+									logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue reading status from Fortify on Demand, will retry up to"+(maxErrorAttempts - attempts)+" times at rate " + 
+									pollingWait + " minutes.");																							
+								}
 							
-							if (release != null){							
+							if (release != null)
+							{							
 								
 								continueLoop = 
 										((ScanStatus.IN_PROGRESS.getId().intValue() 
@@ -426,22 +436,25 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 												== release.getStaticScanStatusId().intValue()
 												) && (attempts < maxErrorAttempts));
 								
-								if (ScanStatus.WAITING.getId().intValue() == release.getStaticScanStatusId().intValue()){
+								if (ScanStatus.WAITING.getId().intValue() == release.getStaticScanStatusId().intValue())
+								{
 									logger.println(METHOD_NAME+" "+pollingTimestamp+": Assessment is paused with a question from Fortify on Demand,"
 											+ " please contact your Technical Account Manager. Polling will continue.");
 								}
 								
 							}
-							else{
+							else
+							{
 								attempts++;
 								logger.println(METHOD_NAME+": Error retrieving assessment status information from Fortify on Demand after "+attempts+ " attempts! Will retry "+(maxErrorAttempts - attempts)+ " more time(s)");
 								continueLoop = false;
 							}
-						} catch (Exception e) {							
-							logger.println(METHOD_NAME+"Exception: "+e.getMessage());
-							attempts++;
-							continueLoop = false;
-						}
+						} catch (Exception e) 
+							{							
+								logger.println(METHOD_NAME+"Exception: "+e.getMessage());
+								attempts++;
+								continueLoop = false;
+							}
 					} while( continueLoop );
 
 					String passFailReasonId = release.getPassFailReasonId();
@@ -649,18 +662,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				returnValue = FormValidation.error("Please set a secret key");
 			}
 			else
-			{
-/*				if( 40 == value.length() )
-				{
-					returnValue = FormValidation.ok();
-				}
-				else
-				{
-					returnValue = FormValidation.error("Invalid secret key");
-				}*/
-				
-				// FoD 5.0 release changed the format of these keys, for now the key must not be blank but due to varying length no other validation will be performed in this release.
-				
+			{			
 				returnValue = FormValidation.ok();
 			}
 			return returnValue;
