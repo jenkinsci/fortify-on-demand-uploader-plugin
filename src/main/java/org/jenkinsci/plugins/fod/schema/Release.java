@@ -10,10 +10,10 @@ public class Release {
 	private String releaseName;
 	private Long status;
 	private Integer rating;
-	private Integer critical;
-	private Integer high;
-	private Integer medium;
-	private Integer low;
+	private int critical;
+	private int high;
+	private int medium;
+	private int low;
 	private Integer scanStatus;
 	private Long currentStaticScanId;
 	private Long currentDynamicScanId;
@@ -27,7 +27,7 @@ public class Release {
 	private Date staticScanDate;
 	private Date dynamicScanDate;
 	private Date mobileScanDate;
-	private Integer issueCount;
+	private int issueCount;
 	private Boolean isPassed;
 	private String passFailReasonId;
 	
@@ -67,28 +67,28 @@ public class Release {
 	public void setRating(Integer rating) {
 		this.rating = rating;
 	}
-	public Integer getCritical() {
+	public int getCritical() {
 		return critical;
 	}
-	public void setCritical(Integer critical) {
+	public void setCritical(int critical) {
 		this.critical = critical;
 	}
-	public Integer getHigh() {
+	public int getHigh() {
 		return high;
 	}
-	public void setHigh(Integer high) {
+	public void setHigh(int high) {
 		this.high = high;
 	}
-	public Integer getMedium() {
+	public int getMedium() {
 		return medium;
 	}
-	public void setMedium(Integer medium) {
+	public void setMedium(int medium) {
 		this.medium = medium;
 	}
-	public Integer getLow() {
+	public int getLow() {
 		return low;
 	}
-	public void setLow(Integer low) {
+	public void setLow(int low) {
 		this.low = low;
 	}
 	public Integer getScanStatus() {
@@ -169,10 +169,10 @@ public class Release {
 	public void setMobileScanDate(Date mobileScanDate) {
 		this.mobileScanDate = mobileScanDate;
 	}
-	public Integer getIssueCount() {
+	public int getIssueCount() {
 		return issueCount;
 	}
-	public void setIssueCount(Integer issueCount) {
+	public void setIssueCount(int issueCount) {
 		this.issueCount = issueCount;
 	}
 	public Boolean getIsPassed() {

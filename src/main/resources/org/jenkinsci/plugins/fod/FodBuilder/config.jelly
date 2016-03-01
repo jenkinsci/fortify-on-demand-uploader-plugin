@@ -27,16 +27,19 @@
   </f:entry>
   <f:advanced title="Additional Options">
     <f:entry title="Don't wait for FoD security results" field="doSkipFortifyResults">
-    <f:checkbox name="doSkipFortifyResults"/>
+    <f:checkbox default="false"/>
   </f:entry>
   <f:entry title="Request Sonatype report" field="runSonatypeScan">
-    <f:checkbox name="runSonatypeScan"/>
+    <f:checkbox default="false"/>
   </f:entry>
     <f:entry title="Enable Express scan mode" field="isExpressScan">
-    <f:checkbox name="isExpressScan"/>
+    <f:checkbox default="false"/>
   </f:entry>
     <f:entry title="Enable Automated audit mode" field="isExpressAudit">
-    <f:checkbox name="isExpressAudit"/>
+    <f:checkbox default="false"/>
+  </f:entry>
+  <f:entry title="Enable table scan result log output" field="doPrettyLogOutput">
+    <f:checkbox default="false"/>
   </f:entry>
   </f:advanced>
 </j:jelly>

@@ -72,10 +72,11 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	private Long assessmentTypeId;
 	private String technologyStack;
 	private String languageLevel;
-	private Boolean runSonatypeScan;
-	private Boolean isExpressScan;
-	private Boolean isExpressAudit;
-	private Boolean doSkipFortifyResults;
+	private boolean runSonatypeScan;
+	private boolean isExpressScan;
+	private boolean isExpressAudit;
+	private boolean doSkipFortifyResults;
+	private boolean doPrettyLogOutput;
 	
 
 	// Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
@@ -86,10 +87,11 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			,Long assessmentTypeId
 			,String technologyStack
 			,String languageLevel
-			,Boolean runSonatypeScan
-			,Boolean isExpressScan
-			,Boolean isExpressAudit
-			,Boolean doSkipFortifyResults)
+			,boolean runSonatypeScan
+			,boolean isExpressScan
+			,boolean isExpressAudit
+			,boolean doSkipFortifyResults
+			,boolean doPrettyLogOutput)
 	{
 		this.filePatterns = filePatterns;
 		this.applicationName = applicationName;
@@ -101,6 +103,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		this.isExpressScan = isExpressScan;
 		this.isExpressAudit = isExpressAudit;
 		this.doSkipFortifyResults = doSkipFortifyResults;
+		this.doPrettyLogOutput = doPrettyLogOutput;
 	}
 
 	/**
@@ -136,21 +139,25 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		return languageLevel;
 	}
 
-	public Boolean getRunSonatypeScan()
+	public boolean getRunSonatypeScan()
 	{
 		return runSonatypeScan;
 	}
-	public Boolean getIsExpressScan()
+	public boolean getIsExpressScan()
 	{
 		return isExpressScan;
 	}
-	public Boolean getIsExpressAudit()
+	public boolean getIsExpressAudit()
 	{
 		return isExpressAudit;
 	}
-	public Boolean doSkipFortifyReults()
+	public boolean doSkipFortifyReults()
 	{
 		return doSkipFortifyResults;
+	}
+	public boolean doPrettyLogOutput()
+	{
+		return doPrettyLogOutput;		
 	}
 	
 	protected static TaskListener getTaskListener()
@@ -401,7 +408,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 									logger.println(METHOD_NAME+" "+pollingTimestamp+": Session stale, re-authenticating...");
 									try {
 										authSuccess = api.authorize(clientId, clientSecret);
-									} catch (IOException e) {
+									} catch (IOException e) 
+									{
 										logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue re-authenticating to Fortify on Demand, will retry "+(maxErrorAttempts - attempts)+" times.");
 										attempts++;
 									}
@@ -488,23 +496,74 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					else if( ScanStatus.COMPLETED.getId().equals(release.getStaticScanStatusId().intValue()) )
 					{
 						try {
-							Scan scan = api.getScan(release.getReleaseId(), release.getCurrentStaticScanId());
 							
-							if( !release.getIsPassed() )
-							{																
-								logger.println(String.format("Star rating: %d/5 with %d total issue(s).", scan.getStarRating(), scan.getTotalIssues()));
-								logger.println("Scan failed policy check! Marking build as unstable.");
-								logger.println("For assessment details see the customer portal at: "  + fodUrl + "/Releases/Issues/" + release.getReleaseId());
-								build.setResult(Result.UNSTABLE);
-							}
-							else
+							if(doPrettyLogOutput)
 							{
-								logger.println(String.format("Star rating: %d/5 with %d total issue(s).", scan.getStarRating(), scan.getTotalIssues()));
-								logger.println("Scan completed and passed policy check!");
-								logger.println("For assessment details see the customer portal at: "  + fodUrl + "/Releases/Issues/" + release.getReleaseId());
-							}
+								if( !release.getIsPassed() )
+								{	
+									logger.println("-------------------------------------------------------------------------------");
+									logger.println("       Fortify on Demand Assessment Results");
+									logger.println("-------------------------------------------------------------------------------");
+									logger.println(" ");
+									logger.println(String.format("Star Rating: %d out of 5 with %d total issue(s).",release.getRating(), release.getIssueCount()));
+									logger.println(" ");
+									logger.println(String.format("Critical: %d", release.getCritical()));
+									logger.println(String.format("High:     %d", release.getHigh()));
+									logger.println(String.format("Medium:   %d", release.getMedium()));
+									logger.println(String.format("Low:      %d", release.getLow()));
+									logger.println(" ");
+									logger.println("For assessment details see the customer portal: "  + fodUrl + "/Releases/Issues/" + release.getReleaseId());
+									logger.println(" ");
+									logger.println("Scan failed established policy check, marking build as unstable.");
+									logger.println(" ");
+									logger.println("-------------------------------------------------------------------------------");
+									
+									build.setResult(Result.UNSTABLE);
+								}
+								else
+								{
+									logger.println("-------------------------------------------------------------------------------");
+									logger.println("       Fortify on Demand Assessment Results");
+									logger.println("-------------------------------------------------------------------------------");
+									logger.println(" ");
+									logger.println(String.format("Star Rating: %d out of 5 with %d total issue(s).",release.getRating(), release.getIssueCount()));
+									logger.println(" ");
+									logger.println(String.format("Critical: %d", release.getCritical()));
+									logger.println(String.format("High:     %d", release.getHigh()));
+									logger.println(String.format("Medium:   %d", release.getMedium()));
+									logger.println(String.format("Low:      %d", release.getLow()));
+									logger.println(" ");
+									logger.println("For assessment details see the customer portal: "  + fodUrl + "/Releases/Issues/" + release.getReleaseId());
+									logger.println(" ");
+									logger.println("Scan passed established policy check, marking build as stable.");
+									logger.println(" ");
+									logger.println("-------------------------------------------------------------------------------");
+									
+									build.setResult(Result.SUCCESS);
+								}								
+							} 
+							else								
+							{
+								if( !release.getIsPassed() )
+								{	
+									
+									logger.println(METHOD_NAME+" Star Rating: " + release.getRating());
+									logger.println(METHOD_NAME+" Issue Count: " + release.getIssueCount());
+									logger.println(METHOD_NAME+" Policy Check: Failed");
+								
+									build.setResult(Result.UNSTABLE);
+								}
+								else
+								{
+									logger.println(METHOD_NAME+" Star Rating: " + release.getRating());
+									logger.println(METHOD_NAME+" Issue Count: " + release.getIssueCount());
+									logger.println(METHOD_NAME+" Policy Check: Passed");
+									
+									build.setResult(Result.SUCCESS);
+								}															
+							}							
 						} 
-						catch (IOException e) 
+						catch (Exception e) 
 						{
 							logger.println(e.getMessage());
 						}
