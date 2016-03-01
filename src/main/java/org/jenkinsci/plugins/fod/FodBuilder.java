@@ -513,7 +513,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					{
 						logger.println("Scan status is 'WAITING'. Please contact your Technical Account Manager for details."); 
 						//this should loop until the scan completes after a question from the FoD team or the scan is ultimately canceled.
-					//	build.setResult(Result.UNSTABLE);
 					}
 					else
 					{
