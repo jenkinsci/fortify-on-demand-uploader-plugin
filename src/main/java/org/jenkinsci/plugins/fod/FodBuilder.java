@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 
 import org.jenkinsci.plugins.fod.schema.AssessmentType;
 import org.jenkinsci.plugins.fod.schema.Release;
+import org.jenkinsci.plugins.fod.schema.Scan;
 import org.jenkinsci.plugins.fod.schema.ScanStatus;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -486,14 +487,26 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					}
 					else if( ScanStatus.COMPLETED.getId().equals(release.getStaticScanStatusId().intValue()) )
 					{
-						if( !release.getIsPassed() )
+						try {
+							Scan scan = api.getScan(release.getReleaseId(), release.getCurrentStaticScanId());
+							
+							if( !release.getIsPassed() )
+							{																
+								logger.println(String.format("Star rating: %d/5 with %d total issue(s).", scan.getStarRating(), scan.getTotalIssues()));
+								logger.println("Scan failed policy check! Marking build as unstable.");
+								logger.println("For assessment details see the customer portal at: "  + fodUrl + "/Releases/Issues/" + release.getReleaseId());
+								build.setResult(Result.UNSTABLE);
+							}
+							else
+							{
+								logger.println(String.format("Star rating: %d/5 with %d total issue(s).", scan.getStarRating(), scan.getTotalIssues()));
+								logger.println("Scan completed and passed policy check!");
+								logger.println("For assessment details see the customer portal at: "  + fodUrl + "/Releases/Issues/" + release.getReleaseId());
+							}
+						} 
+						catch (IOException e) 
 						{
-							logger.println("Scan failed policy check! Marking build as unstable.");
-							build.setResult(Result.UNSTABLE);
-						}
-						else
-						{
-							logger.println("Scan completed and passed policy check!");
+							logger.println(e.getMessage());
 						}
 					}
 					else if( ScanStatus.WAITING.getId().equals(release.getStaticScanStatusId().intValue()) )
