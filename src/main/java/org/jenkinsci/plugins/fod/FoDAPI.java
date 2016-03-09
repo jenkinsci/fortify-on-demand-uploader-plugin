@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.TreeMap;
 
 import org.apache.http.HttpEntity;
@@ -570,6 +572,73 @@ public class FoDAPI {
 		}
 	}
 	
+	public Map<String, String> getAssessmentTypeListWithRetry() throws IOException {
+		
+		final String METHOD_NAME = CLASS_NAME+".getReleaseList";
+		PrintStream out = FodBuilder.getLogger();
+		if( null == out )
+		{
+			out = System.out;
+		}
+		
+		int attempts = 0;
+		int maxattempts = 5;
+		Map<String, String> map = new TreeMap<String, String>();				
+		
+		String endpoint = baseUrl + "/api/v1/AssessmentType";
+		URL url = new URL(endpoint);
+				
+		while ((null == map || map.isEmpty()) && (attempts < maxattempts))
+		{
+			HttpURLConnection connection = getHttpUrlConnection("GET",url);
+			InputStream is = null;			
+
+			try {
+				// Get Response
+				is = connection.getInputStream();
+				StringBuffer response = collectInputStream(is);
+				
+				int responseCode = connection.getResponseCode();
+				out.println(METHOD_NAME+": calling GET "+url);
+				out.println(METHOD_NAME+": responseCode = "+responseCode);
+				out.println(METHOD_NAME + ": response = " + response);
+				System.out.println(METHOD_NAME+": called, " + attempts + " previous attempts.");
+				
+				JsonArray arr = getDataJsonArray(response);			
+				
+				String staticTypeRegex = ".*static.*";
+				Pattern p = Pattern.compile(staticTypeRegex, Pattern.CASE_INSENSITIVE);
+							
+				for (int ix = 0; ix < arr.size(); ix++) {
+					JsonElement entity = arr.get(ix);
+					JsonObject obj = entity.getAsJsonObject();
+					JsonPrimitive name = obj.getAsJsonPrimitive("Name");
+					JsonPrimitive id = obj.getAsJsonPrimitive("AssessmentTypeId");
+
+					Matcher m = p.matcher(name.getAsString());
+
+					if (map.containsKey(name.getAsString()) && m.matches())
+						continue;
+					map.put(name.getAsString(), id.getAsString());
+				}
+				if (!(null == map || map.isEmpty()))
+				{
+					return map;
+				}
+			} finally {
+				
+				attempts++;
+				
+				if (is != null)
+				{
+					is.close();				
+				}
+			}
+		}
+		out.println(METHOD_NAME+": Unable to refresh assessment types, please contact your Technical Account Manager for assistance. ");
+		return map;
+	}
+	
 	/**
 	 * Scan snapshot refers to a particular point in history when statistics are 
 	 * reevaluated, such as when a scan is completed. This call returns different 
@@ -731,13 +800,9 @@ public class FoDAPI {
 		{
 			String applicationName = req.getApplicationName();
 			String releaseName = req.getReleaseName();
-			out.println(METHOD_NAME+": applicationName="+applicationName);
-			out.println(METHOD_NAME+": releaseName="+releaseName);
 			releaseId = getReleaseId(applicationName, releaseName);
 		}
-		
-		out.println(METHOD_NAME+": releaseId = "+releaseId);
-		
+				
 		if( null != releaseId && 0 < releaseId )
 		{
 			if(sessionToken != null && !sessionToken.isEmpty())	
@@ -761,22 +826,29 @@ public class FoDAPI {
 						} else {
 							sendByteArray = readByteArray;
 						}
+						
+						StringBuffer postURL = new StringBuffer();
 
-						//TODO change fragUrl to StringBuilder, so fewer objects created in background for mixed-mode expressions
-						String fragUrl = "";
 						if (req.getLanguageLevel() != null) {
-							fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId="
-									+ req.getAssessmentTypeId() + "&technologyStack="
-									+ encodeURLParamUTF8(req.getTechnologyStack()) + "&languageLevel="
-									+ req.getLanguageLevel() + "&fragNo=" + fragmentNumber++ + "&len=" + byteCount
-									+ "&offset=" + offset;
-						//	out.println(METHOD_NAME + ": fragUrl = " + fragUrl);
+							
+							postURL.append(baseUrl);
+							postURL.append("/api/v1/release/" + releaseId);
+							postURL.append("/scan/?assessmentTypeId="+ req.getAssessmentTypeId());
+							postURL.append("&technologyStack="+ encodeURLParamUTF8(req.getTechnologyStack()));
+							postURL.append("&languageLevel="+ req.getLanguageLevel());
+							postURL.append("&fragNo=" + fragmentNumber++ );
+							postURL.append("&len=" + byteCount);
+							postURL.append("&offset=" + offset);
+
 						} else {
-							fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId="
-									+ req.getAssessmentTypeId() + "&technologyStack="
-									+ encodeURLParamUTF8(req.getTechnologyStack()) + "&fragNo=" + fragmentNumber++
-									+ "&len=" + byteCount + "&offset=" + offset;
-						//	out.println(METHOD_NAME + ": fragUrl = " + fragUrl);
+							
+							postURL.append(baseUrl);
+							postURL.append("/api/v1/release/" + releaseId);
+							postURL.append("/scan/?assessmentTypeId="+ req.getAssessmentTypeId());
+							postURL.append("&technologyStack="+ encodeURLParamUTF8(req.getTechnologyStack()));
+							postURL.append("&fragNo=" + fragmentNumber++ );
+							postURL.append("&len=" + byteCount);
+							postURL.append("&offset=" + offset);
 						}
 
 						Boolean runSonatypeScan = req.getRunSonatypeScan();
@@ -785,31 +857,29 @@ public class FoDAPI {
 
 						if (null != runSonatypeScan) {
 							if (runSonatypeScan) {
-								fragUrl += "&doSonatypeScan=true";
+								postURL.append("&doSonatypeScan=true");
 							}
 						}
-
+						
 						if (null != isExpressScan) {
 							if (isExpressScan) {
-								fragUrl += "&scanPreferenceId=2";
-
+								postURL.append("&scanPreferenceId=2");
 							}
-
 						}
-
+						
 						if (null != isExpressAudit) {
 							if (isExpressAudit) {
-								fragUrl += "&auditPreferenceId=2";
-
+								postURL.append("&auditPreferenceId=2");
 							}
-
 						}
+						
+						out.println(METHOD_NAME + ": postURL: " + postURL.toString());
 
 						String postErrorMessage = "";
-					//	out.println(METHOD_NAME + ": calling sendPost ...");
-						SendPostResponse postResponse = sendPost(fragUrl, sendByteArray, httpClient, sessionToken,
+						SendPostResponse postResponse = sendPost(postURL.toString(), sendByteArray, httpClient, sessionToken,
 								postErrorMessage);
 						HttpResponse response = postResponse.getResponse();
+
 						if (response == null) {
 							out.println(METHOD_NAME + ": HttpResponse from sendPost is null!");
 							status.setErrorMessage(postResponse.getErrorMessage());
@@ -819,11 +889,19 @@ public class FoDAPI {
 
 							StatusLine sl = response.getStatusLine();
 							Integer statusCode = Integer.valueOf(sl.getStatusCode());
-						//	out.println(METHOD_NAME + ": HttpResponse.StatusLine.statusCode = " + statusCode);
-						//	out.println(METHOD_NAME + ": HttpResponse.StatusLine.reasonPhrase = " + sl.getReasonPhrase());
+							
 							status.setHttpStatusCode(statusCode);
 							if (!statusCode.toString().startsWith("2")) {
+								
 								status.setErrorMessage(sl.toString());
+								
+								if(statusCode.toString().equals("500"))
+								{
+									status.setErrorMessage(sl.toString());
+									out.println(METHOD_NAME + ": Error uploading to HPE FoD after successful authorization. Please contact your Technical Account Manager with this log for assistance.");
+									out.println(METHOD_NAME + ": DEBUG: " + status.getErrorMessage());
+									out.println(METHOD_NAME + ": DEBUG: Bytes sent: " + status.getBytesSent());
+								}
 								break;
 							} else {
 								if (fragmentNumber != 0 && fragmentNumber % 5 == 0) {
