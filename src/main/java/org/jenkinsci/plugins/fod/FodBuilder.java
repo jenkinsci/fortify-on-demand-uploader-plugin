@@ -788,7 +788,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		private transient FoDAPI api;
 		private transient Object apiLockMonitor = new Object();
 
-		private transient Long releaseListRetentionTime = 5l*60*1000;
+		private transient Long releaseListRetentionTime = 2l*60*1000;
 		private transient List<Release> releaseListCache = null;
 		private transient Long releaseListRetrieveTime = null;
 		private transient Object releaseListLockMonitor = new Object();
