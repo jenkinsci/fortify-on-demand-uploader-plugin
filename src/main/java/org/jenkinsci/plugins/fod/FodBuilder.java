@@ -67,7 +67,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	 */
 	private static final Long DEFAULT_POLLING_INTERVAL = 1l;
 
-	private String filePatterns;
+	private String filePattern;
 	private String assessmentTypeId;
 	private String applicationName;
 	private String releaseName;
@@ -78,11 +78,12 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	private boolean isExpressAudit;
 	private boolean doSkipFortifyResults;
 	private boolean doPrettyLogOutput;
+	private boolean includeAllFiles;
 	
 
 	// Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
 	@DataBoundConstructor
-	public FodBuilder(String filePatterns
+	public FodBuilder(String filePattern
 			,String assessmentTypeId
 			,String applicationName
 			,String releaseName
@@ -92,9 +93,10 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			,boolean isExpressScan
 			,boolean isExpressAudit
 			,boolean doSkipFortifyResults
-			,boolean doPrettyLogOutput)
+			,boolean doPrettyLogOutput
+			,boolean includeAllFiles)
 	{
-		this.filePatterns = filePatterns;
+		this.filePattern = filePattern;
 		this.assessmentTypeId = assessmentTypeId;
 		this.applicationName = applicationName;
 		this.releaseName = releaseName;
@@ -105,14 +107,15 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		this.isExpressAudit = isExpressAudit;
 		this.doSkipFortifyResults = doSkipFortifyResults;
 		this.doPrettyLogOutput = doPrettyLogOutput;
+		this.includeAllFiles = includeAllFiles;
 	}
 
 	/**
 	 * We'll use this from the <tt>config.jelly</tt>.
 	 */
-	public String getFilePatterns()
+	public String getFilePattern()
 	{
-		return filePatterns;
+		return filePattern;
 	}
 	public String getAssessmentTypeId()
 	{
@@ -186,6 +189,81 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		}
 		return returnVal;
 	}
+	
+	/** Takes technologyStack and returns a correct regular expression for files needed by that type
+	 * @param technologyStack
+	 * @return regular expression string of files by language
+	 */
+	private static String getFileExpressionPatternString(String technologyStack){
+		
+		String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config|.*\\.settings|.*\\.cpx|.*\\.xcfg|.*\\.cscfg|.*\\.cscdef|.*\\.wadcfg|.*\\.appxmanifest"
+							 + "|.*\\.wsdl|.*\\.plist|.*\\.properties|.*\\.ini|.*\\.sql|.*\\.pks|.*\\.pkh|.*\\.pkb";
+		
+		
+		if (technologyStack.equalsIgnoreCase(".NET")){
+			
+			return ".*\\.dll|.*\\.pdb|.*\\.cs|.*\\.aspx|.*\\.asp|.*\\.vb|.*\\.vbproj|.*\\.csproj|.*\\.sln" + constantFiles;
+		}
+		if (technologyStack.equalsIgnoreCase("JAVA/J2EE")){
+			
+			return ".*\\.java|.*\\.class|.*\\.ear|.*\\.war|.*\\.jar|.*\\.jsp|.*\\.tag|.*\\.tagx|.*\\.tld|.*\\.jspx|.*\\.xhtml|.*\\.faces|.*\\.jsff|.*\\.properties" + constantFiles;
+		}
+		if (technologyStack.equalsIgnoreCase("Python")){
+			
+			return ".*\\.py" + constantFiles;
+		}
+		if (technologyStack.equalsIgnoreCase("Ruby")){
+			
+			return ".*\\.rb|.*\\.erb" + constantFiles;
+		}
+		if (technologyStack.equalsIgnoreCase("Objective-C")){
+			
+			return ".*"; //returning all as mobile applications are typically small and we must build them to assess.
+		}
+		if (technologyStack.equalsIgnoreCase("ASP")){
+			
+			return ".*\\.asp" + constantFiles;
+		}
+		if (technologyStack.equalsIgnoreCase("PHP")){
+			
+			return ".*\\.php" + constantFiles;
+		}
+		if (technologyStack.equalsIgnoreCase("VB6")){
+			
+			return ".*\\.vbs|.*\\.bas|.*\\.frm|.*\\.ctl|.*\\.cls" + constantFiles;
+		}
+		if (technologyStack.equalsIgnoreCase("VBScript")){
+			
+			return ".*\\.vbscript" + constantFiles;
+		}
+		if (technologyStack.equalsIgnoreCase("Android")){
+			
+			return ".*\\.java|.*\\.class|.*\\.ear|.*\\.war|.*\\.jar|.*\\.jsp|.*\\.tag|.*\\.tagx|.*\\.tld|.*\\.jspx|.*\\.xhtml|.*\\.faces|.*\\.jsff|.*\\.properties|.*\\.apk" + constantFiles;			
+			// APK is not normally used for Static analysis but we are collecting in the event it is useful
+		}
+		if (technologyStack.equalsIgnoreCase("Other")){
+			
+			return ".*";
+		}
+		if (technologyStack.equalsIgnoreCase("XML/HTML")){
+			
+			return ".*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config|.*\\.cpx|.*\\.xcfg" + constantFiles;
+		}
+		if (technologyStack.contains("SQL")){
+			
+			return ".*\\.sql|.*\\.pks|.*\\.pkh|.*\\.pkb" + constantFiles;
+		}
+		if (technologyStack.equalsIgnoreCase("ABAP")){
+			
+			return ".*\\.abap" + constantFiles;
+		}
+		if (technologyStack.equalsIgnoreCase("CFML")){
+			
+			return ".*\\.cfm|.*\\.cfml|.*\\.cfc" + constantFiles;
+		}
+		
+		return ".*";
+	}
 
 	public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 	{
@@ -204,7 +282,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		final PrintStream logger = listener.getLogger();
 		
 		logger.println(METHOD_NAME+": foDUrl = "+fodUrl);	
-		logger.println(METHOD_NAME+": filePatterns = \""+filePatterns+"\"");
+	//	logger.println(METHOD_NAME+": filePattern = \""+filePattern+"\"");		
 			
 		if (assessmentTypeId == null || assessmentTypeId.trim().isEmpty())
 		{
@@ -212,6 +290,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			build.setResult(Result.FAILURE);
 
 		}
+		logger.println(METHOD_NAME+": pollingInterval = "+pollingInterval);
 		logger.println(METHOD_NAME+": assessmentType = "+assessmentTypeId);
 		logger.println(METHOD_NAME+": applicationName = "+applicationName);
 		logger.println(METHOD_NAME+": releaseName = "+releaseName);
@@ -264,13 +343,16 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					
 					try {
 						fos = new FileOutputStream(tmpZipFile);
+
 						String localFilePatterns = null;
-						if (null == filePatterns || filePatterns.isEmpty()) 
-							{
-								localFilePatterns = ".*";
-							} else {
-								localFilePatterns = filePatterns;
-							}
+						if (includeAllFiles)
+						{
+							localFilePatterns = ".*";
+						} else 
+						{
+							localFilePatterns = getFileExpressionPatternString(technologyStack);
+						}
+						logger.println(METHOD_NAME+": effective file patterns = \""+localFilePatterns+"\"");
 						final Pattern p = Pattern.compile(localFilePatterns, Pattern.CASE_INSENSITIVE);
 						
 						FileFilter filter = new FileFilter() 
@@ -372,16 +454,16 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							pollingWait = Long.parseLong(pollingInterval);
 							logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait+" minutes.");
 						}
+						if( null == pollingWait || 1 > pollingWait ) // minimum 1 minutes between polling
+						{
+							pollingWait = DEFAULT_POLLING_INTERVAL;
+							logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait+" minutes.");
+						}
+						
 					}
 					catch( NumberFormatException nfe )
 					{
 					//	nfe.printStackTrace();
-						pollingWait = DEFAULT_POLLING_INTERVAL;
-						logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait+" minutes.");
-					}
-					
-					if( null == pollingWait || 1 > pollingWait ) // minimum 1 minutes between polling
-					{
 						pollingWait = DEFAULT_POLLING_INTERVAL;
 						logger.println(METHOD_NAME+": Effective polling interval = "+pollingWait+" minutes.");
 					}
@@ -435,8 +517,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 								{
 									attempts++;
 									pollingWait = errorStatePollingWait; // set to longer error state wait to give time for the FoD service to recover
-									logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue reading status from HPE Fortify on Demand, will retry "+(maxErrorAttempts - attempts)+" additional times every " + 
-									pollingWait + " minutes until resolved.");																							
+									logger.println(METHOD_NAME+" "+pollingTimestamp+": Issue reading status from HPE Fortify on Demand, will retry "+(maxErrorAttempts - attempts)+" additional times, every " + 
+									pollingWait + " minute(s), until resolved.");																							
 								}
 							
 							if (release != null)
@@ -459,7 +541,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							else
 							{
 								attempts++;
-								logger.println(METHOD_NAME+": Error retrieving assessment status information from Fortify on Demand after "+attempts+ " attempts! Will retry "+(maxErrorAttempts - attempts)+ " more time(s)");
+								logger.println(METHOD_NAME+": Error retrieving assessment status information from Fortify on Demand after "+attempts+ " attempts! Will retry "+(maxErrorAttempts - attempts)+ " more time(s), every " + 
+									pollingWait + " minute(s), until resolved.");	
 								continueLoop = false;
 							}
 						} catch (Exception e) 
@@ -516,7 +599,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 									logger.println(String.format("Medium:   %d", release.getMedium()));
 									logger.println(String.format("Low:      %d", release.getLow()));
 									logger.println(" ");
-									logger.println("For assessment details see the customer portal: "  + fodUrl + "/Releases/Issues/" + release.getReleaseId());
+									logger.println("For application status details see the customer portal: "  + fodUrl + "/Releases/" + release.getReleaseId() + "/Overview");
 									logger.println(" ");
 									logger.println("Scan failed established policy check, marking build as unstable.");
 									logger.println(" ");
@@ -537,7 +620,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 									logger.println(String.format("Medium:   %d", release.getMedium()));
 									logger.println(String.format("Low:      %d", release.getLow()));
 									logger.println(" ");
-									logger.println("For assessment details see the customer portal: "  + fodUrl + "/Releases/Issues/" + release.getReleaseId());
+									logger.println("For application status details see the customer portal: "  + fodUrl + "/Releases/" + release.getReleaseId() + "/Overview");
 									logger.println(" ");
 									logger.println("Scan passed established policy check, marking build as stable.");
 									logger.println(" ");
@@ -674,6 +757,20 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		
 		private static final String TS_DOTNET_KEY = ".NET";
 		private static final String TS_JAVA_KEY = "JAVA/J2EE";
+		private static final String TS_RUBY_KEY = "Ruby";
+		private static final String TS_PYTHON_KEY = "Python";
+		private static final String TS_OBJECTIVEC_KEY = "Objective-C";
+		private static final String TS_ABAP_KEY = "ABAP";
+		private static final String TS_ASP_KEY = "ASP";
+		private static final String TS_CFML_KEY = "CFML";
+		private static final String TS_COBOL_KEY = "COBOL";
+		private static final String TS_ANDROID_KEY = "Android";
+		private static final String TS_PHP_KEY = "PHP";
+		private static final String TS_PLSQL_TSQL_KEY = "PL/SQL & T-SQL";
+		private static final String TS_VB6_KEY = "VB6";
+		private static final String TS_VBSCRIPT_KEY = "VBScript";
+		private static final String TS_XML_HTML_KEY = "XML/HTML";
+
 		
 		/**
 		 * To persist global configuration information,
@@ -783,7 +880,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				}
 			}
 			return returnValue;
-		}	
+		}
 		
 		public ListBoxModel doFillAssessmentTypeIdItems() throws IOException
 		{
@@ -810,7 +907,13 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							for( Map.Entry<String, String> item : assessmentTypeList.entrySet())
 							{
 								out.println(METHOD_NAME+": adding assessment type \""+item.getKey()+"\" to menu");
-								items.add(new Option(item.getKey(),item.getValue(),false));
+								if (item.getValue().equalsIgnoreCase("Static Assessment")) 
+								{
+									items.add(new Option(item.getKey(),item.getValue(),true)); //default to Static Assessment
+								} else 
+								{
+									items.add(new Option(item.getKey(),item.getValue(),false));
+								}								
 							}
 						}
 						else
@@ -927,13 +1030,23 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		
 		public ListBoxModel doFillTechnologyStackItems() {
 			ListBoxModel items = new ListBoxModel();
-			
-			// only supporting Java, initially, but only one option 
-			//  causes it to be selected automatically, which means 
-			//  language levels will not be filled correctly
-			items.add(new Option(TS_JAVA_KEY, TS_JAVA_KEY,false));
+
 			items.add(new Option(TS_DOTNET_KEY, TS_DOTNET_KEY,false));
-			
+			items.add(new Option(TS_ABAP_KEY, TS_ABAP_KEY, false));
+			items.add(new Option(TS_ASP_KEY, TS_ASP_KEY, false));
+			items.add(new Option(TS_ANDROID_KEY, TS_ANDROID_KEY, false));
+			items.add(new Option(TS_CFML_KEY, TS_ABAP_KEY, false));
+			items.add(new Option(TS_COBOL_KEY, TS_COBOL_KEY, false));
+			items.add(new Option(TS_JAVA_KEY, TS_JAVA_KEY,false));
+			items.add(new Option(TS_OBJECTIVEC_KEY, TS_OBJECTIVEC_KEY, false));
+			items.add(new Option(TS_PHP_KEY, TS_PHP_KEY, false));
+			items.add(new Option(TS_PLSQL_TSQL_KEY, TS_PLSQL_TSQL_KEY, false));
+			items.add(new Option(TS_PYTHON_KEY, TS_PYTHON_KEY,false));
+			items.add(new Option(TS_RUBY_KEY, TS_RUBY_KEY,false));				
+			items.add(new Option(TS_VB6_KEY, TS_VB6_KEY, false));
+			items.add(new Option(TS_VBSCRIPT_KEY, TS_VBSCRIPT_KEY, false));
+			items.add(new Option(TS_XML_HTML_KEY, TS_XML_HTML_KEY, false));
+
 			return items;
 		}
 		
@@ -942,9 +1055,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		public ListBoxModel doFillLanguageLevelItems(@QueryParameter("technologyStack") String technologyStack) {
 			ListBoxModel items = new ListBoxModel();
 					
-			if( TS_JAVA_KEY.equalsIgnoreCase(technologyStack)
-					|| "".equals(technologyStack)
-					|| null == technologyStack)
+			if( TS_JAVA_KEY.equalsIgnoreCase(technologyStack))
 			{
 				items.add(new Option("1.2", "1.2",false));
 				items.add(new Option("1.3", "1.3",false));
@@ -966,7 +1077,17 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				items.add(new Option("4.5.1", "4.5.1",false));
 				items.add(new Option("4.5.2", "4.5.2",false));
 				items.add(new Option("4.6", "4.6",false));
-				items.add(new Option("4.6.1", "4.6.1",false));
+				items.add(new Option("4.6.1", "4.6.1",true));
+			}
+			else if (TS_PYTHON_KEY.equalsIgnoreCase(technologyStack))
+			{
+				items.add(new Option("Standard Python", "Standard Python", false));
+				items.add(new Option("Django", "Django", false));
+				
+			}
+			else
+			{
+				items.add(new Option("N/A",null,false)); //support for no language level, must be null for correct API call
 			}
 			
 			return items;

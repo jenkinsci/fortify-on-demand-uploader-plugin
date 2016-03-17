@@ -241,7 +241,6 @@ public class FoDAPI {
 			
 			List<NameValuePair> formparams = new ArrayList<NameValuePair>();
 			
-	//		out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
 			
 			if( AuthCredentialType.CLIENT_CREDENTIALS.getName().equals(request.getGrantType()) )
 			{
@@ -250,11 +249,6 @@ public class FoDAPI {
 				formparams.add(new BasicNameValuePair("grant_type",request.getGrantType()));
 				formparams.add(new BasicNameValuePair("client_id", cred.getClientId()));
 				formparams.add(new BasicNameValuePair("client_secret", cred.getClientSecret()));
-				
-	//			out.println(METHOD_NAME+": request.scope = "+FOD_SCOPE_TENANT);
-	//			out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
-			//	out.println(METHOD_NAME+": request.clientId = "+cred.getClientId());
-			//	out.println(METHOD_NAME+": request.clientSecret = "+cred.getClientSecret());
 			}
 			else
 			{
@@ -266,7 +260,6 @@ public class FoDAPI {
 			HttpResponse postResponse = client.execute(httppost);
 			StatusLine sl = postResponse.getStatusLine();
 			Integer statusCode = Integer.valueOf(sl.getStatusCode());
-	//		out.println(METHOD_NAME+": statusCode = "+statusCode);
 			
 			if (statusCode.toString().startsWith("2"))
 			{
@@ -282,14 +275,13 @@ public class FoDAPI {
 					JsonObject jsonObject = jsonElement.getAsJsonObject();
 					JsonElement tokenElement = jsonObject.getAsJsonPrimitive("access_token");
 					if (null != tokenElement && !tokenElement.isJsonNull() && tokenElement.isJsonPrimitive()) {
-						//accessToken = tokenElement.getAsString();
+
 						response.setAccessToken(tokenElement.getAsString());
-						//		out.println(METHOD_NAME+": access_token = "+tokenElement.getAsString());
+
 					}
 					JsonElement expiresIn = jsonObject.getAsJsonPrimitive("expires_in");
 					Integer expiresInInt = expiresIn.getAsInt();
 					response.setExpiresIn(expiresInInt);
-		//			out.println(METHOD_NAME + ": expires_in = " + expiresInInt);
 					//TODO handle remaining two fields in response
 				} finally {
 					if (is != null){
@@ -335,7 +327,6 @@ public class FoDAPI {
 	public Map<String, String> getApplicationList() throws IOException {
 		final String METHOD_NAME = CLASS_NAME+".getApplicationList";
 		
-		//String endpoint = baseUrl + "/api/v1/application";
 		String endpoint = baseUrl + "/api/v1/Application/?fields=applicationId,applicationName,isMobile&limit=9999"; //TODO make this consistent elsewhere by a global config
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
@@ -371,7 +362,6 @@ public class FoDAPI {
 	
 	public Long getReleaseId(String applicationName, String releaseName) throws IOException
 	{
-		//TODO no exact way to look up single release found yet -- ask FoD ppl if easier method exists
 		Long releaseId = null;
 		List<Release> releaseList = getReleaseList(applicationName);
 		for(Release release : releaseList)
@@ -382,16 +372,12 @@ public class FoDAPI {
 			{
 				releaseId = release.getReleaseId();
 			}
-		}
-		
+		}		
 		return releaseId;
 	}
 
 	public Release getRelease(Long releaseId) throws IOException
-	{
-		// https://www.hpfod.com/api/v1/Release/93328
-		// https://www.hpfod.com/api/v2/Releases/93328
-		
+	{	
 		String endpoint = baseUrl+"/api/v2/Releases/"+releaseId;
 		URL url = new URL(endpoint);
 		HttpURLConnection connection = getHttpUrlConnection("GET",url);
@@ -664,10 +650,6 @@ public class FoDAPI {
 				JsonElement entity = arr.get(ix);
 				JsonObject obj = entity.getAsJsonObject();
 
-				//FIXME GSON not setting fields on Scan obj, need to troubleshoot 
-				//Scan scan = getGson().fromJson(obj, Scan.class);
-				//Scan scan = getGson().fromJson(entity, Scan.class);
-
 				ScanSnapshot scan = new ScanSnapshot();
 				if (!obj.get("ProjectVersionId").isJsonNull()) {
 					JsonPrimitive releaseIdObj = obj.getAsJsonPrimitive("ProjectVersionId");
@@ -808,18 +790,17 @@ public class FoDAPI {
 			if(sessionToken != null && !sessionToken.isEmpty())	
 			{
 				FileInputStream fs = new FileInputStream(req.getUploadZip());
-			//	out.println(METHOD_NAME+": FileInputStream created. Creating buffer of size "+seglen);
+
 				byte[] readByteArray = new byte[seglen];
 				byte[] sendByteArray = null;
 				int fragmentNumber = 0;
 				int byteCount = 0;
 				long offset = 0;
-			//	out.println(METHOD_NAME+": reading in file contents ...");
+
 				try {
 					while ((byteCount = fs.read(readByteArray)) != -1) {
-					//	out.println(METHOD_NAME + ": read in " + byteCount + " bytes of zip file");
+						
 						if (byteCount < seglen) {
-					//		out.println(METHOD_NAME + ": resizing buffer to fit end of file contents");
 							fragmentNumber = -1;
 							lastFragment = true;
 							sendByteArray = Arrays.copyOf(readByteArray, byteCount);
@@ -835,7 +816,7 @@ public class FoDAPI {
 							postURL.append("/api/v1/release/" + releaseId);
 							postURL.append("/scan/?assessmentTypeId="+ req.getAssessmentTypeId());
 							postURL.append("&technologyStack="+ encodeURLParamUTF8(req.getTechnologyStack()));
-							postURL.append("&languageLevel="+ req.getLanguageLevel());
+							postURL.append("&languageLevel="+ encodeURLParamUTF8(req.getLanguageLevel()));
 							postURL.append("&fragNo=" + fragmentNumber++ );
 							postURL.append("&len=" + byteCount);
 							postURL.append("&offset=" + offset);
@@ -873,7 +854,7 @@ public class FoDAPI {
 							}
 						}
 						
-						out.println(METHOD_NAME + ": postURL: " + postURL.toString());
+					//	out.println(METHOD_NAME + ": postURL: " + postURL.toString());
 
 						String postErrorMessage = "";
 						SendPostResponse postResponse = sendPost(postURL.toString(), sendByteArray, httpClient, sessionToken,
@@ -924,7 +905,6 @@ public class FoDAPI {
 							}
 							EntityUtils.consume(response.getEntity());
 						}
-					//	out.println(METHOD_NAME + ": byteCount=" + byteCount);
 						offset += byteCount;
 					} 
 				} finally {
@@ -947,8 +927,6 @@ public class FoDAPI {
 		final String METHOD_NAME = CLASS_NAME+".sendPost";
 		
 		PrintStream out = FodBuilder.getLogger();
-	//	out.println(METHOD_NAME+": url="+url);
-	//	out.println(METHOD_NAME+": token="+token);
 		
 		SendPostResponse result = new SendPostResponse();
 		try {
