@@ -868,7 +868,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				try
 				{
 					URL tmpFodUrl = new URL(value);
-					tmpFodUrl.getPath(); // can't remember if URL immediately parsed ==> force parse
+					tmpFodUrl.getPath();
 				}
 				catch (MalformedURLException e)
 				{
@@ -907,13 +907,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							for( Map.Entry<String, String> item : assessmentTypeList.entrySet())
 							{
 								out.println(METHOD_NAME+": adding assessment type \""+item.getKey()+"\" to menu");
-								if (item.getValue().equalsIgnoreCase("Static Assessment")) 
-								{
-									items.add(new Option(item.getKey(),item.getValue(),true)); //default to Static Assessment
-								} else 
-								{
-									items.add(new Option(item.getKey(),item.getValue(),false));
-								}								
+
+								items.add(new Option(item.getKey(),item.getValue(),false));							
 							}
 						}
 						else
