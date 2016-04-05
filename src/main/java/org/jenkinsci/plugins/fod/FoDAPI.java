@@ -832,12 +832,13 @@ public class FoDAPI {
 							postURL.append("&offset=" + offset);
 						}
 
-						Boolean runSonatypeScan = req.getRunSonatypeScan();
+						Boolean runOpenSourceAnalysis = req.getRunOpenSourceAnalysis();
 						Boolean isExpressScan = req.getIsExpressScan();
 						Boolean isExpressAudit = req.getIsExpressAudit();
+						Boolean includeThirdParty = req.getIncludeThirdParty();
 
-						if (null != runSonatypeScan) {
-							if (runSonatypeScan) {
+						if (null != runOpenSourceAnalysis) {
+							if (runOpenSourceAnalysis) {
 								postURL.append("&doSonatypeScan=true");
 							}
 						}
@@ -851,6 +852,14 @@ public class FoDAPI {
 						if (null != isExpressAudit) {
 							if (isExpressAudit) {
 								postURL.append("&auditPreferenceId=2");
+							}
+						}
+						
+						if(null != includeThirdParty) {
+							if(includeThirdParty) {
+								postURL.append("&excludeThirdPartyLibs=false");
+							} else {
+								postURL.append("&excludeThirdPartyLibs=true");
 							}
 						}
 						
@@ -879,7 +888,7 @@ public class FoDAPI {
 								if(statusCode.toString().equals("500"))
 								{
 									status.setErrorMessage(sl.toString());
-									out.println(METHOD_NAME + ": Error uploading to HPE FoD after successful authorization. Please contact your Technical Account Manager with this log for assistance.");
+									out.println(METHOD_NAME + ": Error uploading to HPE FoD after successful authentication. Please contact your Technical Account Manager with this log for assistance.");
 									out.println(METHOD_NAME + ": DEBUG: " + status.getErrorMessage());
 									out.println(METHOD_NAME + ": DEBUG: Bytes sent: " + status.getBytesSent());
 								}

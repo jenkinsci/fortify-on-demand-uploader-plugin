@@ -46,6 +46,7 @@ import hudson.util.ListBoxModel.Option;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 
+
 /*
  * @author ryancblack
  * @author Michael.A.Marshall
@@ -73,12 +74,13 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	private String releaseName;
 	private String technologyStack;
 	private String languageLevel;
-	private boolean runSonatypeScan;
+	private boolean runOpenSourceAnalysis;
 	private boolean isExpressScan;
 	private boolean isExpressAudit;
-	private boolean doSkipFortifyResults;
+	private boolean doPollFortify;
 	private boolean doPrettyLogOutput;
 	private boolean includeAllFiles;
+	private boolean includeThirdParty;
 	
 
 	// Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
@@ -89,12 +91,13 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			,String releaseName
 			,String technologyStack
 			,String languageLevel
-			,boolean runSonatypeScan
+			,boolean runOpenSourceAnalysis
 			,boolean isExpressScan
 			,boolean isExpressAudit
-			,boolean doSkipFortifyResults
+			,boolean doPollFortify
 			,boolean doPrettyLogOutput
-			,boolean includeAllFiles)
+			,boolean includeAllFiles
+			,boolean includeThirdParty)
 	{
 		this.filePattern = filePattern;
 		this.assessmentTypeId = assessmentTypeId;
@@ -102,12 +105,13 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		this.releaseName = releaseName;
 		this.technologyStack = technologyStack;
 		this.languageLevel = languageLevel;
-		this.runSonatypeScan = runSonatypeScan;
+		this.runOpenSourceAnalysis = runOpenSourceAnalysis;
 		this.isExpressScan = isExpressScan;
 		this.isExpressAudit = isExpressAudit;
-		this.doSkipFortifyResults = doSkipFortifyResults;
+		this.doPollFortify = doPollFortify;
 		this.doPrettyLogOutput = doPrettyLogOutput;
 		this.includeAllFiles = includeAllFiles;
+		this.includeThirdParty = includeThirdParty;
 	}
 
 	/**
@@ -142,9 +146,9 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		return languageLevel;
 	}
 
-	public boolean getRunSonatypeScan()
+	public boolean getRunOpenSourceAnalysis()
 	{
-		return runSonatypeScan;
+		return runOpenSourceAnalysis;
 	}
 	public boolean getIsExpressScan()
 	{
@@ -154,13 +158,17 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	{
 		return isExpressAudit;
 	}
-	public boolean doSkipFortifyReults()
+	public boolean doPollFortify()
 	{
-		return doSkipFortifyResults;
+		return doPollFortify;
 	}
 	public boolean doPrettyLogOutput()
 	{
 		return doPrettyLogOutput;		
+	}
+	public boolean includeThirdParty()
+	{
+		return includeThirdParty;
 	}
 	
 	protected static TaskListener getTaskListener()
@@ -189,6 +197,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		}
 		return returnVal;
 	}
+	
 	
 	/** Takes technologyStack and returns a correct regular expression for files needed by that type
 	 * @param technologyStack
@@ -424,13 +433,14 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 				req.setAssessmentTypeId(assessmentTypeId);  
 				req.setTechnologyStack(technologyStack);
 				req.setLanguageLevel(languageLevel);
-				req.setRunSonatypeScan(runSonatypeScan);
+				req.setRunOpenSourceAnalysis(runOpenSourceAnalysis);
 				req.setIsExpressScan(isExpressScan);
 				req.setIsExpressAudit(isExpressAudit);
+				req.setIncludeThirdParty(includeThirdParty);
 				
 				UploadStatus status = api.uploadFile(req);
 				
-				if( status.isUploadSucceeded() && !doSkipFortifyResults)
+				if( status.isUploadSucceeded() && doPollFortify)
 				{
 					Long releaseId = api.getReleaseId(applicationName, releaseName);
 					Release release = null;
@@ -586,6 +596,8 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							
 							if(doPrettyLogOutput)
 							{
+								
+								
 								if( !release.getIsPassed() )
 								{	
 									logger.println("-------------------------------------------------------------------------------");
@@ -1098,7 +1110,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 		 * This human readable name is used in the configuration screen.
 		 */
 		public String getDisplayName() {
-			return "HPE Fortify on Demand Upload";
+			return "HPE Security Fortify on Demand";
 		}
 
 		@Override

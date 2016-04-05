@@ -33,22 +33,25 @@
   -->
   
   <f:advanced title="Additional Options">
-    <f:entry title="Include all project files" field="includeAllFiles">
+  <f:entry title="Open source component analysis" field="runOpenSourceAnalysis">
     <f:checkbox/>
-      </f:entry>
-    <f:entry title="Don't wait for FoD security results" field="doSkipFortifyResults">
+  </f:entry>
+    <f:entry title="Enable express scan preference" field="isExpressScan">
+    <f:checkbox/>
+  </f:entry>
+    <f:entry title="Enable automated audit preference" field="isExpressAudit">
+    <f:checkbox/>
+  </f:entry>
+  <f:entry title="Enable detailed assessment result log" field="doPrettyLogOutput">
+    <f:checkbox/>
+  </f:entry>
+      <f:entry title="Poll Fortify on Demand for results" field="doPollFortify">
     <f:checkbox/> <!-- <f:checkbox default="false"/>  Checkboxes have no default to avoid resetting options when the user views the configuration page for any reason -->
   </f:entry>
-  <f:entry title="Request Sonatype report" field="runSonatypeScan">
+      <f:entry title="Include all project files" field="includeAllFiles">
     <f:checkbox/>
-  </f:entry>
-    <f:entry title="Enable Express scan mode" field="isExpressScan">
-    <f:checkbox/>
-  </f:entry>
-    <f:entry title="Enable Automated audit mode" field="isExpressAudit">
-    <f:checkbox/>
-  </f:entry>
-  <f:entry title="Enable detailed assessment result log output" field="doPrettyLogOutput">
+      </f:entry>
+    <f:entry title="Include third-party libraries" field="includeThirdParty">
     <f:checkbox/>
   </f:entry>
   </f:advanced>
