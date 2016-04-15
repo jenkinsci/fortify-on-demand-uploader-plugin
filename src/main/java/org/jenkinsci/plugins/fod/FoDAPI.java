@@ -13,6 +13,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import hudson.ProxyConfiguration;
+import jenkins.model.Jenkins;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
@@ -43,10 +46,13 @@ import java.util.regex.Pattern;
 import java.util.TreeMap;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
+import org.apache.http.auth.NTCredentials;
+import org.apache.http.client.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -79,6 +85,7 @@ public class FoDAPI {
 	private String proxyHostname = null;
 	private int proxyPort;
 	private Proxy proxy;
+	private ProxyConfiguration proxyConfig = Jenkins.getInstance().proxy;
 	private Gson gson;
 
 	final int seglen = 1024 * 1024; // chunk size
@@ -140,7 +147,6 @@ public class FoDAPI {
 		this.setPrincipal(clientId, clientSecret);
 		return this.authorize();
 	}
-		
 	
 	/**
 	 * Authenticates against FoD API and caches session token.
@@ -155,12 +161,6 @@ public class FoDAPI {
 		final String METHOD_NAME = CLASS_NAME+".authorize()";
 		PrintStream logger = FodBuilder.getLogger();
 		
-		if( null == this.httpClient )
-		{
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			this.httpClient = builder.build();
-		}
-		
 		String fodBaseUrl = null;
 		
 		if( null != this.baseUrl && !this.baseUrl.isEmpty() )
@@ -170,6 +170,20 @@ public class FoDAPI {
 		else
 		{
 			fodBaseUrl = PUBLIC_FOD_BASE_URL;
+		}
+		
+		if( null == this.httpClient )
+		{
+			HttpClientBuilder builder = HttpClientBuilder.create();
+			if( null != proxyConfig)
+			{
+				proxy = proxyConfig.createProxy(fodBaseUrl);				
+				InetSocketAddress address = (InetSocketAddress) proxy.address();				
+				HttpHost proxyHttpHost = new HttpHost(address.getHostName(), address.getPort() , proxy.address().toString().indexOf("https") != 0 ? "http" : "https");
+				builder.setProxy(proxyHttpHost);
+				logger.println(METHOD_NAME+": using proxy configuration: "+ proxyHttpHost.getSchemeName()+ "://" + proxyHttpHost.getHostName() + ":" + proxyHttpHost.getPort());
+			}
+			this.httpClient = builder.build();
 		}
 		
 	//	logger.println(METHOD_NAME+": url = "+fodBaseUrl);
@@ -197,7 +211,7 @@ public class FoDAPI {
 		AuthTokenResponse authResponse = this.authorize(fodBaseUrl,authRequest,this.httpClient);
 		String token = authResponse.getAccessToken();
 		
-	//	logger.println(METHOD_NAME+": token = "+token);
+	//	logger.println(METHOD_NAME+": token = "+token);  //enabled for testing
 		if (token != null && 0 < token.length() )
 		{
 			this.sessionToken = token;
@@ -1105,6 +1119,16 @@ public class FoDAPI {
 		} else {
 			connection = (HttpURLConnection) url.openConnection();
 		}
+		
+/*		if( null != proxyConfig)
+		{
+			Proxy proxy = proxyConfig.createProxy(fodBaseUrl);				
+			InetSocketAddress address = (InetSocketAddress) proxy.address();				
+			HttpHost proxyHttpHost = new HttpHost(address.getHostName(), address.getPort() , proxy.address().toString().indexOf("https") != 0 ? "http" : "https");
+			builder.setProxy(proxyHttpHost);
+			logger.println(METHOD_NAME+": using proxy configuration: "+ proxyHttpHost.getSchemeName()+ "://" + proxyHttpHost.getHostName() + ":" + proxyHttpHost.getPort());
+		}
+		this.httpClient = builder.build();*/
 		
 		connection.setRequestMethod(requestMethod);
 		connection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");

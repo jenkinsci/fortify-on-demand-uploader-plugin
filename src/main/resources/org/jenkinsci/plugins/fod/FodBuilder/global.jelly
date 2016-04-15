@@ -31,6 +31,8 @@
         <f:textbox default="https://hpfod.com"/>
       </f:entry>
       
+        <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
+         method="testConnection" with="clientId,clientSecret,fodUrl" />
 
         
     </f:advanced>

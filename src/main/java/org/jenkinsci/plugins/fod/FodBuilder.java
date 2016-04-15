@@ -4,6 +4,7 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
@@ -894,6 +895,33 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			return returnValue;
 		}
 		
+		public FormValidation doTestConnection(@QueryParameter("clientId") final String clientId, @QueryParameter("clientSecret") final String clientSecret, 
+				@QueryParameter("fodUrl") final String fodUrl) throws IOException, ServletException {
+			
+			final String METHOD_NAME = CLASS_NAME+".doTestConnection()";
+			PrintStream out = null;
+			out = System.out;
+			try {
+				FoDAPI api = new FoDAPI();
+				api.setBaseUrl(fodUrl);
+				boolean authSuccess = api.authorize(clientId,clientSecret);
+				
+				if( authSuccess )
+				{				
+					out.println(METHOD_NAME+": Connection validataion success!");
+					return FormValidation.ok("Successfully authenticated to Fortify on Demand!");
+				}
+				else
+				{
+					out.println(METHOD_NAME+": Connection validation failed!");
+					return FormValidation.error("Invalid connection information, please check your token, secret, and FoD URL");
+				}
+			} catch (Exception e) {				
+				e.printStackTrace();
+				return FormValidation.error("Unable to validate connection, please check your Jenkins log");
+			}
+		}
+		
 		public ListBoxModel doFillAssessmentTypeIdItems() throws IOException
 		{
 			final String METHOD_NAME = CLASS_NAME+".doFillAssessmentTypeItems()";
@@ -1239,7 +1267,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 
 			return this.api;
 		}
-				
+					
 		protected void ensureLogin(FoDAPI api)
 		{
 			final String METHOD_NAME = CLASS_NAME+".ensureLogin";
