@@ -4,7 +4,7 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.InetAddress;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
@@ -23,9 +23,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 
-import org.jenkinsci.plugins.fod.schema.AssessmentType;
-import org.jenkinsci.plugins.fod.schema.Release;
-import org.jenkinsci.plugins.fod.schema.ScanStatus;
+import org.jenkinsci.plugins.fod.schema.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -230,6 +228,14 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			
 			return ".*"; //returning all as mobile applications are typically small and we must build them to assess.
 		}
+		if (technologyStack.equalsIgnoreCase("Swift")){
+			
+			return ".*";
+		}
+		if (technologyStack.equalsIgnoreCase("iOS")){
+			
+			return ".*";
+		}
 		if (technologyStack.equalsIgnoreCase("ASP")){
 			
 			return ".*\\.asp" + constantFiles;
@@ -363,34 +369,18 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 							localFilePatterns = getFileExpressionPatternString(technologyStack);
 						}
 						logger.println(METHOD_NAME+": effective file patterns = \""+localFilePatterns+"\"");
-						final Pattern p = Pattern.compile(localFilePatterns, Pattern.CASE_INSENSITIVE);
+						final Pattern p = Pattern.compile(localFilePatterns, Pattern.CASE_INSENSITIVE);				
 						
-						FileFilter filter = new FileFilter() 
+						workspace.zip(fos, new RegExFileFilter(p));
 						
-						{
-							//			private final String CLASS_NAME = FodBuilder.CLASS_NAME+".anon(FileFilter)";
 
-							private final Pattern filePattern = p;
-
-							@Override
-							public boolean accept(File pathname) {
-								//				final String METHOD_NAME = CLASS_NAME+".accept";
-								//				logger.println(METHOD_NAME+": pathname.path = "+pathname.getPath());
-								//				logger.println(METHOD_NAME+": pathname.name = "+pathname.getName());
-
-								boolean matches = false;
-
-								Matcher m = filePattern.matcher(pathname.getName());
-								matches = m.matches();
-								//				logger.println(METHOD_NAME+": pathname accepted : "+matches);
-
-								return matches;
-							}
-						};
-						
-						workspace.zip(fos, filter);
-						
-					} finally 
+					} catch (IOException e)
+					{
+						logger.println(METHOD_NAME+": error compressing workspace contents, please refer to the Jenkins log.");
+						e.printStackTrace();
+					}
+					
+					finally 
 						{
 							if (fos != null)
 							{
@@ -420,7 +410,7 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					}
 
 				}
-				catch (InterruptedException e)
+				catch (Exception e)
 				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1418,4 +1408,5 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			return returnValue;
 		}
 	} // end class DescriptorImpl
+	public static interface SerializableFileFilter extends FileFilter, Serializable {}
 }
