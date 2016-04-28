@@ -497,13 +497,12 @@ public class FoDAPI {
 	 * @return
 	 * @throws IOException
 	 */
+	@SuppressWarnings("deprecation")
 	public List<Release> getReleaseList(String applicationName)
 			throws IOException
 	{
-			//FIXME URLEncoder deprecated? 
-			// encode(String, String) to specify the encoding, will avoid issues with default encoding - RB
-			applicationName = encodeURLParamUTF8(applicationName);
-			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+encodeURLParamUTF8(applicationName)+"&fields=applicationId,applicationName,releaseId,releaseName";
+			applicationName = URLEncoder.encode(applicationName);
+			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+applicationName+"&fields=applicationId,applicationName,releaseId,releaseName";
 			URL url = new URL(endpoint);
 			HttpURLConnection connection = getHttpUrlConnection("GET",url);
 			InputStream is = null;
@@ -783,6 +782,7 @@ public class FoDAPI {
 	 * @return
 	 * @throws IOException
 	 */
+	@SuppressWarnings("deprecation")
 	public UploadStatus uploadFile(UploadRequest req) throws IOException
 	{
 		final String METHOD_NAME = CLASS_NAME +".uploadFile";
@@ -797,6 +797,7 @@ public class FoDAPI {
 			String applicationName = req.getApplicationName();
 			String releaseName = req.getReleaseName();
 			releaseId = getReleaseId(applicationName, releaseName);
+			out.println(METHOD_NAME + ": ReleaseId: " + releaseId);
 		}
 				
 		if( null != releaseId && 0 < releaseId )
@@ -829,8 +830,8 @@ public class FoDAPI {
 							postURL.append(baseUrl);
 							postURL.append("/api/v1/release/" + releaseId);
 							postURL.append("/scan/?assessmentTypeId="+ req.getAssessmentTypeId());
-							postURL.append("&technologyStack="+ encodeURLParamUTF8(req.getTechnologyStack()));
-							postURL.append("&languageLevel="+ encodeURLParamUTF8(req.getLanguageLevel()));
+							postURL.append("&technologyStack="+ URLEncoder.encode(req.getTechnologyStack()));
+							postURL.append("&languageLevel="+  URLEncoder.encode(req.getLanguageLevel()));
 							postURL.append("&fragNo=" + fragmentNumber++ );
 							postURL.append("&len=" + byteCount);
 							postURL.append("&offset=" + offset);
@@ -840,7 +841,7 @@ public class FoDAPI {
 							postURL.append(baseUrl);
 							postURL.append("/api/v1/release/" + releaseId);
 							postURL.append("/scan/?assessmentTypeId="+ req.getAssessmentTypeId());
-							postURL.append("&technologyStack="+ encodeURLParamUTF8(req.getTechnologyStack()));
+							postURL.append("&technologyStack="+ URLEncoder.encode(req.getTechnologyStack()));
 							postURL.append("&fragNo=" + fragmentNumber++ );
 							postURL.append("&len=" + byteCount);
 							postURL.append("&offset=" + offset);
@@ -939,8 +940,12 @@ public class FoDAPI {
 		}
 		else
 		{
+			if (releaseId == null)
+			{
+				status.setErrorMessage(METHOD_NAME+":Error: releaseId is null!");
+			}
 			status.setUploadSucceeded(false);
-			status.setErrorMessage("Combination of applicationName of \""+req.getApplicationName()+"\" and releaseName of \""+req.getApplicationName()+"\" is not valid");
+			status.setErrorMessage("Combination of applicationName of \""+req.getApplicationName()+"\" and releaseName of \""+req.getReleaseName()+"\" is not valid");
 		}
 		return status;
 	}
