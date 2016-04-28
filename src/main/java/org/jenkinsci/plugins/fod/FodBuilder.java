@@ -830,6 +830,32 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			return returnValue;
 		}
 		
+		
+		public FormValidation doCheckPollingInterval(@QueryParameter String value)
+				throws IOException, ServletException
+		{
+			FormValidation returnValue = null;
+			if (value.length() == 0)
+			{
+				returnValue = FormValidation.error("Please set a polling interval.");
+			}
+			else
+			{
+				String clientIdRegex = "\\d+";
+				Pattern p = Pattern.compile(clientIdRegex);
+				Matcher m = p.matcher(value);
+				if( m.matches() )
+				{
+					returnValue = FormValidation.ok();
+				}
+				else
+				{
+					returnValue = FormValidation.error("Invalid polling interval.");
+				}
+			}
+			return returnValue;
+		}
+		
 		public FormValidation doCheckClientSecret(@QueryParameter String value)
 				throws IOException, ServletException
 		{
@@ -1082,7 +1108,6 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 					
 			if( TS_JAVA_KEY.equalsIgnoreCase(technologyStack))
 			{
-				items.add(new Option("1.2", "1.2",false));
 				items.add(new Option("1.3", "1.3",false));
 				items.add(new Option("1.4", "1.4",false));
 				items.add(new Option("1.5", "1.5",false));
@@ -1092,17 +1117,12 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			}
 			else if( TS_DOTNET_KEY.equalsIgnoreCase(technologyStack) )
 			{
-				items.add(new Option("1.0", "1.0",false));
 				items.add(new Option("1.1", "1.1",false));
 				items.add(new Option("2.0", "2.0",false));
 				items.add(new Option("3.0", "3.0",false));
 				items.add(new Option("3.5", "3.5",false));
 				items.add(new Option("4.0", "4.0",false));
 				items.add(new Option("4.5", "4.5",false));
-				items.add(new Option("4.5.1", "4.5.1",false));
-				items.add(new Option("4.5.2", "4.5.2",false));
-				items.add(new Option("4.6", "4.6",false));
-				items.add(new Option("4.6.1", "4.6.1",true));
 			}
 			else if (TS_PYTHON_KEY.equalsIgnoreCase(technologyStack))
 			{
@@ -1183,12 +1203,10 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 			}
 			
 			String newPollingInterval = formData.getString("pollingInterval");
-			if( null != pollingInterval && !newPollingInterval.isEmpty() && !newPollingInterval.equals(this.pollingInterval) )
-			{
-				this.pollingInterval = newPollingInterval;
-				out.println(METHOD_NAME+": pollingInterval = "+this.pollingInterval);
-			}
-			
+
+			this.pollingInterval = newPollingInterval;
+			out.println(METHOD_NAME+": pollingInterval = "+this.pollingInterval);
+
 			out.println(METHOD_NAME+": calling save");
 			save();
 			return super.configure(req,formData);

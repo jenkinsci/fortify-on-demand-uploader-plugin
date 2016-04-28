@@ -26,11 +26,6 @@
   <f:entry title="Language Level" field="languageLevel">
     <f:select />
   </f:entry>
-    <!--
-    <f:entry title="Upload Files" field="filePattern">
-  <f:select /> 
-  </f:entry>
-  -->
   
   <f:advanced title="Additional Options">
   <f:entry title="Open source component analysis" field="runOpenSourceAnalysis">
@@ -46,7 +41,7 @@
     <f:checkbox/>
   </f:entry>
       <f:entry title="Poll Fortify on Demand for results" field="doPollFortify">
-    <f:checkbox/> <!-- <f:checkbox default="false"/>  Checkboxes have no default to avoid resetting options when the user views the configuration page for any reason -->
+    <f:checkbox/>
   </f:entry>
       <f:entry title="Include all project files" field="includeAllFiles">
     <f:checkbox/>
