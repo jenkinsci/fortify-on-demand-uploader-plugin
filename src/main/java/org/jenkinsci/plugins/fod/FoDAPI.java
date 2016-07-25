@@ -147,12 +147,18 @@ public class FoDAPI {
 				
 				Proxy proxy = proxyConfig.createProxy(fodBaseUrl);				
 				InetSocketAddress address = (InetSocketAddress) proxy.address();
-				Credentials credentials = new UsernamePasswordCredentials(proxyConfig.getUserName(), proxyConfig.getPassword());
-				AuthScope authScope = new AuthScope(address.getHostName(), address.getPort());
-				CredentialsProvider credsProvider = new BasicCredentialsProvider();
-				credsProvider.setCredentials(authScope, credentials);				
 				HttpHost proxyHttpHost = new HttpHost(address.getHostName(), address.getPort() , proxy.address().toString().indexOf("https") != 0 ? "http" : "https");
-				builder.setProxy(proxyHttpHost).setDefaultCredentialsProvider(credsProvider);
+				builder.setProxy(proxyHttpHost)
+
+				if( null != proxyConfig.getUserName() && ! proxyConfig.getUserName().trim().equals("")
+					&& null != proxyConfig.getPassword() && ! proxyConfig.getPassword().trim().equals(""))
+				{
+					Credentials credentials = new UsernamePasswordCredentials(proxyConfig.getUserName(), proxyConfig.getPassword());
+					AuthScope authScope = new AuthScope(address.getHostName(), address.getPort());
+					CredentialsProvider credsProvider = new BasicCredentialsProvider();
+					credsProvider.setCredentials(authScope, credentials);
+					builder.setDefaultCredentialsProvider(credsProvider);
+				}
 				logger.println(METHOD_NAME+": using proxy configuration: "+ proxyHttpHost.getSchemeName()+ "://" + proxyHttpHost.getHostName() + ":" + proxyHttpHost.getPort());
 			}
 			this.httpClient = builder.build();
