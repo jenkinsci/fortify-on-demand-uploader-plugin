@@ -148,7 +148,7 @@ public class FoDAPI {
 				Proxy proxy = proxyConfig.createProxy(fodBaseUrl);				
 				InetSocketAddress address = (InetSocketAddress) proxy.address();
 				HttpHost proxyHttpHost = new HttpHost(address.getHostName(), address.getPort() , proxy.address().toString().indexOf("https") != 0 ? "http" : "https");
-				builder.setProxy(proxyHttpHost)
+				builder.setProxy(proxyHttpHost);
 
 				if( null != proxyConfig.getUserName() && ! proxyConfig.getUserName().trim().equals("")
 					&& null != proxyConfig.getPassword() && ! proxyConfig.getPassword().trim().equals(""))
