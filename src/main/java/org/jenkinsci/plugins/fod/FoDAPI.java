@@ -68,6 +68,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.jenkinsci.plugins.fod.schema.Application;
 import org.jenkinsci.plugins.fod.schema.Release;
 import org.jenkinsci.plugins.fod.schema.Scan;
 import org.jenkinsci.plugins.fod.schema.ScanSnapshot;
@@ -88,6 +89,7 @@ public class FoDAPI {
 	private long tokenExpiry;
 	private AuthPrincipal principal;
 	private String baseUrl;
+	private String restrictApplications;
 	private ProxyConfiguration proxyConfig = Jenkins.getInstance().proxy;
 	private Gson gson;
 
@@ -368,40 +370,70 @@ public class FoDAPI {
 	}
 
 
-	public Map<String, String> getApplicationList() throws IOException {
+	public List<Application> getApplicationList() throws IOException {
 		final String METHOD_NAME = CLASS_NAME+".getApplicationList";
-		
-		String endpoint = baseUrl + "/api/v1/Application/?fields=applicationId,applicationName,isMobile&limit=9999"; //TODO make this consistent elsewhere by a global config
-		HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
-		InputStream is = null;
 
-		try {
-			// Get Response
-			HttpResponse response = getHttpClient().execute(connection);
-			is = response.getEntity().getContent();
-			StringBuffer buffer = collectInputStream(is);
-			JsonArray arr = getDataJsonArray(buffer);
-			Map<String, String> map = new TreeMap<String, String>();
-			for (int ix = 0; ix < arr.size(); ix++) {
-				JsonElement entity = arr.get(ix);
-				JsonObject obj = entity.getAsJsonObject();
-				JsonPrimitive name = obj.getAsJsonPrimitive("applicationName");
-				JsonPrimitive id = obj.getAsJsonPrimitive("applicationID");
-				JsonPrimitive isMobile = obj.getAsJsonPrimitive("isMobile");
+		PrintStream out = FodBuilder.getLogger();
+		if( null == out )
+		{
+			out = System.out;
+		}
 
-				if (map.containsKey(name.getAsString())) {
-					continue;
+		int MAX_SIZE = 50;
+		int offset = 0;
+		int lastRetrieved = MAX_SIZE;
+
+		List<Application> appList = new LinkedList<Application>();
+
+		String filter = "";
+		if (null != restrictApplications && !restrictApplications.equals(FodBuilder.DescriptorImpl.TYPE_ALL)) {
+			filter = "&filters=applicationType:" + restrictApplications;
+		}
+
+		while (lastRetrieved == MAX_SIZE)
+		{
+
+			String endpoint = baseUrl + "/api/v3/applications/?fields=applicationId,applicationName,applicationTypeId,applicationType"+filter+"&offset="+offset+"&limit="+MAX_SIZE;
+			HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
+			InputStream is = null;
+
+			try {
+				// Get Response
+				HttpResponse response = getHttpClient().execute(connection);
+				is = response.getEntity().getContent();
+				StringBuffer buffer = collectInputStream(is);
+				JsonArray arr = getItemJsonArray(buffer);
+				lastRetrieved = arr.size();
+				for (int ix = 0; ix < arr.size(); ix++) {
+					JsonElement entity = arr.get(ix);
+					JsonObject obj = entity.getAsJsonObject();
+					JsonPrimitive name = obj.getAsJsonPrimitive("applicationName");
+					JsonPrimitive id = obj.getAsJsonPrimitive("applicationId");
+					JsonPrimitive appTypeId = obj.getAsJsonPrimitive("applicationTypeId");
+					JsonPrimitive appType = obj.getAsJsonPrimitive("applicationType");
+
+					out.println("app_name: "+name.getAsString()+"type:"+appType.getAsString()+"("+appTypeId.getAsString()+")");
+					Application app = new Application();
+					app.setApplicationName(name.getAsString());
+					app.setApplicationId(id.getAsLong());
+					app.setApplicationType(appType.getAsString());
+					app.setApplicationTypeId(appTypeId.getAsLong());
+					appList.add(app);
+
 				}
-				if (!isMobile.getAsBoolean()) {
-					map.put(name.getAsString(), id.getAsString());
+				offset += MAX_SIZE;
+			} catch (Exception e) {
+				e.printStackTrace();
+				// in case of error stop querying
+				lastRetrieved = 0;
+
+			} finally {
+				if (is != null){
+					is.close();
 				}
-			}
-			return map;
-		} finally {
-			if (is != null){
-				is.close();
 			}
 		}
+		return appList;
 	}
 	
 	public Long getReleaseId(String applicationName, String releaseName) throws IOException
@@ -483,38 +515,53 @@ public class FoDAPI {
 		System.out.println(METHOD_NAME+": called");
 		
 		List<Release> releaseList = new LinkedList<Release>();
-		
-		String endpoint = baseUrl + "/api/v2/Releases?fields=applicationId,applicationName,releaseId,releaseName";
-		out.println(METHOD_NAME+": baseUrl = "+baseUrl);
-		out.println(METHOD_NAME+": calling GET "+endpoint);
-		HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
 
-		InputStream is = null;
-		
-		try {
-			HttpResponse response = getHttpClient().execute(connection);
-			int responseCode = response.getStatusLine().getStatusCode();
-			out.println(METHOD_NAME+": responseCode = "+responseCode);
-			is = response.getEntity().getContent();
-			StringBuffer buffer = collectInputStream(is);
-			out.println(METHOD_NAME + ": response = " + buffer);
-			JsonArray arr = getDataJsonArray(buffer);
-			Gson gson = getGson();
-			out.println(METHOD_NAME + ": arr.size = " + arr.size());
-			for (int ix = 0; ix < arr.size(); ix++) {
-				Release release = new Release();
+		int MAX_SIZE = 50;
+		int offset = 0;
+		int lastRetrieved = MAX_SIZE;
 
-				JsonElement entity = arr.get(ix);
-				release = gson.fromJson(entity, Release.class);
+		while (lastRetrieved == MAX_SIZE)
+		{
 
-				releaseList.add(release);
-			}
-			return releaseList;
-		} finally {
-			if (is != null){
-				is.close();
+		    String endpoint = baseUrl + "/api/v3/releases?fields=applicationId,applicationName,releaseId,releaseName&offset=" + offset + "&limit=" + MAX_SIZE;
+		    out.println(METHOD_NAME+": baseUrl = "+baseUrl);
+		    out.println(METHOD_NAME+": calling GET "+endpoint);
+		    HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
+
+		    InputStream is = null;
+
+			try {
+				HttpResponse response = getHttpClient().execute(connection);
+				int responseCode = response.getStatusLine().getStatusCode();
+				out.println(METHOD_NAME+": responseCode = "+responseCode);
+				is = response.getEntity().getContent();
+				StringBuffer buffer = collectInputStream(is);
+				out.println(METHOD_NAME + ": response = " + buffer);
+				JsonArray arr = getItemJsonArray(buffer);
+				Gson gson = getGson();
+				out.println(METHOD_NAME + ": arr.size = " + arr.size());
+				lastRetrieved = arr.size();
+				for (int ix = 0; ix < arr.size(); ix++) {
+					Release release = new Release();
+
+					JsonElement entity = arr.get(ix);
+					release = gson.fromJson(entity, Release.class);
+
+					releaseList.add(release);
+				}
+				offset += MAX_SIZE;
+			} catch (Exception e) {
+				e.printStackTrace();
+				// in case of error stop querying
+				lastRetrieved = 0;
+
+			} finally {
+				if (is != null){
+					is.close();
+				}
 			}
 		}
+		return releaseList;
 	}
 
 	/**
@@ -530,7 +577,7 @@ public class FoDAPI {
 			throws IOException
 	{
 			applicationName = URLEncoder.encode(applicationName);
-			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+applicationName+"&fields=applicationId,applicationName,releaseId,releaseName";
+			String endpoint = baseUrl+"/api/v3/releases/?filters=applicationName:"+applicationName+"&fields=applicationId,applicationName,releaseId,releaseName";
 			HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
 			InputStream is = null;
 
@@ -541,7 +588,7 @@ public class FoDAPI {
 				HttpResponse response = getHttpClient().execute(connection);
 				is = response.getEntity().getContent();
 				StringBuffer buffer = collectInputStream(is);
-				JsonArray arr = getDataJsonArray(buffer);
+				JsonArray arr = getItemJsonArray(buffer);
 				list = new LinkedList<Release>();
 				Gson gson = getGson();
 				for (int ix = 0; ix < arr.size(); ix++) {
@@ -600,8 +647,8 @@ public class FoDAPI {
 	}
 	
 	public Map<String, String> getAssessmentTypeListWithRetry() throws IOException {
-		
-		final String METHOD_NAME = CLASS_NAME+".getReleaseList";
+
+		final String METHOD_NAME = CLASS_NAME+".getAssessmentTypeListWithRetry";
 		PrintStream out = FodBuilder.getLogger();
 		if( null == out )
 		{
@@ -1075,6 +1122,14 @@ public class FoDAPI {
 		}
 	}
 
+	public String getRestrictApplications() {
+		return restrictApplications;
+	}
+
+	public void setRestrictApplications(String restrictApplications) {
+		this.restrictApplications = restrictApplications;
+	}
+
 	public String getBaseUrl() {
 		return baseUrl;
 	}
@@ -1147,6 +1202,17 @@ public class FoDAPI {
 		JsonElement jsonElement = parser.parse(responseString);
 		JsonObject dataObject = jsonElement.getAsJsonObject();
 		JsonElement dataElement = dataObject.getAsJsonArray("data");
+		JsonArray arr = dataElement.getAsJsonArray();
+		return arr;
+	}
+
+	protected JsonArray getItemJsonArray(StringBuffer response)
+	{
+		String responseString = response.toString();
+		JsonParser parser = new JsonParser();
+		JsonElement jsonElement = parser.parse(responseString);
+		JsonObject dataObject = jsonElement.getAsJsonObject();
+		JsonElement dataElement = dataObject.getAsJsonArray("items");
 		JsonArray arr = dataElement.getAsJsonArray();
 		return arr;
 	}
