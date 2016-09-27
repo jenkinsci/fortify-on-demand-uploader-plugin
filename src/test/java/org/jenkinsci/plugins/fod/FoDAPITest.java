@@ -21,6 +21,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.jenkinsci.plugins.fod.schema.Application;
 import org.jenkinsci.plugins.fod.schema.Release;
 import org.jenkinsci.plugins.fod.schema.Scan;
 import org.jenkinsci.plugins.fod.schema.ScanSnapshot;
@@ -116,13 +117,13 @@ public class FoDAPITest {
 	@Test
 	public void testGetApplicationList() throws IOException {
 		final String METHOD_NAME = CLASS_NAME+".testGetApplicationList";
-		
-		Map<String,String> appList = api.getApplicationList();
+
+		List<Application> appList = api.getApplicationList();
 		assertNotNull(appList);
 		assertFalse(appList.isEmpty());
-		for( Entry<String,String> entry : appList.entrySet() )
+		for( Application app : appList )
 		{
-			System.out.println(METHOD_NAME+": name="+entry.getKey()+" / id=" + entry.getValue() );
+			System.out.println(METHOD_NAME+": name="+app.getApplicationName()+" / id="+app.getApplicationId() );
 		}
 	}
 

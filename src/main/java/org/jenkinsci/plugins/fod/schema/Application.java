@@ -78,6 +78,10 @@ public class Application {
 		this.applicationType = applicationType;
 	}
 
+	public long getApplicationId() {
+		return applicationId;
+	}
+
 	public void setApplicationId(long applicationId) {
 		this.applicationId = applicationId;
 	}
