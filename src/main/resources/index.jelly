@@ -1,7 +1,0 @@
-<?jelly escape-by-default='true'?>
-<!--
-  This view is used to render the installed plugins page.
--->
-<div>
-  This plugin provides a post build action for submitting code to HPE Security Fortify on Demand for security assessment. 
-</div>
