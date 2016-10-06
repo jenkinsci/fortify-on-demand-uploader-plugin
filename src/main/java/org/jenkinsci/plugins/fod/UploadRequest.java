@@ -7,12 +7,13 @@ public class UploadRequest {
 	private String applicationName;
 	private String releaseName;
 	private Long releaseId;
-	private Long assessmentTypeId;
+	private String assessmentTypeId;
 	private String technologyStack;
 	private String languageLevel;
-	private Boolean runSonatypeScan;
+	private Boolean runOpenSourceAnalysis;
 	private Boolean isExpressScan;
 	private Boolean isExpressAudit;
+	private Boolean includeThirdParty;
 	
 	
 	public File getUploadZip() {
@@ -36,13 +37,13 @@ public class UploadRequest {
 	public Long getReleaseId() {
 		return releaseId;
 	}
-	public void setReleaseId(Long releaseId2) {
-		this.releaseId = releaseId2;
+	public void setReleaseId(Long releaseId) {
+		this.releaseId = releaseId;
 	}
-	public Long getAssessmentTypeId() {
-		return (long) 170; //always a standard, "express" setting controlled by scanPreferenceId param
+	public String getAssessmentTypeId() {		
+		return assessmentTypeId;
 	}
-	public void setAssessmentTypeId(Long assessmentTypeId) {
+	public void setAssessmentTypeId(String assessmentTypeId) {
 		this.assessmentTypeId = assessmentTypeId;
 	}
 	public String getTechnologyStack() {
@@ -57,11 +58,11 @@ public class UploadRequest {
 	public void setLanguageLevel(String languageLevel) {
 		this.languageLevel = languageLevel;
 	}
-	public Boolean getRunSonatypeScan() {
-		return runSonatypeScan;
+	public Boolean getRunOpenSourceAnalysis() {
+		return runOpenSourceAnalysis;
 	}
-	public void setRunSonatypeScan(Boolean runSonatypeScan) {
-		this.runSonatypeScan = runSonatypeScan;
+	public void setRunOpenSourceAnalysis(Boolean runOpenSourceAnalysis) {
+		this.runOpenSourceAnalysis = runOpenSourceAnalysis;
 	}
 	public Boolean getIsExpressScan() {
 		return isExpressScan;
@@ -74,6 +75,12 @@ public class UploadRequest {
 	}
 	public void setIsExpressAudit(Boolean isExpressAudit) {
 		this.isExpressAudit = isExpressAudit;
+	}
+	public Boolean getIncludeThirdParty() {
+		return includeThirdParty;
+	}
+	public void setIncludeThirdParty(Boolean includeThirdParty) {
+		this.includeThirdParty = includeThirdParty;	
 	}
 
 }

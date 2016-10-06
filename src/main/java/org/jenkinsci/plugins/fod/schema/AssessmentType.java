@@ -6,6 +6,7 @@ public enum AssessmentType {
 	,MOBILE_PREMIUM(104,"Mobile Premium")
 	,STATIC_EXPRESS(105,"Static Express")
 	,DYNAMIC_PREMIUM(141,"Dynamic Premium Assessment")
+	,STATIC_STANDARD(107,"Static Standard")
 	,STATIC_ASSESSMENT(170,"Static Assessment")
 	;
 	

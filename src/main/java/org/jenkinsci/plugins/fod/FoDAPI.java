@@ -13,6 +13,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import hudson.ProxyConfiguration;
+import jenkins.model.Jenkins;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
@@ -21,11 +24,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.SocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -38,19 +42,29 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.TreeMap;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -74,9 +88,7 @@ public class FoDAPI {
 	private long tokenExpiry;
 	private AuthPrincipal principal;
 	private String baseUrl;
-	private String proxyHostname = null;
-	private int proxyPort;
-	private Proxy proxy;
+	private ProxyConfiguration proxyConfig = Jenkins.getInstance().proxy;
 	private Gson gson;
 
 	final int seglen = 1024 * 1024; // chunk size
@@ -112,6 +124,47 @@ public class FoDAPI {
 		param = URLEncoder.encode(param, UTF_8);
 		return param;
 	}
+	
+	private HttpClient getHttpClient(){
+		final String METHOD_NAME = CLASS_NAME+".getHttpClient";
+		PrintStream logger = FodBuilder.getLogger();
+		
+		if( null == this.httpClient )
+		{
+			HttpClientBuilder builder = HttpClientBuilder.create();
+			if( null != proxyConfig)
+			{
+				String fodBaseUrl = null;
+				
+				if( null != this.baseUrl && !this.baseUrl.isEmpty() )
+				{
+					fodBaseUrl = this.baseUrl;
+				}
+				else
+				{
+					fodBaseUrl = PUBLIC_FOD_BASE_URL;
+				}
+				
+				Proxy proxy = proxyConfig.createProxy(fodBaseUrl);				
+				InetSocketAddress address = (InetSocketAddress) proxy.address();
+				HttpHost proxyHttpHost = new HttpHost(address.getHostName(), address.getPort() , proxy.address().toString().indexOf("https") != 0 ? "http" : "https");
+				builder.setProxy(proxyHttpHost);
+
+				if( null != proxyConfig.getUserName() && ! proxyConfig.getUserName().trim().equals("")
+					&& null != proxyConfig.getPassword() && ! proxyConfig.getPassword().trim().equals(""))
+				{
+					Credentials credentials = new UsernamePasswordCredentials(proxyConfig.getUserName(), proxyConfig.getPassword());
+					AuthScope authScope = new AuthScope(address.getHostName(), address.getPort());
+					CredentialsProvider credsProvider = new BasicCredentialsProvider();
+					credsProvider.setCredentials(authScope, credentials);
+					builder.setDefaultCredentialsProvider(credsProvider);
+				}
+				logger.println(METHOD_NAME+": using proxy configuration: "+ proxyHttpHost.getSchemeName()+ "://" + proxyHttpHost.getHostName() + ":" + proxyHttpHost.getPort());
+			}
+			this.httpClient = builder.build();
+		}
+		return this.httpClient;
+	}
 
 	//TODO refactor authorization code
 //	public boolean authorize()
@@ -138,7 +191,6 @@ public class FoDAPI {
 		this.setPrincipal(clientId, clientSecret);
 		return this.authorize();
 	}
-		
 	
 	/**
 	 * Authenticates against FoD API and caches session token.
@@ -152,12 +204,6 @@ public class FoDAPI {
 	{
 		final String METHOD_NAME = CLASS_NAME+".authorize()";
 		PrintStream logger = FodBuilder.getLogger();
-		
-		if( null == this.httpClient )
-		{
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			this.httpClient = builder.build();
-		}
 		
 		String fodBaseUrl = null;
 		
@@ -192,10 +238,10 @@ public class FoDAPI {
 		authRequest.setScope(FOD_SCOPE_TENANT);
 		
 		long tokenReqSubmitTs = System.currentTimeMillis();
-		AuthTokenResponse authResponse = this.authorize(fodBaseUrl,authRequest,this.httpClient);
+		AuthTokenResponse authResponse = this.authorize(fodBaseUrl,authRequest);
 		String token = authResponse.getAccessToken();
 		
-	//	logger.println(METHOD_NAME+": token = "+token);
+	//	logger.println(METHOD_NAME+": token = "+token);  //enabled for testing
 		if (token != null && 0 < token.length() )
 		{
 			this.sessionToken = token;
@@ -218,7 +264,7 @@ public class FoDAPI {
 	 * @param client HTTP client object
 	 * @return
 	 */
-	private AuthTokenResponse authorize(String baseUrl, AuthTokenRequest request, HttpClient client)
+	private AuthTokenResponse authorize(String baseUrl, AuthTokenRequest request)
 	{
 		final String METHOD_NAME = CLASS_NAME+".authorize";
 		PrintStream out = FodBuilder.getLogger();
@@ -239,7 +285,6 @@ public class FoDAPI {
 			
 			List<NameValuePair> formparams = new ArrayList<NameValuePair>();
 			
-	//		out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
 			
 			if( AuthCredentialType.CLIENT_CREDENTIALS.getName().equals(request.getGrantType()) )
 			{
@@ -248,11 +293,6 @@ public class FoDAPI {
 				formparams.add(new BasicNameValuePair("grant_type",request.getGrantType()));
 				formparams.add(new BasicNameValuePair("client_id", cred.getClientId()));
 				formparams.add(new BasicNameValuePair("client_secret", cred.getClientSecret()));
-				
-	//			out.println(METHOD_NAME+": request.scope = "+FOD_SCOPE_TENANT);
-	//			out.println(METHOD_NAME+": request.grantType = "+request.getGrantType());
-			//	out.println(METHOD_NAME+": request.clientId = "+cred.getClientId());
-			//	out.println(METHOD_NAME+": request.clientSecret = "+cred.getClientSecret());
 			}
 			else
 			{
@@ -261,10 +301,9 @@ public class FoDAPI {
 
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams,UTF_8);
 			httppost.setEntity(entity);
-			HttpResponse postResponse = client.execute(httppost);
+			HttpResponse postResponse = getHttpClient().execute(httppost);
 			StatusLine sl = postResponse.getStatusLine();
 			Integer statusCode = Integer.valueOf(sl.getStatusCode());
-	//		out.println(METHOD_NAME+": statusCode = "+statusCode);
 			
 			if (statusCode.toString().startsWith("2"))
 			{
@@ -280,14 +319,13 @@ public class FoDAPI {
 					JsonObject jsonObject = jsonElement.getAsJsonObject();
 					JsonElement tokenElement = jsonObject.getAsJsonPrimitive("access_token");
 					if (null != tokenElement && !tokenElement.isJsonNull() && tokenElement.isJsonPrimitive()) {
-						//accessToken = tokenElement.getAsString();
+
 						response.setAccessToken(tokenElement.getAsString());
-						//		out.println(METHOD_NAME+": access_token = "+tokenElement.getAsString());
+
 					}
 					JsonElement expiresIn = jsonObject.getAsJsonPrimitive("expires_in");
 					Integer expiresInInt = expiresIn.getAsInt();
 					response.setExpiresIn(expiresInInt);
-		//			out.println(METHOD_NAME + ": expires_in = " + expiresInInt);
 					//TODO handle remaining two fields in response
 				} finally {
 					if (is != null){
@@ -333,17 +371,16 @@ public class FoDAPI {
 	public Map<String, String> getApplicationList() throws IOException {
 		final String METHOD_NAME = CLASS_NAME+".getApplicationList";
 		
-		//String endpoint = baseUrl + "/api/v1/application";
 		String endpoint = baseUrl + "/api/v1/Application/?fields=applicationId,applicationName,isMobile&limit=9999"; //TODO make this consistent elsewhere by a global config
-		URL url = new URL(endpoint);
-		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
 		InputStream is = null;
 
 		try {
 			// Get Response
-			is = connection.getInputStream();
-			StringBuffer response = collectInputStream(is);
-			JsonArray arr = getDataJsonArray(response);
+			HttpResponse response = getHttpClient().execute(connection);
+			is = response.getEntity().getContent();
+			StringBuffer buffer = collectInputStream(is);
+			JsonArray arr = getDataJsonArray(buffer);
 			Map<String, String> map = new TreeMap<String, String>();
 			for (int ix = 0; ix < arr.size(); ix++) {
 				JsonElement entity = arr.get(ix);
@@ -369,7 +406,6 @@ public class FoDAPI {
 	
 	public Long getReleaseId(String applicationName, String releaseName) throws IOException
 	{
-		//TODO no exact way to look up single release found yet -- ask FoD ppl if easier method exists
 		Long releaseId = null;
 		List<Release> releaseList = getReleaseList(applicationName);
 		for(Release release : releaseList)
@@ -380,27 +416,23 @@ public class FoDAPI {
 			{
 				releaseId = release.getReleaseId();
 			}
-		}
-		
+		}		
 		return releaseId;
 	}
 
 	public Release getRelease(Long releaseId) throws IOException
-	{
-		// https://www.hpfod.com/api/v1/Release/93328
-		// https://www.hpfod.com/api/v2/Releases/93328
-		
+	{	
 		String endpoint = baseUrl+"/api/v2/Releases/"+releaseId;
-		URL url = new URL(endpoint);
-		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
 		InputStream is = null;
 		Release release;
 		
 		try {
 			// Get Response
-			is = connection.getInputStream();
-			StringBuffer response = collectInputStream(is);
-			String responseStr = response.toString();
+			HttpResponse response = getHttpClient().execute(connection);
+			is = response.getEntity().getContent();
+			StringBuffer buffer = collectInputStream(is);
+			String responseStr = buffer.toString();
 			JsonElement dataElement = getDataJsonElement(responseStr);
 			Gson gson = getGson();
 			release = gson.fromJson(dataElement, Release.class);
@@ -454,21 +486,19 @@ public class FoDAPI {
 		
 		String endpoint = baseUrl + "/api/v2/Releases?fields=applicationId,applicationName,releaseId,releaseName";
 		out.println(METHOD_NAME+": baseUrl = "+baseUrl);
-		URL url = new URL(endpoint);
-		out.println(METHOD_NAME+": calling GET "+url);
-		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		out.println(METHOD_NAME+": calling GET "+endpoint);
+		HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
 
-		// Get Response
-		int responseCode = connection.getResponseCode();
-		out.println(METHOD_NAME+": responseCode = "+responseCode);
-		
 		InputStream is = null;
 		
 		try {
-			is = connection.getInputStream();
-			StringBuffer response = collectInputStream(is);
-			out.println(METHOD_NAME + ": response = " + response);
-			JsonArray arr = getDataJsonArray(response);
+			HttpResponse response = getHttpClient().execute(connection);
+			int responseCode = response.getStatusLine().getStatusCode();
+			out.println(METHOD_NAME+": responseCode = "+responseCode);
+			is = response.getEntity().getContent();
+			StringBuffer buffer = collectInputStream(is);
+			out.println(METHOD_NAME + ": response = " + buffer);
+			JsonArray arr = getDataJsonArray(buffer);
 			Gson gson = getGson();
 			out.println(METHOD_NAME + ": arr.size = " + arr.size());
 			for (int ix = 0; ix < arr.size(); ix++) {
@@ -495,24 +525,23 @@ public class FoDAPI {
 	 * @return
 	 * @throws IOException
 	 */
+	@SuppressWarnings("deprecation")
 	public List<Release> getReleaseList(String applicationName)
 			throws IOException
 	{
-			//FIXME URLEncoder deprecated? 
-			// encode(String, String) to specify the encoding, will avoid issues with default encoding - RB
-			applicationName = encodeURLParamUTF8(applicationName);
-			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+encodeURLParamUTF8(applicationName)+"&fields=applicationId,applicationName,releaseId,releaseName";
-			URL url = new URL(endpoint);
-			HttpURLConnection connection = getHttpUrlConnection("GET",url);
+			applicationName = URLEncoder.encode(applicationName);
+			String endpoint = baseUrl+"/api/v2/Releases/?q=applicationName:"+applicationName+"&fields=applicationId,applicationName,releaseId,releaseName";
+			HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
 			InputStream is = null;
 
 			List<Release> list;
 			
 			try {
 				// Get Response
-				is = connection.getInputStream();
-				StringBuffer response = collectInputStream(is);
-				JsonArray arr = getDataJsonArray(response);
+				HttpResponse response = getHttpClient().execute(connection);
+				is = response.getEntity().getContent();
+				StringBuffer buffer = collectInputStream(is);
+				JsonArray arr = getDataJsonArray(buffer);
 				list = new LinkedList<Release>();
 				Gson gson = getGson();
 				for (int ix = 0; ix < arr.size(); ix++) {
@@ -542,17 +571,17 @@ public class FoDAPI {
 			throws IOException
 	{
 		String endpoint = baseUrl+"/api/v2/Releases/?q=applicationId:"+applicationId+"&fields=applicationId,applicationName,releaseId,releaseName";
-		URL url = new URL(endpoint);
-		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
 		InputStream is = null;
 
 		List<Release> list;
 		
 		try {
 			// Get Response
-			is = connection.getInputStream();
-			StringBuffer response = collectInputStream(is);
-			JsonArray arr = getDataJsonArray(response);
+			HttpResponse response = getHttpClient().execute(connection);
+			is = response.getEntity().getContent();
+			StringBuffer buffer = collectInputStream(is);
+			JsonArray arr = getDataJsonArray(buffer);
 			list = new LinkedList<Release>();
 			Gson gson = getGson();
 			for (int ix = 0; ix < arr.size(); ix++) {
@@ -570,6 +599,73 @@ public class FoDAPI {
 		}
 	}
 	
+	public Map<String, String> getAssessmentTypeListWithRetry() throws IOException {
+		
+		final String METHOD_NAME = CLASS_NAME+".getReleaseList";
+		PrintStream out = FodBuilder.getLogger();
+		if( null == out )
+		{
+			out = System.out;
+		}
+		
+		int attempts = 0;
+		int maxattempts = 5;
+		Map<String, String> map = new TreeMap<String, String>();				
+		
+		String endpoint = baseUrl + "/api/v1/AssessmentType";
+				
+		while ((null == map || map.isEmpty()) && (attempts < maxattempts))
+		{
+			HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
+			InputStream is = null;			
+
+			try {
+				// Get Response
+				HttpResponse response = getHttpClient().execute(connection);
+				is = response.getEntity().getContent();
+				StringBuffer buffer = collectInputStream(is);
+				
+				int responseCode = response.getStatusLine().getStatusCode();
+				out.println(METHOD_NAME+": calling GET "+endpoint);
+				out.println(METHOD_NAME+": responseCode = "+responseCode);
+				out.println(METHOD_NAME + ": response = " + buffer);
+				System.out.println(METHOD_NAME+": called, " + attempts + " previous attempts.");
+				
+				JsonArray arr = getDataJsonArray(buffer);			
+				
+				String staticTypeRegex = ".*static.*";
+				Pattern p = Pattern.compile(staticTypeRegex, Pattern.CASE_INSENSITIVE);
+							
+				for (int ix = 0; ix < arr.size(); ix++) {
+					JsonElement entity = arr.get(ix);
+					JsonObject obj = entity.getAsJsonObject();
+					JsonPrimitive name = obj.getAsJsonPrimitive("Name");
+					JsonPrimitive id = obj.getAsJsonPrimitive("AssessmentTypeId");
+
+					Matcher m = p.matcher(name.getAsString());
+
+					if (map.containsKey(name.getAsString()) && m.matches())
+						continue;
+					map.put(name.getAsString(), id.getAsString());
+				}
+				if (!(null == map || map.isEmpty()))
+				{
+					return map;
+				}
+			} finally {
+				
+				attempts++;
+				
+				if (is != null)
+				{
+					is.close();				
+				}
+			}
+		}
+		out.println(METHOD_NAME+": Unable to refresh assessment types, please contact your Technical Account Manager for assistance. ");
+		return map;
+	}
+	
 	/**
 	 * Scan snapshot refers to a particular point in history when statistics are 
 	 * reevaluated, such as when a scan is completed. This call returns different 
@@ -581,23 +677,19 @@ public class FoDAPI {
 	public List<ScanSnapshot> getScanSnapshotList() throws IOException
 	{
 		String endpoint = baseUrl + "/api/v1/Scan";
-		URL url = new URL(endpoint);
-		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
 		InputStream is = null;
 
 		try {
 			// Get Response
-			is = connection.getInputStream();
-			StringBuffer response = collectInputStream(is);
-			JsonArray arr = getDataJsonArray(response);
+			HttpResponse response = getHttpClient().execute(connection);
+			is = response.getEntity().getContent();
+			StringBuffer buffer = collectInputStream(is);
+			JsonArray arr = getDataJsonArray(buffer);
 			List<ScanSnapshot> snapshots = new LinkedList<ScanSnapshot>();
 			for (int ix = 0; ix < arr.size(); ix++) {
 				JsonElement entity = arr.get(ix);
 				JsonObject obj = entity.getAsJsonObject();
-
-				//FIXME GSON not setting fields on Scan obj, need to troubleshoot 
-				//Scan scan = getGson().fromJson(obj, Scan.class);
-				//Scan scan = getGson().fromJson(entity, Scan.class);
 
 				ScanSnapshot scan = new ScanSnapshot();
 				if (!obj.get("ProjectVersionId").isJsonNull()) {
@@ -643,17 +735,17 @@ public class FoDAPI {
 	public List<ScanSnapshot> getScanSnapshotList(Long releaseId) throws IOException
 	{
 		String endpoint = baseUrl + "/api/v2/releases/"+releaseId+"/scan-results";
-		
-		URL url = new URL(endpoint);
-		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+	
+		HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
 		InputStream is = null;
 
 		try {
 			// Get Response
-			is = connection.getInputStream();
-			StringBuffer response = collectInputStream(is);
+			HttpResponse response = getHttpClient().execute(connection);
+			is = response.getEntity().getContent();
+			StringBuffer buffer = collectInputStream(is);
 			List<ScanSnapshot> scanList = new LinkedList<ScanSnapshot>();
-			JsonArray arr = getDataJsonArray(response);
+			JsonArray arr = getDataJsonArray(buffer);
 			Gson gson = getGson();
 			for (int ix = 0; ix < arr.size(); ix++) {
 
@@ -686,16 +778,16 @@ public class FoDAPI {
 		// https://www.hpfod.com/api/v2/releases/30008/scan-results
 		String endpoint = baseUrl + "/api/v2/Releases/"+releaseId+"/Scans/"+scanId;
 		
-		URL url = new URL(endpoint);
-		HttpURLConnection connection = getHttpUrlConnection("GET",url);
+		HttpGet connection = (HttpGet) getHttpUriRequest("GET",endpoint);
 		InputStream is = null;
 
 		Scan scan;
 		try {
 			// Get Response
-			is = connection.getInputStream();
-			StringBuffer response = collectInputStream(is);
-			String responseString = response.toString();
+			HttpResponse response = getHttpClient().execute(connection);
+			is = response.getEntity().getContent();
+			StringBuffer buffer = collectInputStream(is);
+			String responseString = buffer.toString();
 			JsonElement dataObject = getDataJsonElement(responseString);
 			Gson gson = getGson();
 			scan = gson.fromJson(dataObject, Scan.class);
@@ -718,6 +810,7 @@ public class FoDAPI {
 	 * @return
 	 * @throws IOException
 	 */
+	@SuppressWarnings("deprecation")
 	public UploadStatus uploadFile(UploadRequest req) throws IOException
 	{
 		final String METHOD_NAME = CLASS_NAME +".uploadFile";
@@ -731,85 +824,94 @@ public class FoDAPI {
 		{
 			String applicationName = req.getApplicationName();
 			String releaseName = req.getReleaseName();
-			out.println(METHOD_NAME+": applicationName="+applicationName);
-			out.println(METHOD_NAME+": releaseName="+releaseName);
 			releaseId = getReleaseId(applicationName, releaseName);
+			out.println(METHOD_NAME + ": ReleaseId: " + releaseId);
 		}
-		
-		out.println(METHOD_NAME+": releaseId = "+releaseId);
-		
+				
 		if( null != releaseId && 0 < releaseId )
 		{
 			if(sessionToken != null && !sessionToken.isEmpty())	
 			{
 				FileInputStream fs = new FileInputStream(req.getUploadZip());
-			//	out.println(METHOD_NAME+": FileInputStream created. Creating buffer of size "+seglen);
+
 				byte[] readByteArray = new byte[seglen];
 				byte[] sendByteArray = null;
 				int fragmentNumber = 0;
 				int byteCount = 0;
 				long offset = 0;
-			//	out.println(METHOD_NAME+": reading in file contents ...");
+
 				try {
 					while ((byteCount = fs.read(readByteArray)) != -1) {
-					//	out.println(METHOD_NAME + ": read in " + byteCount + " bytes of zip file");
+						
 						if (byteCount < seglen) {
-					//		out.println(METHOD_NAME + ": resizing buffer to fit end of file contents");
 							fragmentNumber = -1;
 							lastFragment = true;
 							sendByteArray = Arrays.copyOf(readByteArray, byteCount);
 						} else {
 							sendByteArray = readByteArray;
 						}
+						
+						StringBuffer postURL = new StringBuffer();
 
-						//TODO change fragUrl to StringBuilder, so fewer objects created in background for mixed-mode expressions
-						String fragUrl = "";
 						if (req.getLanguageLevel() != null) {
-							fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId="
-									+ req.getAssessmentTypeId() + "&technologyStack="
-									+ encodeURLParamUTF8(req.getTechnologyStack()) + "&languageLevel="
-									+ req.getLanguageLevel() + "&fragNo=" + fragmentNumber++ + "&len=" + byteCount
-									+ "&offset=" + offset;
-						//	out.println(METHOD_NAME + ": fragUrl = " + fragUrl);
+							
+							postURL.append(baseUrl);
+							postURL.append("/api/v1/release/" + releaseId);
+							postURL.append("/scan/?assessmentTypeId="+ req.getAssessmentTypeId());
+							postURL.append("&technologyStack="+ URLEncoder.encode(req.getTechnologyStack()));
+							postURL.append("&languageLevel="+  URLEncoder.encode(req.getLanguageLevel()));
+							postURL.append("&fragNo=" + fragmentNumber++ );
+							postURL.append("&len=" + byteCount);
+							postURL.append("&offset=" + offset);
+
 						} else {
-							fragUrl = baseUrl + "/api/v1/release/" + releaseId + "/scan/?assessmentTypeId="
-									+ req.getAssessmentTypeId() + "&technologyStack="
-									+ encodeURLParamUTF8(req.getTechnologyStack()) + "&fragNo=" + fragmentNumber++
-									+ "&len=" + byteCount + "&offset=" + offset;
-						//	out.println(METHOD_NAME + ": fragUrl = " + fragUrl);
+							
+							postURL.append(baseUrl);
+							postURL.append("/api/v1/release/" + releaseId);
+							postURL.append("/scan/?assessmentTypeId="+ req.getAssessmentTypeId());
+							postURL.append("&technologyStack="+ URLEncoder.encode(req.getTechnologyStack()));
+							postURL.append("&fragNo=" + fragmentNumber++ );
+							postURL.append("&len=" + byteCount);
+							postURL.append("&offset=" + offset);
 						}
 
-						Boolean runSonatypeScan = req.getRunSonatypeScan();
+						Boolean runOpenSourceAnalysis = req.getRunOpenSourceAnalysis();
 						Boolean isExpressScan = req.getIsExpressScan();
 						Boolean isExpressAudit = req.getIsExpressAudit();
+						Boolean includeThirdParty = req.getIncludeThirdParty();
 
-						if (null != runSonatypeScan) {
-							if (runSonatypeScan) {
-								fragUrl += "&doSonatypeScan=true";
+						if (null != runOpenSourceAnalysis) {
+							if (runOpenSourceAnalysis) {
+								postURL.append("&doSonatypeScan=true");
 							}
 						}
-
+						
 						if (null != isExpressScan) {
 							if (isExpressScan) {
-								fragUrl += "&scanPreferenceId=2";
-
+								postURL.append("&scanPreferenceId=2");
 							}
-
 						}
-
+						
 						if (null != isExpressAudit) {
 							if (isExpressAudit) {
-								fragUrl += "&auditPreferenceId=2";
-
+								postURL.append("&auditPreferenceId=2");
 							}
-
 						}
+						
+						if(null != includeThirdParty) {
+							if(includeThirdParty) {
+								postURL.append("&excludeThirdPartyLibs=false");
+							} else {
+								postURL.append("&excludeThirdPartyLibs=true");
+							}
+						}
+						
+					//	out.println(METHOD_NAME + ": postURL: " + postURL.toString());
 
 						String postErrorMessage = "";
-					//	out.println(METHOD_NAME + ": calling sendPost ...");
-						SendPostResponse postResponse = sendPost(fragUrl, sendByteArray, httpClient, sessionToken,
-								postErrorMessage);
+						SendPostResponse postResponse = sendPost(postURL.toString(), sendByteArray, postErrorMessage);
 						HttpResponse response = postResponse.getResponse();
+
 						if (response == null) {
 							out.println(METHOD_NAME + ": HttpResponse from sendPost is null!");
 							status.setErrorMessage(postResponse.getErrorMessage());
@@ -819,11 +921,19 @@ public class FoDAPI {
 
 							StatusLine sl = response.getStatusLine();
 							Integer statusCode = Integer.valueOf(sl.getStatusCode());
-						//	out.println(METHOD_NAME + ": HttpResponse.StatusLine.statusCode = " + statusCode);
-						//	out.println(METHOD_NAME + ": HttpResponse.StatusLine.reasonPhrase = " + sl.getReasonPhrase());
+							
 							status.setHttpStatusCode(statusCode);
 							if (!statusCode.toString().startsWith("2")) {
+								
 								status.setErrorMessage(sl.toString());
+								
+								if(statusCode.toString().equals("500"))
+								{
+									status.setErrorMessage(sl.toString());
+									out.println(METHOD_NAME + ": Error uploading to HPE FoD after successful authentication. Please contact your Technical Account Manager with this log for assistance.");
+									out.println(METHOD_NAME + ": DEBUG: " + status.getErrorMessage());
+									out.println(METHOD_NAME + ": DEBUG: Bytes sent: " + status.getBytesSent());
+								}
 								break;
 							} else {
 								if (fragmentNumber != 0 && fragmentNumber % 5 == 0) {
@@ -846,7 +956,6 @@ public class FoDAPI {
 							}
 							EntityUtils.consume(response.getEntity());
 						}
-					//	out.println(METHOD_NAME + ": byteCount=" + byteCount);
 						offset += byteCount;
 					} 
 				} finally {
@@ -858,27 +967,28 @@ public class FoDAPI {
 		}
 		else
 		{
+			if (releaseId == null)
+			{
+				status.setErrorMessage(METHOD_NAME+":Error: releaseId is null!");
+			}
 			status.setUploadSucceeded(false);
-			status.setErrorMessage("Combination of applicationName of \""+req.getApplicationName()+"\" and releaseName of \""+req.getApplicationName()+"\" is not valid");
+			status.setErrorMessage("Combination of applicationName of \""+req.getApplicationName()+"\" and releaseName of \""+req.getReleaseName()+"\" is not valid");
 		}
 		return status;
 	}
 	
-	private SendPostResponse sendPost(String url, byte[] bytesToSend, HttpClient client, String token, String errorMessage)
+	private SendPostResponse sendPost(String url, byte[] bytesToSend, String errorMessage)
 	{
 		final String METHOD_NAME = CLASS_NAME+".sendPost";
 		
 		PrintStream out = FodBuilder.getLogger();
-	//	out.println(METHOD_NAME+": url="+url);
-	//	out.println(METHOD_NAME+": token="+token);
 		
 		SendPostResponse result = new SendPostResponse();
 		try {
-			HttpPost httppost = new HttpPost(url);
-			httppost.addHeader("Authorization","Bearer " + token);
+			HttpPost httppost = (HttpPost) getHttpUriRequest("POST", url);
 			ByteArrayEntity entity = new ByteArrayEntity(bytesToSend);		
 			httppost.setEntity(entity);
-			HttpResponse response = client.execute(httppost);
+			HttpResponse response = getHttpClient().execute(httppost);
 			result.setResponse(response);
 			result.setErrorMessage("");
 		} catch (ParseException e) {
@@ -906,29 +1016,24 @@ public class FoDAPI {
 		final String METHOD_NAME = CLASS_NAME+".sendData";
 		PrintStream out = FodBuilder.getLogger();
 		
-		HttpURLConnection connection = null;
-		DataOutputStream wr = null;
+		HttpPost connection = null;
 		InputStream is = null;
 		try {
 			out.println(METHOD_NAME+": baseUrl="+baseUrl);
 			String endpoint = baseUrl + endpointData 
 					+ "&fragNo=" + frag
 					+ "&offset=" + offset;
-			URL url = new URL(endpoint);
 			out.println(METHOD_NAME+": endpoint="+endpoint);
-			connection = getHttpUrlConnection("POST", url);
-			connection.setRequestProperty("Content-Type","application/octet-stream");
-			connection.setDoOutput(true);
-
-			// Send request
-			wr = new DataOutputStream(
-					connection.getOutputStream());
-			wr.write(data, 0, (int) len);
+			connection = (HttpPost) getHttpUriRequest("POST", endpoint);
+			connection.setHeader("Content-Type","application/octet-stream");
+			ByteArrayEntity entity = new ByteArrayEntity(data);		
+			connection.setEntity(entity);
+			HttpResponse response = getHttpClient().execute(connection);
 
 			// Get Response
-			is = connection.getInputStream();
-			StringBuffer response = collectInputStream(is);
-			return response.toString();
+			is = response.getEntity().getContent();
+			StringBuffer buffer = collectInputStream(is);
+			return buffer.toString();
 
 		} catch (Exception e) {
 
@@ -937,29 +1042,12 @@ public class FoDAPI {
 
 		} finally {
 
-			if (connection != null) {
-				connection.disconnect();
-			}
 			if (is != null){
 				try {
 					is.close();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 				//	e.printStackTrace();
-				}
-			}
-			if (wr != null){
-				try {
-					wr.flush();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-			//		e1.printStackTrace();
-				}
-				try {
-					wr.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-			//		e.printStackTrace();
 				}
 			}
 		}
@@ -1002,56 +1090,40 @@ public class FoDAPI {
 		resetConnection();
 	}
 
-	public Proxy getProxy() {
-		return proxy;
-	}
-
-	public void setProxy(Proxy proxy) {
-		InetSocketAddress address = ((InetSocketAddress)proxy.address());
-		this.proxyHostname = address.getHostName();
-		this.proxyPort = address.getPort();
-		
-		resetConnection();
-	}
-	
-	public void setProxy(String hostname, int port) {
-		this.proxyHostname = hostname;
-		this.proxyPort = port;
-		
-		SocketAddress sa = new InetSocketAddress(hostname,port);
-		Proxy proxy = new Proxy(Proxy.Type.HTTP,sa);
-		this.proxy = proxy;
-		
-		resetConnection();
-	}
-	
 	private void resetConnection()
 	{
 		this.sessionToken = null;
 		this.tokenExpiry = 0l;
 	}
 	
-	protected HttpURLConnection getHttpUrlConnection(String requestMethod, URL url) throws IOException
+	protected HttpUriRequest getHttpUriRequest(String requestMethod, String url) throws IOException
 	{
-		HttpURLConnection connection = null;
 		
-		if (proxy != null) {
-			connection = (HttpURLConnection) url.openConnection(proxy);
-		} else {
-			connection = (HttpURLConnection) url.openConnection();
+		HttpUriRequest request = null;
+		
+		try
+		{
+			URI uri = new URI(url);
+			// GET or POST
+			if (requestMethod.equalsIgnoreCase("get")){
+				request = new HttpGet(uri);
+			} else {
+				request = new HttpPost(uri);
+			}
+			
+			request.setHeader("Content-Type", "application/x-www-form-urlencoded");
+			request.setHeader("Content-Language", "en-US");
+			request.setHeader("Authorization", "Bearer " + sessionToken);
+
+			request.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+			request.setHeader("Pragma", "no-cache"); // HTTP 1.0.
+			request.setHeader("Expires", "0"); // Proxies.
+
+		} catch(URISyntaxException e) {
+			e.printStackTrace();
 		}
 		
-		connection.setRequestMethod(requestMethod);
-		connection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-
-		connection.setRequestProperty("Content-Language", "en-US");
-		connection.setRequestProperty("Authorization", "Bearer " + sessionToken);
-
-		connection.setUseCaches(false);
-		connection.setDoInput(true);
-		connection.setDoOutput(false);
-		
-		return connection;
+		return request;
 	}
 
 	protected StringBuffer collectInputStream(InputStream is)

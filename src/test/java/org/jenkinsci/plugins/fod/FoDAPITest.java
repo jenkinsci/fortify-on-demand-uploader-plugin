@@ -42,7 +42,7 @@ public class FoDAPITest {
 	
 	// name=Static Assessment / id=170
 	// name=Static Express / id=105
-	private Long assessmentTypeId = 105l; // 105 = Static/Express
+	private String assessmentTypeId = "105"; // 105 = Static/Express
 	private String technologyStack = "JAVA/J2EE";
 	private String languageLevel = "1.5";
 	
