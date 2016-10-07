@@ -56,11 +56,9 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
         // This is where you 'build' the project.
         // Since this is a dummy, we just say 'hello world' and call that a build.
 
-        // This also shows how you can consult the global configuration of the builder
-        if (getDescriptor().getUseFrench())
-            listener.getLogger().println("Bonjour, "+name+"!");
-        else
-            listener.getLogger().println("Hello, "+name+"!");
+        listener.getLogger().println("Hello, "+name+"!");
+
+        listener.getLogger().println("TOKEN: " + getDescriptor().getFodApi().authenticate());
     }
 
     // Overridden for better type safety.
@@ -78,7 +76,6 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
 
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-        private boolean useFrench;
         private FodApi api;
 
         /**
@@ -120,26 +117,14 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            // To persist global configuration information,
-            // set that to properties and call save().
-            useFrench = formData.getBoolean("useFrench");
-            // ^Can also use req.bindJSON(this, formData);
-            //  (easier when there are many fields; need set* methods for this, like setUseFrench)
-
             api = new FodApi(formData.getString(CLIENT_ID), formData.getString(CLIENT_SECRET));
 
             save();
             return super.configure(req,formData);
         }
 
-        /**
-         * This method returns true if the global configuration says we should speak French.
-         *
-         * The method name is bit awkward because global.jelly calls this method to determine
-         * the initial state of the checkbox by the naming convention.
-         */
-        public boolean getUseFrench() {
-            return useFrench;
+        public FodApi getFodApi() {
+            return api;
         }
     }
 }
