@@ -33,6 +33,8 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  */
 public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
+    private static final String CLIENT_ID = "clientId";
+    private static final String CLIENT_SECRET = "clientSecret";
 
     private final String name;
 
@@ -77,6 +79,8 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         private boolean useFrench;
+        private FodApi api;
+
         /**
          * In order to load the persisted global configuration, you have to
          * call load() in the constructor.
@@ -121,6 +125,9 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
             useFrench = formData.getBoolean("useFrench");
             // ^Can also use req.bindJSON(this, formData);
             //  (easier when there are many fields; need set* methods for this, like setUseFrench)
+
+            api = new FodApi(formData.getString(CLIENT_ID), formData.getString(CLIENT_SECRET));
+
             save();
             return super.configure(req,formData);
         }
