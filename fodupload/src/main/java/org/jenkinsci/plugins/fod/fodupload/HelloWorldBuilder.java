@@ -30,7 +30,7 @@ import java.io.IOException;
  *
  * <p>
  * When a build is performed, the {@link #perform} method will be invoked. 
- *  poop
+ *
  * @author Kohsuke Kawaguchi
  */
 public class HelloWorldBuilder extends Builder implements SimpleBuildStep {
