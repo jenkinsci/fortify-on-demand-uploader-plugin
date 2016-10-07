@@ -74,7 +74,6 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
         return null;
     }
 
-
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         private boolean useFrench;
