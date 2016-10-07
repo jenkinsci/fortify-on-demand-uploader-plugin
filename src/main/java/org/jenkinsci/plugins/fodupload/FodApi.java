@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.sf.json.JSONObject;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 
@@ -9,8 +10,12 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class FodApi {
-    //TODO: not hardcoded
-    private String baseUrl = "http://api.local";
+    private static final String CLIENT_ID = "clientId";
+    private static final String CLIENT_SECRET = "clientSecret";
+    private static final String BASE_URL = "baseUrl";
+
+
+    private String baseUrl;
     private OkHttpClient client;
     private String token;
 
@@ -24,14 +29,14 @@ public class FodApi {
     private final int WRITE_TIMEOUT = 30;
     private final int READ_TIMEOUT = 30;
 
-    public FodApi(String key, String secret) {
-        this.key = key;
-        this.secret = secret;
+    public FodApi(JSONObject formData) {
+        key = formData.getString(CLIENT_ID);
+        secret = formData.getString(CLIENT_SECRET);
+        baseUrl = formData.getString(BASE_URL);
 
         client = Create();
     }
 
-    //TODO: Authenticate
     public String authenticate() {
         try {
             RequestBody formBody = new FormBody.Builder()

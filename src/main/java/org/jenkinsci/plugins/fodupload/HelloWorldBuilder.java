@@ -33,9 +33,6 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  */
 public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
-    private static final String CLIENT_ID = "clientId";
-    private static final String CLIENT_SECRET = "clientSecret";
-
     private final String name;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
@@ -71,7 +68,7 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
 
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
-        return null;
+        return BuildStepMonitor.NONE;
     }
 
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
@@ -117,7 +114,7 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            api = new FodApi(formData.getString(CLIENT_ID), formData.getString(CLIENT_SECRET));
+            api = new FodApi(formData);
 
             save();
             return super.configure(req,formData);

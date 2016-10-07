@@ -20,4 +20,10 @@
             <f:password />
         </f:entry>
     </f:section>
+
+    <f:advanced title="Advanced Settings">
+        <f:entry title="Fortify on Demand URL" description="Link to HP FOD" field="baseUrl">
+            <f:textbox default="https://hpfod.com"/>
+        </f:entry>
+    </f:advanced>
 </j:jelly>
