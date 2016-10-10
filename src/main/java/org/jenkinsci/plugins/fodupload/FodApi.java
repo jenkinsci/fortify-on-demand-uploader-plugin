@@ -44,7 +44,7 @@ public class FodApi {
         client = Create();
     }
 
-    public String authenticate() {
+    public void authenticate() {
         try {
             RequestBody formBody = new FormBody.Builder()
                     .add("scope", "https://hpfod.com/tenant")
@@ -68,11 +68,10 @@ public class FodApi {
             // Parse the Response
             JsonParser parser = new JsonParser();
             JsonObject obj = parser.parse(content).getAsJsonObject();
-            token = obj.get("access_token").getAsString();
+            this.token = obj.get("access_token").getAsString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return token;
     }
 
     //TODO: retire token
@@ -96,10 +95,12 @@ public class FodApi {
 
     public String getToken() { return token; }
 
+    public boolean isAuthenticated() { return token != null || ! token.isEmpty(); }
+
     public List<ApplicationDTO> getApplications(TaskListener listener) {
         try {
 
-            listener.getLogger().println(token + "\n" + baseUrl);
+            listener.getLogger().println(token + "\n" + baseUrl + "\n" + key);
             String url = baseUrl + "/api/v3/applications";
 
             Request request = new Request.Builder()

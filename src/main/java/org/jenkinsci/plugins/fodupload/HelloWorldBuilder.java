@@ -25,6 +25,7 @@ import static org.jenkinsci.plugins.fodupload.FodApi.CLIENT_ID;
 import static org.jenkinsci.plugins.fodupload.FodApi.CLIENT_SECRET;
 
 public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
+    private FodApi api;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
@@ -35,11 +36,13 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
 
     @Override
     public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
-        getDescriptor().getFodApi().authenticate();
+        api = getDescriptor().getFodApi();
+        api.authenticate();
 
-        listener.getLogger().println("Authenticated: " + getDescriptor().getFodApi().getToken());
+        if (api.isAuthenticated())
+            listener.getLogger().println("Authenticated");
 
-        List<ApplicationDTO> apps = getDescriptor().getFodApi().getApplications(listener);
+        List<ApplicationDTO> apps = api.getApplications(listener);
     }
 
     // Overridden for better type safety.
