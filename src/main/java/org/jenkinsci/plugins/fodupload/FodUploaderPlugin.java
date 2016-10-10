@@ -49,6 +49,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
         if (api.isAuthenticated())
             listener.getLogger().println("Authenticated");
+
+        // TODO: Hard work goes here
     }
 
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
@@ -85,7 +87,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         private static final String TS_PHP_KEY = "PHP";
         private static final String TS_PLSQL_TSQL_KEY = "PL/SQL & T-SQL";
         private static final String TS_VB6_KEY = "VB6";
-        private static final String TS_VBSCRIPT_KEY = "VBScript";
+        private static final String TS_VB_SCRIPT_KEY = "VBScript";
         private static final String TS_XML_HTML_KEY = "XML/HTML";
 
         private FodApi api;
@@ -160,7 +162,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             items.add(new ListBoxModel.Option(TS_PYTHON_KEY, TS_PYTHON_KEY,false));
             items.add(new ListBoxModel.Option(TS_RUBY_KEY, TS_RUBY_KEY,false));
             items.add(new ListBoxModel.Option(TS_VB6_KEY, TS_VB6_KEY, false));
-            items.add(new ListBoxModel.Option(TS_VBSCRIPT_KEY, TS_VBSCRIPT_KEY, false));
+            items.add(new ListBoxModel.Option(TS_VB_SCRIPT_KEY, TS_VB_SCRIPT_KEY, false));
             items.add(new ListBoxModel.Option(TS_XML_HTML_KEY, TS_XML_HTML_KEY, false));
 
             return items;
@@ -211,6 +213,15 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 listBox.add(new ListBoxModel.Option(assessmentType.getName(), value, false));
             }
             return listBox;
+        }
+
+        // Form validation
+        public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId, @QueryParameter(CLIENT_SECRET) final String clientSecret,
+                                               @QueryParameter(BASE_URL) final String baseUrl) {
+            api.authenticate();
+            return !api.getToken().isEmpty() ?
+                    FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
+                    FormValidation.error("Invalid connection information. Please check your credentials and try again.");
         }
     }
 }
