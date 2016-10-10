@@ -11,6 +11,7 @@ import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.fodupload.Models.ApplicationDTO;
+import org.jenkinsci.plugins.fodupload.Models.ReleaseAssessmentTypeDTO;
 import org.jenkinsci.plugins.fodupload.Models.ReleaseDTO;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -71,8 +72,21 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         //TODO: Create Lookup endpoint for this info.
-        private static final String TS_DOTNET_KEY = ".NET";
+        private static final String TS_DOT_NET_KEY = ".NET";
         private static final String TS_JAVA_KEY = "JAVA/J2EE";
+        private static final String TS_RUBY_KEY = "Ruby";
+        private static final String TS_PYTHON_KEY = "Python";
+        private static final String TS_OBJECTIVE_C_KEY = "Objective-C";
+        private static final String TS_ABAP_KEY = "ABAP";
+        private static final String TS_ASP_KEY = "ASP";
+        private static final String TS_CFML_KEY = "CFML";
+        private static final String TS_COBOL_KEY = "COBOL";
+        private static final String TS_ANDROID_KEY = "Android";
+        private static final String TS_PHP_KEY = "PHP";
+        private static final String TS_PLSQL_TSQL_KEY = "PL/SQL & T-SQL";
+        private static final String TS_VB6_KEY = "VB6";
+        private static final String TS_VBSCRIPT_KEY = "VBScript";
+        private static final String TS_XML_HTML_KEY = "XML/HTML";
 
         private FodApi api;
 
@@ -133,43 +147,70 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public ListBoxModel doFillTechnologyStackItems() {
             ListBoxModel items = new ListBoxModel();
 
-            // only supporting Java, initially, but only one option
-            //  causes it to be selected automatically, which means
-            //  language levels will not be filled correctly
+            items.add(new ListBoxModel.Option(TS_DOT_NET_KEY, TS_DOT_NET_KEY,false));
+            items.add(new ListBoxModel.Option(TS_ABAP_KEY, TS_ABAP_KEY, false));
+            items.add(new ListBoxModel.Option(TS_ASP_KEY, TS_ASP_KEY, false));
+            items.add(new ListBoxModel.Option(TS_ANDROID_KEY, TS_ANDROID_KEY, false));
+            items.add(new ListBoxModel.Option(TS_CFML_KEY, TS_ABAP_KEY, false));
+            items.add(new ListBoxModel.Option(TS_COBOL_KEY, TS_COBOL_KEY, false));
             items.add(new ListBoxModel.Option(TS_JAVA_KEY, TS_JAVA_KEY,false));
-            items.add(new ListBoxModel.Option(TS_DOTNET_KEY, TS_DOTNET_KEY,false));
+            items.add(new ListBoxModel.Option(TS_OBJECTIVE_C_KEY, TS_OBJECTIVE_C_KEY, false));
+            items.add(new ListBoxModel.Option(TS_PHP_KEY, TS_PHP_KEY, false));
+            items.add(new ListBoxModel.Option(TS_PLSQL_TSQL_KEY, TS_PLSQL_TSQL_KEY, false));
+            items.add(new ListBoxModel.Option(TS_PYTHON_KEY, TS_PYTHON_KEY,false));
+            items.add(new ListBoxModel.Option(TS_RUBY_KEY, TS_RUBY_KEY,false));
+            items.add(new ListBoxModel.Option(TS_VB6_KEY, TS_VB6_KEY, false));
+            items.add(new ListBoxModel.Option(TS_VBSCRIPT_KEY, TS_VBSCRIPT_KEY, false));
+            items.add(new ListBoxModel.Option(TS_XML_HTML_KEY, TS_XML_HTML_KEY, false));
 
             return items;
         }
         public ListBoxModel doFillLanguageLevelItems(@QueryParameter("technologyStack") String technologyStack) {
             ListBoxModel items = new ListBoxModel();
 
-            if (technologyStack.equalsIgnoreCase(TS_JAVA_KEY) || technologyStack.isEmpty())
-            {
-                items.add(new ListBoxModel.Option("1.2", "1.2",false));
-                items.add(new ListBoxModel.Option("1.3", "1.3",false));
-                items.add(new ListBoxModel.Option("1.4", "1.4",false));
-                items.add(new ListBoxModel.Option("1.5", "1.5",false));
-                items.add(new ListBoxModel.Option("1.6", "1.6",false));
-                items.add(new ListBoxModel.Option("1.7", "1.7",false));
-                items.add(new ListBoxModel.Option("1.8", "1.8",false));
-            }
-            else if (technologyStack.equalsIgnoreCase(TS_DOTNET_KEY))
-            {
-                items.add(new ListBoxModel.Option("1.0", "1.0",false));
-                items.add(new ListBoxModel.Option("1.1", "1.1",false));
-                items.add(new ListBoxModel.Option("2.0", "2.0",false));
-                items.add(new ListBoxModel.Option("3.0", "3.0",false));
-                items.add(new ListBoxModel.Option("3.5", "3.5",false));
-                items.add(new ListBoxModel.Option("4.0", "4.0",false));
-                items.add(new ListBoxModel.Option("4.5", "4.5",false));
-                items.add(new ListBoxModel.Option("4.5.1", "4.5.1",false));
-                items.add(new ListBoxModel.Option("4.5.2", "4.5.2",false));
-                items.add(new ListBoxModel.Option("4.6", "4.6",false));
-                items.add(new ListBoxModel.Option("4.6.1", "4.6.1",false));
+            switch (technologyStack) {
+                case TS_JAVA_KEY:
+                    items.add(new ListBoxModel.Option("1.2", "1.2",false));
+                    items.add(new ListBoxModel.Option("1.3", "1.3",false));
+                    items.add(new ListBoxModel.Option("1.4", "1.4",false));
+                    items.add(new ListBoxModel.Option("1.5", "1.5",false));
+                    items.add(new ListBoxModel.Option("1.6", "1.6",false));
+                    items.add(new ListBoxModel.Option("1.7", "1.7",false));
+                    items.add(new ListBoxModel.Option("1.8", "1.8",false));
+                    break;
+                case TS_DOT_NET_KEY:
+                    items.add(new ListBoxModel.Option("1.0", "1.0",false));
+                    items.add(new ListBoxModel.Option("1.1", "1.1",false));
+                    items.add(new ListBoxModel.Option("2.0", "2.0",false));
+                    items.add(new ListBoxModel.Option("3.0", "3.0",false));
+                    items.add(new ListBoxModel.Option("3.5", "3.5",false));
+                    items.add(new ListBoxModel.Option("4.0", "4.0",false));
+                    items.add(new ListBoxModel.Option("4.5", "4.5",false));
+                    items.add(new ListBoxModel.Option("4.5.1", "4.5.1",false));
+                    items.add(new ListBoxModel.Option("4.5.2", "4.5.2",false));
+                    items.add(new ListBoxModel.Option("4.6", "4.6",false));
+                    items.add(new ListBoxModel.Option("4.6.1", "4.6.1",false));
+                    break;
+                case TS_PYTHON_KEY:
+                    items.add(new ListBoxModel.Option("Standard Python", "Standard Python", false));
+                    items.add(new ListBoxModel.Option("Django", "Django", false));
+                    break;
+                default:
+                    //support for no language level, must be null for correct API call
+                    items.add(new ListBoxModel.Option("N/A", null, false));
+                    break;
             }
 
             return items;
+        }
+        public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter("releaseId") final String releaseId) {
+            ListBoxModel listBox = new ListBoxModel();
+            List<ReleaseAssessmentTypeDTO> assessmentTypes = api.getAssessmentTypeIds(releaseId);
+            for (ReleaseAssessmentTypeDTO assessmentType : assessmentTypes) {
+                final String value = String.valueOf(assessmentType.getAssessmentTypeId());
+                listBox.add(new ListBoxModel.Option(assessmentType.getName(), value, false));
+            }
+            return listBox;
         }
     }
 }
