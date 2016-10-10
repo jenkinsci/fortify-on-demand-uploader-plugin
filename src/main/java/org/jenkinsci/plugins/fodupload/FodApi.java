@@ -100,10 +100,9 @@ public class FodApi {
 
     public boolean isAuthenticated() { return token != null || ! token.isEmpty(); }
 
-    public List<ApplicationDTO> getApplications(TaskListener listener) {
+    public List<ApplicationDTO> getApplications() {
         try {
 
-            listener.getLogger().println(token + "\n" + baseUrl + "\n" + key);
             String url = baseUrl + "/api/v3/applications";
 
             Request request = new Request.Builder()
@@ -112,8 +111,8 @@ public class FodApi {
                     .get()
                     .build();
             Response response = client.newCall(request).execute();
+
             if (response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
-                System.out.println("Token expired re-authorizing");
                 // Re-authenticate
                 authenticate();
             }
