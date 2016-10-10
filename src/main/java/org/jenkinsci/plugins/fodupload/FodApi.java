@@ -9,6 +9,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.Models.ApplicationDTO;
 import org.jenkinsci.plugins.fodupload.Models.GenericListResponse;
+import org.jenkinsci.plugins.fodupload.Models.ReleaseDTO;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -102,7 +103,6 @@ public class FodApi {
 
     public List<ApplicationDTO> getApplications() {
         try {
-
             String url = baseUrl + "/api/v3/applications";
 
             Request request = new Request.Builder()
@@ -125,6 +125,38 @@ public class FodApi {
             // Create a type of GenericList<ApplicationDTO> to play nice with gson.
             Type t = new TypeToken<GenericListResponse<ApplicationDTO>>(){}.getType();
             GenericListResponse<ApplicationDTO> results =  gson.fromJson(content, t);
+            return results.getItems();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<ReleaseDTO> getReleases(final String applicationId) {
+        try {
+            String url = baseUrl + "/api/v3/applications/" + applicationId + "/releases";
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization", "Bearer " + token)
+                    .get()
+                    .build();
+            Response response = client.newCall(request).execute();
+
+            if (response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
+                // Re-authenticate
+                authenticate();
+            }
+
+            // Read the results and close the response
+            String content = IOUtils.toString(response.body().byteStream(), "utf-8");
+            response.body().close();
+
+            Gson gson = new Gson();
+            // Create a type of GenericList<ApplicationDTO> to play nice with gson.
+            Type t = new TypeToken<GenericListResponse<ReleaseDTO>>(){}.getType();
+            GenericListResponse<ReleaseDTO> results =  gson.fromJson(content, t);
+
             return results.getItems();
         } catch (Exception e) {
             e.printStackTrace();
