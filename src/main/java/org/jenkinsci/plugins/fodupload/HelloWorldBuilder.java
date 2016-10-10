@@ -44,6 +44,11 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
             listener.getLogger().println("Authenticated");
     }
 
+    // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
+    // marks them unused, but they actually are used.
+    // These getters are also named in the following format: Get<JellyField>.
+    public String getApplicationName() { return applicationName; }
+
     // Overridden for better type safety.
     // If your plugin doesn't really define any property on Descriptor,
     // you don't have to do this.
@@ -86,7 +91,7 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
         public FodApi getFodApi() { return api; }
 
         // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
-        // marks them unused, but they actually are.
+        // marks them unused, but they actually are used.
         // These getters are also named in the following format: Get<JellyField>.
         public String getDisplayName() { return "Fortify Uploader Plug-in"; }
         public String getClientId() { return api.getKey(); }
@@ -94,8 +99,8 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
         public String getBaseUrl() { return api.getBaseUrl(); }
         public String getApplicationId() { return String.valueOf(applicationId); }
 
-        // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
-        // marks them unused, but they actually are.
+        // NOTE: The following Getters are used to return saved values in the global.jelly. Intellij
+        // marks them unused, but they actually are used.
         // These getters are also named in the following format: doFill<JellyField>Items.
         public ListBoxModel doFillApplicationNameItems() {
             if (!api.isAuthenticated()) {
