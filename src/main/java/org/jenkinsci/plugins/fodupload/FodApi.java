@@ -94,6 +94,9 @@ public class FodApi {
     }
 
     public String getToken() { return token; }
+    public String getKey() { return key; }
+    public String getSecret() { return secret; }
+    public String getBaseUrl() { return baseUrl; }
 
     public boolean isAuthenticated() { return token != null || ! token.isEmpty(); }
 

@@ -29,10 +29,9 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public HelloWorldBuilder(String name) {
+    public HelloWorldBuilder() {
 
     }
-
 
     @Override
     public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
@@ -93,9 +92,10 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
         /**
          * This human readable name is used in the configuration screen.
          */
-        public String getDisplayName() {
-            return "Fortify Uploader Plug-in";
-        }
+        public String getDisplayName() { return "Fortify Uploader Plug-in"; }
+        public String getClientId() { return api.getKey(); }
+        public String getClientSecret() { return api.getSecret(); }
+        public String getBaseUrl() { return api.getBaseUrl(); }
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
