@@ -1,9 +1,18 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry title="Assessment Type" field="assessmentTypeId">
+        <f:select />
+    </f:entry>
     <f:entry title="Application Name" field="applicationId">
         <f:select />
     </f:entry>
     <f:entry title="Release Name" field="releaseId">
+        <f:select />
+    </f:entry>
+    <f:entry title="Technology Stack" field="technologyStack">
+        <f:select />
+    </f:entry>
+    <f:entry title="Language Level" field="languageLevel">
         <f:select />
     </f:entry>
 </j:jelly>

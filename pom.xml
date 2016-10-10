@@ -9,7 +9,7 @@
     <version>2.11</version>
     <relativePath/>
   </parent>
-  <groupId>org.jenkinsci.plugins.fod</groupId>
+  <groupId>org.jenkinsci.plugins</groupId>
   <artifactId>fodupload</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>

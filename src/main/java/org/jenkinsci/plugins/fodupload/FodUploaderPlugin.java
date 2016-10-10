@@ -22,19 +22,26 @@ import static org.jenkinsci.plugins.fodupload.FodApi.BASE_URL;
 import static org.jenkinsci.plugins.fodupload.FodApi.CLIENT_ID;
 import static org.jenkinsci.plugins.fodupload.FodApi.CLIENT_SECRET;
 
-public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
+public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     private FodApi api;
     private String applicationId;
     private String releaseId;
+    private String assessmentTypeId;
+    private String technologyStack;
+    private String languageLevel;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public HelloWorldBuilder(String applicationId, String releaseId) {
+    public FodUploaderPlugin(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
+                             String languageLevel) {
         api = getDescriptor().getFodApi();
         api.authenticate();
 
         this.applicationId = applicationId;
         this.releaseId = releaseId;
+        this.assessmentTypeId = assessmentTypeId;
+        this.technologyStack = technologyStack;
+        this.languageLevel = languageLevel;
     }
 
     @Override
@@ -48,6 +55,9 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
     // These getters are also named in the following format: Get<JellyField>.
     public String getApplicationId() { return applicationId; }
     public String getReleaseId() { return releaseId; }
+    public String getAssessmentTypeId() { return assessmentTypeId; }
+    public String getTechnologyStack() { return technologyStack; }
+    public String getLanguageLevel() { return languageLevel; }
 
     // Overridden for better type safety.
     // If your plugin doesn't really define any property on Descriptor,
@@ -60,6 +70,10 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
 
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+        //TODO: Create Lookup endpoint for this info.
+        private static final String TS_DOTNET_KEY = ".NET";
+        private static final String TS_JAVA_KEY = "JAVA/J2EE";
+
         private FodApi api;
 
         /**
@@ -115,6 +129,46 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
                 listBox.add(new ListBoxModel.Option(release.getReleaseName(), value, false));
             }
             return listBox;
+        }
+        public ListBoxModel doFillTechnologyStackItems() {
+            ListBoxModel items = new ListBoxModel();
+
+            // only supporting Java, initially, but only one option
+            //  causes it to be selected automatically, which means
+            //  language levels will not be filled correctly
+            items.add(new ListBoxModel.Option(TS_JAVA_KEY, TS_JAVA_KEY,false));
+            items.add(new ListBoxModel.Option(TS_DOTNET_KEY, TS_DOTNET_KEY,false));
+
+            return items;
+        }
+        public ListBoxModel doFillLanguageLevelItems(@QueryParameter("technologyStack") String technologyStack) {
+            ListBoxModel items = new ListBoxModel();
+
+            {
+                items.add(new ListBoxModel.Option("1.2", "1.2",false));
+                items.add(new ListBoxModel.Option("1.3", "1.3",false));
+                items.add(new ListBoxModel.Option("1.4", "1.4",false));
+                items.add(new ListBoxModel.Option("1.5", "1.5",false));
+                items.add(new ListBoxModel.Option("1.6", "1.6",false));
+                items.add(new ListBoxModel.Option("1.7", "1.7",false));
+                items.add(new ListBoxModel.Option("1.8", "1.8",false));
+            }
+            else if (technologyStack.equalsIgnoreCase(TS_DOTNET_KEY))
+            {
+                items.add(new ListBoxModel.Option("1.0", "1.0",false));
+                items.add(new ListBoxModel.Option("1.1", "1.1",false));
+                items.add(new ListBoxModel.Option("2.0", "2.0",false));
+                items.add(new ListBoxModel.Option("3.0", "3.0",false));
+                items.add(new ListBoxModel.Option("3.5", "3.5",false));
+                items.add(new ListBoxModel.Option("4.0", "4.0",false));
+                items.add(new ListBoxModel.Option("4.5", "4.5",false));
+                items.add(new ListBoxModel.Option("4.5.1", "4.5.1",false));
+                items.add(new ListBoxModel.Option("4.5.2", "4.5.2",false));
+                items.add(new ListBoxModel.Option("4.6", "4.6",false));
+                items.add(new ListBoxModel.Option("4.6.1", "4.6.1",false));
+            }
+
+            return items;
         }
     }
 }
