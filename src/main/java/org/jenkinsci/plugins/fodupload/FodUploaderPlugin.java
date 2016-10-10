@@ -144,6 +144,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public ListBoxModel doFillLanguageLevelItems(@QueryParameter("technologyStack") String technologyStack) {
             ListBoxModel items = new ListBoxModel();
 
+            if (technologyStack.equalsIgnoreCase(TS_JAVA_KEY) || technologyStack.isEmpty())
             {
                 items.add(new ListBoxModel.Option("1.2", "1.2",false));
                 items.add(new ListBoxModel.Option("1.3", "1.3",false));
