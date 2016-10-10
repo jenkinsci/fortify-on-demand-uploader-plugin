@@ -100,7 +100,7 @@ public class FodApi {
     public String getSecret() { return secret; }
     public String getBaseUrl() { return baseUrl; }
 
-    public boolean isAuthenticated() { return token != null || ! token.isEmpty(); }
+    public boolean isAuthenticated() { return !token.isEmpty(); }
 
     public List<ApplicationDTO> getApplications() {
         try {
