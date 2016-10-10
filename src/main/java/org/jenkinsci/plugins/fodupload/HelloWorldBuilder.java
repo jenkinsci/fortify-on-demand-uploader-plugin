@@ -7,55 +7,39 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.*;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.fodupload.Models.ApplicationDTO;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
-/**
- * Sample {@link Builder}.
- *
- * <p>
- * When the user configures the project and enables this builder,
- * {@link DescriptorImpl#newInstance(StaplerRequest)} is invoked
- * and a new {@link HelloWorldBuilder} is created. The created
- * instance is persisted to the project configuration XML by using
- * XStream, so this allows you to use instance fields (like {@link #name})
- * to remember the configuration.
- *
- * <p>
- * When a build is performed, the {@link #perform} method will be invoked. 
- *
- * @author Kohsuke Kawaguchi
- */
+import static org.jenkinsci.plugins.fodupload.FodApi.BASE_URL;
+import static org.jenkinsci.plugins.fodupload.FodApi.CLIENT_ID;
+import static org.jenkinsci.plugins.fodupload.FodApi.CLIENT_SECRET;
+
 public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
-    private final String name;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public HelloWorldBuilder(String name) {
-        this.name = name;
+
     }
 
-    /**
-     * We'll use this from the {@code config.jelly}.
-     */
-    public String getName() {
-        return name;
-    }
 
     @Override
     public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
-        // This is where you 'build' the project.
-        // Since this is a dummy, we just say 'hello world' and call that a build.
+        getDescriptor().getFodApi().authenticate();
 
-        listener.getLogger().println("Hello, "+name+"!");
+        listener.getLogger().println("Authenticated: " + getDescriptor().getFodApi().getToken());
 
-        listener.getLogger().println("TOKEN: " + getDescriptor().getFodApi().authenticate());
+        List<ApplicationDTO> apps = getDescriptor().getFodApi().getApplications(listener);
     }
 
     // Overridden for better type safety.
@@ -67,9 +51,7 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
     }
 
     @Override
-    public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.NONE;
-    }
+    public BuildStepMonitor getRequiredMonitorService() { return BuildStepMonitor.NONE; }
 
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
@@ -114,10 +96,17 @@ public class HelloWorldBuilder extends Recorder implements SimpleBuildStep {
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            api = new FodApi(formData);
+            api = new FodApi(formData.getString(CLIENT_ID), formData.getString(CLIENT_SECRET), formData.getString(BASE_URL));;
 
             save();
             return super.configure(req,formData);
+        }
+
+        public ListBoxModel doFillApplicationNameItems() {
+            return new ListBoxModel(
+                    new ListBoxModel.Option("Green", "00ff00", true),
+                    new ListBoxModel.Option("Yellow", "ffff00", false),
+                    new ListBoxModel.Option("Red", "ff0000", false));
         }
 
         public FodApi getFodApi() {

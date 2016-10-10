@@ -1,18 +1,25 @@
 package org.jenkinsci.plugins.fodupload;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.sf.json.JSONObject;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
+import hudson.model.TaskListener;
 import okhttp3.*;
+
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.fodupload.Models.ApplicationDTO;
+import org.jenkinsci.plugins.fodupload.Models.GenericListResponse;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class FodApi {
-    private static final String CLIENT_ID = "clientId";
-    private static final String CLIENT_SECRET = "clientSecret";
-    private static final String BASE_URL = "baseUrl";
+    public static final String CLIENT_ID = "clientId";
+    public static final String CLIENT_SECRET = "clientSecret";
+    public static final String BASE_URL = "baseUrl";
 
 
     private String baseUrl;
@@ -29,10 +36,10 @@ public class FodApi {
     private final int WRITE_TIMEOUT = 30;
     private final int READ_TIMEOUT = 30;
 
-    public FodApi(JSONObject formData) {
-        key = formData.getString(CLIENT_ID);
-        secret = formData.getString(CLIENT_SECRET);
-        baseUrl = formData.getString(BASE_URL);
+    public FodApi(String key, String secret, String baseUrl) {
+        this.key = key;
+        this.secret = secret;
+        this.baseUrl = baseUrl;
 
         client = Create();
     }
@@ -88,5 +95,38 @@ public class FodApi {
     }
 
     public String getToken() { return token; }
+
+    public List<ApplicationDTO> getApplications(TaskListener listener) {
+        try {
+
+            listener.getLogger().println(token + "\n" + baseUrl);
+            String url = baseUrl + "/api/v3/applications";
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization", "Bearer " + token)
+                    .get()
+                    .build();
+            Response response = client.newCall(request).execute();
+            if (response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
+                System.out.println("Token expired re-authorizing");
+                // Re-authenticate
+                authenticate();
+            }
+
+            // Read the results and close the response
+            String content = IOUtils.toString(response.body().byteStream(), "utf-8");
+            response.body().close();
+
+            Gson gson = new Gson();
+            // Create a type of GenericList<ApplicationDTO> to play nice with gson.
+            Type t = new TypeToken<GenericListResponse<ApplicationDTO>>(){}.getType();
+            GenericListResponse<ApplicationDTO> results =  gson.fromJson(content, t);
+            return results.getItems();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
 
