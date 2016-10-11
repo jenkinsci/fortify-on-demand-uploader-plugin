@@ -21,6 +21,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -65,43 +66,52 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     }
 
     @Override
-    public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
+    public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException {
         final PrintStream logger = listener.getLogger();
         taskListener.set(listener);
 
-        if (api.isAuthenticated())
+        if (api.isAuthenticated()) {
             logger.println("Authenticated");
+        } else {
+            api.authenticate();
+        }
 
-        // TODO: Hard work goes here
         if (getAssessmentTypeId().isEmpty()) {
             logger.println("Assessment Type is empty.");
             build.setResult(Result.FAILURE);
         }
-        if (!api.isAuthenticated()) {
-            api.authenticate();
+
+        // zips the file in a temporary location
+        File payload = CreateZipFile(workspace);
+
+        if (payload.length() == 0) {
+            logger.println("Source is empty for given Technology Stack and Language Level.");
+            build.setResult(Result.FAILURE);
         }
 
-        try {
-            String tempDir = System.getProperty("java.io.tmpdir");
-            File dir = new File(tempDir);
+        jobModel.setUploadFile(payload);
+        boolean success = api.getStaticScanController().StartStaticScan(jobModel);
+        if (success) {
+            //TODO: Polling
+            payload.delete();
+        }
+    }
 
-            File tempZip = File.createTempFile("fodupload", ".zip", dir);
-            try(FileOutputStream fos = new FileOutputStream(tempZip)) {
-                final Pattern pattern = Pattern.compile(getFileExpressionPatternString(getTechnologyStack()),
-                        Pattern.CASE_INSENSITIVE);
+    private File CreateZipFile(FilePath workspace) throws IOException {
+        String tempDir = System.getProperty("java.io.tmpdir");
+        File dir = new File(tempDir);
 
-                workspace.zip(fos, new RegexFileFilter(pattern));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        File tempZip = File.createTempFile("fodupload", ".zip", dir);
+        try(FileOutputStream fos = new FileOutputStream(tempZip)) {
+            final Pattern pattern = Pattern.compile(getFileExpressionPatternString(getTechnologyStack()),
+                    Pattern.CASE_INSENSITIVE);
 
-            // TODO: Upload this sucker
-            jobModel.setUploadFile(tempZip);
-            boolean success = api.getStaticScanController().StartStaticScan(jobModel);
+            workspace.zip(fos, new RegexFileFilter(pattern));
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        return tempZip;
     }
 
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
