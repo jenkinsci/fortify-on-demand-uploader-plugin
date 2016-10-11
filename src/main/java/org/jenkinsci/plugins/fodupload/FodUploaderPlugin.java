@@ -11,7 +11,6 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.jenkinsci.plugins.fodupload.Models.ApplicationDTO;
 import org.jenkinsci.plugins.fodupload.Models.ReleaseAssessmentTypeDTO;
 import org.jenkinsci.plugins.fodupload.Models.ReleaseDTO;
@@ -92,18 +91,31 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         try {
             String tempDir = System.getProperty("java.io.tmpdir");
             File dir = new File(tempDir);
-            logger.println(dir.getAbsolutePath());
 
             File tempZip = File.createTempFile("fodupload", ".zip", dir);
             try(FileOutputStream fos = new FileOutputStream(tempZip)) {
                 final Pattern pattern = Pattern.compile(getFileExpressionPatternString(technologyStack),
                         Pattern.CASE_INSENSITIVE);
+
                 workspace.zip(fos, new RegexFileFilter(pattern));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
             // TODO: Upload this sucker
+            UploadRequest request = new UploadRequest();
+            request.setAssessmentTypeId(Integer.parseInt(assessmentTypeId));
+            request.setAuditPreferenceId(1);
+            request.setExcludeThirdPartyLibs(false);
+            request.setLanguageLevel(languageLevel);
+            request.setProjectVersionId(Integer.parseInt(releaseId));
+            request.setRemediationScan(false);
+            request.setRunSonatypeScan(false);
+            request.setScanPreferenceId(1);
+            request.setTechnologyStack(technologyStack);
+            request.setUploadFile(tempZip);
+            boolean success = api.StartStaticScan(request);
+            logger.println("Success? " + success);
 
         } catch(Exception e) {
             e.printStackTrace();
@@ -214,6 +226,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         // marks them unused, but they actually are used.
         // These getters are also named in the following format: doFill<JellyField>Items.
         public ListBoxModel doFillApplicationIdItems() {
+            api.authenticate();
+
             ListBoxModel listBox = new ListBoxModel();
             List<ApplicationDTO> apps = api.getApplications();
             for (ApplicationDTO app : apps) {
@@ -223,6 +237,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             return listBox;
         }
         public ListBoxModel doFillReleaseIdItems(@QueryParameter("applicationId") final String applicationId) {
+
+
             ListBoxModel listBox = new ListBoxModel();
             List<ReleaseDTO> releases = api.getReleases(applicationId);
             for(ReleaseDTO release : releases) {

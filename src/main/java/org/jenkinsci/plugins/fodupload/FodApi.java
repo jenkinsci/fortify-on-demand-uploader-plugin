@@ -7,10 +7,6 @@ import okhttp3.*;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.fodupload.Models.ApplicationDTO;
-import org.jenkinsci.plugins.fodupload.Models.GenericListResponse;
-import org.jenkinsci.plugins.fodupload.Models.ReleaseAssessmentTypeDTO;
-import org.jenkinsci.plugins.fodupload.Models.ReleaseDTO;
 import org.jenkinsci.plugins.fodupload.Models.*;
 
 import java.io.FileInputStream;
@@ -198,6 +194,94 @@ public class FodApi {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private final int CHUNK_SIZE = 1024 * 1024;
+    public boolean StartStaticScan(final UploadRequest uploadRequest) {
+        PrintStream logger = FodUploaderPlugin.getLogger();
+
+        PostStartScanResponse scanStartedResponse = null;
+        boolean lastFragment = false;
+        try(FileInputStream fs = new FileInputStream(uploadRequest.getUploadFile())) {
+            byte[] readByteArray = new byte[CHUNK_SIZE];
+            byte[] sendByteArray;
+            int fragmentNumber = 0;
+            int byteCount;
+            long offset = 0;
+            if (!uploadRequest.hasAssessmentTypeId() && !uploadRequest.hasTechnologyStack()) {
+                return false;
+            }
+
+            // Build 'static' portion of url
+            String fragUrl = baseUrl + "/api/v3/releases/" + uploadRequest.getProjectVersionId() +
+                    "/static-scans/start-scan?";
+            fragUrl += "assessmentTypeId=" + uploadRequest.getAssessmentTypeId();
+            fragUrl += "&technologyStack=" + uploadRequest.getTechnologyStack();
+
+            if (uploadRequest.hasLanguageLevel())
+                fragUrl += "&languageLevel=" + uploadRequest.getLanguageLevel();
+            if (uploadRequest.hasScanPreferenceId())
+                fragUrl += "&scanPreferenceId=" + uploadRequest.getScanPreferenceId();
+            if (uploadRequest.hasAuditPreferencesId())
+                fragUrl += "&auditPreferenceId=" + uploadRequest.getAuditPreferenceId();
+            if (uploadRequest.hasRunSonatypeScan())
+                fragUrl += "&doSonatypeScan=" + uploadRequest.hasRunSonatypeScan();
+            if (uploadRequest.isRemediationScan())
+                fragUrl += "&isRemediationScan=" + uploadRequest.isRemediationScan();
+            if (uploadRequest.hasExcludeThirdPartyLibs())
+                fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.hasExcludeThirdPartyLibs();
+
+            // Loop through chunks
+            while ((byteCount = fs.read(readByteArray)) != -1) {
+                if (byteCount < CHUNK_SIZE) {
+                    fragmentNumber = -1;
+                    lastFragment = true;
+                    sendByteArray = Arrays.copyOf(readByteArray, byteCount);
+                } else {
+                    sendByteArray = readByteArray;
+                }
+
+                MediaType byteArray = MediaType.parse("application/octet-stream");
+                Request request = new Request.Builder()
+                        .addHeader("Authorization", "Bearer " + token)
+                        .addHeader("Content-Type", "application/octet-stream")
+                        // Add offsets
+                        .url(fragUrl + "&fragNo=" + fragmentNumber++ + "&offset=" + offset)
+                        .post(RequestBody.create(byteArray, sendByteArray))
+                        .build();
+
+                // Get the response
+                Response response = client.newCall(request).execute();
+
+                if (fragmentNumber != 0 && fragmentNumber % 5 == 0) {
+                    logger.println("Upload Status - Bytes sent:" + offset);
+                }
+                if (lastFragment) {
+                    // Read the results and close the response
+                    String finalResponse = IOUtils.toString(response.body().byteStream(), "utf-8");
+                    response.body().close();
+
+                    Gson gson = new Gson();
+                    // Scan successfully uploaded
+                    if (response.isSuccessful()) {
+                        scanStartedResponse = gson.fromJson(finalResponse, PostStartScanResponse.class);
+                        // There was an error along the lines of 'another scan in progress' or something
+                    } else {
+                        GenericErrorResponse errors = gson.fromJson(finalResponse, GenericErrorResponse.class);
+                        logger.println("Package upload failed for the following reasons: " +
+                                errors.toString());
+                    }
+                }
+                offset += byteCount;
+            }
+            if (scanStartedResponse != null) {
+                logger.println("Scan " + scanStartedResponse.getScanId() +
+                        " uploaded successfully. Total bytes sent: " + offset);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return scanStartedResponse != null;
     }
 }
 
