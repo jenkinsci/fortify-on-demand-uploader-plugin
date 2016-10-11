@@ -25,10 +25,6 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.jenkinsci.plugins.fodupload.FodApi.BASE_URL;
-import static org.jenkinsci.plugins.fodupload.FodApi.CLIENT_ID;
-import static org.jenkinsci.plugins.fodupload.FodApi.CLIENT_SECRET;
-
 public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     //TODO: Create Lookup endpoint for this info.
     private static final String TS_DOT_NET_KEY = ".NET";
@@ -185,6 +181,12 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+        static final String CLIENT_ID = "clientId";
+        static final String CLIENT_SECRET = "clientSecret";
+        static final String BASE_URL = "baseUrl";
+        static final String APPLICATION_ID = "applicationId";
+        static final String RELEASE_ID = "releaseId";
+        static final String TECHNOLOGY_STACK = "technologyStack";
 
         private FodApi api;
 
@@ -217,13 +219,17 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         // marks them unused, but they actually are used.
         // These getters are also named in the following format: Get<JellyField>.
         public String getDisplayName() { return "Fortify Uploader Plug-in"; }
+        @SuppressWarnings("unused")
         public String getClientId() { return api.getKey(); }
+        @SuppressWarnings("unused")
         public String getClientSecret() { return api.getSecret(); }
+        @SuppressWarnings("unused")
         public String getBaseUrl() { return api.getBaseUrl(); }
 
         // NOTE: The following Getters are used to return saved values in the global.jelly. Intellij
         // marks them unused, but they actually are used.
         // These getters are also named in the following format: doFill<JellyField>Items.
+        @SuppressWarnings("unused")
         public ListBoxModel doFillApplicationIdItems() {
             api.authenticate();
 
@@ -235,7 +241,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             }
             return listBox;
         }
-        public ListBoxModel doFillReleaseIdItems(@QueryParameter("applicationId") final String applicationId) {
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) final String applicationId) {
 
 
             ListBoxModel listBox = new ListBoxModel();
@@ -246,6 +253,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             }
             return listBox;
         }
+        @SuppressWarnings("unused")
         public ListBoxModel doFillTechnologyStackItems() {
             ListBoxModel items = new ListBoxModel();
 
@@ -267,7 +275,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
             return items;
         }
-        public ListBoxModel doFillLanguageLevelItems(@QueryParameter("technologyStack") String technologyStack) {
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillLanguageLevelItems(@QueryParameter(TECHNOLOGY_STACK) String technologyStack) {
             ListBoxModel items = new ListBoxModel();
 
             switch (technologyStack) {
@@ -305,7 +314,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
             return items;
         }
-        public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter("releaseId") final String releaseId) {
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) final String releaseId) {
             ListBoxModel listBox = new ListBoxModel();
             List<ReleaseAssessmentTypeDTO> assessmentTypes = api.getReleaseController().getAssessmentTypeIds(releaseId);
             for (ReleaseAssessmentTypeDTO assessmentType : assessmentTypes) {
@@ -316,8 +326,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
 
         // Form validation
-        public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId, @QueryParameter(CLIENT_SECRET) final String clientSecret,
-                                               @QueryParameter(BASE_URL) final String baseUrl) {
+        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
+        public FormValidation doTestConnection() {
             api.authenticate();
             return !api.getToken().isEmpty() ?
                     FormValidation.ok("Successfully authenticated to Fortify on Demand.") :

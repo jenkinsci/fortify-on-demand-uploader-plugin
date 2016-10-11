@@ -27,6 +27,6 @@
         </f:entry>
 
         <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
-                 method="testConnection" with="clientId,clientSecret,fodUrl" />
+                 method="testConnection" />
     </f:advanced>
 </j:jelly>

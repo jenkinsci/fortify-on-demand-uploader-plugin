@@ -12,11 +12,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class FodApi {
-    public static final String CLIENT_ID = "clientId";
-    public static final String CLIENT_SECRET = "clientSecret";
-    public static final String BASE_URL = "baseUrl";
-
-
     private String baseUrl;
     private OkHttpClient client;
     private String token;
