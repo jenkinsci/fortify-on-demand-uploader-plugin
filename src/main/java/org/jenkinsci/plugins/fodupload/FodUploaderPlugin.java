@@ -11,6 +11,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.fodupload.models.JobConfigModel;
 import org.jenkinsci.plugins.fodupload.models.response.ApplicationDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
@@ -43,28 +44,24 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     private static final String TS_VB_SCRIPT_KEY = "VBScript";
     private static final String TS_XML_HTML_KEY = "XML/HTML";
 
-    private static final ThreadLocal<TaskListener> taskListener =
-            new ThreadLocal<>();
+    private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
     private FodApi api;
-    private String applicationId;
-    private String releaseId;
-    private String assessmentTypeId;
-    private String technologyStack;
-    private String languageLevel;
+    private JobConfigModel jobModel;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public FodUploaderPlugin(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
-                             String languageLevel) {
+                             String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
+                             boolean doPollFortify, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty) {
+        jobModel = new JobConfigModel(applicationId, releaseId, assessmentTypeId, technologyStack,
+                languageLevel, runOpenSourceAnalysis, isExpressScan, isExpressAudit,
+                doPollFortify, doPrettyLogOutput, includeAllFiles, includeThirdParty);
+
         api = getDescriptor().getFodApi();
+
         api.authenticate();
 
-        this.applicationId = applicationId;
-        this.releaseId = releaseId;
-        this.assessmentTypeId = assessmentTypeId;
-        this.technologyStack = technologyStack;
-        this.languageLevel = languageLevel;
     }
 
     @Override
@@ -76,7 +73,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             logger.println("Authenticated");
 
         // TODO: Hard work goes here
-        if (assessmentTypeId.isEmpty()) {
+        if (getAssessmentTypeId().isEmpty()) {
             logger.println("Assessment Type is empty.");
             build.setResult(Result.FAILURE);
         }
@@ -90,7 +87,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
             File tempZip = File.createTempFile("fodupload", ".zip", dir);
             try(FileOutputStream fos = new FileOutputStream(tempZip)) {
-                final Pattern pattern = Pattern.compile(getFileExpressionPatternString(technologyStack),
+                final Pattern pattern = Pattern.compile(getFileExpressionPatternString(getTechnologyStack()),
                         Pattern.CASE_INSENSITIVE);
 
                 workspace.zip(fos, new RegexFileFilter(pattern));
@@ -100,15 +97,15 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
             // TODO: Upload this sucker
             UploadRequest request = new UploadRequest();
-            request.setAssessmentTypeId(Integer.parseInt(assessmentTypeId));
+            request.setAssessmentTypeId(Integer.parseInt(getAssessmentTypeId()));
             request.setAuditPreferenceId(1);
             request.setExcludeThirdPartyLibs(false);
-            request.setLanguageLevel(languageLevel);
-            request.setProjectVersionId(Integer.parseInt(releaseId));
+            request.setLanguageLevel(getLanguageLevel());
+            request.setProjectVersionId(Integer.parseInt(getReleaseId()));
             request.setRemediationScan(false);
             request.setRunSonatypeScan(false);
             request.setScanPreferenceId(1);
-            request.setTechnologyStack(technologyStack);
+            request.setTechnologyStack(getTechnologyStack());
             request.setUploadFile(tempZip);
             boolean success = api.getStaticScanController().StartStaticScan(request);
 
@@ -120,11 +117,18 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
     // marks them unused, but they actually are used.
     // These getters are also named in the following format: Get<JellyField>.
-    public String getApplicationId() { return applicationId; }
-    public String getReleaseId() { return releaseId; }
-    public String getAssessmentTypeId() { return assessmentTypeId; }
-    public String getTechnologyStack() { return technologyStack; }
-    public String getLanguageLevel() { return languageLevel; }
+    public String getApplicationId() { return jobModel.getApplicationId(); }
+    public String getReleaseId() { return jobModel.getReleaseId(); }
+    public String getAssessmentTypeId() { return jobModel.getAssessmentTypeId(); }
+    public String getTechnologyStack() { return jobModel.getTechnologyStack(); }
+    public String getLanguageLevel() { return jobModel.getLanguageLevel(); }
+    public boolean getRunOpenSourceAnalysis() { return jobModel.getRunOpenSourceAnalysis(); }
+    public boolean getIsExpressScan() { return jobModel.getIsExpressScan(); }
+    public boolean getIsExpressAudit() { return jobModel.getIsExpressAudit(); }
+    public boolean getDoPollFortify() { return jobModel.getDoPollFortify(); }
+    public boolean getDoPrettyLogOutput() { return jobModel.getDoPrettyLogOutput(); }
+    public boolean getIncludeAllFiles() { return jobModel.getIncludeAllFiles(); }
+    public boolean getIncludeThirdParty() { return jobModel.getIncludeThirdParty(); }
 
     private static String getFileExpressionPatternString(String technologyStack){
         String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +
