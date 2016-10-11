@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.fodupload.Models;
+package org.jenkinsci.plugins.fodupload.models.response;
 
 public class ReleaseDTO {
     private int releaseId;

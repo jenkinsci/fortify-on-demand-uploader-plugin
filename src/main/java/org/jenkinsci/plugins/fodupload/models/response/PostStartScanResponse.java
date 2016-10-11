@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.fodupload.Models;
+package org.jenkinsci.plugins.fodupload.models.response;
 
 public class PostStartScanResponse {
     private int scanId;

@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.fodupload.Models;
+package org.jenkinsci.plugins.fodupload.models.request;
 
 import java.io.File;
 

@@ -11,10 +11,10 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
-import org.jenkinsci.plugins.fodupload.Models.ApplicationDTO;
-import org.jenkinsci.plugins.fodupload.Models.ReleaseAssessmentTypeDTO;
-import org.jenkinsci.plugins.fodupload.Models.ReleaseDTO;
-import org.jenkinsci.plugins.fodupload.Models.UploadRequest;
+import org.jenkinsci.plugins.fodupload.models.response.ApplicationDTO;
+import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
+import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
+import org.jenkinsci.plugins.fodupload.models.request.UploadRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -115,7 +115,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             request.setTechnologyStack(technologyStack);
             request.setUploadFile(tempZip);
             boolean success = api.StartStaticScan(request);
-            logger.println("Success? " + success);
 
         } catch(Exception e) {
             e.printStackTrace();
