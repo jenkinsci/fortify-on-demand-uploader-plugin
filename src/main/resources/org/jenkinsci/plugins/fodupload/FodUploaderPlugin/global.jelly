@@ -26,6 +26,10 @@
             <f:textbox default="https://hpfod.com"/>
         </f:entry>
 
+        <f:entry title="Polling Interval" description="In minutes" field="pollingInterval">
+            <f:textbox default="0"/>
+        </f:entry>
+
         <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
                  method="testConnection" />
     </f:advanced>

@@ -70,8 +70,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         final PrintStream logger = listener.getLogger();
         taskListener.set(listener);
 
+        logger.println("Starting Scan.");
         if (api.isAuthenticated()) {
-            logger.println("Authenticated");
+            logger.println("Authenticated.");
         } else {
             api.authenticate();
         }
@@ -83,7 +84,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
         // zips the file in a temporary location
         File payload = CreateZipFile(workspace);
-
         if (payload.length() == 0) {
             logger.println("Source is empty for given Technology Stack and Language Level.");
             build.setResult(Result.FAILURE);
@@ -91,9 +91,10 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
         jobModel.setUploadFile(payload);
         boolean success = api.getStaticScanController().StartStaticScan(jobModel);
+        payload.delete();
         if (success) {
+            logger.println("Scan Uploaded Successfully.");
             //TODO: Polling
-            payload.delete();
         }
     }
 
@@ -192,8 +193,10 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         static final String APPLICATION_ID = "applicationId";
         static final String RELEASE_ID = "releaseId";
         static final String TECHNOLOGY_STACK = "technologyStack";
+        static final String POLLING_INTERVAL = "pollingInterval";
 
         private FodApi api;
+        private int pollingInterval;
 
         /**
          * In order to load the persisted global configuration, you have to
@@ -214,6 +217,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             api = new FodApi(formData.getString(CLIENT_ID), formData.getString(CLIENT_SECRET), formData.getString(BASE_URL));
             api.authenticate();
 
+            pollingInterval = formData.getInt(POLLING_INTERVAL);
             save();
             return super.configure(req,formData);
         }
@@ -230,7 +234,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public String getClientSecret() { return api.getSecret(); }
         @SuppressWarnings("unused")
         public String getBaseUrl() { return api.getBaseUrl(); }
-
+        @SuppressWarnings("unused")
+        public int getPollingInterval() { return pollingInterval; }
         // NOTE: The following Getters are used to return saved values in the global.jelly. Intellij
         // marks them unused, but they actually are used.
         // These getters are also named in the following format: doFill<JellyField>Items.
