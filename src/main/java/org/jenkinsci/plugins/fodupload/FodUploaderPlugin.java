@@ -114,7 +114,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             request.setScanPreferenceId(1);
             request.setTechnologyStack(technologyStack);
             request.setUploadFile(tempZip);
-            boolean success = api.StartStaticScan(request);
+            boolean success = api.getStaticScanController().StartStaticScan(request);
 
         } catch(Exception e) {
             e.printStackTrace();
@@ -228,7 +228,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             api.authenticate();
 
             ListBoxModel listBox = new ListBoxModel();
-            List<ApplicationDTO> apps = api.getApplications();
+            List<ApplicationDTO> apps = api.getApplicationController().getApplications();
             for (ApplicationDTO app : apps) {
                 final String value = String.valueOf(app.getApplicationId());
                 listBox.add(new ListBoxModel.Option(app.getApplicationName(), value, false));
@@ -239,7 +239,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
 
             ListBoxModel listBox = new ListBoxModel();
-            List<ReleaseDTO> releases = api.getReleases(applicationId);
+            List<ReleaseDTO> releases = api.getReleaseController().getReleases(applicationId);
             for(ReleaseDTO release : releases) {
                 final String value = String.valueOf(release.getReleaseId());
                 listBox.add(new ListBoxModel.Option(release.getReleaseName(), value, false));
@@ -307,7 +307,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
         public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter("releaseId") final String releaseId) {
             ListBoxModel listBox = new ListBoxModel();
-            List<ReleaseAssessmentTypeDTO> assessmentTypes = api.getAssessmentTypeIds(releaseId);
+            List<ReleaseAssessmentTypeDTO> assessmentTypes = api.getReleaseController().getAssessmentTypeIds(releaseId);
             for (ReleaseAssessmentTypeDTO assessmentType : assessmentTypes) {
                 final String value = String.valueOf(assessmentType.getAssessmentTypeId());
                 listBox.add(new ListBoxModel.Option(assessmentType.getName(), value, false));
