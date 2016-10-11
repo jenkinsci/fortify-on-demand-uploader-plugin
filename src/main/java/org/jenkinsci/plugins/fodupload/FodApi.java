@@ -208,6 +208,7 @@ public class FodApi {
             int fragmentNumber = 0;
             int byteCount;
             long offset = 0;
+
             if (!uploadRequest.hasAssessmentTypeId() && !uploadRequest.hasTechnologyStack()) {
                 return false;
             }
@@ -256,21 +257,20 @@ public class FodApi {
                 if (fragmentNumber != 0 && fragmentNumber % 5 == 0) {
                     logger.println("Upload Status - Bytes sent:" + offset);
                 }
-                if (lastFragment) {
-                    // Read the results and close the response
-                    String finalResponse = IOUtils.toString(response.body().byteStream(), "utf-8");
-                    response.body().close();
+                // Read the results and close the response
+                String finalResponse = IOUtils.toString(response.body().byteStream(), "utf-8");
+                response.body().close();
 
-                    Gson gson = new Gson();
-                    // Scan successfully uploaded
-                    if (response.isSuccessful()) {
-                        scanStartedResponse = gson.fromJson(finalResponse, PostStartScanResponse.class);
-                        // There was an error along the lines of 'another scan in progress' or something
-                    } else {
-                        GenericErrorResponse errors = gson.fromJson(finalResponse, GenericErrorResponse.class);
-                        logger.println("Package upload failed for the following reasons: " +
-                                errors.toString());
-                    }
+                Gson gson = new Gson();
+                // Scan successfully uploaded
+                if (response.isSuccessful()) {
+                    scanStartedResponse = gson.fromJson(finalResponse, PostStartScanResponse.class);
+                    // There was an error along the lines of 'another scan in progress' or something
+                } else {
+                    GenericErrorResponse errors = gson.fromJson(finalResponse, GenericErrorResponse.class);
+                    logger.println("Package upload failed for the following reasons: " +
+                            errors.toString());
+                    break;
                 }
                 offset += byteCount;
             }
