@@ -52,10 +52,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     @DataBoundConstructor
     public FodUploaderPlugin(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
                              String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
-                             boolean doPollFortify, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty) {
+                             boolean doPollFortify, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
+                             boolean isRemediationScan) {
         jobModel = new JobConfigModel(applicationId, releaseId, assessmentTypeId, technologyStack,
                 languageLevel, runOpenSourceAnalysis, isExpressScan, isExpressAudit,
-                doPollFortify, doPrettyLogOutput, includeAllFiles, includeThirdParty);
+                doPollFortify, doPrettyLogOutput, includeAllFiles, includeThirdParty, isRemediationScan);
 
         api = getDescriptor().getFodApi();
 
@@ -118,6 +119,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     public boolean getDoPrettyLogOutput() { return jobModel.getDoPrettyLogOutput(); }
     public boolean getIncludeAllFiles() { return jobModel.getIncludeAllFiles(); }
     public boolean getIncludeThirdParty() { return jobModel.getIncludeThirdParty(); }
+    public boolean getIsRemediationScan() { return jobModel.getIsRemediationScan(); }
 
     private static String getFileExpressionPatternString(String technologyStack){
         String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +

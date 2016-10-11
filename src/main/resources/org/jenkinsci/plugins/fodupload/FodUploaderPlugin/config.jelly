@@ -38,5 +38,8 @@
         <f:entry title="Include third-party libraries" field="includeThirdParty">
             <f:checkbox/>
         </f:entry>
+                <f:entry title="Is a remediation scan" field="isRemediationScan">
+                    <f:checkbox/>
+                </f:entry>
     </f:advanced>
 </j:jelly>

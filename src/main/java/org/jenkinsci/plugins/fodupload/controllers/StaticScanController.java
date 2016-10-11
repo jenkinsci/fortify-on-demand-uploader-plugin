@@ -62,8 +62,8 @@ public class StaticScanController extends ControllerBase {
                 fragUrl += "&auditPreferenceId=2";
             if (uploadRequest.getRunOpenSourceAnalysis())
                 fragUrl += "&doSonatypeScan=" + uploadRequest.getRunOpenSourceAnalysis();
-/*            if (uploadRequest.isRemediationScan())
-                fragUrl += "&isRemediationScan=" + uploadRequest.isRemediationScan();*/
+            if (uploadRequest.getIsRemediationScan())
+                fragUrl += "&isRemediationScan=" + uploadRequest.getIsRemediationScan();
             if (uploadRequest.getIncludeThirdParty())
                 fragUrl += "&excludeThirdPartyLibs=" + !uploadRequest.getIncludeThirdParty();
 
