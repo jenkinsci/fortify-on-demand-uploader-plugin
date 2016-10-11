@@ -217,7 +217,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             return super.configure(req,formData);
         }
 
-        public FodApi getFodApi() { return api; }
+        FodApi getFodApi() { return api; }
 
         // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
         // marks them unused, but they actually are used.
