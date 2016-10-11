@@ -9,7 +9,7 @@ import okhttp3.Response;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApi;
 import org.jenkinsci.plugins.fodupload.FodUploaderPlugin;
-import org.jenkinsci.plugins.fodupload.models.request.UploadRequest;
+import org.jenkinsci.plugins.fodupload.models.JobConfigModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
 
@@ -30,7 +30,7 @@ public class StaticScanController extends ControllerBase {
      * @param uploadRequest zip file to upload
      * @return true if the scan succeeded
      */
-    public boolean StartStaticScan(final UploadRequest uploadRequest) {
+    public boolean StartStaticScan(final JobConfigModel uploadRequest) {
         PrintStream logger = FodUploaderPlugin.getLogger();
 
         PostStartScanResponse scanStartedResponse = null;
@@ -47,7 +47,7 @@ public class StaticScanController extends ControllerBase {
             }
 
             // Build 'static' portion of url
-            String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getProjectVersionId() +
+            String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getReleaseId() +
                     "/static-scans/start-scan?";
             fragUrl += "assessmentTypeId=" + uploadRequest.getAssessmentTypeId();
             fragUrl += "&technologyStack=" + uploadRequest.getTechnologyStack();
@@ -56,16 +56,16 @@ public class StaticScanController extends ControllerBase {
 
             if (uploadRequest.hasLanguageLevel())
                 fragUrl += "&languageLevel=" + uploadRequest.getLanguageLevel();
-            if (uploadRequest.hasScanPreferenceId())
-                fragUrl += "&scanPreferenceId=" + uploadRequest.getScanPreferenceId();
-            if (uploadRequest.hasAuditPreferencesId())
-                fragUrl += "&auditPreferenceId=" + uploadRequest.getAuditPreferenceId();
-            if (uploadRequest.hasRunSonatypeScan())
-                fragUrl += "&doSonatypeScan=" + uploadRequest.hasRunSonatypeScan();
-            if (uploadRequest.isRemediationScan())
-                fragUrl += "&isRemediationScan=" + uploadRequest.isRemediationScan();
-            if (uploadRequest.hasExcludeThirdPartyLibs())
-                fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.hasExcludeThirdPartyLibs();
+            if (uploadRequest.getIsExpressScan())
+                fragUrl += "&scanPreferenceId=2";
+            if (uploadRequest.getIsExpressAudit())
+                fragUrl += "&auditPreferenceId=2";
+            if (uploadRequest.getRunOpenSourceAnalysis())
+                fragUrl += "&doSonatypeScan=" + uploadRequest.getRunOpenSourceAnalysis();
+/*            if (uploadRequest.isRemediationScan())
+                fragUrl += "&isRemediationScan=" + uploadRequest.isRemediationScan();*/
+            if (uploadRequest.getIncludeThirdParty())
+                fragUrl += "&excludeThirdPartyLibs=" + !uploadRequest.getIncludeThirdParty();
 
             // Loop through chunks
             while ((byteCount = fs.read(readByteArray)) != -1) {

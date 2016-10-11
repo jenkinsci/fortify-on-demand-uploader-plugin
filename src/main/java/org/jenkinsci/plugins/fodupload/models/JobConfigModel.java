@@ -3,10 +3,12 @@ package org.jenkinsci.plugins.fodupload.models;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Recorder;
 
+import java.io.File;
+
 public class JobConfigModel {
-    private String applicationId;
-    private String releaseId;
-    private String assessmentTypeId;
+    private int applicationId;
+    private int releaseId;
+    private int assessmentTypeId;
     private String technologyStack;
     private String languageLevel;
     private boolean runOpenSourceAnalysis;
@@ -16,12 +18,25 @@ public class JobConfigModel {
     private boolean doPrettyLogOutput;
     private boolean includeAllFiles;
     private boolean includeThirdParty;
+    private File uploadFile;
 
-    public String getApplicationId() { return applicationId; }
-    public String getReleaseId() { return releaseId; }
-    public String getAssessmentTypeId() { return assessmentTypeId; }
+    public int getApplicationId() { return applicationId; }
+    public int getReleaseId() { return releaseId; }
+
+    public int getAssessmentTypeId() { return assessmentTypeId; }
+    public boolean hasAssessmentTypeId() {
+        return assessmentTypeId != 0;
+    }
+
     public String getTechnologyStack() { return technologyStack; }
+    public boolean hasTechnologyStack() {
+        return !technologyStack.isEmpty();
+    }
     public String getLanguageLevel() { return languageLevel; }
+    public boolean hasLanguageLevel() {
+        return !languageLevel.isEmpty();
+    }
+
     public boolean getRunOpenSourceAnalysis() { return runOpenSourceAnalysis; }
     public boolean getIsExpressScan() { return isExpressScan; }
     public boolean getIsExpressAudit() { return isExpressAudit; }
@@ -30,12 +45,15 @@ public class JobConfigModel {
     public boolean getIncludeAllFiles() { return includeAllFiles; }
     public boolean getIncludeThirdParty() { return includeThirdParty; }
 
+    public File getUploadFile() { return uploadFile; }
+    public void setUploadFile(File file) { uploadFile = file; }
+
     public JobConfigModel(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
               String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
               boolean doPollFortify, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty) {
-        this.applicationId = applicationId;
-        this.releaseId = releaseId;
-        this.assessmentTypeId = assessmentTypeId;
+        this.applicationId = Integer.parseInt(applicationId);
+        this.releaseId = Integer.parseInt(releaseId);
+        this.assessmentTypeId = Integer.parseInt(assessmentTypeId);
         this.technologyStack = technologyStack;
         this.languageLevel = languageLevel;
         this.runOpenSourceAnalysis = runOpenSourceAnalysis;

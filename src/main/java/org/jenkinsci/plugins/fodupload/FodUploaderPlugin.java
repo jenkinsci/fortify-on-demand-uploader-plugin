@@ -15,7 +15,6 @@ import org.jenkinsci.plugins.fodupload.models.JobConfigModel;
 import org.jenkinsci.plugins.fodupload.models.response.ApplicationDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
-import org.jenkinsci.plugins.fodupload.models.request.UploadRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -96,18 +95,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             }
 
             // TODO: Upload this sucker
-            UploadRequest request = new UploadRequest();
-            request.setAssessmentTypeId(Integer.parseInt(getAssessmentTypeId()));
-            request.setAuditPreferenceId(1);
-            request.setExcludeThirdPartyLibs(false);
-            request.setLanguageLevel(getLanguageLevel());
-            request.setProjectVersionId(Integer.parseInt(getReleaseId()));
-            request.setRemediationScan(false);
-            request.setRunSonatypeScan(false);
-            request.setScanPreferenceId(1);
-            request.setTechnologyStack(getTechnologyStack());
-            request.setUploadFile(tempZip);
-            boolean success = api.getStaticScanController().StartStaticScan(request);
+            jobModel.setUploadFile(tempZip);
+            boolean success = api.getStaticScanController().StartStaticScan(jobModel);
 
         } catch(Exception e) {
             e.printStackTrace();
@@ -117,9 +106,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
     // marks them unused, but they actually are used.
     // These getters are also named in the following format: Get<JellyField>.
-    public String getApplicationId() { return jobModel.getApplicationId(); }
-    public String getReleaseId() { return jobModel.getReleaseId(); }
-    public String getAssessmentTypeId() { return jobModel.getAssessmentTypeId(); }
+    public String getApplicationId() { return String.valueOf(jobModel.getApplicationId()); }
+    public String getReleaseId() { return String.valueOf(jobModel.getReleaseId()); }
+    public String getAssessmentTypeId() { return String.valueOf(jobModel.getAssessmentTypeId()); }
     public String getTechnologyStack() { return jobModel.getTechnologyStack(); }
     public String getLanguageLevel() { return jobModel.getLanguageLevel(); }
     public boolean getRunOpenSourceAnalysis() { return jobModel.getRunOpenSourceAnalysis(); }
