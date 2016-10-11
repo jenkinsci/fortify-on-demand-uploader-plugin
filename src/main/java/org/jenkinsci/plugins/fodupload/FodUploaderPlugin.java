@@ -15,6 +15,7 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.jenkinsci.plugins.fodupload.Models.ApplicationDTO;
 import org.jenkinsci.plugins.fodupload.Models.ReleaseAssessmentTypeDTO;
 import org.jenkinsci.plugins.fodupload.Models.ReleaseDTO;
+import org.jenkinsci.plugins.fodupload.Models.UploadRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -47,6 +48,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     private static final String TS_VB_SCRIPT_KEY = "VBScript";
     private static final String TS_XML_HTML_KEY = "XML/HTML";
 
+    private static final ThreadLocal<TaskListener> taskListener =
+            new ThreadLocal<>();
 
     private FodApi api;
     private String applicationId;
@@ -72,6 +75,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     @Override
     public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
         final PrintStream logger = listener.getLogger();
+        taskListener.set(listener);
 
         if (api.isAuthenticated())
             logger.println("Authenticated");
@@ -153,6 +157,10 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             default:
                 return ".*";
         }
+    }
+
+    public static PrintStream getLogger() {
+        return taskListener.get().getLogger();
     }
 
     // Overridden for better type safety.

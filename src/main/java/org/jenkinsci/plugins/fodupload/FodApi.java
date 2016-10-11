@@ -11,9 +11,13 @@ import org.jenkinsci.plugins.fodupload.Models.ApplicationDTO;
 import org.jenkinsci.plugins.fodupload.Models.GenericListResponse;
 import org.jenkinsci.plugins.fodupload.Models.ReleaseAssessmentTypeDTO;
 import org.jenkinsci.plugins.fodupload.Models.ReleaseDTO;
+import org.jenkinsci.plugins.fodupload.Models.*;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
