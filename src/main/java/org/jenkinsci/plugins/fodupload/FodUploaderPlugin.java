@@ -15,6 +15,7 @@ import org.jenkinsci.plugins.fodupload.models.JobConfigModel;
 import org.jenkinsci.plugins.fodupload.models.response.ApplicationDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
+import org.jenkinsci.plugins.fodupload.models.response.TenantEntitlementDTO;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -197,6 +198,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
         private FodApi api;
         private int pollingInterval;
+        private TenantEntitlementDTO entitlementObject;
+        private int entitlementId;
+        private int frequencyTypeId;
 
         /**
          * In order to load the persisted global configuration, you have to
@@ -204,7 +208,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
          */
         public DescriptorImpl() {
             load();
+
             api.authenticate();
+
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -218,6 +224,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             api.authenticate();
 
             pollingInterval = formData.getInt(POLLING_INTERVAL);
+            
             save();
             return super.configure(req,formData);
         }
@@ -236,6 +243,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public String getBaseUrl() { return api.getBaseUrl(); }
         @SuppressWarnings("unused")
         public int getPollingInterval() { return pollingInterval; }
+        @SuppressWarnings("unused")
+        public int getEntitlementId() { return entitlementId; }
+        @SuppressWarnings("unused")
+        public int getFrequencyTypeId() { return frequencyTypeId; }
+
         // NOTE: The following Getters are used to return saved values in the global.jelly. Intellij
         // marks them unused, but they actually are used.
         // These getters are also named in the following format: doFill<JellyField>Items.

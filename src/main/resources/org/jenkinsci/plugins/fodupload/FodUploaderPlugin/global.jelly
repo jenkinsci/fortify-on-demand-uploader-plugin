@@ -30,6 +30,14 @@
             <f:textbox default="0"/>
         </f:entry>
 
+        <f:entry title="Entitlement Type" field="entitlementType">
+            <f:select/>
+        </f:entry>
+
+        <f:entry title="Entitlement Frequency" field="entitlementFrequency">
+            <f:select/>
+        </f:entry>
+
         <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
                  method="testConnection" />
     </f:advanced>
