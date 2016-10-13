@@ -112,6 +112,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
 
         // Success could be true then set to false from polling.
+        api.retireToken();
         build.setResult(success ? Result.SUCCESS : Result.UNSTABLE);
     }
 

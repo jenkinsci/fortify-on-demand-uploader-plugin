@@ -37,6 +37,12 @@ public class FodApi {
     private LookupItemsController lookupItemsController;
     public LookupItemsController getLookupItemsController() { return lookupItemsController; }
 
+    /**
+     * Constructor that encapsulates the api
+     * @param key api key
+     * @param secret api secret
+     * @param baseUrl api url
+     */
     public FodApi(String key, String secret, String baseUrl) {
         this.key = key;
         this.secret = secret;
@@ -51,6 +57,9 @@ public class FodApi {
         lookupItemsController = new LookupItemsController(this);
     }
 
+    /**
+     * Used for authenticating in the case of a time out using the saved api credentials.
+     */
     public void authenticate() {
         try {
             RequestBody formBody = new FormBody.Builder()
@@ -81,11 +90,38 @@ public class FodApi {
         }
     }
 
-    //TODO: retire token
+    /**
+     * Retire the current token. Unclear if this actually does anything on the backend.
+     */
     public void retireToken() {
+        try {
+            Request request = new Request.Builder()
+                    .url(baseUrl + "/oauth/retireToken")
+                    .addHeader("Authorization","Bearer " + token)
+                    .get()
+                    .build();
+            Response response = client.newCall(request).execute();
 
+            if (response.isSuccessful()) {
+                // Read the results and close the response
+                String content = IOUtils.toString(response.body().byteStream(), "utf-8");
+                response.body().close();
+
+                JsonParser parser = new JsonParser();
+                JsonObject obj = parser.parse(content).getAsJsonObject();
+                String messageResponse = obj.get("message").getAsString();
+
+                System.out.println("Retiring Token : " + messageResponse);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     * Creates a okHttp client to connect with.
+     * @return returns a client object
+     */
     private OkHttpClient Create() {
         OkHttpClient.Builder baseClient = new OkHttpClient().newBuilder()
                 .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
