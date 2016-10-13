@@ -78,10 +78,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         final PrintStream logger = listener.getLogger();
         taskListener.set(listener);
 
-        logger.println("Starting Scan.");
+        logger.println("Starting FoD Upload.");
         if (api.isAuthenticated()) {
             logger.println("Authenticated.");
         } else {
+            logger.println("Authenticating");
             api.authenticate();
         }
 
@@ -96,9 +97,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             logger.println("Source is empty for given Technology Stack and Language Level.");
             build.setResult(Result.FAILURE);
         }
+        logger.println(jobModel.toString());
 
         jobModel.setUploadFile(payload);
         boolean success = api.getStaticScanController().StartStaticScan(jobModel);
+
         payload.delete();
         if (success) {
             logger.println("Scan Uploaded Successfully.");
@@ -107,6 +110,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     }
 
     private File CreateZipFile(FilePath workspace) throws IOException {
+        getLogger().println("Begin Create Zip.");
+
         String tempDir = System.getProperty("java.io.tmpdir");
         File dir = new File(tempDir);
 
@@ -120,6 +125,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        getLogger().println("End Create Zip.");
         return tempZip;
     }
 
@@ -357,7 +363,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             if (entitlements.size() > 0) {
                 for(TenantEntitlementDTO entitlement : entitlements) {
                     String val = String.valueOf(entitlement.getEntitlementId());
-                    String text = String.format("%1s (%2s %3s left)", val,
+                    String text = String.format("%s (%s %s left)", val,
                             (entitlement.getUnitsPurchased() - entitlement.getUnitsConsumed()),
                             availableEntitlements.getEntitlementType());
                     listBox.add(new ListBoxModel.Option(text, val, false));

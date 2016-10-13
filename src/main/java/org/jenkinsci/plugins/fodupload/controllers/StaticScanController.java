@@ -45,7 +45,7 @@ public class StaticScanController extends ControllerBase {
             if (!uploadRequest.hasAssessmentTypeId() && !uploadRequest.hasTechnologyStack()) {
                 return false;
             }
-            
+
             // Build 'static' portion of url
             String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getReleaseId() +
                     "/static-scans/start-scan?";

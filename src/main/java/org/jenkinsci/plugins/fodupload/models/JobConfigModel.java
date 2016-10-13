@@ -79,4 +79,28 @@ public class JobConfigModel {
         this.entitlementFrequencyTypeId = entitlementProperties != null ?
                 entitlementProperties.getFrequencyTypeId() : 1;
     }
+
+    @Override
+    public String toString() {
+        String text = String.format(
+                "Application Id:                    %s%n" +
+                "Release Id:                        %s%n" +
+                "Assessment Type Id:                %s%n" +
+                "Technology Stack:                  %s%n" +
+                "Language Level:                    %s%n" +
+                "Run Open Source Analysis:          %s%n" +
+                "Express Scan:                      %s%n" +
+                "Express Audit:                     %s%n" +
+                "Include All Files:                 %s%n" +
+                "Include Third Party:               %s%n" +
+                "Remediation Scan:                  %s%n" +
+                "Entitlement Id:                    %s%n" +
+                "Entitlement Frequency Type:        %s%n" +
+                "Poll Fortify:                      %s%n" +
+                "Pretty Log Output:                 %s%n",
+                applicationId, releaseId, assessmentTypeId, technologyStack, languageLevel, runOpenSourceAnalysis,
+                isExpressScan, isExpressAudit, includeAllFiles, includeThirdParty, isRemediationScan, entitlementId,
+                entitlementFrequencyTypeId == 1 ? "Single Scan" : "Subscription", doPollFortify, doPrettyLogOutput);
+        return text;
+    }
 }
