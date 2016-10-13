@@ -16,6 +16,14 @@
         <f:select />
     </f:entry>
 
+    <f:entry title="Entitlement Type" field="entitlementId">
+        <f:select/>
+    </f:entry>
+
+    <f:entry title="Entitlement Frequency" field="entitlementFrequencyType">
+        <f:select/>
+    </f:entry>
+
     <f:advanced title="Additional Options">
         <f:entry title="Open source component analysis" field="runOpenSourceAnalysis">
             <f:checkbox/>

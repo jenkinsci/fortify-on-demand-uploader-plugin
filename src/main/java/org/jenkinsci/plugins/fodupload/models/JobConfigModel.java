@@ -20,6 +20,8 @@ public class JobConfigModel {
     private boolean includeThirdParty;
     private boolean isRemediationScan;
     private File uploadFile;
+    private int entitlementId;
+    private int entitlementFrequencyTypeId;
 
     public int getApplicationId() { return applicationId; }
     public int getReleaseId() { return releaseId; }
@@ -46,6 +48,8 @@ public class JobConfigModel {
     public boolean getIncludeAllFiles() { return includeAllFiles; }
     public boolean getIncludeThirdParty() { return includeThirdParty; }
     public boolean getIsRemediationScan() { return isRemediationScan; }
+    public int getEntitlementId() { return entitlementId; }
+    public int getEntitlementFrequencyTypeId() { return entitlementFrequencyTypeId; }
 
 
     public File getUploadFile() { return uploadFile; }
@@ -54,7 +58,7 @@ public class JobConfigModel {
     public JobConfigModel(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
               String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
               boolean doPollFortify, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
-              boolean isRemediationScan) {
+              boolean isRemediationScan, int entitlementId, int entitlementFrequencyTypeId) {
         this.applicationId = Integer.parseInt(applicationId);
         this.releaseId = Integer.parseInt(releaseId);
         this.assessmentTypeId = Integer.parseInt(assessmentTypeId);
@@ -68,5 +72,7 @@ public class JobConfigModel {
         this.includeAllFiles = includeAllFiles;
         this.includeThirdParty = includeThirdParty;
         this.isRemediationScan = isRemediationScan;
+        this.entitlementFrequencyTypeId = entitlementFrequencyTypeId;
+        this.entitlementId = entitlementId;
     }
 }

@@ -51,7 +51,7 @@ public class StaticScanController extends ControllerBase {
                     "/static-scans/start-scan?";
             fragUrl += "assessmentTypeId=" + uploadRequest.getAssessmentTypeId();
             fragUrl += "&technologyStack=" + uploadRequest.getTechnologyStack();
-            fragUrl += "&entitlementId=6";
+            fragUrl += "&entitlementId=" + uploadRequest.getEntitlementId();
             fragUrl += "&entitlementFrequencyType=1";
 
             if (uploadRequest.hasLanguageLevel())

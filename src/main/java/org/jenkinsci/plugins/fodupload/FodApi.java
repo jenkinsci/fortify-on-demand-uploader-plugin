@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.controllers.ApplicationController;
 import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
+import org.jenkinsci.plugins.fodupload.controllers.TenantEntitlementsController;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,8 @@ public class FodApi {
     public ApplicationController getApplicationController() { return applicationController; }
     private ReleaseController releaseController;
     public ReleaseController getReleaseController() { return releaseController; }
+    private TenantEntitlementsController tenantEntitlementsController;
+    public TenantEntitlementsController getTenantEntitlementsController() { return tenantEntitlementsController; }
 
     public FodApi(String key, String secret, String baseUrl) {
         this.key = key;
@@ -43,6 +46,7 @@ public class FodApi {
         staticScanController = new StaticScanController(this);
         applicationController = new ApplicationController(this);
         releaseController = new ReleaseController(this);
+        tenantEntitlementsController = new TenantEntitlementsController(this);
     }
 
     public void authenticate() {
