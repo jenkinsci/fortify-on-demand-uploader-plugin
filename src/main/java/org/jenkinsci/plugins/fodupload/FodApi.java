@@ -4,10 +4,7 @@ import com.google.gson.*;
 import okhttp3.*;
 
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.fodupload.controllers.ApplicationController;
-import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
-import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
-import org.jenkinsci.plugins.fodupload.controllers.TenantEntitlementsController;
+import org.jenkinsci.plugins.fodupload.controllers.*;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +32,8 @@ public class FodApi {
     public ReleaseController getReleaseController() { return releaseController; }
     private TenantEntitlementsController tenantEntitlementsController;
     public TenantEntitlementsController getTenantEntitlementsController() { return tenantEntitlementsController; }
+    private LookupItemsController lookupItemsController;
+    public LookupItemsController getLookupItemsController() { return lookupItemsController; }
 
     public FodApi(String key, String secret, String baseUrl) {
         this.key = key;
@@ -47,6 +46,7 @@ public class FodApi {
         applicationController = new ApplicationController(this);
         releaseController = new ReleaseController(this);
         tenantEntitlementsController = new TenantEntitlementsController(this);
+        lookupItemsController = new LookupItemsController(this);
     }
 
     public void authenticate() {

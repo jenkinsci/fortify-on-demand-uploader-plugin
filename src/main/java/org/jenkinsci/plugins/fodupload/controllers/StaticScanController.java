@@ -43,6 +43,7 @@ public class StaticScanController extends ControllerBase {
             long offset = 0;
 
             if (!uploadRequest.hasAssessmentTypeId() && !uploadRequest.hasTechnologyStack()) {
+                logger.println("Missing Assessment Type or Technology Stack.");
                 return false;
             }
 

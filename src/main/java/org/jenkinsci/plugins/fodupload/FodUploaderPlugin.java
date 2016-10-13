@@ -86,7 +86,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             api.authenticate();
         }
 
-        if (getAssessmentTypeId().isEmpty()) {
+        if (getAssessmentTypeId() == 0) {
             logger.println("Assessment Type is empty.");
             build.setResult(Result.FAILURE);
         }
@@ -106,6 +106,10 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         if (success) {
             logger.println("Scan Uploaded Successfully.");
             //TODO: Polling
+            if (getDoPollFortify()) {
+                PollStatus /*Amy*/poller = new PollStatus(api, 1);
+                poller.releaseStatus(getReleaseId());
+            }
         }
     }
 
@@ -132,9 +136,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
     // marks them unused, but they actually are used.
     // These getters are also named in the following format: Get<JellyField>.
-    public String getApplicationId() { return String.valueOf(jobModel.getApplicationId()); }
-    public String getReleaseId() { return String.valueOf(jobModel.getReleaseId()); }
-    public String getAssessmentTypeId() { return String.valueOf(jobModel.getAssessmentTypeId()); }
+    public int getApplicationId() { return jobModel.getApplicationId(); }
+    public int getReleaseId() { return jobModel.getReleaseId(); }
+    public int getAssessmentTypeId() { return jobModel.getAssessmentTypeId(); }
     public String getTechnologyStack() { return jobModel.getTechnologyStack(); }
     public String getLanguageLevel() { return jobModel.getLanguageLevel(); }
     public boolean getRunOpenSourceAnalysis() { return jobModel.getRunOpenSourceAnalysis(); }
@@ -272,7 +276,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             return listBox;
         }
         @SuppressWarnings("unused")
-        public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) final String applicationId) {
+        public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) final int applicationId) {
 
 
             ListBoxModel listBox = new ListBoxModel();

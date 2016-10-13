@@ -1,10 +1,10 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Recorder;
 import org.jenkinsci.plugins.fodupload.models.response.TenantEntitlementExtendedPropertiesDTO;
 
 import java.io.File;
+
+import static org.jenkinsci.plugins.fodupload.models.FodEnums.*;
 
 public class JobConfigModel {
     private int applicationId;
@@ -76,8 +76,9 @@ public class JobConfigModel {
         this.isRemediationScan = isRemediationScan;
         this.entitlementId = entitlementId;
 
-        this.entitlementFrequencyTypeId = entitlementProperties != null ?
-                entitlementProperties.getFrequencyTypeId() : 1;
+        this.entitlementFrequencyTypeId = (entitlementProperties != null) ?
+                entitlementProperties.getFrequencyTypeId().getValue() :
+                EntitlementFrequencyType.SingleScan.getValue();
     }
 
     @Override
@@ -100,7 +101,7 @@ public class JobConfigModel {
                 "Pretty Log Output:                 %s%n",
                 applicationId, releaseId, assessmentTypeId, technologyStack, languageLevel, runOpenSourceAnalysis,
                 isExpressScan, isExpressAudit, includeAllFiles, includeThirdParty, isRemediationScan, entitlementId,
-                entitlementFrequencyTypeId == 1 ? "Single Scan" : "Subscription", doPollFortify, doPrettyLogOutput);
+                entitlementFrequencyTypeId == EntitlementFrequencyType.SingleScan.getValue() ? "Single Scan" : "Subscription", doPollFortify, doPrettyLogOutput);
         return text;
     }
 }
