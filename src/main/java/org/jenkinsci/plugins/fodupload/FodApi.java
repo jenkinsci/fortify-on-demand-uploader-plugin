@@ -1,12 +1,15 @@
 package org.jenkinsci.plugins.fodupload;
 
 import com.google.gson.*;
+import hudson.ProxyConfiguration;
+import jenkins.model.Jenkins;
 import okhttp3.*;
 
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.controllers.*;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 public class FodApi {
@@ -17,8 +20,7 @@ public class FodApi {
     private String key;
     private String secret;
 
-    //TODO: set this up to pull from Jenkins
-    private String proxy = null;
+    private ProxyConfiguration proxy = Jenkins.getInstance().proxy;
 
     private final int CONNECTION_TIMEOUT = 10;
     private final int WRITE_TIMEOUT = 30;
@@ -94,8 +96,17 @@ public class FodApi {
         if(proxy == null)
             return baseClient.build();
 
-        //TODO: ...otherwise set up proxy
-        return null;
+        OkHttpClient.Builder proxyClient = baseClient
+                .proxy(new java.net.Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress(proxy.name, proxy.port)));
+        // Otherwise set up proxy
+        Authenticator proxyAuthenticator;
+        String credentials = Credentials.basic(proxy.getUserName(), proxy.getPassword());
+
+        proxyAuthenticator = (route, response) -> response.request().newBuilder()
+                .header("Proxy-Authorization", credentials)
+                .build();
+        proxyClient.proxyAuthenticator(proxyAuthenticator);
+        return proxyClient.build();
     }
 
     public String getToken() { return token; }
