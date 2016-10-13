@@ -22,7 +22,7 @@ public class PollStatus {
     /**
      * Constructor
      * @param api api connection to use
-     * @param pollingInterval interval to poll
+     * @param jobModel fod api data
      */
     public PollStatus(FodApi api, final JobConfigModel jobModel) {
         fodApi = api;
@@ -54,15 +54,8 @@ public class PollStatus {
                 int status = release.getCurrentAnalysisStatusTypeId();
 
                 // Get the possible statuses only once
-                if(analysisStatusTypes == null) {
-                    logger.println(analysisStatusTypes);
-                    logger.println(fodApi);
-                    logger.println(fodApi.getLookupItemsController());
-                    logger.println(fodApi.getReleaseController());
-                    logger.println(fodApi.getTenantEntitlementsController());
-
+                if(analysisStatusTypes == null)
                     analysisStatusTypes = fodApi.getLookupItemsController().getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
-                }
 
                 if(failCount < MAX_FAILS)
                 {
