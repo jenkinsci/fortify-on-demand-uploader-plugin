@@ -33,8 +33,8 @@
         <f:entry title="Enable detailed assessment result log" field="doPrettyLogOutput">
             <f:checkbox/>
         </f:entry>
-        <f:entry title="Poll Fortify on Demand for results" field="doPollFortify">
-            <f:checkbox/>
+        <f:entry title="Polling Interval" description="In minutes" field="pollingInterval">
+            <f:textbox default="0"/>
         </f:entry>
         <f:entry title="Include all project files" field="includeAllFiles">
             <f:checkbox/>

@@ -51,7 +51,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     @DataBoundConstructor
     public FodUploaderPlugin(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
                              String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
-                             boolean doPollFortify, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
+                             int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
                              boolean isRemediationScan, int entitlementId) {
         api = getDescriptor().getFodApi();
 
@@ -67,7 +67,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         // load job model
         jobModel = new JobConfigModel(applicationId, releaseId, assessmentTypeId, technologyStack,
                 languageLevel, runOpenSourceAnalysis, isExpressScan, isExpressAudit,
-                doPollFortify, doPrettyLogOutput, includeAllFiles, includeThirdParty, isRemediationScan,
+                pollingInterval, doPrettyLogOutput, includeAllFiles, includeThirdParty, isRemediationScan,
                 entitlementId, property);
         api.authenticate();
 
@@ -105,9 +105,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         payload.delete();
         if (success) {
             logger.println("Scan Uploaded Successfully.");
-            //TODO: Polling
-            if (getDoPollFortify()) {
-                PollStatus /*Amy*/poller = new PollStatus(api, 1);
+            if (getDescriptor().getDoPollFortify() && jobModel.getPollingInterval() > 0) {
+                PollStatus /*Amy*/poller = new PollStatus(api, jobModel.getPollingInterval());
                 poller.releaseStatus(getReleaseId());
             }
         }
@@ -144,7 +143,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     public boolean getRunOpenSourceAnalysis() { return jobModel.getRunOpenSourceAnalysis(); }
     public boolean getIsExpressScan() { return jobModel.getIsExpressScan(); }
     public boolean getIsExpressAudit() { return jobModel.getIsExpressAudit(); }
-    public boolean getDoPollFortify() { return jobModel.getDoPollFortify(); }
     public boolean getDoPrettyLogOutput() { return jobModel.getDoPrettyLogOutput(); }
     public boolean getIncludeAllFiles() { return jobModel.getIncludeAllFiles(); }
     public boolean getIncludeThirdParty() { return jobModel.getIncludeThirdParty(); }
@@ -213,10 +211,10 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         static final String APPLICATION_ID = "applicationId";
         static final String RELEASE_ID = "releaseId";
         static final String TECHNOLOGY_STACK = "technologyStack";
-        static final String POLLING_INTERVAL = "pollingInterval";
+        static final String DO_POLL_FORTIFY = "doPollFortify";
 
         private FodApi api;
-        private int pollingInterval;
+        private boolean doPollFortify;
         private GetTenantEntitlementResponse availableEntitlements;
 
         /**
@@ -239,14 +237,21 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             api = new FodApi(formData.getString(CLIENT_ID), formData.getString(CLIENT_SECRET), formData.getString(BASE_URL));
             api.authenticate();
 
-            pollingInterval = formData.getInt(POLLING_INTERVAL);
+            doPollFortify = formData.getBoolean(DO_POLL_FORTIFY);
 
             save();
             return super.configure(req,formData);
         }
 
-        FodApi getFodApi() { return api; }
-        GetTenantEntitlementResponse getAvailableEntitlements() { return availableEntitlements; }
+        FodApi getFodApi() {
+            if (api.getReleaseController() == null || api.getTenantEntitlementsController() == null ||
+                    api.getApplicationController() == null || api.getLookupItemsController() == null ||
+                    api.getApplicationController() == null) {
+                api = new FodApi(api.getKey(), api.getSecret(), api.getBaseUrl());
+                api.authenticate();
+            }
+            return api;
+        }
         // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
         // marks them unused, but they actually are used.
         // These getters are also named in the following format: Get<JellyField>.
@@ -258,7 +263,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public String getBaseUrl() { return api.getBaseUrl(); }
         @SuppressWarnings("unused")
-        public int getPollingInterval() { return pollingInterval; }
+        public boolean getDoPollFortify() { return doPollFortify; }
 
         // NOTE: The following Getters are used to return saved values in the global.jelly. Intellij
         // marks them unused, but they actually are used.

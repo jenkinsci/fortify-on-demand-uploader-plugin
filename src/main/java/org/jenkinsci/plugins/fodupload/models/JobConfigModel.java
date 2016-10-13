@@ -15,7 +15,7 @@ public class JobConfigModel {
     private boolean runOpenSourceAnalysis;
     private boolean isExpressScan;
     private boolean isExpressAudit;
-    private boolean doPollFortify;
+    private int pollingInterval;
     private boolean doPrettyLogOutput;
     private boolean includeAllFiles;
     private boolean includeThirdParty;
@@ -44,7 +44,7 @@ public class JobConfigModel {
     public boolean getRunOpenSourceAnalysis() { return runOpenSourceAnalysis; }
     public boolean getIsExpressScan() { return isExpressScan; }
     public boolean getIsExpressAudit() { return isExpressAudit; }
-    public boolean getDoPollFortify() { return doPollFortify; }
+    public int getPollingInterval() { return pollingInterval; }
     public boolean getDoPrettyLogOutput() { return doPrettyLogOutput; }
     public boolean getIncludeAllFiles() { return includeAllFiles; }
     public boolean getIncludeThirdParty() { return includeThirdParty; }
@@ -58,7 +58,7 @@ public class JobConfigModel {
 
     public JobConfigModel(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
                           String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
-                          boolean doPollFortify, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
+                          int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
                           boolean isRemediationScan, int entitlementId,
                           TenantEntitlementExtendedPropertiesDTO entitlementProperties) {
         this.applicationId = Integer.parseInt(applicationId);
@@ -69,7 +69,7 @@ public class JobConfigModel {
         this.runOpenSourceAnalysis = runOpenSourceAnalysis;
         this.isExpressScan = isExpressScan;
         this.isExpressAudit = isExpressAudit;
-        this.doPollFortify = doPollFortify;
+        this.pollingInterval = pollingInterval;
         this.doPrettyLogOutput = doPrettyLogOutput;
         this.includeAllFiles = includeAllFiles;
         this.includeThirdParty = includeThirdParty;
@@ -97,11 +97,11 @@ public class JobConfigModel {
                 "Remediation Scan:                  %s%n" +
                 "Entitlement Id:                    %s%n" +
                 "Entitlement Frequency Type:        %s%n" +
-                "Poll Fortify:                      %s%n" +
+                "Polling Interval:                  %s%n" +
                 "Pretty Log Output:                 %s%n",
                 applicationId, releaseId, assessmentTypeId, technologyStack, languageLevel, runOpenSourceAnalysis,
                 isExpressScan, isExpressAudit, includeAllFiles, includeThirdParty, isRemediationScan, entitlementId,
-                entitlementFrequencyTypeId == EntitlementFrequencyType.SingleScan.getValue() ? "Single Scan" : "Subscription", doPollFortify, doPrettyLogOutput);
+                entitlementFrequencyTypeId == EntitlementFrequencyType.SingleScan.getValue() ? "Single Scan" : "Subscription", pollingInterval, doPrettyLogOutput);
         return text;
     }
 }
