@@ -8,10 +8,8 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApi;
 import org.jenkinsci.plugins.fodupload.models.response.GetTenantEntitlementResponse;
-import org.jenkinsci.plugins.fodupload.models.response.TenantEntitlementDTO;
 
 import java.lang.reflect.Type;
-import java.util.List;
 
 public class TenantEntitlementsController extends ControllerBase {
     /**
@@ -22,7 +20,7 @@ public class TenantEntitlementsController extends ControllerBase {
         super(api);
     }
 
-    public List<TenantEntitlementDTO> getTenantEntitlements() {
+    public GetTenantEntitlementResponse getTenantEntitlements() {
         try {
             String url = api.getBaseUrl() + "/api/v3/tenant-entitlements";
 
@@ -46,7 +44,7 @@ public class TenantEntitlementsController extends ControllerBase {
             // Create a type of GenericList<ApplicationDTO> to play nice with gson.
             Type t = new TypeToken<GetTenantEntitlementResponse>(){}.getType();
             GetTenantEntitlementResponse results =  gson.fromJson(content, t);
-            return results.getTenantEntitlements();
+            return results;
         } catch(Exception e) {
             e.printStackTrace();
             return null;

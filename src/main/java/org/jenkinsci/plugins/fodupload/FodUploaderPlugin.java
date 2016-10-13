@@ -12,10 +12,7 @@ import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.fodupload.models.JobConfigModel;
-import org.jenkinsci.plugins.fodupload.models.response.ApplicationDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
-import org.jenkinsci.plugins.fodupload.models.response.TenantEntitlementDTO;
+import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -203,7 +200,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
         private FodApi api;
         private int pollingInterval;
-        private List<TenantEntitlementDTO> availableEntitlements;
+        private GetTenantEntitlementResponse availableEntitlements;
 
         /**
          * In order to load the persisted global configuration, you have to
@@ -348,12 +345,14 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public ListBoxModel doFillEntitlementIdItems() {
             // Get entitlements on load
             availableEntitlements = api.getTenantEntitlementsController().getTenantEntitlements();
+            List<TenantEntitlementDTO> entitlements = availableEntitlements.getTenantEntitlements();
             ListBoxModel listBox = new ListBoxModel();
-            if (availableEntitlements.size() > 0) {
-                for(TenantEntitlementDTO entitlement : availableEntitlements) {
+            if (entitlements.size() > 0) {
+                for(TenantEntitlementDTO entitlement : entitlements) {
                     String val = String.valueOf(entitlement.getEntitlementId());
-                    String text = val + ": " + (entitlement.getUnitsPurchased() - entitlement.getUnitsConsumed())
-                            + " left";
+                    String text = String.format("%1s (%2s %3s left)", val,
+                            (entitlement.getUnitsPurchased() - entitlement.getUnitsConsumed()),
+                            availableEntitlements.getEntitlementType());
                     listBox.add(new ListBoxModel.Option(text, val, false));
                 }
             }
