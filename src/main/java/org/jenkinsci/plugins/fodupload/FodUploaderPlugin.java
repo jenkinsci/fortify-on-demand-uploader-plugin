@@ -106,10 +106,13 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         if (success) {
             logger.println("Scan Uploaded Successfully.");
             if (getDescriptor().getDoPollFortify() && jobModel.getPollingInterval() > 0) {
-                PollStatus /*Amy*/poller = new PollStatus(api, jobModel.getPollingInterval());
-                poller.releaseStatus(getReleaseId());
+                PollStatus /*Amy*/poller = new PollStatus(api, jobModel);
+                success = poller.releaseStatus(getReleaseId());
             }
         }
+
+        // Success could be true then set to false from polling.
+        build.setResult(success ? Result.SUCCESS : Result.UNSTABLE);
     }
 
     private File CreateZipFile(FilePath workspace) throws IOException {
@@ -148,7 +151,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     public boolean getIncludeThirdParty() { return jobModel.getIncludeThirdParty(); }
     public boolean getIsRemediationScan() { return jobModel.getIsRemediationScan(); }
     public int getEntitlementId() { return jobModel.getEntitlementId(); }
-    public int getFrequencyTypeId() { return jobModel.getEntitlementFrequencyTypeId(); }
+    public int getPollingInterval() { return jobModel.getPollingInterval(); }
 
     private static String getFileExpressionPatternString(String technologyStack){
         String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +

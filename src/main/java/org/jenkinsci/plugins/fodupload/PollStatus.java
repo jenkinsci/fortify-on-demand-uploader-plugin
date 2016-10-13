@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload;
 
+import org.jenkinsci.plugins.fodupload.models.JobConfigModel;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
@@ -12,7 +13,7 @@ import static org.jenkinsci.plugins.fodupload.models.FodEnums.*;
 
 public class PollStatus {
     private FodApi fodApi;
-    private int pollingInterval;
+    private JobConfigModel jobModel;
     private int failCount = 0;
     private final int MAX_FAILS = 3;
 
@@ -23,9 +24,9 @@ public class PollStatus {
      * @param api api connection to use
      * @param pollingInterval interval to poll
      */
-    public PollStatus(FodApi api, final int pollingInterval) {
+    public PollStatus(FodApi api, final JobConfigModel jobModel) {
         fodApi = api;
-        this.pollingInterval = pollingInterval;
+        this.jobModel = jobModel;
     }
 
     /**
@@ -41,7 +42,7 @@ public class PollStatus {
         {
             while(!finished)
             {
-                Thread.sleep(pollingInterval*60*1000);
+                Thread.sleep(jobModel.getPollingInterval()*60*1000);
                 // Get the status of the release
                 ReleaseDTO release = fodApi.getReleaseController().getRelease(releaseId,
                         "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low");
@@ -65,6 +66,10 @@ public class PollStatus {
 
                 if(failCount < MAX_FAILS)
                 {
+                    if (!fodApi.isAuthenticated()) {
+                        fodApi.authenticate();
+                    }
+
                     String statusString = "";
 
                     // Create a list of values that will be used to break the loop if found
@@ -121,18 +126,39 @@ public class PollStatus {
             }
             boolean isPassed = release.isPassed();
             logger.println("Pass/Fail status:       " + (isPassed ? "Passed" : "Failed") );
-            if (!isPassed)
-            {
-                String passFailReason = release.getPassFailReasonType() == null ?
-                        "Pass/Fail Policy requirements not met " :
-                        release.getPassFailReasonType();
-
-                logger.println("Failure Reason:         " + passFailReason);
+            if (!jobModel.getDoPrettyLogOutput()) {
+                if (!isPassed) {
+                    String passFailReason = release.getPassFailReasonType() == null ?
+                            "Pass/Fail Policy requirements not met " :
+                            release.getPassFailReasonType();
+                    logger.println("Failure Reason:         " + passFailReason);
+                } else {
+                    logger.println("Passed");
+                }
                 logger.println("Number of criticals:    " +  release.getCritical());
                 logger.println("Number of highs:        " +  release.getHigh());
                 logger.println("Number of mediums:      " +  release.getMedium());
                 logger.println("Number of lows:         " +  release.getLow());
 
+            } else {
+                logger.println("------------------------------------------------------------------------------------");
+                logger.println("                        Fortify on Demand Assessment Results                        ");
+                logger.println("------------------------------------------------------------------------------------");
+                logger.println();
+                logger.println(String.format("Star Rating: %d out of 5 with %d total issue(s).",release.getRating(), release.getIssueCount()));
+                logger.println();
+                logger.println(String.format("Critical: %d", release.getCritical()));
+                logger.println(String.format("High:     %d", release.getHigh()));
+                logger.println(String.format("Medium:   %d", release.getMedium()));
+                logger.println(String.format("Low:      %d", release.getLow()));
+                logger.println();
+                logger.println("For application status details see the customer portal: "
+                        + fodApi.getBaseUrl() + "/Releases/" + release.getReleaseId() + "/Overview");
+                logger.println();
+                logger.println(String.format("Scan %s established policy check, marking build as %sstable.",
+                        isPassed ? "passed" : "failed", isPassed ? "" : "un"));
+                logger.println();
+                logger.println("------------------------------------------------------------------------------------");
             }
         } catch (Exception e) {
             e.printStackTrace();
