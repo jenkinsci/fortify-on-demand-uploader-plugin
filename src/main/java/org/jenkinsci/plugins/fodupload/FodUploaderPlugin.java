@@ -52,14 +52,23 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     public FodUploaderPlugin(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
                              String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
                              boolean doPollFortify, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
-                             boolean isRemediationScan, int entitlementId, int entitlementFrequencyTypeId) {
+                             boolean isRemediationScan, int entitlementId) {
+        api = getDescriptor().getFodApi();
+
+        // Get entitlement frequency
+        List<TenantEntitlementDTO> entitlements = api.getTenantEntitlementsController()
+                .getTenantEntitlements().getTenantEntitlements();
+        TenantEntitlementExtendedPropertiesDTO property = null;
+        for(TenantEntitlementDTO entitlement : entitlements) {
+            if (entitlement.getEntitlementId() == entitlementId)
+                property = entitlement.getExtendedProperties();
+        }
+
+        // load job model
         jobModel = new JobConfigModel(applicationId, releaseId, assessmentTypeId, technologyStack,
                 languageLevel, runOpenSourceAnalysis, isExpressScan, isExpressAudit,
                 doPollFortify, doPrettyLogOutput, includeAllFiles, includeThirdParty, isRemediationScan,
-                entitlementId, entitlementFrequencyTypeId);
-
-        api = getDescriptor().getFodApi();
-
+                entitlementId, property);
         api.authenticate();
 
     }
@@ -195,8 +204,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         static final String RELEASE_ID = "releaseId";
         static final String TECHNOLOGY_STACK = "technologyStack";
         static final String POLLING_INTERVAL = "pollingInterval";
-        static final String ENTITLEMENT_ID = "entitlementId";
-        static final String ENTITLEMENT_FREQUENCY_TYPE = "entitlementFrequencyType";
 
         private FodApi api;
         private int pollingInterval;
@@ -229,7 +236,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
 
         FodApi getFodApi() { return api; }
-
+        GetTenantEntitlementResponse getAvailableEntitlements() { return availableEntitlements; }
         // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
         // marks them unused, but they actually are used.
         // These getters are also named in the following format: Get<JellyField>.
@@ -293,7 +300,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             return items;
         }
         @SuppressWarnings("unused")
-        public ListBoxModel doFillLanguageLevelItems(@QueryParameter(TECHNOLOGY_STACK) String technologyStack) {
+        public ListBoxModel doFillLanguageLevelItems(@QueryParameter(TECHNOLOGY_STACK) final String technologyStack) {
             ListBoxModel items = new ListBoxModel();
 
             switch (technologyStack) {
@@ -341,7 +348,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             }
             return listBox;
         }
-
+        @SuppressWarnings("unused")
         public ListBoxModel doFillEntitlementIdItems() {
             // Get entitlements on load
             availableEntitlements = api.getTenantEntitlementsController().getTenantEntitlements();

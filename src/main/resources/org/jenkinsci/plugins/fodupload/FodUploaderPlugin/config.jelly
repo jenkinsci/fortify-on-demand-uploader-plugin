@@ -16,11 +16,7 @@
         <f:select />
     </f:entry>
 
-    <f:entry title="Entitlement Type" field="entitlementId">
-        <f:select/>
-    </f:entry>
-
-    <f:entry title="Entitlement Frequency" field="entitlementFrequencyType">
+    <f:entry title="Entitlement Id" field="entitlementId">
         <f:select/>
     </f:entry>
 

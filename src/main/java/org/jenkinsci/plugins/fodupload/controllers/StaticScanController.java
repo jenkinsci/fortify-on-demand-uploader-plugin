@@ -45,14 +45,14 @@ public class StaticScanController extends ControllerBase {
             if (!uploadRequest.hasAssessmentTypeId() && !uploadRequest.hasTechnologyStack()) {
                 return false;
             }
-
+            
             // Build 'static' portion of url
             String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getReleaseId() +
                     "/static-scans/start-scan?";
             fragUrl += "assessmentTypeId=" + uploadRequest.getAssessmentTypeId();
             fragUrl += "&technologyStack=" + uploadRequest.getTechnologyStack();
             fragUrl += "&entitlementId=" + uploadRequest.getEntitlementId();
-            fragUrl += "&entitlementFrequencyType=1";
+            fragUrl += "&entitlementFrequencyType=" + uploadRequest.getEntitlementFrequencyTypeId();
 
             if (uploadRequest.hasLanguageLevel())
                 fragUrl += "&languageLevel=" + uploadRequest.getLanguageLevel();

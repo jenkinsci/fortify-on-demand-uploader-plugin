@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload.models;
 
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Recorder;
+import org.jenkinsci.plugins.fodupload.models.response.TenantEntitlementExtendedPropertiesDTO;
 
 import java.io.File;
 
@@ -56,9 +57,10 @@ public class JobConfigModel {
     public void setUploadFile(File file) { uploadFile = file; }
 
     public JobConfigModel(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
-              String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
-              boolean doPollFortify, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
-              boolean isRemediationScan, int entitlementId, int entitlementFrequencyTypeId) {
+                          String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
+                          boolean doPollFortify, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
+                          boolean isRemediationScan, int entitlementId,
+                          TenantEntitlementExtendedPropertiesDTO entitlementProperties) {
         this.applicationId = Integer.parseInt(applicationId);
         this.releaseId = Integer.parseInt(releaseId);
         this.assessmentTypeId = Integer.parseInt(assessmentTypeId);
@@ -72,7 +74,9 @@ public class JobConfigModel {
         this.includeAllFiles = includeAllFiles;
         this.includeThirdParty = includeThirdParty;
         this.isRemediationScan = isRemediationScan;
-        this.entitlementFrequencyTypeId = entitlementFrequencyTypeId;
         this.entitlementId = entitlementId;
+
+        this.entitlementFrequencyTypeId = entitlementProperties != null ?
+                entitlementProperties.getFrequencyTypeId() : 1;
     }
 }
