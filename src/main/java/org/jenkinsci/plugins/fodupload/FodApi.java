@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.controllers.*;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
@@ -95,6 +96,8 @@ public class FodApi {
      */
     public void retireToken() {
         try {
+            PrintStream logger = FodUploaderPlugin.getLogger();
+
             Request request = new Request.Builder()
                     .url(baseUrl + "/oauth/retireToken")
                     .addHeader("Authorization","Bearer " + token)
@@ -111,7 +114,8 @@ public class FodApi {
                 JsonObject obj = parser.parse(content).getAsJsonObject();
                 String messageResponse = obj.get("message").getAsString();
 
-                System.out.println("Retiring Token : " + messageResponse);
+                logger.println("Retiring Token : " + messageResponse);
+                token = null;
             }
         } catch(Exception e) {
             e.printStackTrace();
@@ -150,8 +154,5 @@ public class FodApi {
     public String getSecret() { return secret; }
     public String getBaseUrl() { return baseUrl; }
     public OkHttpClient getClient() { return client; }
-
-    public boolean isAuthenticated() { return !token.isEmpty(); }
-
 }
 

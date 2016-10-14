@@ -7,10 +7,12 @@ import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApi;
+import org.jenkinsci.plugins.fodupload.FodUploaderPlugin;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
+import java.io.PrintStream;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -37,7 +39,7 @@ public class ReleaseController extends ControllerBase {
                     .build();
             Response response = api.getClient().newCall(request).execute();
 
-            if (response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
+            if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                 // Re-authenticate
                 api.authenticate();
             }
@@ -60,6 +62,7 @@ public class ReleaseController extends ControllerBase {
 
     public ReleaseDTO getRelease(final int releaseId, final String fields) {
         try {
+            PrintStream logger = FodUploaderPlugin.getLogger();
             String url = api.getBaseUrl() + "/api/v3/releases?filters=releaseId:" + releaseId;
             if (fields.length() > 0) {
                 url += "&fields=" + fields + "&limit=1";
@@ -71,8 +74,8 @@ public class ReleaseController extends ControllerBase {
                     .build();
             Response response = api.getClient().newCall(request).execute();
 
-            if (response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
-                System.out.println("Token expired re-authorizing");
+            if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
+                logger.println("Token expired re-authorizing");
                 // Re-authenticate
                 api.authenticate();
             }
@@ -107,7 +110,7 @@ public class ReleaseController extends ControllerBase {
                     .build();
             Response response = api.getClient().newCall(request).execute();
 
-            if (response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
+            if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                 // Re-authenticate
                 api.authenticate();
             }

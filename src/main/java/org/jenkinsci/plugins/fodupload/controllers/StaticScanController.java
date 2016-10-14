@@ -6,6 +6,7 @@ import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApi;
 import org.jenkinsci.plugins.fodupload.FodUploaderPlugin;
@@ -88,6 +89,11 @@ public class StaticScanController extends ControllerBase {
 
                 // Get the response
                 Response response = api.getClient().newCall(request).execute();
+
+                if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
+                    // Re-authenticate
+                    api.authenticate();
+                }
 
                 if (fragmentNumber != 0 && fragmentNumber % 5 == 0) {
                     logger.println("Upload Status - Bytes sent:" + offset);

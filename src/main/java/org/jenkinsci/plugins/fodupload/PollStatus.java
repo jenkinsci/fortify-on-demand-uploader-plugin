@@ -59,10 +59,6 @@ public class PollStatus {
 
                 if(failCount < MAX_FAILS)
                 {
-                    if (!fodApi.isAuthenticated()) {
-                        fodApi.authenticate();
-                    }
-
                     String statusString = "";
 
                     // Create a list of values that will be used to break the loop if found

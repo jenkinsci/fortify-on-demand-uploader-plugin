@@ -79,12 +79,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         taskListener.set(listener);
 
         logger.println("Starting FoD Upload.");
-        if (api.isAuthenticated()) {
-            logger.println("Authenticated.");
-        } else {
-            logger.println("Authenticating");
-            api.authenticate();
-        }
 
         if (getAssessmentTypeId() == 0) {
             logger.println("Assessment Type is empty.");

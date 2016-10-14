@@ -37,7 +37,7 @@ public class ApplicationController extends ControllerBase {
                     .build();
             Response response = api.getClient().newCall(request).execute();
 
-            if (response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
+            if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                 // Re-authenticate
                 api.authenticate();
             }
