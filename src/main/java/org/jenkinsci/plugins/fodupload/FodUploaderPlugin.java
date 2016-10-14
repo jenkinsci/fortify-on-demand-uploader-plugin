@@ -48,6 +48,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     private JobConfigModel jobModel;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
+    // Entry point when building
     @DataBoundConstructor
     public FodUploaderPlugin(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
                              String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
@@ -73,6 +74,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     }
 
+    // logic run during a build
     @Override
     public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException {
         final PrintStream logger = listener.getLogger();
@@ -110,6 +112,12 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         build.setResult(success ? Result.SUCCESS : Result.UNSTABLE);
     }
 
+    /**
+     * Zips a folder, stores it in a temp location and returns the object
+     * @param workspace location of the files to zip
+     * @return a File object
+     * @throws IOException no files
+     */
     private File CreateZipFile(FilePath workspace) throws IOException {
         getLogger().println("Begin Create Zip.");
 
@@ -188,6 +196,10 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
     }
 
+    /**
+     * Gets the out for the build console output
+     * @return Task Listener object
+     */
     public static PrintStream getLogger() {
         return taskListener.get().getLogger();
     }
@@ -219,6 +231,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
          * In order to load the persisted global configuration, you have to
          * call load() in the constructor.
          */
+        // Entry point when accessing global configuration
         public DescriptorImpl() {
             load();
 
@@ -230,6 +243,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             return true;
         }
 
+        // On save.
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             api = new FodApi(formData.getString(CLIENT_ID), formData.getString(CLIENT_SECRET), formData.getString(BASE_URL));
@@ -241,6 +255,10 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             return super.configure(req,formData);
         }
 
+        /**
+         * gets the fod api object created from to global config. If any of the properties are null, re-create the object.
+         * @return Fod api object
+         */
         FodApi getFodApi() {
             if (api.getReleaseController() == null || api.getTenantEntitlementsController() == null ||
                     api.getApplicationController() == null || api.getLookupItemsController() == null ||

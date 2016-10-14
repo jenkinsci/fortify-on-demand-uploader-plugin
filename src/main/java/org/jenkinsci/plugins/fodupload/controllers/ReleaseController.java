@@ -60,6 +60,12 @@ public class ReleaseController extends ControllerBase {
         }
     }
 
+    /**
+     * Get an individual release with given fields
+     * @param releaseId release to get
+     * @param fields fields to return
+     * @return ReleaseDTO object with given fields
+     */
     public ReleaseDTO getRelease(final int releaseId, final String fields) {
         try {
             PrintStream logger = FodUploaderPlugin.getLogger();

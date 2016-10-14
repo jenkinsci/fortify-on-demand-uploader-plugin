@@ -20,6 +20,10 @@ public class TenantEntitlementsController extends ControllerBase {
         super(api);
     }
 
+    /**
+     * Get the entitlements of a tenant
+     * @return returns list of available entitlements
+     */
     public GetTenantEntitlementResponse getTenantEntitlements() {
         try {
             String url = api.getBaseUrl() + "/api/v3/tenant-entitlements";
