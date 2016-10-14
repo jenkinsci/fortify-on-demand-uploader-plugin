@@ -21,11 +21,12 @@ public class FodApi {
     private String key;
     private String secret;
 
-    private ProxyConfiguration proxy = Jenkins.getInstance().proxy;
+    private ProxyConfiguration proxy = null;
 
     private final int CONNECTION_TIMEOUT = 10;
     private final int WRITE_TIMEOUT = 30;
     private final int READ_TIMEOUT = 30;
+    public final int MAX_SIZE = 50;
 
     private StaticScanController staticScanController;
     public StaticScanController getStaticScanController() { return staticScanController; }
@@ -44,10 +45,13 @@ public class FodApi {
      * @param secret api secret
      * @param baseUrl api url
      */
-    public FodApi(String key, String secret, String baseUrl) {
+    public FodApi(final String key, final String secret, final String baseUrl) {
         this.key = key;
         this.secret = secret;
         this.baseUrl = baseUrl;
+
+        if (Jenkins.getInstance() != null)
+            proxy = Jenkins.getInstance().proxy;
 
         client = Create();
 

@@ -14,6 +14,7 @@ import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
 import java.io.PrintStream;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ReleaseController extends ControllerBase {
@@ -30,30 +31,42 @@ public class ReleaseController extends ControllerBase {
      */
     public List<ReleaseDTO> getReleases(final int applicationId) {
         try {
-            String url = api.getBaseUrl() + "/api/v3/applications/" + applicationId + "/releases";
+            int offset = 0, resultSize = api.MAX_SIZE;
+            List<ReleaseDTO> releaseList = new ArrayList<>();
 
-            Request request = new Request.Builder()
-                    .url(url)
-                    .addHeader("Authorization", "Bearer " + api.getToken())
-                    .get()
-                    .build();
-            Response response = api.getClient().newCall(request).execute();
+            // Pagination. Will continue until the results are less than the MAX_SIZE, which indicates that you've
+            // hit the end of the results.
+            while(resultSize == api.MAX_SIZE) {
+                String url = api.getBaseUrl() + "/api/v3/applications/" + applicationId + "/releases?" +
+                        "offset=" + offset + "&limit=" + api.MAX_SIZE;
 
-            if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
-                // Re-authenticate
-                api.authenticate();
+
+                Request request = new Request.Builder()
+                        .url(url)
+                        .addHeader("Authorization", "Bearer " + api.getToken())
+                        .get()
+                        .build();
+                Response response = api.getClient().newCall(request).execute();
+
+                if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
+                    // Re-authenticate
+                    api.authenticate();
+                }
+
+                // Read the results and close the response
+                String content = IOUtils.toString(response.body().byteStream(), "utf-8");
+                response.body().close();
+
+                Gson gson = new Gson();
+                // Create a type of GenericList<ApplicationDTO> to play nice with gson.
+                Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() {}.getType();
+                GenericListResponse<ReleaseDTO> results = gson.fromJson(content, t);
+
+                resultSize = results.getItems().size();
+                offset += api.MAX_SIZE;
+                releaseList.addAll(results.getItems());
             }
-
-            // Read the results and close the response
-            String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-            response.body().close();
-
-            Gson gson = new Gson();
-            // Create a type of GenericList<ApplicationDTO> to play nice with gson.
-            Type t = new TypeToken<GenericListResponse<ReleaseDTO>>(){}.getType();
-            GenericListResponse<ReleaseDTO> results =  gson.fromJson(content, t);
-
-            return results.getItems();
+            return releaseList;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
