@@ -157,15 +157,19 @@ public class FodBuilder extends Recorder implements SimpleBuildStep
 	{
 		return isExpressAudit;
 	}
-	public boolean doPollFortify()
+	public boolean getDoPollFortify()
 	{
 		return doPollFortify;
 	}
-	public boolean doPrettyLogOutput()
+	public boolean getDoPrettyLogOutput()
 	{
 		return doPrettyLogOutput;		
 	}
-	public boolean includeThirdParty()
+    public boolean getIncludeAllFiles()
+    {
+        return includeAllFiles;
+    }
+	public boolean getIncludeThirdParty()
 	{
 		return includeThirdParty;
 	}
