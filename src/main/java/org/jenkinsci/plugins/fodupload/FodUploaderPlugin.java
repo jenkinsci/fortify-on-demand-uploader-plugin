@@ -235,7 +235,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public DescriptorImpl() {
             load();
 
-            api.authenticate();
+            if(api != null && api.getKey() != null && api.getSecret() != null && api.getBaseUrl() != null)
+                api.authenticate();
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
