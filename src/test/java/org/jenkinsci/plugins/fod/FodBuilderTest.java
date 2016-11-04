@@ -92,6 +92,7 @@ public class FodBuilderTest {
 		formData.put("clientSecret","123456");
 		formData.put("fodUrl", "http://localhost:8080");
 		formData.put("pollingInterval", "5");
+		formData.put("restrictApplications", "Mobile");
 		descriptor.save();
 		replay(descriptor);
 		boolean success = descriptor.configure(staplerRequest, formData);
@@ -166,7 +167,7 @@ public class FodBuilderTest {
 		
 		replay(descriptor);
 		replay(api);
-		List<Release> releaseList = descriptor.getReleasesWithRetry(api, maxAttempts);
+		List<Release> releaseList = descriptor.getReleasesWithRetry(api, maxAttempts, "eightball");
 		verify(descriptor);
 		verify(api);
 		
