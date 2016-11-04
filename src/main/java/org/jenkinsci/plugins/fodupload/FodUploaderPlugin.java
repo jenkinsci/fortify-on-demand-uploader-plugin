@@ -245,16 +245,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         // Entry point when accessing global configuration
         public DescriptorImpl() {
             load();
-
-            if (clientId != null && clientSecret != null && baseUrl != null) {
-                api = new FodApi(clientId, clientSecret, baseUrl);
-                api.authenticate();
-                applications = api.getApplicationController().getApplications();
-                releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
-                assessments = api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId());
-                availableEntitlements = api.getTenantEntitlementsController().getTenantEntitlements();
-                entitlements = availableEntitlements.getTenantEntitlements();
-            }
+            loadPluginOptions();
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -270,6 +261,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             baseUrl = formData.getString(BASE_URL);
             doPollFortify = formData.getBoolean(DO_POLL_FORTIFY);
 
+            loadPluginOptions();
             save();
             return super.configure(req,formData);
         }
@@ -418,6 +410,19 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             return !testApi.getToken().isEmpty() ?
                     FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
                     FormValidation.error("Invalid connection information. Please check your credentials and try again.");
+        }
+
+        private void loadPluginOptions() {
+            if (clientId != null && clientSecret != null && baseUrl != null) {
+                api = new FodApi(clientId, clientSecret, baseUrl);
+                api.authenticate();
+                applications = api.getApplicationController().getApplications();
+                releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
+                assessments = api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId());
+                availableEntitlements = api.getTenantEntitlementsController().getTenantEntitlements();
+                entitlements = availableEntitlements.getTenantEntitlements();
+            }
+
         }
     }
 }
