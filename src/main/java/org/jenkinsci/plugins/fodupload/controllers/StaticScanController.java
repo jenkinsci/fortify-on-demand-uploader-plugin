@@ -69,8 +69,8 @@ public class StaticScanController extends ControllerBase {
                 fragUrl += "&doSonatypeScan=" + uploadRequest.getRunOpenSourceAnalysis();
             if (uploadRequest.getIsRemediationScan())
                 fragUrl += "&isRemediationScan=" + uploadRequest.getIsRemediationScan();
-            if (uploadRequest.getIncludeThirdParty())
-                fragUrl += "&excludeThirdPartyLibs=" + !uploadRequest.getIncludeThirdParty();
+            if (uploadRequest.getExcludeThirdParty())
+                fragUrl += "&excludeThirdPartyLibs=" + !uploadRequest.getExcludeThirdParty();
 
             // Loop through chunks
             while ((byteCount = fs.read(readByteArray)) != -1) {

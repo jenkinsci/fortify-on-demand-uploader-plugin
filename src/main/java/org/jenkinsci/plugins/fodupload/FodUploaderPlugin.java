@@ -17,7 +17,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.servlet.ServletException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,7 +52,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     @DataBoundConstructor
     public FodUploaderPlugin(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
                              String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
-                             int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
+                             int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
                              boolean isRemediationScan, int entitlementId) {
         api = new FodApi(getDescriptor().getClientId(), getDescriptor().getClientSecret(), getDescriptor().getBaseUrl());
         api.authenticate();
@@ -72,7 +71,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         // load job model
         jobModel = new JobConfigModel(applicationId, releaseId, assessmentTypeId, technologyStack,
                 languageLevel, runOpenSourceAnalysis, isExpressScan, isExpressAudit,
-                pollingInterval, doPrettyLogOutput, includeAllFiles, includeThirdParty, isRemediationScan,
+                pollingInterval, doPrettyLogOutput, includeAllFiles, excludeThirdParty, isRemediationScan,
                 entitlementId, property);
     }
 
@@ -155,7 +154,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     public boolean getIsExpressAudit() { return jobModel.getIsExpressAudit(); }
     public boolean getDoPrettyLogOutput() { return jobModel.getDoPrettyLogOutput(); }
     public boolean getIncludeAllFiles() { return jobModel.getIncludeAllFiles(); }
-    public boolean getIncludeThirdParty() { return jobModel.getIncludeThirdParty(); }
+    public boolean getExcludeThirdParty() { return jobModel.getExcludeThirdParty(); }
     public boolean getIsRemediationScan() { return jobModel.getIsRemediationScan(); }
     public int getEntitlementId() { return jobModel.getEntitlementId(); }
     public int getPollingInterval() { return jobModel.getPollingInterval(); }

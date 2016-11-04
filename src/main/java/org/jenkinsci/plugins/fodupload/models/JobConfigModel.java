@@ -18,7 +18,7 @@ public class JobConfigModel {
     private int pollingInterval;
     private boolean doPrettyLogOutput;
     private boolean includeAllFiles;
-    private boolean includeThirdParty;
+    private boolean excludeThirdParty;
     private boolean isRemediationScan;
     private File uploadFile;
     private int entitlementId;
@@ -47,7 +47,7 @@ public class JobConfigModel {
     public int getPollingInterval() { return pollingInterval; }
     public boolean getDoPrettyLogOutput() { return doPrettyLogOutput; }
     public boolean getIncludeAllFiles() { return includeAllFiles; }
-    public boolean getIncludeThirdParty() { return includeThirdParty; }
+    public boolean getExcludeThirdParty() { return excludeThirdParty; }
     public boolean getIsRemediationScan() { return isRemediationScan; }
     public int getEntitlementId() { return entitlementId; }
     public int getEntitlementFrequencyTypeId() { return entitlementFrequencyTypeId; }
@@ -58,7 +58,7 @@ public class JobConfigModel {
 
     public JobConfigModel(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
                           String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
-                          int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
+                          int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
                           boolean isRemediationScan, int entitlementId,
                           TenantEntitlementExtendedPropertiesDTO entitlementProperties) {
         this.applicationId = Integer.parseInt(applicationId);
@@ -72,7 +72,7 @@ public class JobConfigModel {
         this.pollingInterval = pollingInterval;
         this.doPrettyLogOutput = doPrettyLogOutput;
         this.includeAllFiles = includeAllFiles;
-        this.includeThirdParty = includeThirdParty;
+        this.excludeThirdParty = excludeThirdParty;
         this.isRemediationScan = isRemediationScan;
         this.entitlementId = entitlementId;
 
@@ -100,7 +100,7 @@ public class JobConfigModel {
                 "Polling Interval:                  %s%n" +
                 "Pretty Log Output:                 %s%n",
                 applicationId, releaseId, assessmentTypeId, technologyStack, languageLevel, runOpenSourceAnalysis,
-                isExpressScan, isExpressAudit, includeAllFiles, includeThirdParty, isRemediationScan, entitlementId,
+                isExpressScan, isExpressAudit, includeAllFiles, excludeThirdParty, isRemediationScan, entitlementId,
                 entitlementFrequencyTypeId == EntitlementFrequencyType.SingleScan.getValue() ? "Single Scan" : "Subscription", pollingInterval, doPrettyLogOutput);
         return text;
     }
