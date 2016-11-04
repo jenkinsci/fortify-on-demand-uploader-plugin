@@ -92,7 +92,7 @@ public class JobConfigModel {
                 "Run Open Source Analysis:          %s%n" +
                 "Express Scan:                      %s%n" +
                 "Express Audit:                     %s%n" +
-                "Include All Files:                 %s%n" +
+                "Exclude All Files:                 %s%n" +
                 "Include Third Party:               %s%n" +
                 "Remediation Scan:                  %s%n" +
                 "Entitlement Id:                    %s%n" +

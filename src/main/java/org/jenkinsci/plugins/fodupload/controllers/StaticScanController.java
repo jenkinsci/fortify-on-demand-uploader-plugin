@@ -62,15 +62,15 @@ public class StaticScanController extends ControllerBase {
             if (uploadRequest.hasLanguageLevel())
                 fragUrl += "&languageLevel=" + uploadRequest.getLanguageLevel();
             if (uploadRequest.getIsExpressScan())
-                fragUrl += "&scanPreferenceId=2";
+                fragUrl += "&scanPreferenceType=2";
             if (uploadRequest.getIsExpressAudit())
-                fragUrl += "&auditPreferenceId=2";
+                fragUrl += "&auditPreferenceType=2";
             if (uploadRequest.getRunOpenSourceAnalysis())
                 fragUrl += "&doSonatypeScan=" + uploadRequest.getRunOpenSourceAnalysis();
             if (uploadRequest.getIsRemediationScan())
                 fragUrl += "&isRemediationScan=" + uploadRequest.getIsRemediationScan();
             if (uploadRequest.getExcludeThirdParty())
-                fragUrl += "&excludeThirdPartyLibs=" + !uploadRequest.getExcludeThirdParty();
+                fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.getExcludeThirdParty();
 
             // Loop through chunks
             while ((byteCount = fs.read(readByteArray)) != -1) {
