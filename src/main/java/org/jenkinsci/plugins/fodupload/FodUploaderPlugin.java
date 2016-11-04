@@ -17,6 +17,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.servlet.ServletException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
-    private FodApi api;
+    public static FodApi api;
     private JobConfigModel jobModel;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
@@ -54,17 +55,20 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                              String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
                              int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean includeThirdParty,
                              boolean isRemediationScan, int entitlementId) {
-        api = getDescriptor().getFodApi();
+        api = new FodApi(getDescriptor().getClientId(), getDescriptor().getClientSecret(), getDescriptor().getBaseUrl());
+        api.authenticate();
 
-        // Get entitlement frequency
-        List<TenantEntitlementDTO> entitlements = api.getTenantEntitlementsController()
-                .getTenantEntitlements().getTenantEntitlements();
         TenantEntitlementExtendedPropertiesDTO property = null;
-        for(TenantEntitlementDTO entitlement : entitlements) {
-            if (entitlement.getEntitlementId() == entitlementId)
-                property = entitlement.getExtendedProperties();
-        }
+        if (entitlementId != 0) {
+            // Get entitlement frequency
+            List<TenantEntitlementDTO> entitlements = api.getTenantEntitlementsController()
+                    .getTenantEntitlements().getTenantEntitlements();
+            for (TenantEntitlementDTO entitlement : entitlements) {
+                if (entitlement.getEntitlementId() == entitlementId)
+                    property = entitlement.getExtendedProperties();
+            }
 
+        }
         // load job model
         jobModel = new JobConfigModel(applicationId, releaseId, assessmentTypeId, technologyStack,
                 languageLevel, runOpenSourceAnalysis, isExpressScan, isExpressAudit,
@@ -223,12 +227,16 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         static final String TECHNOLOGY_STACK = "technologyStack";
         static final String DO_POLL_FORTIFY = "doPollFortify";
 
-        private FodApi api;
+        private String clientId;
+        private String clientSecret;
+        private String baseUrl;
         private boolean doPollFortify;
         private GetTenantEntitlementResponse availableEntitlements;
         private String defaultTechStack;
-        private int defaultApplicationId;
-        private int defaultReleaseId;
+        private List<ApplicationDTO> applications;
+        private List<ReleaseDTO> releases;
+        private List<ReleaseAssessmentTypeDTO> assessments;
+        private List<TenantEntitlementDTO> entitlements;
 
         /**
          * In order to load the persisted global configuration, you have to
@@ -238,8 +246,15 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public DescriptorImpl() {
             load();
 
-            if(api != null && api.getKey() != null && api.getSecret() != null && api.getBaseUrl() != null)
+            if (clientId != null && clientSecret != null && baseUrl != null) {
+                api = new FodApi(clientId, clientSecret, baseUrl);
                 api.authenticate();
+                applications = api.getApplicationController().getApplications();
+                releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
+                assessments = api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId());
+                availableEntitlements = api.getTenantEntitlementsController().getTenantEntitlements();
+                entitlements = availableEntitlements.getTenantEntitlements();
+            }
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -250,38 +265,22 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         // On save.
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            api = new FodApi(formData.getString(CLIENT_ID), formData.getString(CLIENT_SECRET), formData.getString(BASE_URL));
-            api.authenticate();
-
+            clientId = formData.getString(CLIENT_ID);
+            clientSecret = formData.getString(CLIENT_SECRET);
+            baseUrl = formData.getString(BASE_URL);
             doPollFortify = formData.getBoolean(DO_POLL_FORTIFY);
 
             save();
             return super.configure(req,formData);
         }
 
-        /**
-         * gets the fod api object created from to global config. If any of the properties are null, re-create the object.
-         * @return Fod api object
-         */
-        FodApi getFodApi() {
-            if (api.getReleaseController() == null || api.getTenantEntitlementsController() == null ||
-                    api.getApplicationController() == null || api.getLookupItemsController() == null ||
-                    api.getApplicationController() == null) {
-                api = new FodApi(api.getKey(), api.getSecret(), api.getBaseUrl());
-                api.authenticate();
-            }
-            return api;
-        }
         // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
         // marks them unused, but they actually are used.
         // These getters are also named in the following format: Get<JellyField>.
-        public String getDisplayName() { return "Fortify Uploader Plug-in"; }
-        @SuppressWarnings("unused")
-        public String getClientId() { return api.getKey(); }
-        @SuppressWarnings("unused")
-        public String getClientSecret() { return api.getSecret(); }
-        @SuppressWarnings("unused")
-        public String getBaseUrl() { return api.getBaseUrl(); }
+        public String getDisplayName() { return "Fortify Uploader Plugin"; }
+        public String getClientId() { return clientId; }
+        public String getClientSecret() { return clientSecret; }
+        public String getBaseUrl() { return baseUrl; }
         @SuppressWarnings("unused")
         public boolean getDoPollFortify() { return doPollFortify; }
 
@@ -290,32 +289,24 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         // These getters are also named in the following format: doFill<JellyField>Items.
         @SuppressWarnings("unused")
         public ListBoxModel doFillApplicationIdItems() {
-            api.authenticate();
-
             ListBoxModel listBox = new ListBoxModel();
-            List<ApplicationDTO> apps = api.getApplicationController().getApplications();
-            for (ApplicationDTO app : apps) {
+            for (ApplicationDTO app : applications) {
                 final String value = String.valueOf(app.getApplicationId());
                 listBox.add(new ListBoxModel.Option(app.getApplicationName(), value, false));
             }
-
-            defaultApplicationId = Integer.parseInt(listBox.get(0).value);
             return listBox;
         }
         @SuppressWarnings("unused")
         public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) int applicationId) {
-
-            if (applicationId == 0)
-                applicationId = defaultApplicationId;
+            if (applicationId != 0)
+                releases = api.getReleaseController().getReleases(applicationId);
 
             ListBoxModel listBox = new ListBoxModel();
-            List<ReleaseDTO> releases = api.getReleaseController().getReleases(applicationId);
-            for(ReleaseDTO release : releases) {
+
+            for (ReleaseDTO release : releases) {
                 final String value = String.valueOf(release.getReleaseId());
                 listBox.add(new ListBoxModel.Option(release.getReleaseName(), value, false));
             }
-
-            defaultReleaseId = Integer.parseInt(listBox.get(0).value);
             return listBox;
         }
         @SuppressWarnings("unused")
@@ -384,12 +375,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
         @SuppressWarnings("unused")
         public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) int releaseId) {
-            if (releaseId == 0)
-                releaseId = defaultReleaseId;
+            if (releaseId != 0)
+                assessments = api.getReleaseController().getAssessmentTypeIds(releaseId);
 
             ListBoxModel listBox = new ListBoxModel();
-            List<ReleaseAssessmentTypeDTO> assessmentTypes = api.getReleaseController().getAssessmentTypeIds(releaseId);
-            for (ReleaseAssessmentTypeDTO assessmentType : assessmentTypes) {
+            for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
                 final String value = String.valueOf(assessmentType.getAssessmentTypeId());
                 listBox.add(new ListBoxModel.Option(assessmentType.getName(), value, false));
             }
@@ -398,11 +388,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillEntitlementIdItems() {
             // Get entitlements on load
-            availableEntitlements = api.getTenantEntitlementsController().getTenantEntitlements();
-            List<TenantEntitlementDTO> entitlements = availableEntitlements.getTenantEntitlements();
             ListBoxModel listBox = new ListBoxModel();
             if (entitlements.size() > 0) {
-                for(TenantEntitlementDTO entitlement : entitlements) {
+                for (TenantEntitlementDTO entitlement : entitlements) {
                     String val = String.valueOf(entitlement.getEntitlementId());
                     String text = String.format("%s (%s %s left)", val,
                             (entitlement.getUnitsPurchased() - entitlement.getUnitsConsumed()),
