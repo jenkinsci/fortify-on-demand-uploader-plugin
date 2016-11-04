@@ -226,6 +226,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         private FodApi api;
         private boolean doPollFortify;
         private GetTenantEntitlementResponse availableEntitlements;
+        private String defaultTechStack;
 
         /**
          * In order to load the persisted global configuration, you have to
@@ -329,12 +330,15 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             items.add(new ListBoxModel.Option(TS_VB_SCRIPT_KEY, TS_VB_SCRIPT_KEY, false));
             items.add(new ListBoxModel.Option(TS_XML_HTML_KEY, TS_XML_HTML_KEY, false));
 
+            defaultTechStack = items.get(0).name;
             return items;
         }
         @SuppressWarnings("unused")
-        public ListBoxModel doFillLanguageLevelItems(@QueryParameter(TECHNOLOGY_STACK) final String technologyStack) {
+        public ListBoxModel doFillLanguageLevelItems(@QueryParameter(TECHNOLOGY_STACK) String technologyStack) {
             ListBoxModel items = new ListBoxModel();
 
+            if (technologyStack == null || technologyStack.isEmpty())
+                    technologyStack = defaultTechStack;
             switch (technologyStack) {
                 case TS_JAVA_KEY:
                     items.add(new ListBoxModel.Option("1.2", "1.2",false));
