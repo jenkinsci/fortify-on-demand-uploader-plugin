@@ -119,7 +119,7 @@ public class ReleaseController extends ControllerBase {
      * @param releaseId release to get assessment types for
      * @return List of possible assessment types
      */
-    public List<ReleaseAssessmentTypeDTO> getAssessmentTypeIds(final String releaseId) {
+    public List<ReleaseAssessmentTypeDTO> getAssessmentTypeIds(final int releaseId) {
         try {
             String url = api.getBaseUrl() + "/api/v3/releases/" + releaseId + "/assessment-types?scanType=1";
             Request request = new Request.Builder()

@@ -227,6 +227,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         private boolean doPollFortify;
         private GetTenantEntitlementResponse availableEntitlements;
         private String defaultTechStack;
+        private int defaultApplicationId;
+        private int defaultReleaseId;
 
         /**
          * In order to load the persisted global configuration, you have to
@@ -296,11 +298,15 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 final String value = String.valueOf(app.getApplicationId());
                 listBox.add(new ListBoxModel.Option(app.getApplicationName(), value, false));
             }
+
+            defaultApplicationId = Integer.parseInt(listBox.get(0).value);
             return listBox;
         }
         @SuppressWarnings("unused")
-        public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) final int applicationId) {
+        public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) int applicationId) {
 
+            if (applicationId == 0)
+                applicationId = defaultApplicationId;
 
             ListBoxModel listBox = new ListBoxModel();
             List<ReleaseDTO> releases = api.getReleaseController().getReleases(applicationId);
@@ -308,6 +314,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 final String value = String.valueOf(release.getReleaseId());
                 listBox.add(new ListBoxModel.Option(release.getReleaseName(), value, false));
             }
+
+            defaultReleaseId = Integer.parseInt(listBox.get(0).value);
             return listBox;
         }
         @SuppressWarnings("unused")
@@ -375,7 +383,10 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             return items;
         }
         @SuppressWarnings("unused")
-        public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) final String releaseId) {
+        public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) int releaseId) {
+            if (releaseId == 0)
+                releaseId = defaultReleaseId;
+
             ListBoxModel listBox = new ListBoxModel();
             List<ReleaseAssessmentTypeDTO> assessmentTypes = api.getReleaseController().getAssessmentTypeIds(releaseId);
             for (ReleaseAssessmentTypeDTO assessmentType : assessmentTypes) {
