@@ -74,13 +74,13 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 languageLevel, runOpenSourceAnalysis, isExpressScan, isExpressAudit,
                 pollingInterval, doPrettyLogOutput, includeAllFiles, includeThirdParty, isRemediationScan,
                 entitlementId, property);
-        api.authenticate();
-
     }
 
     // logic run during a build
     @Override
     public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException {
+        api.authenticate();
+
         final PrintStream logger = listener.getLogger();
         taskListener.set(listener);
 
