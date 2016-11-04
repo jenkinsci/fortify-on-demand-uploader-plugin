@@ -40,6 +40,8 @@ public class ReleaseController extends ControllerBase {
                 String url = api.getBaseUrl() + "/api/v3/applications/" + applicationId + "/releases?" +
                         "offset=" + offset + "&limit=" + api.MAX_SIZE;
 
+                if (api.getToken() == null)
+                    api.authenticate();
 
                 Request request = new Request.Builder()
                         .url(url)
@@ -83,6 +85,10 @@ public class ReleaseController extends ControllerBase {
         try {
             PrintStream logger = FodUploaderPlugin.getLogger();
             String url = api.getBaseUrl() + "/api/v3/releases?filters=releaseId:" + releaseId;
+
+            if (api.getToken() == null)
+                api.authenticate();
+
             if (fields.length() > 0) {
                 url += "&fields=" + fields + "&limit=1";
             }
@@ -122,6 +128,10 @@ public class ReleaseController extends ControllerBase {
     public List<ReleaseAssessmentTypeDTO> getAssessmentTypeIds(final int releaseId) {
         try {
             String url = api.getBaseUrl() + "/api/v3/releases/" + releaseId + "/assessment-types?scanType=1";
+
+            if (api.getToken() == null)
+                api.authenticate();
+
             Request request = new Request.Builder()
                     .url(url)
                     .addHeader("Authorization", "Bearer " + api.getToken())

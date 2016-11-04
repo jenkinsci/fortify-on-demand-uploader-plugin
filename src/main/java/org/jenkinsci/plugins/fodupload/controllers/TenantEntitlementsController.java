@@ -28,6 +28,9 @@ public class TenantEntitlementsController extends ControllerBase {
         try {
             String url = api.getBaseUrl() + "/api/v3/tenant-entitlements";
 
+            if (api.getToken() == null)
+                api.authenticate();
+
             Request request = new Request.Builder()
                     .url(url)
                     .addHeader("Authorization", "Bearer " + api.getToken())

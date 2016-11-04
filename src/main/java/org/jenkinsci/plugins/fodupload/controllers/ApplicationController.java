@@ -37,6 +37,9 @@ public class ApplicationController extends ControllerBase {
                 String url = api.getBaseUrl() + "/api/v3/applications?" +
                 "offset=" + offset + "&limit=" + api.MAX_SIZE;
 
+                if (api.getToken() == null)
+                    api.authenticate();
+
                 Request request = new Request.Builder()
                         .url(url)
                         .addHeader("Authorization", "Bearer " + api.getToken())

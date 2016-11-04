@@ -29,6 +29,10 @@ public class LookupItemsController extends ControllerBase {
      */
     public List<LookupItemsModel> getLookupItems(FodEnums.APILookupItemTypes type) {
         try {
+
+            if (api.getToken() == null)
+                api.authenticate();
+
             Request request = new Request.Builder()
                     .url(api.getBaseUrl() + "/api/v3/lookup-items?type=" + type.toString())
                     .addHeader("Authorization", "Bearer " + api.getToken())
