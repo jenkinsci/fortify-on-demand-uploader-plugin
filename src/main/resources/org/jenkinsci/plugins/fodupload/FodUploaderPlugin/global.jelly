@@ -16,7 +16,7 @@
         <f:entry title="API Key" field="clientId">
             <f:textbox />
         </f:entry>
-        <f:entry title="Secret Code" field="clientSecret">
+        <f:entry title="Secret Key" field="clientSecret">
             <f:password />
         </f:entry>
     </f:section>
@@ -29,6 +29,6 @@
             <f:checkbox/>
         </f:entry>
         <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
-                 method="testConnection" />
+                 method="testConnection" with="clientId,clientSecret,baseUrl"/>
     </f:advanced>
 </j:jelly>

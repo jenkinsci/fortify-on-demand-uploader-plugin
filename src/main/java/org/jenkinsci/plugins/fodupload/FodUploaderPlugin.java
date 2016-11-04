@@ -399,9 +399,20 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
-        public FormValidation doTestConnection() {
-            api.authenticate();
-            return !api.getToken().isEmpty() ?
+        public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId,
+                                               @QueryParameter(CLIENT_SECRET) final String clientSecret,
+                                               @QueryParameter(BASE_URL) final String baseUrl) {
+            if (clientId == null || clientId.isEmpty())
+                return FormValidation.error("API Key is empty!");
+            if (clientSecret == null || clientSecret.isEmpty())
+                return FormValidation.error("Secret Key is empty!");
+            if (baseUrl == null || baseUrl.isEmpty())
+                return FormValidation.error("Fortify on Demand URL is empty!");
+
+            FodApi testApi = new FodApi(clientId, clientSecret, baseUrl);
+
+            testApi.authenticate();
+            return !testApi.getToken().isEmpty() ?
                     FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
                     FormValidation.error("Invalid connection information. Please check your credentials and try again.");
         }
