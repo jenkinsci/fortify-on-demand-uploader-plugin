@@ -61,22 +61,17 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         api = new FodApi(getDescriptor().getClientId(), getDescriptor().getClientSecret(), getDescriptor().getBaseUrl());
         api.authenticate();
 
-        TenantEntitlementExtendedPropertiesDTO property = null;
-        if (entitlementId != 0) {
-            // Get entitlement frequency
-            List<TenantEntitlementDTO> entitlements = api.getTenantEntitlementsController()
-                    .getTenantEntitlements().getTenantEntitlements();
-            for (TenantEntitlementDTO entitlement : entitlements) {
-                if (entitlement.getEntitlementId() == entitlementId)
-                    property = entitlement.getExtendedProperties();
+        int frequencyType = 0;
+        for (ReleaseAssessmentTypeDTO assessment : getDescriptor().assessments) {
+            if (assessment.getEntitlementId() == entitlementId) {
+                frequencyType = assessment.getFrequencyTypeId();
             }
-
         }
         // load job model
         jobModel = new JobConfigModel(applicationId, releaseId, assessmentTypeId, technologyStack,
                 languageLevel, runOpenSourceAnalysis, isExpressScan, isExpressAudit,
                 pollingInterval, doPrettyLogOutput, includeAllFiles, excludeThirdParty, isRemediationScan,
-                entitlementId, property);
+                entitlementId, frequencyType);
     }
 
     // logic run during a build

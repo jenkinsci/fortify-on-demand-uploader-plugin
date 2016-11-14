@@ -31,6 +31,10 @@ public class ReleaseAssessmentTypeDTO {
         return entitlementId;
     }
 
+    public void setEntitlementId(int value) {
+        entitlementId = value;
+    }
+
     public String getFrequencyType() {
         return frequencyType;
     }

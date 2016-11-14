@@ -59,8 +59,7 @@ public class JobConfigModel {
     public JobConfigModel(String applicationId, String releaseId, String assessmentTypeId, String technologyStack,
                           String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
                           int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
-                          boolean isRemediationScan, int entitlementId,
-                          TenantEntitlementExtendedPropertiesDTO entitlementProperties) {
+                          boolean isRemediationScan, int entitlementId, int frequencyType) {
         this.applicationId = Integer.parseInt(applicationId);
         this.releaseId = Integer.parseInt(releaseId);
         this.assessmentTypeId = Integer.parseInt(assessmentTypeId);
@@ -76,8 +75,8 @@ public class JobConfigModel {
         this.isRemediationScan = isRemediationScan;
         this.entitlementId = entitlementId;
 
-        this.entitlementFrequencyTypeId = (entitlementProperties != null) ?
-                entitlementProperties.getFrequencyTypeId().getValue() :
+        this.entitlementFrequencyTypeId = (frequencyType != 0) ?
+                frequencyType :
                 EntitlementFrequencyType.SingleScan.getValue();
     }
 
