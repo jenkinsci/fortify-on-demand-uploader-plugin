@@ -292,9 +292,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
         @SuppressWarnings("unused")
         public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) int applicationId) {
-            if (applicationId != 0)
-                releases = api.getReleaseController().getReleases(applicationId);
-
             ListBoxModel listBox = new ListBoxModel();
 
             for (ReleaseDTO release : releases) {
@@ -369,9 +366,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
         @SuppressWarnings("unused")
         public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) int releaseId) {
-            if (releaseId != 0)
-                assessments = api.getReleaseController().getAssessmentTypeIds(releaseId);
-
             ListBoxModel listBox = new ListBoxModel();
             for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
                 final String value = String.valueOf(assessmentType.getAssessmentTypeId());
@@ -390,7 +384,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public ListBoxModel doFillEntitlementIdItems(@QueryParameter(ASSESSMENT_TYPE_ID) final String assessmentTypeId) {
             // Get entitlements on load
             ListBoxModel listBox = new ListBoxModel();
-            Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<ReleaseAssessmentTypeDTO>();;
+            Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<>();;
             applicableAssessments.addAll(assessments.stream()
                     .filter(assessment -> assessment.getAssessmentTypeId() == Integer.parseInt(assessmentTypeId)
                                     && Integer.parseInt(assessmentTypeId) > 0)
