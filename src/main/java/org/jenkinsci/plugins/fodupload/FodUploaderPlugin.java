@@ -11,6 +11,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.fodupload.models.FodEnums.EntitlementFrequencyType;
 import org.jenkinsci.plugins.fodupload.models.JobConfigModel;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -365,7 +366,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
                 final String value = String.valueOf(assessmentType.getAssessmentTypeId());
                 String infoText;
-                if (assessmentType.getFrequencyTypeId() == 2) {
+                if (assessmentType.getFrequencyTypeId() == EntitlementFrequencyType.Subscription.getValue()) {
                     infoText = "Subscription";
                 } else {
                     infoText = String.format("Single Scan: %s Unit(s) left", assessmentType.getUnitsAvailable());
