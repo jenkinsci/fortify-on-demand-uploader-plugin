@@ -225,6 +225,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         static final String RELEASE_ID = "releaseId";
         static final String TECHNOLOGY_STACK = "technologyStack";
         static final String DO_POLL_FORTIFY = "doPollFortify";
+        static final String ASSESSMENT_TYPE_ID = "assessmentTypeId";
 
         private String clientId;
         private String clientSecret;
@@ -372,7 +373,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             ListBoxModel listBox = new ListBoxModel();
             for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
                 final String value = String.valueOf(assessmentType.getAssessmentTypeId());
-                listBox.add(new ListBoxModel.Option(assessmentType.getName(), value, false));
+                final String name = String.format("%s (%s)", assessmentType.getName()
+                        , assessmentType.getFrequencyTypeId() == 2 ? "Subscription" : "Single Scan");
+                listBox.add(new ListBoxModel.Option(name, value, false));
             }
             return listBox;
         }
