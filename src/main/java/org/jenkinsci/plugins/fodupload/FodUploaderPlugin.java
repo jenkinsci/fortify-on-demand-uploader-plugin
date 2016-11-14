@@ -21,8 +21,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     //TODO: Create Lookup endpoint for this info.
@@ -231,12 +235,10 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         private String clientSecret;
         private String baseUrl;
         private boolean doPollFortify;
-        private GetTenantEntitlementResponse availableEntitlements;
         private String defaultTechStack;
         private List<ApplicationDTO> applications;
         private List<ReleaseDTO> releases;
         private List<ReleaseAssessmentTypeDTO> assessments;
-        private List<TenantEntitlementDTO> entitlements;
 
         /**
          * In order to load the persisted global configuration, you have to
@@ -373,24 +375,30 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             ListBoxModel listBox = new ListBoxModel();
             for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
                 final String value = String.valueOf(assessmentType.getAssessmentTypeId());
-                final String name = String.format("%s (%s)", assessmentType.getName()
-                        , assessmentType.getFrequencyTypeId() == 2 ? "Subscription" : "Single Scan");
+                String infoText;
+                if (assessmentType.getFrequencyTypeId() == 2) {
+                    infoText = "Subscription";
+                } else {
+                    infoText = String.format("Single Scan: %s Unit(s) left", assessmentType.getUnitsAvailable());
+                }
+                final String name = String.format("%s (%s)", assessmentType.getName(), infoText);
                 listBox.add(new ListBoxModel.Option(name, value, false));
             }
             return listBox;
         }
         @SuppressWarnings("unused")
-        public ListBoxModel doFillEntitlementIdItems() {
+        public ListBoxModel doFillEntitlementIdItems(@QueryParameter(ASSESSMENT_TYPE_ID) final String assessmentTypeId) {
             // Get entitlements on load
             ListBoxModel listBox = new ListBoxModel();
-            if (entitlements.size() > 0) {
-                for (TenantEntitlementDTO entitlement : entitlements) {
+            Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<ReleaseAssessmentTypeDTO>();;
+            applicableAssessments.addAll(assessments.stream()
+                    .filter(assessment -> assessment.getAssessmentTypeId() == Integer.parseInt(assessmentTypeId)
+                                    && Integer.parseInt(assessmentTypeId) > 0)
+                    .collect(Collectors.toList()));
+
+            for (ReleaseAssessmentTypeDTO entitlement : applicableAssessments) {
                     String val = String.valueOf(entitlement.getEntitlementId());
-                    String text = String.format("%s (%s %s left)", val,
-                            (entitlement.getUnitsPurchased() - entitlement.getUnitsConsumed()),
-                            availableEntitlements.getEntitlementType());
-                    listBox.add(new ListBoxModel.Option(text, val, false));
-                }
+                    listBox.add(new ListBoxModel.Option(val, val, false));
             }
             return listBox;
         }
@@ -421,8 +429,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 applications = api.getApplicationController().getApplications();
                 releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
                 assessments = api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId());
-                availableEntitlements = api.getTenantEntitlementsController().getTenantEntitlements();
-                entitlements = availableEntitlements.getTenantEntitlements();
             }
 
         }
