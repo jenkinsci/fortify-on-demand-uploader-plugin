@@ -25,6 +25,7 @@
         <f:entry title="Fortify on Demand URL" description="Link to HP FOD" field="baseUrl">
             <f:textbox default="https://hpfod.com"/>
         </f:entry>
+
         <f:entry title="Poll Fortify on Demand for results" field="doPollFortify">
             <f:checkbox/>
         </f:entry>
