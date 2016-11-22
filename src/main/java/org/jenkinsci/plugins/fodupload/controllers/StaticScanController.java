@@ -13,10 +13,7 @@ import org.jenkinsci.plugins.fodupload.models.JobConfigModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
 
-import java.io.FileInputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.Arrays;
 
 public class StaticScanController extends ControllerBase {
@@ -42,7 +39,8 @@ public class StaticScanController extends ControllerBase {
 
         PostStartScanResponse scanStartedResponse = null;
 
-        try (FileInputStream fs = new FileInputStream(uploadRequest.getUploadFile())) {
+        File uploadFile = uploadRequest.getUploadFile();
+        try (FileInputStream fs = new FileInputStream(uploadFile)) {
             byte[] readByteArray = new byte[CHUNK_SIZE];
             byte[] sendByteArray;
             int fragmentNumber = 0;
@@ -82,6 +80,7 @@ public class StaticScanController extends ControllerBase {
 
             // Loop through chunks
 
+            logger.println("TOTAL FILE SIZE = " + uploadFile.length());
             logger.println("CHUNK_SIZE = " + CHUNK_SIZE);
             while ((byteCount = fs.read(readByteArray)) != -1) {
 
