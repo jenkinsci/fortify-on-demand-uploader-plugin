@@ -77,6 +77,8 @@ public class StaticScanController extends ControllerBase {
             if (uploadRequest.getExcludeThirdParty())
                 fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.getExcludeThirdParty();
 
+            Gson gson = new Gson();
+
             // Loop through chunks
             while ((byteCount = fs.read(readByteArray)) != -1) {
                 if (byteCount <= CHUNK_SIZE) {
@@ -101,35 +103,47 @@ public class StaticScanController extends ControllerBase {
                 if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                     // Re-authenticate
                     api.authenticate();
+
+                    // if you had to reauthenticate here, would the loop and request not need to be resubmitted?
+                    // possible continue?
                 }
 
-                if (fragmentNumber != 0 && fragmentNumber % 5 == 0) {
-                    logger.println("Upload Status - Bytes sent:" + offset);
+                if (fragmentNumber % 5 == 0) {
+                    logger.println("Upload Status - Fragment No: " + fragmentNumber + ", Bytes sent:" + offset
+                            + " (Response: " + response.code() + ")");
                 }
-                // Read the results and close the response
-                String finalResponse = IOUtils.toString(response.body().byteStream(), "utf-8");
+
+                if (response.code() != 202) {
+                    String responseJsonStr = IOUtils.toString(response.body().byteStream(), "utf-8");
+
+                    // final response has 200, try to deserialize it
+                    if (response.code() == 200) {
+                        scanStartedResponse = gson.fromJson(responseJsonStr, PostStartScanResponse.class);
+
+                        logger.println("Scan started response: " + responseJsonStr);
+                        logger.println("Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
+
+                        return true;
+
+                    } else if (!response.isSuccessful()) { // There was an error along the lines of 'another scan in progress' or something
+
+                        logger.println("An error occurred during the upload.");
+                        GenericErrorResponse errors = gson.fromJson(responseJsonStr, GenericErrorResponse.class);
+                        if (errors != null)
+                            logger.println("Package upload failed for the following reasons: " + errors.toString());
+                        return false; // if there is an error, get out of loop and mark build unstable
+                    }
+                }
+
                 response.body().close();
-
-                Gson gson = new Gson();
-                // Scan successfully uploaded
-                if (response.isSuccessful()) {
-                    scanStartedResponse = gson.fromJson(finalResponse, PostStartScanResponse.class);
-                    // There was an error along the lines of 'another scan in progress' or something
-                } else {
-                    GenericErrorResponse errors = gson.fromJson(finalResponse, GenericErrorResponse.class);
-                    logger.println("Package upload failed for the following reasons: " +
-                            errors.toString());
-                    break;
-                }
                 offset += byteCount;
-            }
-            if (scanStartedResponse != null) {
-                logger.println("Scan " + scanStartedResponse.getScanId() +
-                        " uploaded successfully. Total bytes sent: " + offset);
-            }
+            } // end while
+
         } catch (Exception e) {
             logger.println(e.getStackTrace());
+            return false;
         }
-        return scanStartedResponse != null;
+
+        return false;
     }
 }
