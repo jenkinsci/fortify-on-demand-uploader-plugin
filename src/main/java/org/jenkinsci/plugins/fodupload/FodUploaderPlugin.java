@@ -1,4 +1,5 @@
 package org.jenkinsci.plugins.fodupload;
+
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.FilePath;
@@ -77,7 +78,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     // logic run during a build
     @Override
-    public void perform(Run<?,?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException {
+    public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException {
         api.authenticate();
 
         final PrintStream logger = listener.getLogger();
@@ -117,6 +118,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     /**
      * Zips a folder, stores it in a temp location and returns the object
+     *
      * @param workspace location of the files to zip
      * @return a File object
      * @throws IOException no files
@@ -127,15 +129,17 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         String tempDir = System.getProperty("java.io.tmpdir");
         File dir = new File(tempDir);
 
+
         File tempZip = File.createTempFile("fodupload", ".zip", dir);
-        try(FileOutputStream fos = new FileOutputStream(tempZip)) {
+        try (FileOutputStream fos = new FileOutputStream(tempZip)) {
             final Pattern pattern = Pattern.compile(getFileExpressionPatternString(getTechnologyStack()),
                     Pattern.CASE_INSENSITIVE);
 
             workspace.zip(fos, new RegexFileFilter(pattern));
+            getLogger().println("Temporary file created at: " + tempZip.getAbsolutePath());
 
         } catch (Exception e) {
-            e.printStackTrace();
+            getLogger().println(e.getMessage());
         }
         getLogger().println("End Create Zip.");
         return tempZip;
@@ -144,22 +148,63 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
     // marks them unused, but they actually are used.
     // These getters are also named in the following format: Get<JellyField>.
-    public int getApplicationId() { return jobModel.getApplicationId(); }
-    public int getReleaseId() { return jobModel.getReleaseId(); }
-    public int getAssessmentTypeId() { return jobModel.getAssessmentTypeId(); }
-    public String getTechnologyStack() { return jobModel.getTechnologyStack(); }
-    public String getLanguageLevel() { return jobModel.getLanguageLevel(); }
-    public boolean getRunOpenSourceAnalysis() { return jobModel.getRunOpenSourceAnalysis(); }
-    public boolean getIsExpressScan() { return jobModel.getIsExpressScan(); }
-    public boolean getIsExpressAudit() { return jobModel.getIsExpressAudit(); }
-    public boolean getDoPrettyLogOutput() { return jobModel.getDoPrettyLogOutput(); }
-    public boolean getIncludeAllFiles() { return jobModel.getIncludeAllFiles(); }
-    public boolean getExcludeThirdParty() { return jobModel.getExcludeThirdParty(); }
-    public boolean getIsRemediationScan() { return jobModel.getIsRemediationScan(); }
-    public int getEntitlementId() { return jobModel.getEntitlementId(); }
-    public int getPollingInterval() { return jobModel.getPollingInterval(); }
+    public int getApplicationId() {
+        return jobModel.getApplicationId();
+    }
 
-    private static String getFileExpressionPatternString(String technologyStack){
+    public int getReleaseId() {
+        return jobModel.getReleaseId();
+    }
+
+    public int getAssessmentTypeId() {
+        return jobModel.getAssessmentTypeId();
+    }
+
+    public String getTechnologyStack() {
+        return jobModel.getTechnologyStack();
+    }
+
+    public String getLanguageLevel() {
+        return jobModel.getLanguageLevel();
+    }
+
+    public boolean getRunOpenSourceAnalysis() {
+        return jobModel.getRunOpenSourceAnalysis();
+    }
+
+    public boolean getIsExpressScan() {
+        return jobModel.getIsExpressScan();
+    }
+
+    public boolean getIsExpressAudit() {
+        return jobModel.getIsExpressAudit();
+    }
+
+    public boolean getDoPrettyLogOutput() {
+        return jobModel.getDoPrettyLogOutput();
+    }
+
+    public boolean getIncludeAllFiles() {
+        return jobModel.getIncludeAllFiles();
+    }
+
+    public boolean getExcludeThirdParty() {
+        return jobModel.getExcludeThirdParty();
+    }
+
+    public boolean getIsRemediationScan() {
+        return jobModel.getIsRemediationScan();
+    }
+
+    public int getEntitlementId() {
+        return jobModel.getEntitlementId();
+    }
+
+    public int getPollingInterval() {
+        return jobModel.getPollingInterval();
+    }
+
+    private static String getFileExpressionPatternString(String technologyStack) {
         String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +
                 "|.*\\.settings|.*\\.cpx|.*\\.xcfg|.*\\.cscfg|.*\\.cscdef|.*\\.wadcfg|.*\\.appxmanifest"
                 + "|.*\\.wsdl|.*\\.plist|.*\\.properties|.*\\.ini|.*\\.sql|.*\\.pks|.*\\.pkh|.*\\.pkb";
@@ -201,6 +246,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     /**
      * Gets the out for the build console output
+     *
      * @return Task Listener object
      */
     public static PrintStream getLogger() {
@@ -211,10 +257,14 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     // If your plugin doesn't really define any property on Descriptor,
     // you don't have to do this.
     @Override
-    public DescriptorImpl getDescriptor() { return (DescriptorImpl)super.getDescriptor(); }
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl) super.getDescriptor();
+    }
 
     @Override
-    public BuildStepMonitor getRequiredMonitorService() { return BuildStepMonitor.NONE; }
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.NONE;
+    }
 
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
@@ -261,18 +311,32 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
             loadPluginOptions();
             save();
-            return super.configure(req,formData);
+            return super.configure(req, formData);
         }
 
         // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
         // marks them unused, but they actually are used.
         // These getters are also named in the following format: Get<JellyField>.
-        public String getDisplayName() { return "Fortify Uploader Plugin"; }
-        public String getClientId() { return clientId; }
-        public String getClientSecret() { return clientSecret; }
-        public String getBaseUrl() { return baseUrl; }
+        public String getDisplayName() {
+            return "Fortify Uploader Plugin";
+        }
+
+        public String getClientId() {
+            return clientId;
+        }
+
+        public String getClientSecret() {
+            return clientSecret;
+        }
+
+        public String getBaseUrl() {
+            return baseUrl;
+        }
+
         @SuppressWarnings("unused")
-        public boolean getDoPollFortify() { return doPollFortify; }
+        public boolean getDoPollFortify() {
+            return doPollFortify;
+        }
 
         // NOTE: The following Getters are used to return saved values in the global.jelly. Intellij
         // marks them unused, but they actually are used.
@@ -286,6 +350,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             }
             return listBox;
         }
+
         @SuppressWarnings("unused")
         public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) int applicationId) {
             ListBoxModel listBox = new ListBoxModel();
@@ -296,22 +361,23 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             }
             return listBox;
         }
+
         @SuppressWarnings("unused")
         public ListBoxModel doFillTechnologyStackItems() {
             ListBoxModel items = new ListBoxModel();
 
-            items.add(new ListBoxModel.Option(TS_DOT_NET_KEY, TS_DOT_NET_KEY,false));
+            items.add(new ListBoxModel.Option(TS_DOT_NET_KEY, TS_DOT_NET_KEY, false));
             items.add(new ListBoxModel.Option(TS_ABAP_KEY, TS_ABAP_KEY, false));
             items.add(new ListBoxModel.Option(TS_ASP_KEY, TS_ASP_KEY, false));
             items.add(new ListBoxModel.Option(TS_ANDROID_KEY, TS_ANDROID_KEY, false));
             items.add(new ListBoxModel.Option(TS_CFML_KEY, TS_ABAP_KEY, false));
             items.add(new ListBoxModel.Option(TS_COBOL_KEY, TS_COBOL_KEY, false));
-            items.add(new ListBoxModel.Option(TS_JAVA_KEY, TS_JAVA_KEY,false));
+            items.add(new ListBoxModel.Option(TS_JAVA_KEY, TS_JAVA_KEY, false));
             items.add(new ListBoxModel.Option(TS_OBJECTIVE_C_KEY, TS_OBJECTIVE_C_KEY, false));
             items.add(new ListBoxModel.Option(TS_PHP_KEY, TS_PHP_KEY, false));
             items.add(new ListBoxModel.Option(TS_PLSQL_TSQL_KEY, TS_PLSQL_TSQL_KEY, false));
-            items.add(new ListBoxModel.Option(TS_PYTHON_KEY, TS_PYTHON_KEY,false));
-            items.add(new ListBoxModel.Option(TS_RUBY_KEY, TS_RUBY_KEY,false));
+            items.add(new ListBoxModel.Option(TS_PYTHON_KEY, TS_PYTHON_KEY, false));
+            items.add(new ListBoxModel.Option(TS_RUBY_KEY, TS_RUBY_KEY, false));
             items.add(new ListBoxModel.Option(TS_VB6_KEY, TS_VB6_KEY, false));
             items.add(new ListBoxModel.Option(TS_VB_SCRIPT_KEY, TS_VB_SCRIPT_KEY, false));
             items.add(new ListBoxModel.Option(TS_XML_HTML_KEY, TS_XML_HTML_KEY, false));
@@ -319,34 +385,35 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             defaultTechStack = items.get(0).name;
             return items;
         }
+
         @SuppressWarnings("unused")
         public ListBoxModel doFillLanguageLevelItems(@QueryParameter(TECHNOLOGY_STACK) String technologyStack) {
             ListBoxModel items = new ListBoxModel();
 
             if (technologyStack == null || technologyStack.isEmpty())
-                    technologyStack = defaultTechStack;
+                technologyStack = defaultTechStack;
             switch (technologyStack) {
                 case TS_JAVA_KEY:
-                    items.add(new ListBoxModel.Option("1.2", "1.2",false));
-                    items.add(new ListBoxModel.Option("1.3", "1.3",false));
-                    items.add(new ListBoxModel.Option("1.4", "1.4",false));
-                    items.add(new ListBoxModel.Option("1.5", "1.5",false));
-                    items.add(new ListBoxModel.Option("1.6", "1.6",false));
-                    items.add(new ListBoxModel.Option("1.7", "1.7",false));
-                    items.add(new ListBoxModel.Option("1.8", "1.8",false));
+                    items.add(new ListBoxModel.Option("1.2", "1.2", false));
+                    items.add(new ListBoxModel.Option("1.3", "1.3", false));
+                    items.add(new ListBoxModel.Option("1.4", "1.4", false));
+                    items.add(new ListBoxModel.Option("1.5", "1.5", false));
+                    items.add(new ListBoxModel.Option("1.6", "1.6", false));
+                    items.add(new ListBoxModel.Option("1.7", "1.7", false));
+                    items.add(new ListBoxModel.Option("1.8", "1.8", false));
                     break;
                 case TS_DOT_NET_KEY:
-                    items.add(new ListBoxModel.Option("1.0", "1.0",false));
-                    items.add(new ListBoxModel.Option("1.1", "1.1",false));
-                    items.add(new ListBoxModel.Option("2.0", "2.0",false));
-                    items.add(new ListBoxModel.Option("3.0", "3.0",false));
-                    items.add(new ListBoxModel.Option("3.5", "3.5",false));
-                    items.add(new ListBoxModel.Option("4.0", "4.0",false));
-                    items.add(new ListBoxModel.Option("4.5", "4.5",false));
-                    items.add(new ListBoxModel.Option("4.5.1", "4.5.1",false));
-                    items.add(new ListBoxModel.Option("4.5.2", "4.5.2",false));
-                    items.add(new ListBoxModel.Option("4.6", "4.6",false));
-                    items.add(new ListBoxModel.Option("4.6.1", "4.6.1",false));
+                    items.add(new ListBoxModel.Option("1.0", "1.0", false));
+                    items.add(new ListBoxModel.Option("1.1", "1.1", false));
+                    items.add(new ListBoxModel.Option("2.0", "2.0", false));
+                    items.add(new ListBoxModel.Option("3.0", "3.0", false));
+                    items.add(new ListBoxModel.Option("3.5", "3.5", false));
+                    items.add(new ListBoxModel.Option("4.0", "4.0", false));
+                    items.add(new ListBoxModel.Option("4.5", "4.5", false));
+                    items.add(new ListBoxModel.Option("4.5.1", "4.5.1", false));
+                    items.add(new ListBoxModel.Option("4.5.2", "4.5.2", false));
+                    items.add(new ListBoxModel.Option("4.6", "4.6", false));
+                    items.add(new ListBoxModel.Option("4.6.1", "4.6.1", false));
                     break;
                 case TS_PYTHON_KEY:
                     items.add(new ListBoxModel.Option("Standard Python", "Standard Python", false));
@@ -360,6 +427,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
             return items;
         }
+
         @SuppressWarnings("unused")
         public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) int releaseId) {
             ListBoxModel listBox = new ListBoxModel();
@@ -377,22 +445,25 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             }
             return listBox;
         }
+
         @SuppressWarnings("unused")
         public ListBoxModel doFillEntitlementIdItems(@QueryParameter(ASSESSMENT_TYPE_ID) final String assessmentTypeId) {
             // Get entitlements on load
             ListBoxModel listBox = new ListBoxModel();
-            Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<>();;
+            Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<>();
+            ;
             applicableAssessments.addAll(assessments.stream()
                     .filter(assessment -> assessment.getAssessmentTypeId() == Integer.parseInt(assessmentTypeId)
-                                    && Integer.parseInt(assessmentTypeId) > 0)
+                            && Integer.parseInt(assessmentTypeId) > 0)
                     .collect(Collectors.toList()));
 
             for (ReleaseAssessmentTypeDTO entitlement : applicableAssessments) {
-                    String val = String.valueOf(entitlement.getEntitlementId());
-                    listBox.add(new ListBoxModel.Option(val, val, false));
+                String val = String.valueOf(entitlement.getEntitlementId());
+                listBox.add(new ListBoxModel.Option(val, val, false));
             }
             return listBox;
         }
+
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId,
