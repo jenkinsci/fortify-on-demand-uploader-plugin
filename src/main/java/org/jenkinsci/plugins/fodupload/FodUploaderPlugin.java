@@ -354,6 +354,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) int applicationId) {
             ListBoxModel listBox = new ListBoxModel();
+            api.authenticate();
             releases = api.getReleaseController().getReleases(applicationId);
             for (ReleaseDTO release : releases) {
                 final String value = String.valueOf(release.getReleaseId());
@@ -431,6 +432,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) int releaseId) {
             ListBoxModel listBox = new ListBoxModel();
+            api.authenticate();
             assessments = api.getReleaseController().getAssessmentTypeIds(releaseId);
             for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
                 final String value = String.valueOf(assessmentType.getAssessmentTypeId());
@@ -451,7 +453,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             // Get entitlements on load
             ListBoxModel listBox = new ListBoxModel();
             Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<>();
-            ;
             applicableAssessments.addAll(assessments.stream()
                     .filter(assessment -> assessment.getAssessmentTypeId() == Integer.parseInt(assessmentTypeId)
                             && Integer.parseInt(assessmentTypeId) > 0)
@@ -492,7 +493,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
                 assessments = api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId());
             }
-
         }
     }
 }
