@@ -81,7 +81,7 @@ public class StaticScanController extends ControllerBase {
 
             // Loop through chunks
             while ((byteCount = fs.read(readByteArray)) != -1) {
-                if (byteCount <= CHUNK_SIZE) {
+                if (byteCount < CHUNK_SIZE) {
                     fragmentNumber = -1;
                     sendByteArray = Arrays.copyOf(readByteArray, byteCount);
                 } else {
