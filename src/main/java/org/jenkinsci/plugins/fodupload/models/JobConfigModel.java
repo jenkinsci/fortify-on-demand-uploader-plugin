@@ -92,7 +92,7 @@ public class JobConfigModel {
                 "Express Scan:                      %s%n" +
                 "Express Audit:                     %s%n" +
                 "Exclude All Files:                 %s%n" +
-                "Include Third Party:               %s%n" +
+                "Exclude Third Party:               %s%n" +
                 "Remediation Scan:                  %s%n" +
                 "Entitlement Id:                    %s%n" +
                 "Entitlement Frequency Type:        %s%n" +
