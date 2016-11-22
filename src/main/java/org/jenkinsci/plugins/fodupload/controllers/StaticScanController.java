@@ -123,7 +123,7 @@ public class StaticScanController extends ControllerBase {
                         " uploaded successfully. Total bytes sent: " + offset);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.println(e.getStackTrace());
         }
         return scanStartedResponse != null;
     }
