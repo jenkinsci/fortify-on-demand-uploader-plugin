@@ -411,10 +411,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                     items.add(new ListBoxModel.Option("3.5", "3.5", false));
                     items.add(new ListBoxModel.Option("4.0", "4.0", false));
                     items.add(new ListBoxModel.Option("4.5", "4.5", false));
-                    items.add(new ListBoxModel.Option("4.5.1", "4.5.1", false));
-                    items.add(new ListBoxModel.Option("4.5.2", "4.5.2", false));
-                    items.add(new ListBoxModel.Option("4.6", "4.6", false));
-                    items.add(new ListBoxModel.Option("4.6.1", "4.6.1", false));
                     break;
                 case TS_PYTHON_KEY:
                     items.add(new ListBoxModel.Option("Standard Python", "Standard Python", false));
