@@ -15,6 +15,8 @@ import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
 
 import java.io.FileInputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 
 public class StaticScanController extends ControllerBase {
@@ -140,9 +142,7 @@ public class StaticScanController extends ControllerBase {
 
             } // end while
         } catch (Exception e) {
-            StackTraceElement[] elements = e.getStackTrace();
-            for (StackTraceElement element : elements)
-                logger.println("Error at: " + element.getMethodName());
+            e.printStackTrace(logger);
             return false;
         }
 
