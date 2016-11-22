@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
-
 import com.google.gson.Gson;
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -80,10 +79,13 @@ public class StaticScanController extends ControllerBase {
             Gson gson = new Gson();
 
             // Loop through chunks
+
+            logger.println("CHUNK_SIZE = " + CHUNK_SIZE);
             while ((byteCount = fs.read(readByteArray)) != -1) {
+
                 if (byteCount < CHUNK_SIZE) {
-                    fragmentNumber = -1;
                     sendByteArray = Arrays.copyOf(readByteArray, byteCount);
+                    fragmentNumber = -1;
                 } else {
                     sendByteArray = readByteArray;
                 }
@@ -108,8 +110,10 @@ public class StaticScanController extends ControllerBase {
                     // possible continue?
                 }
 
+                offset += byteCount;
+
                 if (fragmentNumber % 5 == 0) {
-                    logger.println("Upload Status - Fragment No: " + fragmentNumber + ", Bytes sent:" + offset
+                    logger.println("Upload Status - Fragment No: " + fragmentNumber + ", Bytes sent: " + offset
                             + " (Response: " + response.code() + ")");
                 }
 
@@ -118,11 +122,9 @@ public class StaticScanController extends ControllerBase {
 
                     // final response has 200, try to deserialize it
                     if (response.code() == 200) {
+
                         scanStartedResponse = gson.fromJson(responseJsonStr, PostStartScanResponse.class);
-
-                        logger.println("Scan started response: " + responseJsonStr);
                         logger.println("Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
-
                         return true;
 
                     } else if (!response.isSuccessful()) { // There was an error along the lines of 'another scan in progress' or something
@@ -134,13 +136,13 @@ public class StaticScanController extends ControllerBase {
                         return false; // if there is an error, get out of loop and mark build unstable
                     }
                 }
-
                 response.body().close();
-                offset += byteCount;
-            } // end while
 
+            } // end while
         } catch (Exception e) {
-            logger.println(e.getStackTrace());
+            StackTraceElement[] elements = e.getStackTrace();
+            for (StackTraceElement element : elements)
+                logger.println("Error at: " + element.getMethodName());
             return false;
         }
 
