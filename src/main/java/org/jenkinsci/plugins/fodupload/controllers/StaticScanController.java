@@ -20,14 +20,19 @@ import java.util.Arrays;
 
 public class StaticScanController extends ControllerBase {
     private final int CHUNK_SIZE = 1024 * 1024;
+
     /**
      * Constructor
+     *
      * @param api api object with client info
      */
-    public StaticScanController(final FodApi api) { super(api); }
+    public StaticScanController(final FodApi api) {
+        super(api);
+    }
 
     /**
      * Begin a static scan on FoD
+     *
      * @param uploadRequest zip file to upload
      * @return true if the scan succeeded
      */
@@ -36,7 +41,7 @@ public class StaticScanController extends ControllerBase {
 
         PostStartScanResponse scanStartedResponse = null;
 
-        try(FileInputStream fs = new FileInputStream(uploadRequest.getUploadFile())) {
+        try (FileInputStream fs = new FileInputStream(uploadRequest.getUploadFile())) {
             byte[] readByteArray = new byte[CHUNK_SIZE];
             byte[] sendByteArray;
             int fragmentNumber = 0;
