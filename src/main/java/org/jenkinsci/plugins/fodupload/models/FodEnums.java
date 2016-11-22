@@ -41,7 +41,13 @@ public class FodEnums {
         Subscription(2);
 
         private final int id;
-        EntitlementFrequencyType(int id) { this.id = id; }
-        public int getValue() { return id; }
+
+        EntitlementFrequencyType(int id) {
+            this.id = id;
+        }
+
+        public int getValue() {
+            return id;
+        }
     }
 }

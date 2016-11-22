@@ -18,6 +18,7 @@ import java.util.List;
 public class ApplicationController extends ControllerBase {
     /**
      * Constructor
+     *
      * @param api api object with client info
      */
     public ApplicationController(final FodApi api) {
@@ -26,6 +27,7 @@ public class ApplicationController extends ControllerBase {
 
     /**
      * Get list of applications
+     *
      * @return List of application objects
      */
     public List<ApplicationDTO> getApplications() {
@@ -33,9 +35,9 @@ public class ApplicationController extends ControllerBase {
             int offset = 0, resultSize = api.MAX_SIZE;
             List<ApplicationDTO> applicationList = new ArrayList<>();
 
-            while(resultSize == api.MAX_SIZE) {
+            while (resultSize == api.MAX_SIZE) {
                 String url = api.getBaseUrl() + "/api/v3/applications?" +
-                "offset=" + offset + "&limit=" + api.MAX_SIZE;
+                        "offset=" + offset + "&limit=" + api.MAX_SIZE;
 
                 if (api.getToken() == null)
                     api.authenticate();

@@ -7,7 +7,10 @@ class ControllerBase {
 
     /**
      * Base constructor for all api controllers
+     *
      * @param api api object (containing client etc.) of controller
      */
-    ControllerBase(FodApi api) { this.api = api; }
+    ControllerBase(FodApi api) {
+        this.api = api;
+    }
 }

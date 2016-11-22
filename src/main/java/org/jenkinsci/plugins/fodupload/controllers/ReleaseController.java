@@ -20,12 +20,16 @@ import java.util.List;
 public class ReleaseController extends ControllerBase {
     /**
      * Constructor
+     *
      * @param api api object with client info
      */
-    public ReleaseController(FodApi api) { super(api); }
+    public ReleaseController(FodApi api) {
+        super(api);
+    }
 
     /**
      * Get list of releases for a given application
+     *
      * @param applicationId application to get releases of
      * @return List of releases
      */
@@ -36,7 +40,7 @@ public class ReleaseController extends ControllerBase {
 
             // Pagination. Will continue until the results are less than the MAX_SIZE, which indicates that you've
             // hit the end of the results.
-            while(resultSize == api.MAX_SIZE) {
+            while (resultSize == api.MAX_SIZE) {
                 String url = api.getBaseUrl() + "/api/v3/applications/" + applicationId + "/releases?" +
                         "offset=" + offset + "&limit=" + api.MAX_SIZE;
 
@@ -61,7 +65,8 @@ public class ReleaseController extends ControllerBase {
 
                 Gson gson = new Gson();
                 // Create a type of GenericList<ApplicationDTO> to play nice with gson.
-                Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() {}.getType();
+                Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() {
+                }.getType();
                 GenericListResponse<ReleaseDTO> results = gson.fromJson(content, t);
 
                 resultSize = results.getItems().size();
@@ -77,8 +82,9 @@ public class ReleaseController extends ControllerBase {
 
     /**
      * Get an individual release with given fields
+     *
      * @param releaseId release to get
-     * @param fields fields to return
+     * @param fields    fields to return
      * @return ReleaseDTO object with given fields
      */
     public ReleaseDTO getRelease(final int releaseId, final String fields) {
@@ -111,10 +117,11 @@ public class ReleaseController extends ControllerBase {
 
             Gson gson = new Gson();
             // Create a type of GenericList<ReleaseDTO> to play nice with gson.
-            Type t = new TypeToken<GenericListResponse<ReleaseDTO>>(){}.getType();
-            GenericListResponse<ReleaseDTO> results =  gson.fromJson(content, t);
+            Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() {
+            }.getType();
+            GenericListResponse<ReleaseDTO> results = gson.fromJson(content, t);
             return results.getItems().get(0);
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -122,6 +129,7 @@ public class ReleaseController extends ControllerBase {
 
     /**
      * Get a list of available assessment types for a given release
+     *
      * @param releaseId release to get assessment types for
      * @return List of possible assessment types
      */
@@ -150,8 +158,9 @@ public class ReleaseController extends ControllerBase {
 
             Gson gson = new Gson();
             // Create a type of GenericList<ApplicationDTO> to play nice with gson.
-            Type t = new TypeToken<GenericListResponse<ReleaseAssessmentTypeDTO>>(){}.getType();
-            GenericListResponse<ReleaseAssessmentTypeDTO> results =  gson.fromJson(content, t);
+            Type t = new TypeToken<GenericListResponse<ReleaseAssessmentTypeDTO>>() {
+            }.getType();
+            GenericListResponse<ReleaseAssessmentTypeDTO> results = gson.fromJson(content, t);
 
             return results.getItems();
         } catch (Exception e) {

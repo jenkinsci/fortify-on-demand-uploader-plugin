@@ -16,6 +16,7 @@ import java.util.List;
 public class LookupItemsController extends ControllerBase {
     /**
      * Constructor
+     *
      * @param api api object with client info
      */
     public LookupItemsController(FodApi api) {
@@ -24,6 +25,7 @@ public class LookupItemsController extends ControllerBase {
 
     /**
      * GET given enum
+     *
      * @param type enum to look up
      * @return array of enum values and text or null
      */
@@ -45,8 +47,9 @@ public class LookupItemsController extends ControllerBase {
             response.body().close();
 
             Gson gson = new Gson();
-            Type t = new TypeToken<GenericListResponse<LookupItemsModel>>(){}.getType();
-            GenericListResponse<LookupItemsModel> results =  gson.fromJson(content, t);
+            Type t = new TypeToken<GenericListResponse<LookupItemsModel>>() {
+            }.getType();
+            GenericListResponse<LookupItemsModel> results = gson.fromJson(content, t);
             return results.getItems();
         } catch (Exception e) {
             e.printStackTrace();

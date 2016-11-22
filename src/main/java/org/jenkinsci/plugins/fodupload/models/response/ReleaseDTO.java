@@ -29,31 +29,111 @@ public class ReleaseDTO {
     private int sdlcStatusTypeId;
     private String sdlcStatusType;
 
-    public int getReleaseId() {return releaseId;}
-    public String getReleaseName() {return releaseName;}
-    public String getReleaseDescription() {return releaseDescription;}
-    public int getApplicationId() {return applicationId;}
-    public String getApplicationName() {return applicationName;}
-    public int getCurrentAnalysisStatusTypeId() {return currentAnalysisStatusTypeId;}
-    public String getCurrentAnalysisStatusType() {return currentAnalysisStatusType;}
-    public int getRating() {return rating;}
-    public int getCritical() {return critical;}
-    public int getHigh() {return high;}
-    public int getMedium() {return medium;}
-    public int getLow() {return low;}
-    public int getCurrentStaticScanId() {return currentStaticScanId;}
-    public int getCurrentDynamicScanId() {return currentDynamicScanId;}
-    public int getCurrentMobileScanId() {return currentMobileScanId;}
-    public String getStaticAnalysisStatusType() {return staticAnalysisStatusType;}
-    public String getDynamicAnalysisStatusType() {return dynamicAnalysisStatusType;}
-    public String getMobileAnalysisStatusType() {return mobileAnalysisStatusType;}
-    public int getStaticAnalysisStatusTypeId() {return staticAnalysisStatusTypeId;}
-    public int getDynamicAnalysisStatusTypeId() {return dynamicAnalysisStatusTypeId;}
-    public int getMobileAnalysisStatusTypeId() {return mobileAnalysisStatusTypeId;}
-    public int getIssueCount() {return issueCount;}
-    public boolean isPassed() {return isPassed;}
-    public int getPassFailReasonTypeId() {return passFailReasonTypeId;}
-    public String getPassFailReasonType() {return passFailReasonType;}
-    public int getSdlcStatusTypeId() {return sdlcStatusTypeId;}
-    public String getSdlcStatusType() {return sdlcStatusType;}
+    public int getReleaseId() {
+        return releaseId;
+    }
+
+    public String getReleaseName() {
+        return releaseName;
+    }
+
+    public String getReleaseDescription() {
+        return releaseDescription;
+    }
+
+    public int getApplicationId() {
+        return applicationId;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public int getCurrentAnalysisStatusTypeId() {
+        return currentAnalysisStatusTypeId;
+    }
+
+    public String getCurrentAnalysisStatusType() {
+        return currentAnalysisStatusType;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public int getCritical() {
+        return critical;
+    }
+
+    public int getHigh() {
+        return high;
+    }
+
+    public int getMedium() {
+        return medium;
+    }
+
+    public int getLow() {
+        return low;
+    }
+
+    public int getCurrentStaticScanId() {
+        return currentStaticScanId;
+    }
+
+    public int getCurrentDynamicScanId() {
+        return currentDynamicScanId;
+    }
+
+    public int getCurrentMobileScanId() {
+        return currentMobileScanId;
+    }
+
+    public String getStaticAnalysisStatusType() {
+        return staticAnalysisStatusType;
+    }
+
+    public String getDynamicAnalysisStatusType() {
+        return dynamicAnalysisStatusType;
+    }
+
+    public String getMobileAnalysisStatusType() {
+        return mobileAnalysisStatusType;
+    }
+
+    public int getStaticAnalysisStatusTypeId() {
+        return staticAnalysisStatusTypeId;
+    }
+
+    public int getDynamicAnalysisStatusTypeId() {
+        return dynamicAnalysisStatusTypeId;
+    }
+
+    public int getMobileAnalysisStatusTypeId() {
+        return mobileAnalysisStatusTypeId;
+    }
+
+    public int getIssueCount() {
+        return issueCount;
+    }
+
+    public boolean isPassed() {
+        return isPassed;
+    }
+
+    public int getPassFailReasonTypeId() {
+        return passFailReasonTypeId;
+    }
+
+    public String getPassFailReasonType() {
+        return passFailReasonType;
+    }
+
+    public int getSdlcStatusTypeId() {
+        return sdlcStatusTypeId;
+    }
+
+    public String getSdlcStatusType() {
+        return sdlcStatusType;
+    }
 }

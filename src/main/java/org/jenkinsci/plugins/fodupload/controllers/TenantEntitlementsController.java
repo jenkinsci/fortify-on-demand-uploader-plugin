@@ -14,6 +14,7 @@ import java.lang.reflect.Type;
 public class TenantEntitlementsController extends ControllerBase {
     /**
      * Constructor
+     *
      * @param api api object with client info
      */
     public TenantEntitlementsController(FodApi api) {
@@ -22,6 +23,7 @@ public class TenantEntitlementsController extends ControllerBase {
 
     /**
      * Get the entitlements of a tenant
+     *
      * @return returns list of available entitlements
      */
     public GetTenantEntitlementResponse getTenantEntitlements() {
@@ -49,10 +51,11 @@ public class TenantEntitlementsController extends ControllerBase {
 
             Gson gson = new Gson();
             // Create a type of GenericList<ApplicationDTO> to play nice with gson.
-            Type t = new TypeToken<GetTenantEntitlementResponse>(){}.getType();
-            GetTenantEntitlementResponse results =  gson.fromJson(content, t);
+            Type t = new TypeToken<GetTenantEntitlementResponse>() {
+            }.getType();
+            GetTenantEntitlementResponse results = gson.fromJson(content, t);
             return results;
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

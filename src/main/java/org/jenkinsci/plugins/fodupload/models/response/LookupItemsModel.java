@@ -6,10 +6,16 @@ public class LookupItemsModel {
         this.text = text;
         this.group = group;
     }
+
     private String value;
     private String text;
     private String group;
 
-    public String getValue() {return value;}
-    public String getText() {return text;}
+    public String getValue() {
+        return value;
+    }
+
+    public String getText() {
+        return text;
+    }
 }

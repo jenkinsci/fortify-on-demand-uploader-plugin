@@ -9,9 +9,23 @@ public class GetTenantEntitlementResponse {
     private int subscriptionTypeId;
     private String subscriptionType;
 
-    public List<TenantEntitlementDTO> getTenantEntitlements() { return tenantEntitlements; }
-    public int getEntitlementTypeId() { return entitlementTypeId; }
-    public int getSubscriptionTypeId() { return subscriptionTypeId; }
-    public String getEntitlementType() { return entitlementType; }
-    public String getSubscriptionType() { return subscriptionType; }
+    public List<TenantEntitlementDTO> getTenantEntitlements() {
+        return tenantEntitlements;
+    }
+
+    public int getEntitlementTypeId() {
+        return entitlementTypeId;
+    }
+
+    public int getSubscriptionTypeId() {
+        return subscriptionTypeId;
+    }
+
+    public String getEntitlementType() {
+        return entitlementType;
+    }
+
+    public String getSubscriptionType() {
+        return subscriptionType;
+    }
 }

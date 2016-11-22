@@ -8,10 +8,27 @@ public class TenantEntitlementDTO {
     private String endDate;
     private TenantEntitlementExtendedPropertiesDTO extendedProperties;
 
-    public int getEntitlementId() { return entitlementId; }
-    public int getUnitsPurchased() { return unitsPurchased; }
-    public int getUnitsConsumed() { return unitsConsumed; }
-    public String getStartDate() { return startDate; }
-    public String getEndDate() { return  endDate; }
-    public TenantEntitlementExtendedPropertiesDTO getExtendedProperties() { return extendedProperties; }
+    public int getEntitlementId() {
+        return entitlementId;
+    }
+
+    public int getUnitsPurchased() {
+        return unitsPurchased;
+    }
+
+    public int getUnitsConsumed() {
+        return unitsConsumed;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public TenantEntitlementExtendedPropertiesDTO getExtendedProperties() {
+        return extendedProperties;
+    }
 }

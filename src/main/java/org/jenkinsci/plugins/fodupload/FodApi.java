@@ -29,20 +29,40 @@ public class FodApi {
     public final int MAX_SIZE = 50;
 
     private StaticScanController staticScanController;
-    public StaticScanController getStaticScanController() { return staticScanController; }
+
+    public StaticScanController getStaticScanController() {
+        return staticScanController;
+    }
+
     private ApplicationController applicationController;
-    public ApplicationController getApplicationController() { return applicationController; }
+
+    public ApplicationController getApplicationController() {
+        return applicationController;
+    }
+
     private ReleaseController releaseController;
-    public ReleaseController getReleaseController() { return releaseController; }
+
+    public ReleaseController getReleaseController() {
+        return releaseController;
+    }
+
     private TenantEntitlementsController tenantEntitlementsController;
-    public TenantEntitlementsController getTenantEntitlementsController() { return tenantEntitlementsController; }
+
+    public TenantEntitlementsController getTenantEntitlementsController() {
+        return tenantEntitlementsController;
+    }
+
     private LookupItemsController lookupItemsController;
-    public LookupItemsController getLookupItemsController() { return lookupItemsController; }
+
+    public LookupItemsController getLookupItemsController() {
+        return lookupItemsController;
+    }
 
     /**
      * Constructor that encapsulates the api
-     * @param key api key
-     * @param secret api secret
+     *
+     * @param key     api key
+     * @param secret  api secret
      * @param baseUrl api url
      */
     public FodApi(final String key, final String secret, final String baseUrl) {
@@ -104,7 +124,7 @@ public class FodApi {
 
             Request request = new Request.Builder()
                     .url(baseUrl + "/oauth/retireToken")
-                    .addHeader("Authorization","Bearer " + token)
+                    .addHeader("Authorization", "Bearer " + token)
                     .get()
                     .build();
             Response response = client.newCall(request).execute();
@@ -121,13 +141,14 @@ public class FodApi {
                 logger.println("Retiring Token : " + messageResponse);
                 token = null;
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     /**
      * Creates a okHttp client to connect with.
+     *
      * @return returns a client object
      */
     private OkHttpClient Create() {
@@ -137,7 +158,7 @@ public class FodApi {
                 .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
 
         // If there's no proxy just create a normal client
-        if(proxy == null)
+        if (proxy == null)
             return baseClient.build();
 
         OkHttpClient.Builder proxyClient = baseClient
@@ -153,10 +174,24 @@ public class FodApi {
         return proxyClient.build();
     }
 
-    public String getToken() { return token; }
-    public String getKey() { return key; }
-    public String getSecret() { return secret; }
-    public String getBaseUrl() { return baseUrl; }
-    public OkHttpClient getClient() { return client; }
+    public String getToken() {
+        return token;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public OkHttpClient getClient() {
+        return client;
+    }
 }
 

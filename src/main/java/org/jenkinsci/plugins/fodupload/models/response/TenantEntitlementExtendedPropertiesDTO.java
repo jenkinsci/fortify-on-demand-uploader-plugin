@@ -8,8 +8,19 @@ public class TenantEntitlementExtendedPropertiesDTO {
     private String frequencyType;
     public String subscriptionLength;
 
-    public int getAssessmentTypeId() { return assessmentTypeId; }
-    public EntitlementFrequencyType getFrequencyTypeId() { return frequencyTypeId; }
-    public String getFrequencyType() { return frequencyType; }
-    public String getSubscriptionLength() { return subscriptionLength; }
+    public int getAssessmentTypeId() {
+        return assessmentTypeId;
+    }
+
+    public EntitlementFrequencyType getFrequencyTypeId() {
+        return frequencyTypeId;
+    }
+
+    public String getFrequencyType() {
+        return frequencyType;
+    }
+
+    public String getSubscriptionLength() {
+        return subscriptionLength;
+    }
 }
