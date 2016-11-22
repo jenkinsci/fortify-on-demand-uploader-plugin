@@ -289,7 +289,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) int applicationId) {
             ListBoxModel listBox = new ListBoxModel();
-
+            releases = api.getReleaseController().getReleases(applicationId);
             for (ReleaseDTO release : releases) {
                 final String value = String.valueOf(release.getReleaseId());
                 listBox.add(new ListBoxModel.Option(release.getReleaseName(), value, false));
@@ -363,6 +363,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) int releaseId) {
             ListBoxModel listBox = new ListBoxModel();
+            assessments = api.getReleaseController().getAssessmentTypeIds(releaseId);
             for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
                 final String value = String.valueOf(assessmentType.getAssessmentTypeId());
                 String infoText;
