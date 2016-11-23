@@ -167,9 +167,14 @@ public class FodApi {
         Authenticator proxyAuthenticator;
         String credentials = Credentials.basic(proxy.getUserName(), proxy.getPassword());
 
-        proxyAuthenticator = (route, response) -> response.request().newBuilder()
-                .header("Proxy-Authorization", credentials)
-                .build();
+        proxyAuthenticator = new Authenticator() {
+            @Override
+            public Request authenticate(Route route, Response response) throws IOException {
+                return response.request().newBuilder()
+                        .header("Proxy-Authorization", credentials)
+                        .build();
+            }
+        };
         proxyClient.proxyAuthenticator(proxyAuthenticator);
         return proxyClient.build();
     }

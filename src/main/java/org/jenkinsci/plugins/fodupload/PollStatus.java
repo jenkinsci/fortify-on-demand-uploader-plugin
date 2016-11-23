@@ -7,6 +7,8 @@ import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.jenkinsci.plugins.fodupload.models.FodEnums.*;
@@ -63,8 +65,18 @@ public class PollStatus {
                     // Create a list of values that will be used to break the loop if found
                     // This way if any of this changes we don't need to redo the keys or something
                     List<String> complete = analysisStatusTypes.stream()
-                            .filter(p -> p.getText().equals("Completed") || p.getText().equals("Canceled"))
-                            .map(l -> l.getValue())
+                            .filter(new Predicate<LookupItemsModel>() {
+                                @Override
+                                public boolean test(LookupItemsModel p) {
+                                    return p.getText().equals("Completed") || p.getText().equals("Canceled");
+                                }
+                            })
+                            .map(new Function<LookupItemsModel, String>() {
+                                @Override
+                                public String apply(LookupItemsModel l) {
+                                    return l.getValue();
+                                }
+                            })
                             .collect(Collectors.toCollection(ArrayList::new));
 
                     // Look for and print the status OR break the loop.

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -450,8 +451,13 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             ListBoxModel listBox = new ListBoxModel();
             Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<>();
             applicableAssessments.addAll(assessments.stream()
-                    .filter(assessment -> assessment.getAssessmentTypeId() == Integer.parseInt(assessmentTypeId)
-                            && Integer.parseInt(assessmentTypeId) > 0)
+                    .filter(new Predicate<ReleaseAssessmentTypeDTO>() {
+                        @Override
+                        public boolean test(ReleaseAssessmentTypeDTO assessment) {
+                            return assessment.getAssessmentTypeId() == Integer.parseInt(assessmentTypeId)
+                                    && Integer.parseInt(assessmentTypeId) > 0;
+                        }
+                    })
                     .collect(Collectors.toList()));
 
             for (ReleaseAssessmentTypeDTO entitlement : applicableAssessments) {
