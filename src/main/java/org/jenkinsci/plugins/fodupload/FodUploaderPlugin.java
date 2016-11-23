@@ -23,13 +23,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     //TODO: Create Lookup endpoint for this info.
@@ -450,15 +447,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             // Get entitlements on load
             ListBoxModel listBox = new ListBoxModel();
             Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<>();
-            applicableAssessments.addAll(assessments.stream()
-                    .filter(new Predicate<ReleaseAssessmentTypeDTO>() {
-                        @Override
-                        public boolean test(ReleaseAssessmentTypeDTO assessment) {
-                            return assessment.getAssessmentTypeId() == Integer.parseInt(assessmentTypeId)
-                                    && Integer.parseInt(assessmentTypeId) > 0;
-                        }
-                    })
-                    .collect(Collectors.toList()));
+
+            for (ReleaseAssessmentTypeDTO assessment : assessments) {
+                if (assessment.getAssessmentTypeId() == Integer.parseInt(assessmentTypeId) && Integer.parseInt(assessmentTypeId) > 0)
+                    applicableAssessments.add(assessment);
+            }
 
             for (ReleaseAssessmentTypeDTO entitlement : applicableAssessments) {
                 String val = String.valueOf(entitlement.getEntitlementId());

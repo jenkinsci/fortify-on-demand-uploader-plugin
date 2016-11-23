@@ -165,7 +165,7 @@ public class FodApi {
                 .proxy(new java.net.Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress(proxy.name, proxy.port)));
         // Otherwise set up proxy
         Authenticator proxyAuthenticator;
-        String credentials = Credentials.basic(proxy.getUserName(), proxy.getPassword());
+        final String credentials = Credentials.basic(proxy.getUserName(), proxy.getPassword());
 
         proxyAuthenticator = new Authenticator() {
             @Override
@@ -175,6 +175,7 @@ public class FodApi {
                         .build();
             }
         };
+
         proxyClient.proxyAuthenticator(proxyAuthenticator);
         return proxyClient.build();
     }
