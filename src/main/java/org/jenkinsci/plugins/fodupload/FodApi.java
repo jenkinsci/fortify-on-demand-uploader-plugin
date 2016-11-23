@@ -71,8 +71,9 @@ public class FodApi {
         this.secret = secret;
         this.baseUrl = baseUrl;
 
-        if (Jenkins.getInstance() != null)
-            proxy = Jenkins.getInstance().proxy;
+        Jenkins instance = Jenkins.getInstance();
+        if (instance != null)
+            proxy = instance.proxy;
 
         client = Create();
 
