@@ -14,6 +14,12 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 public class FodApi {
+
+    private final static int CONNECTION_TIMEOUT = 10;
+    private final static int WRITE_TIMEOUT = 30;
+    private final static int READ_TIMEOUT = 30;
+    public final static int MAX_SIZE = 50;
+
     private String baseUrl;
     private OkHttpClient client;
     private String token;
@@ -22,11 +28,6 @@ public class FodApi {
     private String secret;
 
     private ProxyConfiguration proxy = null;
-
-    private final int CONNECTION_TIMEOUT = 10;
-    private final int WRITE_TIMEOUT = 30;
-    private final int READ_TIMEOUT = 30;
-    public final int MAX_SIZE = 50;
 
     private StaticScanController staticScanController;
 

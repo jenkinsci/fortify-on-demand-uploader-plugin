@@ -17,7 +17,8 @@ import java.io.*;
 import java.util.Arrays;
 
 public class StaticScanController extends ControllerBase {
-    private final int CHUNK_SIZE = 1024 * 1024;
+
+    private final static int CHUNK_SIZE = 1024 * 1024;
 
     /**
      * Constructor

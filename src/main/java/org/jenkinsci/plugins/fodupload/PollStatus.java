@@ -11,10 +11,12 @@ import java.util.List;
 import static org.jenkinsci.plugins.fodupload.models.FodEnums.*;
 
 public class PollStatus {
+
+    private final static int MAX_FAILS = 3;
+
     private FodApi fodApi;
     private JobConfigModel jobModel;
     private int failCount = 0;
-    private final int MAX_FAILS = 3;
 
     private List<LookupItemsModel> analysisStatusTypes = null;
 
