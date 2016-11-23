@@ -59,9 +59,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                              String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
                              int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
                              boolean isRemediationScan, int entitlementId) {
-        api = new FodApi(getDescriptor().getClientId(), getDescriptor().getClientSecret(), getDescriptor().getBaseUrl());
-        api.authenticate();
-
         int frequencyType = 0;
         for (ReleaseAssessmentTypeDTO assessment : getDescriptor().assessments) {
             if (assessment.getEntitlementId() == entitlementId) {
