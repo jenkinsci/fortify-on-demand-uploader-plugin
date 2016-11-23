@@ -18,4 +18,8 @@ public class LookupItemsModel {
     public String getText() {
         return text;
     }
+
+    public String getGroup() {
+        return group;
+    }
 }
