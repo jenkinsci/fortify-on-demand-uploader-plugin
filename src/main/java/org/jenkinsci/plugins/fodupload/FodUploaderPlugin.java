@@ -99,9 +99,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
         jobModel.setUploadFile(payload);
         boolean success = api.getStaticScanController().StartStaticScan(jobModel);
-
-        payload.delete();
-        if (success) {
+        boolean deleted = payload.delete();
+        if (success && deleted) {
             logger.println("Scan Uploaded Successfully.");
             if (getDescriptor().getDoPollFortify() && jobModel.getPollingInterval() > 0) {
                 PollStatus /*Amy*/poller = new PollStatus(api, jobModel);
