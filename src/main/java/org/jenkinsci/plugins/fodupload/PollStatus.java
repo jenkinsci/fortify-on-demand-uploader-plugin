@@ -43,7 +43,7 @@ public class PollStatus {
 
         try {
             while (!finished) {
-                Thread.sleep(jobModel.getPollingInterval() * 60 * 1000);
+                Thread.sleep(1000L * 60 * jobModel.getPollingInterval());
                 // Get the status of the release
                 ReleaseDTO release = fodApi.getReleaseController().getRelease(releaseId,
                         "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low");
