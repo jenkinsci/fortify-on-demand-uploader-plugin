@@ -48,7 +48,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
-    public static FodApi api;
+    private static FodApi api;
     private JobConfigModel jobModel;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
