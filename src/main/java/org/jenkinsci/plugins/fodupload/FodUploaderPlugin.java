@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -426,7 +427,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) int releaseId) {
             ListBoxModel listBox = new ListBoxModel();
             api.authenticate();
-            assessments = api.getReleaseController().getAssessmentTypeIds(releaseId);
+            assessments = FilterNegativeEntitlements(api.getReleaseController().getAssessmentTypeIds(releaseId));
             for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
                 final String value = String.valueOf(assessmentType.getAssessmentTypeId());
                 String infoText;
@@ -454,7 +455,12 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
             for (ReleaseAssessmentTypeDTO entitlement : applicableAssessments) {
                 String val = String.valueOf(entitlement.getEntitlementId());
-                listBox.add(new ListBoxModel.Option(val, val, false));
+                boolean addIt = true;
+                for (ListBoxModel.Option option : listBox) {
+                    addIt = !option.value.equals(val);
+                }
+                if (addIt)
+                    listBox.add(new ListBoxModel.Option(val, val, false));
             }
             return listBox;
         }
@@ -485,8 +491,18 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 api.authenticate();
                 applications = api.getApplicationController().getApplications();
                 releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
-                assessments = api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId());
+                assessments = FilterNegativeEntitlements(
+                        api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId()));
             }
+        }
+
+        private List<ReleaseAssessmentTypeDTO> FilterNegativeEntitlements(List<ReleaseAssessmentTypeDTO> assessments) {
+            List<ReleaseAssessmentTypeDTO> filtered = new LinkedList<>();
+            for (ReleaseAssessmentTypeDTO assessment : assessments) {
+                if (assessment.getEntitlementId() > 0)
+                    filtered.add(assessment);
+            }
+            return filtered;
         }
     }
 }
