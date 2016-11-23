@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.fodupload.models.response;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.List;
 
 public class GenericErrorResponse {
@@ -32,6 +34,7 @@ class ErrorResponse {
         return errorCode;
     }
 
+    @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
     public String getMessage() {
         return message;
     }
