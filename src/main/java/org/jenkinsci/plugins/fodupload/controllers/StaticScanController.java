@@ -34,7 +34,7 @@ public class StaticScanController extends ControllerBase {
      * @param uploadRequest zip file to upload
      * @return true if the scan succeeded
      */
-    public boolean StartStaticScan(final JobConfigModel uploadRequest) {
+    public boolean startStaticScan(final JobConfigModel uploadRequest) {
         PrintStream logger = FodUploaderPlugin.getLogger();
 
         PostStartScanResponse scanStartedResponse = null;

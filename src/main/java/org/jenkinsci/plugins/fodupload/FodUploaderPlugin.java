@@ -98,7 +98,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         logger.println(jobModel.toString());
 
         jobModel.setUploadFile(payload);
-        boolean success = api.getStaticScanController().StartStaticScan(jobModel);
+        boolean success = api.getStaticScanController().startStaticScan(jobModel);
         boolean deleted = payload.delete();
         if (success && deleted) {
             logger.println("Scan Uploaded Successfully.");
