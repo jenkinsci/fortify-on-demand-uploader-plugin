@@ -1,0 +1,24 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+    <f:section title="HPE Security Fortify on Demand">
+        <f:entry title="API Key" field="clientId">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Secret Key" field="clientSecret">
+            <f:password/>
+        </f:entry>
+    </f:section>
+
+    <f:advanced title="Advanced Settings">
+        <f:entry title="Fortify on Demand URL" description="Link to HP FOD" field="baseUrl">
+            <f:textbox default="https://hpfod.com"/>
+        </f:entry>
+
+        <f:entry title="Poll Fortify on Demand for results" field="doPollFortify">
+            <f:checkbox/>
+        </f:entry>
+        <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
+                          method="testConnection" with="clientId,clientSecret,baseUrl"/>
+    </f:advanced>
+</j:jelly>
