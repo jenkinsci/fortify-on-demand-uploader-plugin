@@ -477,7 +477,13 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             FodApi testApi = new FodApi(clientId, clientSecret, baseUrl);
 
             testApi.authenticate();
-            return !testApi.getToken().isEmpty() ?
+            String token = testApi.getToken();
+
+            if (token == null) {
+                return FormValidation.error("Unable to retrieve authentication token.");
+            }
+
+            return !token.isEmpty() ?
                     FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
                     FormValidation.error("Invalid connection information. Please check your credentials and try again.");
         }
