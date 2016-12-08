@@ -35,7 +35,6 @@
         <connection>scm:git:ssh://github.com/jenkinsci/fortify-on-demand-uploader-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/fortify-on-demand-uploader-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/fortify-on-demand-uploader-plugin</url>
-        <tag>fortify-on-demand-uploader-2.0.2</tag>
     </scm>
 
     <developers>
