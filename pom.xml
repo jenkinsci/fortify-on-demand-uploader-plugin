@@ -31,6 +31,12 @@
         </license>
     </licenses>
 
+    <scm>
+        <connection>scm:git:ssh://github.com/jenkinsci/fortify-on-demand-uploader-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/fortify-on-demand-uploader-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/fortify-on-demand-uploader-plugin</url>
+    </scm>
+
     <developers>
         <developer>
             <id>ryancblack</id>
