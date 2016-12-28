@@ -493,9 +493,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 api = new FodApi(clientId, clientSecret, baseUrl);
                 api.authenticate();
                 applications = api.getApplicationController().getApplications();
-                releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
-                assessments = FilterNegativeEntitlements(
+                if (!applications.isEmpty()) {
+                    releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
+                    assessments = FilterNegativeEntitlements(
                         api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId()));
+                }
             }
         }
 
