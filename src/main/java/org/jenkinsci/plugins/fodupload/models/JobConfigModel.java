@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.response.TenantEntitlementExtendedPropertiesDTO;
 
 import java.io.File;
@@ -109,9 +110,10 @@ public class JobConfigModel {
                           String languageLevel, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
                           int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
                           boolean isRemediationScan, int entitlementId, int frequencyType) {
-        this.applicationId = Integer.parseInt(applicationId);
-        this.releaseId = Integer.parseInt(releaseId);
-        this.assessmentTypeId = Integer.parseInt(assessmentTypeId);
+        this.applicationId = Utils.tryParseInt(applicationId);
+        this.releaseId = Utils.tryParseInt(releaseId);
+        this.assessmentTypeId = Utils.tryParseInt(assessmentTypeId);
+
         this.technologyStack = technologyStack;
         this.languageLevel = languageLevel;
         this.runOpenSourceAnalysis = runOpenSourceAnalysis;

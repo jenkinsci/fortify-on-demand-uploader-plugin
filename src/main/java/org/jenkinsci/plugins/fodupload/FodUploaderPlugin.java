@@ -446,7 +446,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<>();
 
             for (ReleaseAssessmentTypeDTO assessment : assessments) {
-                if (assessment.getAssessmentTypeId() == Integer.parseInt(assessmentTypeId) && Integer.parseInt(assessmentTypeId) > 0)
+                int parsedAssessmentId = Utils.tryParseInt(assessmentTypeId);
+                if (assessment.getAssessmentTypeId() == parsedAssessmentId && parsedAssessmentId > 0)
                     applicableAssessments.add(assessment);
             }
 
