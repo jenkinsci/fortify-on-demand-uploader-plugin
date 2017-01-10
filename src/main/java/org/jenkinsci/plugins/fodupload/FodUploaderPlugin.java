@@ -304,8 +304,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             baseUrl = formData.getString(BASE_URL);
             doPollFortify = formData.getBoolean(DO_POLL_FORTIFY);
 
-            loadPluginOptions();
             save();
+            loadPluginOptions();
             return super.configure(req, formData);
         }
 
@@ -493,8 +493,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             if (clientId != null && clientSecret != null && baseUrl != null) {
                 api = new FodApi(clientId, clientSecret, baseUrl);
                 api.authenticate();
+
                 applications = api.getApplicationController().getApplications();
-                if (!applications.isEmpty()) {
+                if (applications != null && !applications.isEmpty()) {
                     releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
                     assessments = FilterNegativeEntitlements(
                         api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId()));
