@@ -23,10 +23,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
@@ -288,7 +285,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         // Entry point when accessing global configuration
         public DescriptorImpl() {
             load();
-            loadPluginOptions();
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -339,6 +335,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillApplicationIdItems() {
             ListBoxModel listBox = new ListBoxModel();
+            listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
+
             for (ApplicationDTO app : applications) {
                 final String value = String.valueOf(app.getApplicationId());
                 listBox.add(new ListBoxModel.Option(app.getApplicationName(), value, false));
@@ -349,7 +347,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) int applicationId) {
             ListBoxModel listBox = new ListBoxModel();
-            api.authenticate();
+            listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
+
+            loadPluginOptions();
             releases = api.getReleaseController().getReleases(applicationId);
             for (ReleaseDTO release : releases) {
                 final String value = String.valueOf(release.getReleaseId());
@@ -361,6 +361,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillTechnologyStackItems() {
             ListBoxModel items = new ListBoxModel();
+            items.add(new ListBoxModel.Option("(Choose One)", "0", false));
 
             items.add(new ListBoxModel.Option(TS_DOT_NET_KEY, TS_DOT_NET_KEY, false));
             items.add(new ListBoxModel.Option(TS_ABAP_KEY, TS_ABAP_KEY, false));
@@ -385,6 +386,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillLanguageLevelItems(@QueryParameter(TECHNOLOGY_STACK) String technologyStack) {
             ListBoxModel items = new ListBoxModel();
+            items.add(new ListBoxModel.Option("(Choose One)", "0", false));
 
             if (technologyStack == null || technologyStack.isEmpty())
                 technologyStack = defaultTechStack;
@@ -423,7 +425,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) int releaseId) {
             ListBoxModel listBox = new ListBoxModel();
-            api.authenticate();
+            listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
+
+            loadPluginOptions();
             assessments = FilterNegativeEntitlements(api.getReleaseController().getAssessmentTypeIds(releaseId));
             for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
                 final String value = String.valueOf(assessmentType.getAssessmentTypeId());
@@ -443,6 +447,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public ListBoxModel doFillEntitlementIdItems(@QueryParameter(ASSESSMENT_TYPE_ID) final String assessmentTypeId) {
             // Get entitlements on load
             ListBoxModel listBox = new ListBoxModel();
+            listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
+
             Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<>();
 
             for (ReleaseAssessmentTypeDTO assessment : assessments) {
@@ -495,22 +501,31 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 api.authenticate();
 
                 applications = api.getApplicationController().getApplications();
+
                 if (applications != null && !applications.isEmpty()) {
                     releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
-                    assessments = FilterNegativeEntitlements(
-                        api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId()));
+
+                    if(releases != null && !releases.isEmpty()) {
+                        assessments = FilterNegativeEntitlements(
+                                api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId()));
+                    }
                 }
             }
         }
 
         private List<ReleaseAssessmentTypeDTO> FilterNegativeEntitlements(List<ReleaseAssessmentTypeDTO> assessments) {
             List<ReleaseAssessmentTypeDTO> filtered = new LinkedList<>();
-            for (ReleaseAssessmentTypeDTO assessment : assessments) {
-                if (assessment.getEntitlementId() > 0)
-                    filtered.add(assessment);
+            if (assessments != null && !assessments.isEmpty()) {
+                for (ReleaseAssessmentTypeDTO assessment : assessments) {
+                    if (assessment.getEntitlementId() > 0)
+                        filtered.add(assessment);
+                }
             }
             return filtered;
         }
     }
+
+
 }
+
 
