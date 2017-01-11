@@ -6,16 +6,16 @@
     <f:entry title="Release Name" field="releaseId">
         <f:select/>
     </f:entry>
-    <f:entry title="Technology Stack" field="technologyStack">
-        <f:select/>
-    </f:entry>
-    <f:entry title="Language Level" field="languageLevel">
-        <f:select/>
-    </f:entry>
     <f:entry title="Assessment Type" field="assessmentTypeId">
         <f:select/>
     </f:entry>
     <f:entry title="Entitlement Id" field="entitlementId">
+        <f:select/>
+    </f:entry>
+    <f:entry title="Technology Stack" field="technologyStack">
+        <f:select/>
+    </f:entry>
+    <f:entry title="Language Level" field="languageLevel">
         <f:select/>
     </f:entry>
 

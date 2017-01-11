@@ -23,10 +23,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
@@ -60,9 +57,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                              int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
                              boolean isRemediationScan, int entitlementId) {
         int frequencyType = 0;
-        for (ReleaseAssessmentTypeDTO assessment : getDescriptor().assessments) {
-            if (assessment.getEntitlementId() == entitlementId) {
-                frequencyType = assessment.getFrequencyTypeId();
+        if (!Utils.isNullOrEmpty(getDescriptor().assessments)) {
+            for (ReleaseAssessmentTypeDTO assessment : getDescriptor().assessments) {
+                if (assessment.getEntitlementId() == entitlementId) {
+                    frequencyType = assessment.getFrequencyTypeId();
+                }
             }
         }
         // load job model
@@ -74,41 +73,51 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     // logic run during a build
     @Override
-    public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException {
-        api.authenticate();
+    public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
+        try {
+            final PrintStream logger = listener.getLogger();
+            taskListener.set(listener);
 
-        final PrintStream logger = listener.getLogger();
-        taskListener.set(listener);
+            if (api == null) {
+                logger.println("Error: Failed to Authenticate with Fortify API.");
+                build.setResult(Result.UNSTABLE);
+            } else {
+                api.authenticate();
 
-        logger.println("Starting FoD Upload.");
+                logger.println("Starting FoD Upload.");
 
-        if (getAssessmentTypeId() == 0) {
-            logger.println("Assessment Type is empty.");
-            build.setResult(Result.FAILURE);
-        }
+                if (getAssessmentTypeId() == 0) {
+                    logger.println("Assessment Type is empty.");
+                    build.setResult(Result.FAILURE);
+                }
 
-        // zips the file in a temporary location
-        File payload = CreateZipFile(workspace);
-        if (payload.length() == 0) {
-            logger.println("Source is empty for given Technology Stack and Language Level.");
-            build.setResult(Result.FAILURE);
-        }
-        logger.println(jobModel.toString());
+                // zips the file in a temporary location
+                File payload = CreateZipFile(workspace);
+                if (payload.length() == 0) {
+                    logger.println("Source is empty for given Technology Stack and Language Level.");
+                    build.setResult(Result.FAILURE);
+                }
+                logger.println(jobModel.toString());
 
-        jobModel.setUploadFile(payload);
-        boolean success = api.getStaticScanController().startStaticScan(jobModel);
-        boolean deleted = payload.delete();
-        if (success && deleted) {
-            logger.println("Scan Uploaded Successfully.");
-            if (getDescriptor().getDoPollFortify() && jobModel.getPollingInterval() > 0) {
-                PollStatus /*Amy*/poller = new PollStatus(api, jobModel);
-                success = poller.releaseStatus(getReleaseId());
+                jobModel.setUploadFile(payload);
+                boolean success = api.getStaticScanController().startStaticScan(jobModel);
+                boolean deleted = payload.delete();
+                if (success && deleted) {
+                    logger.println("Scan Uploaded Successfully.");
+                    if (getDescriptor().getDoPollFortify() && jobModel.getPollingInterval() > 0) {
+                        PollStatus /*Amy*/poller = new PollStatus(api, jobModel);
+                        success = poller.releaseStatus(getReleaseId());
+                    }
+                }
+
+                // Success could be true then set to false from polling.
+                api.retireToken();
+                build.setResult(success ? Result.SUCCESS : Result.UNSTABLE);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            build.setResult(Result.UNSTABLE);
         }
-
-        // Success could be true then set to false from polling.
-        api.retireToken();
-        build.setResult(success ? Result.SUCCESS : Result.UNSTABLE);
     }
 
     /**
@@ -288,7 +297,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         // Entry point when accessing global configuration
         public DescriptorImpl() {
             load();
-            loadPluginOptions();
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -304,8 +312,13 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             baseUrl = formData.getString(BASE_URL);
             doPollFortify = formData.getBoolean(DO_POLL_FORTIFY);
 
-            loadPluginOptions();
             save();
+
+            api = createFodApi();
+            if (api != null) {
+                applications = api.getApplicationController().getApplications();
+            }
+
             return super.configure(req, formData);
         }
 
@@ -339,9 +352,17 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillApplicationIdItems() {
             ListBoxModel listBox = new ListBoxModel();
-            for (ApplicationDTO app : applications) {
-                final String value = String.valueOf(app.getApplicationId());
-                listBox.add(new ListBoxModel.Option(app.getApplicationName(), value, false));
+            listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
+
+            api = createFodApi();
+            if (api != null) {
+                applications = api.getApplicationController().getApplications();
+                if (!Utils.isNullOrEmpty(applications)) {
+                    for (ApplicationDTO app : applications) {
+                        final String value = String.valueOf(app.getApplicationId());
+                        listBox.add(new ListBoxModel.Option(app.getApplicationName(), value, false));
+                    }
+                }
             }
             return listBox;
         }
@@ -349,11 +370,17 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillReleaseIdItems(@QueryParameter(APPLICATION_ID) int applicationId) {
             ListBoxModel listBox = new ListBoxModel();
-            api.authenticate();
-            releases = api.getReleaseController().getReleases(applicationId);
-            for (ReleaseDTO release : releases) {
-                final String value = String.valueOf(release.getReleaseId());
-                listBox.add(new ListBoxModel.Option(release.getReleaseName(), value, false));
+            listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
+
+            if (!Utils.isNullOrEmpty(applications) && applications.get(0).getApplicationId() != 0) {
+                api = createFodApi();
+                if (api != null) {
+                    releases = api.getReleaseController().getReleases(applicationId);
+                    for (ReleaseDTO release : releases) {
+                        final String value = String.valueOf(release.getReleaseId());
+                        listBox.add(new ListBoxModel.Option(release.getReleaseName(), value, false));
+                    }
+                }
             }
             return listBox;
         }
@@ -361,6 +388,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillTechnologyStackItems() {
             ListBoxModel items = new ListBoxModel();
+            items.add(new ListBoxModel.Option("(Choose One)", "0", false));
 
             items.add(new ListBoxModel.Option(TS_DOT_NET_KEY, TS_DOT_NET_KEY, false));
             items.add(new ListBoxModel.Option(TS_ABAP_KEY, TS_ABAP_KEY, false));
@@ -385,8 +413,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillLanguageLevelItems(@QueryParameter(TECHNOLOGY_STACK) String technologyStack) {
             ListBoxModel items = new ListBoxModel();
+            items.add(new ListBoxModel.Option("(Choose One)", "0", false));
 
-            if (technologyStack == null || technologyStack.isEmpty())
+            if (!Utils.isNullOrEmpty(technologyStack))
                 technologyStack = defaultTechStack;
             switch (technologyStack) {
                 case TS_JAVA_KEY:
@@ -423,18 +452,26 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillAssessmentTypeIdItems(@QueryParameter(RELEASE_ID) int releaseId) {
             ListBoxModel listBox = new ListBoxModel();
-            api.authenticate();
-            assessments = FilterNegativeEntitlements(api.getReleaseController().getAssessmentTypeIds(releaseId));
-            for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
-                final String value = String.valueOf(assessmentType.getAssessmentTypeId());
-                String infoText;
-                if (assessmentType.getFrequencyTypeId() == EntitlementFrequencyType.Subscription.getValue()) {
-                    infoText = "Subscription";
-                } else {
-                    infoText = String.format("Single Scan: %s Unit(s) left", assessmentType.getUnitsAvailable());
+            listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
+
+            if (!Utils.isNullOrEmpty(releases)) {
+                api = createFodApi();
+                if (api != null) {
+                    assessments = FilterNegativeEntitlements(api.getReleaseController().getAssessmentTypeIds(releaseId));
+                    if (!Utils.isNullOrEmpty(assessments)) {
+                        for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
+                            final String value = String.valueOf(assessmentType.getAssessmentTypeId());
+                            String infoText;
+                            if (assessmentType.getFrequencyTypeId() == EntitlementFrequencyType.Subscription.getValue()) {
+                                infoText = "Subscription";
+                            } else {
+                                infoText = String.format("Single Scan: %s Unit(s) left", assessmentType.getUnitsAvailable());
+                            }
+                            final String name = String.format("%s (%s)", assessmentType.getName(), infoText);
+                            listBox.add(new ListBoxModel.Option(name, value, false));
+                        }
+                    }
                 }
-                final String name = String.format("%s (%s)", assessmentType.getName(), infoText);
-                listBox.add(new ListBoxModel.Option(name, value, false));
             }
             return listBox;
         }
@@ -443,22 +480,25 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public ListBoxModel doFillEntitlementIdItems(@QueryParameter(ASSESSMENT_TYPE_ID) final String assessmentTypeId) {
             // Get entitlements on load
             ListBoxModel listBox = new ListBoxModel();
+            listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
+
             Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<>();
-
-            for (ReleaseAssessmentTypeDTO assessment : assessments) {
-                int parsedAssessmentId = Utils.tryParseInt(assessmentTypeId);
-                if (assessment.getAssessmentTypeId() == parsedAssessmentId && parsedAssessmentId > 0)
-                    applicableAssessments.add(assessment);
-            }
-
-            for (ReleaseAssessmentTypeDTO entitlement : applicableAssessments) {
-                String val = String.valueOf(entitlement.getEntitlementId());
-                boolean addIt = true;
-                for (ListBoxModel.Option option : listBox) {
-                    addIt = !option.value.equals(val);
+            if (!Utils.isNullOrEmpty(assessments)) {
+                for (ReleaseAssessmentTypeDTO assessment : assessments) {
+                    int parsedAssessmentId = Utils.tryParseInt(assessmentTypeId);
+                    if (assessment.getAssessmentTypeId() == parsedAssessmentId && parsedAssessmentId > 0)
+                        applicableAssessments.add(assessment);
                 }
-                if (addIt)
-                    listBox.add(new ListBoxModel.Option(val, val, false));
+
+                for (ReleaseAssessmentTypeDTO entitlement : applicableAssessments) {
+                    String val = String.valueOf(entitlement.getEntitlementId());
+                    boolean addIt = true;
+                    for (ListBoxModel.Option option : listBox) {
+                        addIt = !option.value.equals(val);
+                    }
+                    if (addIt)
+                        listBox.add(new ListBoxModel.Option(val, val, false));
+                }
             }
             return listBox;
         }
@@ -468,11 +508,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId,
                                                @QueryParameter(CLIENT_SECRET) final String clientSecret,
                                                @QueryParameter(BASE_URL) final String baseUrl) {
-            if (clientId == null || clientId.isEmpty())
+            if (Utils.isNullOrEmpty(clientId))
                 return FormValidation.error("API Key is empty!");
-            if (clientSecret == null || clientSecret.isEmpty())
+            if (Utils.isNullOrEmpty(clientSecret))
                 return FormValidation.error("Secret Key is empty!");
-            if (baseUrl == null || baseUrl.isEmpty())
+            if (Utils.isNullOrEmpty(baseUrl))
                 return FormValidation.error("Fortify on Demand URL is empty!");
 
             FodApi testApi = new FodApi(clientId, clientSecret, baseUrl);
@@ -489,27 +529,30 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                     FormValidation.error("Invalid connection information. Please check your credentials and try again.");
         }
 
-        private void loadPluginOptions() {
-            if (clientId != null && clientSecret != null && baseUrl != null) {
-                api = new FodApi(clientId, clientSecret, baseUrl);
-                api.authenticate();
-                applications = api.getApplicationController().getApplications();
-                if (!applications.isEmpty()) {
-                    releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
-                    assessments = FilterNegativeEntitlements(
-                        api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId()));
-                }
-            }
-        }
-
         private List<ReleaseAssessmentTypeDTO> FilterNegativeEntitlements(List<ReleaseAssessmentTypeDTO> assessments) {
             List<ReleaseAssessmentTypeDTO> filtered = new LinkedList<>();
-            for (ReleaseAssessmentTypeDTO assessment : assessments) {
-                if (assessment.getEntitlementId() > 0)
-                    filtered.add(assessment);
+            if (!Utils.isNullOrEmpty(assessments)) {
+                for (ReleaseAssessmentTypeDTO assessment : assessments) {
+                    if (assessment.getEntitlementId() > 0)
+                        filtered.add(assessment);
+                }
             }
             return filtered;
         }
+
+        private FodApi createFodApi() {
+            if (!Utils.isNullOrEmpty(clientId) &&
+                    !Utils.isNullOrEmpty(clientSecret)&&
+                    !Utils.isNullOrEmpty(baseUrl)) {
+                api = new FodApi(clientId, clientSecret, baseUrl);
+                api.authenticate();
+                return api;
+            }
+            return null;
+        }
     }
+
+
 }
+
 
