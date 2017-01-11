@@ -73,41 +73,51 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     // logic run during a build
     @Override
-    public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException {
-        api.authenticate();
+    public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
+        try {
+            final PrintStream logger = listener.getLogger();
+            taskListener.set(listener);
+            
+            if (api == null) {
+                logger.println("Error: Failed to Authenticate with Fortify API.");
+                build.setResult(Result.UNSTABLE);
+            } else {
+                api.authenticate();
 
-        final PrintStream logger = listener.getLogger();
-        taskListener.set(listener);
+                logger.println("Starting FoD Upload.");
 
-        logger.println("Starting FoD Upload.");
+                if (getAssessmentTypeId() == 0) {
+                    logger.println("Assessment Type is empty.");
+                    build.setResult(Result.FAILURE);
+                }
 
-        if (getAssessmentTypeId() == 0) {
-            logger.println("Assessment Type is empty.");
-            build.setResult(Result.FAILURE);
-        }
+                // zips the file in a temporary location
+                File payload = CreateZipFile(workspace);
+                if (payload.length() == 0) {
+                    logger.println("Source is empty for given Technology Stack and Language Level.");
+                    build.setResult(Result.FAILURE);
+                }
+                logger.println(jobModel.toString());
 
-        // zips the file in a temporary location
-        File payload = CreateZipFile(workspace);
-        if (payload.length() == 0) {
-            logger.println("Source is empty for given Technology Stack and Language Level.");
-            build.setResult(Result.FAILURE);
-        }
-        logger.println(jobModel.toString());
+                jobModel.setUploadFile(payload);
+                boolean success = api.getStaticScanController().startStaticScan(jobModel);
+                boolean deleted = payload.delete();
+                if (success && deleted) {
+                    logger.println("Scan Uploaded Successfully.");
+                    if (getDescriptor().getDoPollFortify() && jobModel.getPollingInterval() > 0) {
+                        PollStatus /*Amy*/poller = new PollStatus(api, jobModel);
+                        success = poller.releaseStatus(getReleaseId());
+                    }
+                }
 
-        jobModel.setUploadFile(payload);
-        boolean success = api.getStaticScanController().startStaticScan(jobModel);
-        boolean deleted = payload.delete();
-        if (success && deleted) {
-            logger.println("Scan Uploaded Successfully.");
-            if (getDescriptor().getDoPollFortify() && jobModel.getPollingInterval() > 0) {
-                PollStatus /*Amy*/poller = new PollStatus(api, jobModel);
-                success = poller.releaseStatus(getReleaseId());
+                // Success could be true then set to false from polling.
+                api.retireToken();
+                build.setResult(success ? Result.SUCCESS : Result.UNSTABLE);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            build.setResult(Result.UNSTABLE);
         }
-
-        // Success could be true then set to false from polling.
-        api.retireToken();
-        build.setResult(success ? Result.SUCCESS : Result.UNSTABLE);
     }
 
     /**
