@@ -57,9 +57,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                              int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
                              boolean isRemediationScan, int entitlementId) {
         int frequencyType = 0;
-        for (ReleaseAssessmentTypeDTO assessment : getDescriptor().assessments) {
-            if (assessment.getEntitlementId() == entitlementId) {
-                frequencyType = assessment.getFrequencyTypeId();
+        if (!Utils.isNullOrEmpty(getDescriptor().assessments)) {
+            for (ReleaseAssessmentTypeDTO assessment : getDescriptor().assessments) {
+                if (assessment.getEntitlementId() == entitlementId) {
+                    frequencyType = assessment.getFrequencyTypeId();
+                }
             }
         }
         // load job model
@@ -337,9 +339,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             ListBoxModel listBox = new ListBoxModel();
             listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
 
-            for (ApplicationDTO app : applications) {
-                final String value = String.valueOf(app.getApplicationId());
-                listBox.add(new ListBoxModel.Option(app.getApplicationName(), value, false));
+            if (!Utils.isNullOrEmpty(applications)) {
+                for (ApplicationDTO app : applications) {
+                    final String value = String.valueOf(app.getApplicationId());
+                    listBox.add(new ListBoxModel.Option(app.getApplicationName(), value, false));
+                }
             }
             return listBox;
         }
@@ -349,11 +353,13 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             ListBoxModel listBox = new ListBoxModel();
             listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
 
-            loadPluginOptions();
-            releases = api.getReleaseController().getReleases(applicationId);
-            for (ReleaseDTO release : releases) {
-                final String value = String.valueOf(release.getReleaseId());
-                listBox.add(new ListBoxModel.Option(release.getReleaseName(), value, false));
+            if (!Utils.isNullOrEmpty(applications)) {
+                //loadPluginOptions();
+                releases = api.getReleaseController().getReleases(applicationId);
+                for (ReleaseDTO release : releases) {
+                    final String value = String.valueOf(release.getReleaseId());
+                    listBox.add(new ListBoxModel.Option(release.getReleaseName(), value, false));
+                }
             }
             return listBox;
         }
@@ -388,7 +394,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             ListBoxModel items = new ListBoxModel();
             items.add(new ListBoxModel.Option("(Choose One)", "0", false));
 
-            if (technologyStack == null || technologyStack.isEmpty())
+            if (!Utils.isNullOrEmpty(technologyStack))
                 technologyStack = defaultTechStack;
             switch (technologyStack) {
                 case TS_JAVA_KEY:
@@ -427,18 +433,22 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             ListBoxModel listBox = new ListBoxModel();
             listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
 
-            loadPluginOptions();
-            assessments = FilterNegativeEntitlements(api.getReleaseController().getAssessmentTypeIds(releaseId));
-            for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
-                final String value = String.valueOf(assessmentType.getAssessmentTypeId());
-                String infoText;
-                if (assessmentType.getFrequencyTypeId() == EntitlementFrequencyType.Subscription.getValue()) {
-                    infoText = "Subscription";
-                } else {
-                    infoText = String.format("Single Scan: %s Unit(s) left", assessmentType.getUnitsAvailable());
+            if (!Utils.isNullOrEmpty(releases)) {
+                //loadPluginOptions();
+                assessments = FilterNegativeEntitlements(api.getReleaseController().getAssessmentTypeIds(releaseId));
+                if (!Utils.isNullOrEmpty(assessments)) {
+                    for (ReleaseAssessmentTypeDTO assessmentType : assessments) {
+                        final String value = String.valueOf(assessmentType.getAssessmentTypeId());
+                        String infoText;
+                        if (assessmentType.getFrequencyTypeId() == EntitlementFrequencyType.Subscription.getValue()) {
+                            infoText = "Subscription";
+                        } else {
+                            infoText = String.format("Single Scan: %s Unit(s) left", assessmentType.getUnitsAvailable());
+                        }
+                        final String name = String.format("%s (%s)", assessmentType.getName(), infoText);
+                        listBox.add(new ListBoxModel.Option(name, value, false));
+                    }
                 }
-                final String name = String.format("%s (%s)", assessmentType.getName(), infoText);
-                listBox.add(new ListBoxModel.Option(name, value, false));
             }
             return listBox;
         }
@@ -450,21 +460,22 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             listBox.add(new ListBoxModel.Option("(Choose One)", "0", false));
 
             Set<ReleaseAssessmentTypeDTO> applicableAssessments = new HashSet<>();
-
-            for (ReleaseAssessmentTypeDTO assessment : assessments) {
-                int parsedAssessmentId = Utils.tryParseInt(assessmentTypeId);
-                if (assessment.getAssessmentTypeId() == parsedAssessmentId && parsedAssessmentId > 0)
-                    applicableAssessments.add(assessment);
-            }
-
-            for (ReleaseAssessmentTypeDTO entitlement : applicableAssessments) {
-                String val = String.valueOf(entitlement.getEntitlementId());
-                boolean addIt = true;
-                for (ListBoxModel.Option option : listBox) {
-                    addIt = !option.value.equals(val);
+            if (!Utils.isNullOrEmpty(assessments)) {
+                for (ReleaseAssessmentTypeDTO assessment : assessments) {
+                    int parsedAssessmentId = Utils.tryParseInt(assessmentTypeId);
+                    if (assessment.getAssessmentTypeId() == parsedAssessmentId && parsedAssessmentId > 0)
+                        applicableAssessments.add(assessment);
                 }
-                if (addIt)
-                    listBox.add(new ListBoxModel.Option(val, val, false));
+
+                for (ReleaseAssessmentTypeDTO entitlement : applicableAssessments) {
+                    String val = String.valueOf(entitlement.getEntitlementId());
+                    boolean addIt = true;
+                    for (ListBoxModel.Option option : listBox) {
+                        addIt = !option.value.equals(val);
+                    }
+                    if (addIt)
+                        listBox.add(new ListBoxModel.Option(val, val, false));
+                }
             }
             return listBox;
         }
@@ -474,11 +485,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId,
                                                @QueryParameter(CLIENT_SECRET) final String clientSecret,
                                                @QueryParameter(BASE_URL) final String baseUrl) {
-            if (clientId == null || clientId.isEmpty())
+            if (!Utils.isNullOrEmpty(clientId))
                 return FormValidation.error("API Key is empty!");
-            if (clientSecret == null || clientSecret.isEmpty())
+            if (!Utils.isNullOrEmpty(clientSecret))
                 return FormValidation.error("Secret Key is empty!");
-            if (baseUrl == null || baseUrl.isEmpty())
+            if (!Utils.isNullOrEmpty(baseUrl))
                 return FormValidation.error("Fortify on Demand URL is empty!");
 
             FodApi testApi = new FodApi(clientId, clientSecret, baseUrl);
@@ -496,16 +507,18 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
 
         private void loadPluginOptions() {
-            if (clientId != null && clientSecret != null && baseUrl != null) {
+            if (!Utils.isNullOrEmpty(clientId) &&
+                    !Utils.isNullOrEmpty(clientSecret)&&
+                    !Utils.isNullOrEmpty(baseUrl)) {
                 api = new FodApi(clientId, clientSecret, baseUrl);
                 api.authenticate();
 
                 applications = api.getApplicationController().getApplications();
 
-                if (applications != null && !applications.isEmpty()) {
+                if (!Utils.isNullOrEmpty(applications) && applications.get(0).getApplicationId() != 0) {
                     releases = api.getReleaseController().getReleases(applications.get(0).getApplicationId());
 
-                    if(releases != null && !releases.isEmpty()) {
+                    if(!Utils.isNullOrEmpty(releases)) {
                         assessments = FilterNegativeEntitlements(
                                 api.getReleaseController().getAssessmentTypeIds(releases.get(0).getReleaseId()));
                     }
@@ -515,7 +528,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
         private List<ReleaseAssessmentTypeDTO> FilterNegativeEntitlements(List<ReleaseAssessmentTypeDTO> assessments) {
             List<ReleaseAssessmentTypeDTO> filtered = new LinkedList<>();
-            if (assessments != null && !assessments.isEmpty()) {
+            if (!Utils.isNullOrEmpty(assessments)) {
                 for (ReleaseAssessmentTypeDTO assessment : assessments) {
                     if (assessment.getEntitlementId() > 0)
                         filtered.add(assessment);
