@@ -415,7 +415,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             ListBoxModel items = new ListBoxModel();
             items.add(new ListBoxModel.Option("(Choose One)", "0", false));
 
-            if (!Utils.isNullOrEmpty(technologyStack))
+            if (Utils.isNullOrEmpty(technologyStack))
                 technologyStack = defaultTechStack;
             switch (technologyStack) {
                 case TS_JAVA_KEY:
