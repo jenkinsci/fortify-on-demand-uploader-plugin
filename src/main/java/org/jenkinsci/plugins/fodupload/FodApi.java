@@ -12,6 +12,22 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.KeyManagementException;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableSet;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class FodApi {
 
@@ -154,10 +170,34 @@ public class FodApi {
      * @return returns a client object
      */
     private OkHttpClient Create() {
+
+      SSLContext sslContext;
+
+      try {
+        KeyStore ks = KeyStore.getInstance("JKS");
+        // load default jvm keystore
+        ks.load(new FileInputStream(
+                System.getProperties()
+                      .getProperty("java.home") + File.separator
+                    + "lib" + File.separator + "security" + File.separator
+                    + "cacerts"), "changeit".toCharArray());
+
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(ks);
+        sslContext = SSLContext.getInstance("TLSv1.2");
+        sslContext.init(null, tmf.getTrustManagers(), new SecureRandom());
+      } catch (java.security.cert.CertificateException | IOException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+        throw Throwables.propagate(e);
+      }
+
+        SSLSocketFactory socketFactory = sslContext.getSocketFactory();
+
         OkHttpClient.Builder baseClient = new OkHttpClient().newBuilder()
                 .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
+                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+                .sslSocketFactory(socketFactory)
+                .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS));
 
         // If there's no proxy just create a normal client
         if (proxy == null)
@@ -202,4 +242,3 @@ public class FodApi {
         return client;
     }
 }
-
