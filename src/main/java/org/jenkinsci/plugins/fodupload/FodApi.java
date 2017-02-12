@@ -176,11 +176,13 @@ public class FodApi {
       try {
         KeyStore ks = KeyStore.getInstance("JKS");
         // load default jvm keystore
-        ks.load(new FileInputStream(
+        FileInputStream ksfile = new FileInputStream(
                 System.getProperties()
                       .getProperty("java.home") + File.separator
                     + "lib" + File.separator + "security" + File.separator
-                    + "cacerts"), "changeit".toCharArray());
+                    + "cacerts");
+        ks.load(ksfile, "changeit".toCharArray());
+        ksfile.close();
 
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(ks);
