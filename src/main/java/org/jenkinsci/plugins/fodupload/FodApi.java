@@ -174,21 +174,9 @@ public class FodApi {
       SSLContext sslContext;
 
       try {
-        KeyStore ks = KeyStore.getInstance("JKS");
-        // load default jvm keystore
-        FileInputStream ksfile = new FileInputStream(
-                System.getProperties()
-                      .getProperty("java.home") + File.separator
-                    + "lib" + File.separator + "security" + File.separator
-                    + "cacerts");
-        ks.load(ksfile, "changeit".toCharArray());
-        ksfile.close();
-
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmf.init(ks);
         sslContext = SSLContext.getInstance("TLSv1.2");
-        sslContext.init(null, tmf.getTrustManagers(), new SecureRandom());
-      } catch (java.security.cert.CertificateException | IOException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+        sslContext.init(null, null, null);
+      } catch ( NoSuchAlgorithmException | KeyManagementException e) {
         throw Throwables.propagate(e);
       }
 
