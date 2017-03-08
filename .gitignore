@@ -6,6 +6,7 @@
 target/
 work/
 build
+out
 
 .project
 .classpath

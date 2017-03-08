@@ -15,6 +15,7 @@ buildscript {
 apply plugin: 'org.jenkins-ci.jpi'
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 group = 'org.jenkins-ci.plugins'
 version = '2.0.10-SNAPSHOT'
@@ -54,20 +55,35 @@ jenkinsPlugin {
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
+repositories {
+    jcenter()
+}
+
 dependencies {
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version:'3.4.1'
     compile group: 'com.squareup.okio', name: 'okio', version:'1.10.0'
     compile group: 'com.google.code.gson', name: 'gson', version:'2.7'
     compile group: 'junit', name: 'junit', version:'4.12'
     compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.7'
-    testCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
-    testCompile group: 'org.jenkins-ci.main', name: 'jenkins-war', version:'1.625.3', classifier:'war-for-test'
-    testCompile group: 'org.jenkins-ci.main', name: 'jenkins-war', version:'1.625.3'
-    testCompile(group: 'org.jenkins-ci.main', name: 'jenkins-test-harness', version:'2.13') {
-        exclude(module: 'junit-dep')
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
     }
-    testCompile group: 'org.jenkins-ci', name: 'test-annotations', version:'1.2'
-    testCompile group: 'org.slf4j', name: 'log4j-over-slf4j', version:'1.7.7'
-    testCompile group: 'org.slf4j', name: 'jcl-over-slf4j', version:'1.7.7'
-    testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version:'1.7.7'
+}
+publishing {
+    repositories {
+        maven {
+            name 'jenkins'
+            if (project.version.toString().endsWith('-SNAPSHOT')) {
+                url 'https://repo.jenkins-ci.org/snapshots'
+            } else {
+                url 'https://repo.jenkins-ci.org/releases'
+            }
+        }
+    }
 }
