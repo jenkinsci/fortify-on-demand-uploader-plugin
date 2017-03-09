@@ -14,29 +14,10 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.regex.Pattern;
 
 public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
-    //TODO: Create Lookup endpoint for this info.
-    private static final String TS_DOT_NET_KEY = ".NET";
-    private static final String TS_JAVA_KEY = "JAVA/J2EE";
-    private static final String TS_RUBY_KEY = "Ruby";
-    private static final String TS_PYTHON_KEY = "Python";
-    private static final String TS_OBJECTIVE_C_KEY = "Objective-C";
-    private static final String TS_ABAP_KEY = "ABAP";
-    private static final String TS_ASP_KEY = "ASP";
-    private static final String TS_CFML_KEY = "CFML";
-    private static final String TS_COBOL_KEY = "COBOL";
-    private static final String TS_ANDROID_KEY = "Android";
-    private static final String TS_PHP_KEY = "PHP";
-    private static final String TS_PLSQL_TSQL_KEY = "PL/SQL & T-SQL";
-    private static final String TS_VB6_KEY = "VB6";
-    private static final String TS_VB_SCRIPT_KEY = "VBScript";
-    private static final String TS_XML_HTML_KEY = "XML/HTML";
-
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
     private static JobModel model;
@@ -80,8 +61,9 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                     logger.println("Starting FoD Upload.");
 
                     // zips the file in a temporary location
-                    File payload = CreateZipFile(workspace);
+                    File payload = Utils.createZipFile(model.getBsiUrl().getTechnologyStack(), workspace, logger);
                     if (payload.length() == 0) {
+                        //noinspection ResultOfMethodCallIgnored
                         payload.delete();
                         logger.println("Source is empty for given Technology Stack and Language Level.");
                         build.setResult(Result.FAILURE);
@@ -111,32 +93,37 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     }
 
     /**
-     * Zips a folder, stores it in a temp location and returns the object
-     *
-     * @param workspace location of the files to zip
-     * @return a File object
-     * @throws IOException no files
+     * Gets the out for the build console output
+     * @return Task Listener object
      */
-    private File CreateZipFile(FilePath workspace) throws IOException {
-        getLogger().println("Begin Create Zip.");
+    public static PrintStream getLogger() {
+        return taskListener.get().getLogger();
+    }
 
-        String tempDir = System.getProperty("java.io.tmpdir");
-        File dir = new File(tempDir);
+    // Overridden for better type safety.
+    // If your plugin doesn't really define any property on Descriptor,
+    // you don't have to do this.
+    @Override
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl) super.getDescriptor();
+    }
 
+    @Override
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.NONE;
+    }
 
-        File tempZip = File.createTempFile("fodupload", ".zip", dir);
-        try (FileOutputStream fos = new FileOutputStream(tempZip)) {
-            final Pattern pattern = Pattern.compile(getFileExpressionPatternString(model.getBsiUrl().getTechnologyStack()),
-                    Pattern.CASE_INSENSITIVE);
-
-            workspace.zip(fos, new RegexFileFilter(pattern));
-            getLogger().println("Temporary file created at: " + tempZip.getAbsolutePath());
-
-        } catch (Exception e) {
-            getLogger().println(e.getMessage());
+    @Extension
+    public static final class DescriptorImpl extends FodDescriptor {
+        /**
+         * In order to load the persisted global configuration, you have to
+         * call load() in the constructor.
+         */
+        // Entry point when accessing global configuration
+        public DescriptorImpl() {
+            super();
+            load();
         }
-        getLogger().println("End Create Zip.");
-        return tempZip;
     }
 
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
@@ -177,81 +164,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     @SuppressWarnings("unused")
     public int getPollingInterval() {
         return model.getPollingInterval();
-    }
-
-    private static String getFileExpressionPatternString(String technologyStack) {
-        String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +
-                "|.*\\.settings|.*\\.cpx|.*\\.xcfg|.*\\.cscfg|.*\\.cscdef|.*\\.wadcfg|.*\\.appxmanifest"
-                + "|.*\\.wsdl|.*\\.plist|.*\\.properties|.*\\.ini|.*\\.sql|.*\\.pks|.*\\.pkh|.*\\.pkb";
-
-        switch (technologyStack) {
-            case TS_DOT_NET_KEY:
-                return ".*\\.dll|.*\\.pdb|.*\\.cs|.*\\.aspx|.*\\.asp|.*\\.vb|.*\\.vbproj|.*\\.csproj|.*\\.sln" + constantFiles;
-            case TS_JAVA_KEY:
-                return ".*\\.java|.*\\.class|.*\\.ear|.*\\.war|.*\\.jar|.*\\.jsp|.*\\.tag|.*\\.tagx|.*\\.tld" +
-                        "|.*\\.jspx|.*\\.xhtml|.*\\.faces|.*\\.jsff|.*\\.properties" + constantFiles;
-            case TS_PYTHON_KEY:
-                return ".*\\.py" + constantFiles;
-            case TS_RUBY_KEY:
-                return ".*\\.rb|.*\\.erb" + constantFiles;
-            case TS_ASP_KEY:
-                return ".*\\.asp" + constantFiles;
-            case TS_PHP_KEY:
-                return ".*\\.php" + constantFiles;
-            case TS_VB6_KEY:
-                return ".*\\.vbs|.*\\.bas|.*\\.frm|.*\\.ctl|.*\\.cls" + constantFiles;
-            case TS_VB_SCRIPT_KEY:
-                return ".*\\.vbscript" + constantFiles;
-            case TS_ANDROID_KEY:
-                // APK is not normally used for Static analysis but we are collecting in the event it is useful
-                return ".*\\.java|.*\\.class|.*\\.ear|.*\\.war|.*\\.jar|.*\\.jsp|.*\\.tag|.*\\.tagx|.*\\.tld" +
-                        "|.*\\.jspx|.*\\.xhtml|.*\\.faces|.*\\.jsff|.*\\.properties|.*\\.apk" + constantFiles;
-            case TS_XML_HTML_KEY:
-                return ".*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config|.*\\.cpx|.*\\.xcfg" + constantFiles;
-            case TS_PLSQL_TSQL_KEY:
-                return ".*\\.sql|.*\\.pks|.*\\.pkh|.*\\.pkb" + constantFiles;
-            case TS_ABAP_KEY:
-                return ".*\\.abap" + constantFiles;
-            case TS_CFML_KEY:
-                return ".*\\.cfm|.*\\.cfml|.*\\.cfc" + constantFiles;
-            default:
-                return ".*";
-        }
-    }
-
-    /**
-     * Gets the out for the build console output
-     *
-     * @return Task Listener object
-     */
-    public static PrintStream getLogger() {
-        return taskListener.get().getLogger();
-    }
-
-    // Overridden for better type safety.
-    // If your plugin doesn't really define any property on Descriptor,
-    // you don't have to do this.
-    @Override
-    public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl) super.getDescriptor();
-    }
-
-    @Override
-    public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.NONE;
-    }
-
-    @Extension
-    public static final class DescriptorImpl extends FodDescriptor {
-        /**
-         * In order to load the persisted global configuration, you have to
-         * call load() in the constructor.
-         */
-        // Entry point when accessing global configuration
-        public DescriptorImpl() {
-            super();
-            load();
-        }
     }
 }
 
