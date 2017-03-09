@@ -1,6 +1,9 @@
 package org.jenkinsci.plugins.fodupload.models;
 
 import java.io.File;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JobModel {
     private BsiUrl bsiUrl;
@@ -74,7 +77,7 @@ public class JobModel {
 
     @Override
     public String toString() {
-        String text = String.format(
+        return String.format(
                         "Release Id:                        %s%n" +
                         "Assessment Type Id:                %s%n" +
                         "Technology Stack:                  %s%n" +
@@ -99,6 +102,27 @@ public class JobModel {
                 isRemediationScan,
                 pollingInterval,
                 doPrettyLogOutput);
-        return text;
+    }
+
+    public boolean validate(PrintStream logger) {
+        List<String> errors = new ArrayList<>();
+
+        if (!bsiUrl.hasAssessmentTypeId())
+            errors.add("Assessment Type");
+
+        if (!bsiUrl.hasTechnologyStack())
+            errors.add("Technology Stack");
+
+        if (!bsiUrl.hasProjectVersionId())
+            errors.add("Release Id");
+
+        if (errors.size() > 0) {
+            logger.println("Missing the following fields from BSI URL: ");
+            for (String error: errors) {
+                logger.println("    " + error);
+            }
+            return false;
+        }
+        return true;
     }
 }

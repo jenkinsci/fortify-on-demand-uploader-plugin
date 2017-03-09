@@ -55,16 +55,12 @@ public class StaticScanController extends ControllerBase {
             if (api.getToken() == null)
                 api.authenticate();
 
-            if (!uploadRequest.getBsiUrl().hasAssessmentTypeId() && !uploadRequest.getBsiUrl().hasTechnologyStack()) {
-                logger.println("Missing Assessment Type or Technology Stack.");
-                return false;
-            }
-
             // Build 'static' portion of url
             String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
                     "/static-scans/start-scan?";
             fragUrl += "assessmentTypeId=" + uploadRequest.getBsiUrl().getAssessmentTypeId();
             fragUrl += "&technologyStack=" + uploadRequest.getBsiUrl().getTechnologyStack();
+            //TODO Get these values
             fragUrl += "&entitlementId=" + 6;
             fragUrl += "&entitlementFrequencyType=" + 1;
 
@@ -87,9 +83,6 @@ public class StaticScanController extends ControllerBase {
 
             logger.println("TOTAL FILE SIZE = " + uploadFile.length());
             logger.println("CHUNK_SIZE = " + CHUNK_SIZE);
-
-            logger.println(fragUrl);
-            logger.println(uploadRequest.toString());
 
             while ((byteCount = fs.read(readByteArray)) != -1) {
 
