@@ -3,31 +3,19 @@ package org.jenkinsci.plugins.fodupload;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import hudson.util.FormValidation;
 import jenkins.tasks.SimpleBuildStep;
-import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
-import org.jenkinsci.plugins.fodupload.models.response.ApplicationDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
@@ -77,6 +65,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         try {
             final PrintStream logger = listener.getLogger();
             taskListener.set(listener);
+            // Load api settings
             api = getDescriptor().createFodApi();
 
             if (api == null) {
@@ -250,128 +239,18 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         return BuildStepMonitor.NONE;
     }
 
-    @Extension // This indicates to Jenkins that this is an implementation of an extension point.
-    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-        static final String CLIENT_ID = "clientId";
-        static final String CLIENT_SECRET = "clientSecret";
-        static final String BASE_URL = "baseUrl";
-        static final String DO_POLL_FORTIFY = "doPollFortify";
-
-        private String clientId;
-        private String clientSecret;
-        private String baseUrl;
-        private boolean doPollFortify;
-        private String defaultTechStack;
-        private List<ApplicationDTO> applications;
-        private List<ReleaseDTO> releases;
-        private List<ReleaseAssessmentTypeDTO> assessments;
-
+    @Extension
+    public static final class DescriptorImpl extends FodDescriptor {
         /**
          * In order to load the persisted global configuration, you have to
          * call load() in the constructor.
          */
         // Entry point when accessing global configuration
         public DescriptorImpl() {
+            super();
             load();
         }
-
-        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-            // Indicates that this builder can be used with all kinds of project types
-            return true;
-        }
-
-        // On save.
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            clientId = formData.getString(CLIENT_ID);
-            clientSecret = formData.getString(CLIENT_SECRET);
-            baseUrl = formData.getString(BASE_URL);
-            doPollFortify = formData.getBoolean(DO_POLL_FORTIFY);
-
-            save();
-
-            api = createFodApi();
-            if (api != null) {
-                applications = api.getApplicationController().getApplications();
-            }
-
-            return super.configure(req, formData);
-        }
-
-        // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
-        // marks them unused, but they actually are used.
-        // These getters are also named in the following format: Get<JellyField>.
-        public String getDisplayName() {
-            return "Fortify Uploader Plugin";
-        }
-
-        public String getClientId() {
-            return clientId;
-        }
-
-        public String getClientSecret() {
-            return clientSecret;
-        }
-
-        public String getBaseUrl() {
-            return baseUrl;
-        }
-
-        @SuppressWarnings("unused")
-        public boolean getDoPollFortify() {
-            return doPollFortify;
-        }
-
-        // Form validation
-        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
-        public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId,
-                                               @QueryParameter(CLIENT_SECRET) final String clientSecret,
-                                               @QueryParameter(BASE_URL) final String baseUrl) {
-            if (Utils.isNullOrEmpty(clientId))
-                return FormValidation.error("API Key is empty!");
-            if (Utils.isNullOrEmpty(clientSecret))
-                return FormValidation.error("Secret Key is empty!");
-            if (Utils.isNullOrEmpty(baseUrl))
-                return FormValidation.error("Fortify on Demand URL is empty!");
-
-            FodApi testApi = new FodApi(clientId, clientSecret, baseUrl);
-
-            testApi.authenticate();
-            String token = testApi.getToken();
-
-            if (token == null) {
-                return FormValidation.error("Unable to retrieve authentication token.");
-            }
-
-            return !token.isEmpty() ?
-                    FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
-                    FormValidation.error("Invalid connection information. Please check your credentials and try again.");
-        }
-
-        private List<ReleaseAssessmentTypeDTO> FilterNegativeEntitlements(List<ReleaseAssessmentTypeDTO> assessments) {
-            List<ReleaseAssessmentTypeDTO> filtered = new LinkedList<>();
-            if (!Utils.isNullOrEmpty(assessments)) {
-                for (ReleaseAssessmentTypeDTO assessment : assessments) {
-                    if (assessment.getEntitlementId() > 0)
-                        filtered.add(assessment);
-                }
-            }
-            return filtered;
-        }
-
-        private FodApi createFodApi() {
-            if (!Utils.isNullOrEmpty(clientId) &&
-                    !Utils.isNullOrEmpty(clientSecret)&&
-                    !Utils.isNullOrEmpty(baseUrl)) {
-                api = new FodApi(clientId, clientSecret, baseUrl);
-                api.authenticate();
-                return api;
-            }
-            return null;
-        }
     }
-
-
 }
 
 
