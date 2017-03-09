@@ -2,19 +2,21 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.Gson;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import hudson.util.IOUtils;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApi;
 import org.jenkinsci.plugins.fodupload.FodUploaderPlugin;
-import org.jenkinsci.plugins.fodupload.models.JobConfigModel;
+import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.PrintStream;
 import java.util.Arrays;
 
 public class StaticScanController extends ControllerBase {
@@ -33,16 +35,16 @@ public class StaticScanController extends ControllerBase {
     /**
      * Begin a static scan on FoD
      *
-     * @param uploadRequest zip file to upload
+    // * @param uploadRequest zip file to upload
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
-    public boolean startStaticScan(final JobConfigModel uploadRequest) {
+    public boolean startStaticScan(final JobModel uploadRequest) {
         PrintStream logger = FodUploaderPlugin.getLogger();
 
         PostStartScanResponse scanStartedResponse = null;
 
-        File uploadFile = uploadRequest.getUploadFile();
+        File uploadFile = uploadRequest.getPayload();
         try (FileInputStream fs = new FileInputStream(uploadFile)) {
             byte[] readByteArray = new byte[CHUNK_SIZE];
             byte[] sendByteArray;
@@ -53,31 +55,31 @@ public class StaticScanController extends ControllerBase {
             if (api.getToken() == null)
                 api.authenticate();
 
-            if (!uploadRequest.hasAssessmentTypeId() && !uploadRequest.hasTechnologyStack()) {
+            if (!uploadRequest.getBsiUrl().hasAssessmentTypeId() && !uploadRequest.getBsiUrl().hasTechnologyStack()) {
                 logger.println("Missing Assessment Type or Technology Stack.");
                 return false;
             }
 
             // Build 'static' portion of url
-            String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getReleaseId() +
+            String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
                     "/static-scans/start-scan?";
-            fragUrl += "assessmentTypeId=" + uploadRequest.getAssessmentTypeId();
-            fragUrl += "&technologyStack=" + uploadRequest.getTechnologyStack();
-            fragUrl += "&entitlementId=" + uploadRequest.getEntitlementId();
-            fragUrl += "&entitlementFrequencyType=" + uploadRequest.getEntitlementFrequencyTypeId();
+            fragUrl += "assessmentTypeId=" + uploadRequest.getBsiUrl().getAssessmentTypeId();
+            fragUrl += "&technologyStack=" + uploadRequest.getBsiUrl().getTechnologyStack();
+            fragUrl += "&entitlementId=" + 6;
+            fragUrl += "&entitlementFrequencyType=" + 1;
 
-            if (uploadRequest.hasLanguageLevel())
-                fragUrl += "&languageLevel=" + uploadRequest.getLanguageLevel();
-            if (uploadRequest.getIsExpressScan())
+            if (uploadRequest.getBsiUrl().hasLanguageLevel())
+                fragUrl += "&languageLevel=" + uploadRequest.getBsiUrl().getLanguageLevel();
+            if (uploadRequest.isExpressScan())
                 fragUrl += "&scanPreferenceType=2";
-            if (uploadRequest.getIsExpressAudit())
+            if (uploadRequest.isExpressAudit())
                 fragUrl += "&auditPreferenceType=2";
-            if (uploadRequest.getRunOpenSourceAnalysis())
-                fragUrl += "&doSonatypeScan=" + uploadRequest.getRunOpenSourceAnalysis();
-            if (uploadRequest.getIsRemediationScan())
-                fragUrl += "&isRemediationScan=" + uploadRequest.getIsRemediationScan();
-            if (uploadRequest.getExcludeThirdParty())
-                fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.getExcludeThirdParty();
+            if (uploadRequest.isRunOpenSourceAnalysis())
+                fragUrl += "&doSonatypeScan=" + uploadRequest.isRunOpenSourceAnalysis();
+            if (uploadRequest.isRemediationScan())
+                fragUrl += "&isRemediationScan=" + uploadRequest.isRemediationScan();
+            if (uploadRequest.isExcludeThirdParty())
+                fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.isExcludeThirdParty();
 
             Gson gson = new Gson();
 
@@ -85,6 +87,10 @@ public class StaticScanController extends ControllerBase {
 
             logger.println("TOTAL FILE SIZE = " + uploadFile.length());
             logger.println("CHUNK_SIZE = " + CHUNK_SIZE);
+
+            logger.println(fragUrl);
+            logger.println(uploadRequest.toString());
+
             while ((byteCount = fs.read(readByteArray)) != -1) {
 
                 if (byteCount < CHUNK_SIZE) {
