@@ -82,6 +82,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                     // zips the file in a temporary location
                     File payload = CreateZipFile(workspace);
                     if (payload.length() == 0) {
+                        payload.delete();
                         logger.println("Source is empty for given Technology Stack and Language Level.");
                         build.setResult(Result.FAILURE);
                     }

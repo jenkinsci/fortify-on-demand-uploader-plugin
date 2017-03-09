@@ -13,6 +13,7 @@ import org.jenkinsci.plugins.fodupload.FodUploaderPlugin;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
+import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,14 +56,18 @@ public class StaticScanController extends ControllerBase {
             if (api.getToken() == null)
                 api.authenticate();
 
+            // Get entitlement info
+            ReleaseAssessmentTypeDTO assessment = api.getReleaseController()
+                    .getAssessmentType(uploadRequest.getBsiUrl().getProjectVersionId(),
+                            uploadRequest.getBsiUrl().getAssessmentTypeId());
+
             // Build 'static' portion of url
             String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
                     "/static-scans/start-scan?";
             fragUrl += "assessmentTypeId=" + uploadRequest.getBsiUrl().getAssessmentTypeId();
             fragUrl += "&technologyStack=" + uploadRequest.getBsiUrl().getTechnologyStack();
-            //TODO Get these values
-            fragUrl += "&entitlementId=" + 6;
-            fragUrl += "&entitlementFrequencyType=" + 1;
+            fragUrl += "&entitlementId=" + assessment.getEntitlementId();
+            fragUrl += "&entitlementFrequencyType=" + assessment.getFrequencyTypeId();
 
             if (uploadRequest.getBsiUrl().hasLanguageLevel())
                 fragUrl += "&languageLevel=" + uploadRequest.getBsiUrl().getLanguageLevel();

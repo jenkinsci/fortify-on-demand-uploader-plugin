@@ -128,12 +128,12 @@ public class ReleaseController extends ControllerBase {
     }
 
     /**
-     * Get a list of available assessment types for a given release
-     *
-     * @param releaseId release to get assessment types for
-     * @return List of possible assessment types
+     * Get Assessment Type from bsi url
+     * @param releaseId release id
+     * @param assessmentTypeId assessment type id
+     * @return returns assessment type obj
      */
-    public List<ReleaseAssessmentTypeDTO> getAssessmentTypeIds(final int releaseId) {
+    public ReleaseAssessmentTypeDTO getAssessmentType(final int releaseId, final int assessmentTypeId) {
         try {
             String url = api.getBaseUrl() + "/api/v3/releases/" + releaseId + "/assessment-types?scanType=1";
 
@@ -147,7 +147,7 @@ public class ReleaseController extends ControllerBase {
                     .build();
             Response response = api.getClient().newCall(request).execute();
 
-            if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
+            if (response.code() == org.apache.http.HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                 // Re-authenticate
                 api.authenticate();
             }
@@ -162,7 +162,14 @@ public class ReleaseController extends ControllerBase {
             }.getType();
             GenericListResponse<ReleaseAssessmentTypeDTO> results = gson.fromJson(content, t);
 
-            return results.getItems();
+            // Finds the assessment given from the bsiUrl
+            ReleaseAssessmentTypeDTO retval = null;
+            for (ReleaseAssessmentTypeDTO assessment : results.getItems()) {
+                if (assessment.getAssessmentTypeId() == assessmentTypeId && assessment.getEntitlementId() > 0)
+                    retval = assessment;
+            }
+
+            return retval;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
