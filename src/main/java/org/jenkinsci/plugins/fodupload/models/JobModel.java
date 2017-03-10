@@ -75,7 +75,21 @@ public class JobModel {
         return isBundledAssessment;
     }
 
-
+    /**
+     * Build model used to pass values around
+     * @param bsiUrl BSI URL
+     * @param runOpenSourceAnalysis runOpenSourceAnalysis
+     * @param isExpressAudit isExpressAudit
+     * @param isExpressScan isExpressScan
+     * @param pollingInterval pollingInterval
+     * @param includeAllFiles includeAllFiles
+     * @param excludeThirdParty excludeThirdParty
+     * @param isRemediationScan isRemediationScan
+     * @param doPrettyLogOutput doPrettyLogOutput
+     * @param isBundledAssessment isBundledAssessment
+     * @param purchaseEntitlements purchaseEntitlements
+     * @param entitlementPreference entitlementPreference
+     */
     public JobModel(String bsiUrl, boolean runOpenSourceAnalysis, boolean isExpressAudit, boolean isExpressScan,
                     int pollingInterval, boolean includeAllFiles, boolean excludeThirdParty, boolean isRemediationScan,
                     boolean doPrettyLogOutput, boolean isBundledAssessment,

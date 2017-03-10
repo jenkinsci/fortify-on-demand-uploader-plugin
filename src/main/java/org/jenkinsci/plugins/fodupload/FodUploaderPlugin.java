@@ -27,7 +27,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     @DataBoundConstructor
     public FodUploaderPlugin(String bsiUrl, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
                              int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
-                             boolean isRemediationScan, boolean isBundledAssessment, boolean purchaseEntitlement,
+                             boolean isRemediationScan, boolean isBundledAssessment, boolean purchaseEntitlements,
                              int entitlementPreference) {
 
         model = new JobModel(bsiUrl,
@@ -40,7 +40,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 isRemediationScan,
                 doPrettyLogOutput,
                 isBundledAssessment,
-                purchaseEntitlement,
+                purchaseEntitlements,
                 entitlementPreference);
     }
 
@@ -168,6 +168,18 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     @SuppressWarnings("unused")
     public int getPollingInterval() {
         return model.getPollingInterval();
+    }
+    @SuppressWarnings("unused")
+    public int getEntitlementPreference() {
+        return model.getEntitlementPreference();
+    }
+    @SuppressWarnings("unused")
+    public boolean getIsBundledAssessment() {
+        return model.isBundledAssessment();
+    }
+    @SuppressWarnings("unused")
+    public boolean getPurchaseEntitlements() {
+        return model.isPurchaseEntitlements();
     }
 }
 

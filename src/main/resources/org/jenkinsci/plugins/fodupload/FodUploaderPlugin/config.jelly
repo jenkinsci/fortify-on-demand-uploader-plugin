@@ -5,10 +5,7 @@
     </f:entry>
     <f:section title="Entitlement Options">
         <f:entry title="Entitlement Preference" field="entitlementPreference">
-            <select name="entitlementPreference">
-                <option value="1">Single Scan</option>
-                <option value="2">Subscription</option>
-            </select>
+            <f:select/>
         </f:entry>
         <f:entry title="Purchase Entitlements" field="purchaseEntitlements">
             <f:checkbox/>
