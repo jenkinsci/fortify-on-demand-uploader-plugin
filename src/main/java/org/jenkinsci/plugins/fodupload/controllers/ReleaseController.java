@@ -8,6 +8,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApi;
 import org.jenkinsci.plugins.fodupload.FodUploaderPlugin;
+import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
@@ -128,13 +129,19 @@ public class ReleaseController extends ControllerBase {
 
     /**
      * Get Assessment Type from bsi url
-     * @param releaseId release id
-     * @param assessmentTypeId assessment type id
+     * @param model JobModel
      * @return returns assessment type obj
      */
-    public ReleaseAssessmentTypeDTO getAssessmentType(final int releaseId, final int assessmentTypeId) {
+    public ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) {
         try {
-            String url = api.getBaseUrl() + "/api/v3/releases/" + releaseId + "/assessment-types?scanType=1";
+            String filters = "frequencyTypeId:" + model.getEntitlementPreference();
+            if (model.isBundledAssessment())
+                filters += "+isBundledAssessment:true";
+
+            String url = String.format("%s/api/v3/releases/%s/assessment-types?scanType=1&filters=%s",
+                    api.getBaseUrl(),
+                    model.getBsiUrl().getProjectVersionId(),
+                    filters);
 
             if (api.getToken() == null)
                 api.authenticate();
@@ -156,18 +163,20 @@ public class ReleaseController extends ControllerBase {
             response.body().close();
 
             Gson gson = new Gson();
+            // Create a type of GenericList<ApplicationDTO> to play nice with gson.
             Type t = new TypeToken<GenericListResponse<ReleaseAssessmentTypeDTO>>() {
             }.getType();
             GenericListResponse<ReleaseAssessmentTypeDTO> results = gson.fromJson(content, t);
 
-            // Finds the assessment given from the bsiUrl
-            ReleaseAssessmentTypeDTO retval = null;
+            // Get entitlement based on available options
             for (ReleaseAssessmentTypeDTO assessment : results.getItems()) {
-                if (assessment.getAssessmentTypeId() == assessmentTypeId && assessment.getEntitlementId() > 0)
-                    retval = assessment;
+                if (assessment.getAssessmentTypeId() == model.getBsiUrl().getAssessmentTypeId()) {
+                    if (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0)
+                        return assessment;
+                    return null;
+                }
             }
-
-            return retval;
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

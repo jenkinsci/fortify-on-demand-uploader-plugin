@@ -58,8 +58,7 @@ public class StaticScanController extends ControllerBase {
 
             // Get entitlement info
             ReleaseAssessmentTypeDTO assessment = api.getReleaseController()
-                    .getAssessmentType(uploadRequest.getBsiUrl().getProjectVersionId(),
-                            uploadRequest.getBsiUrl().getAssessmentTypeId());
+                    .getAssessmentType(uploadRequest);
 
             // Build 'static' portion of url
             String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
@@ -68,19 +67,18 @@ public class StaticScanController extends ControllerBase {
             fragUrl += "&technologyStack=" + uploadRequest.getBsiUrl().getTechnologyStack();
             fragUrl += "&entitlementId=" + assessment.getEntitlementId();
             fragUrl += "&entitlementFrequencyType=" + assessment.getFrequencyTypeId();
-
+            fragUrl += "&isBundledAssessment=" + assessment.isBundledAssessment();
+            if (assessment.getParentAssessmentTypeId() != 0 && assessment.isBundledAssessment())
+                fragUrl += "&parentAssessmentTypeId=" + assessment.getParentAssessmentTypeId();
             if (uploadRequest.getBsiUrl().hasLanguageLevel())
                 fragUrl += "&languageLevel=" + uploadRequest.getBsiUrl().getLanguageLevel();
+            fragUrl += "&doSonatypeScan=" + uploadRequest.isRunOpenSourceAnalysis();
+            fragUrl += "&isRemediationScan=" + uploadRequest.isRemediationScan();
+            fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.isExcludeThirdParty();
             if (uploadRequest.isExpressScan())
                 fragUrl += "&scanPreferenceType=2";
             if (uploadRequest.isExpressAudit())
                 fragUrl += "&auditPreferenceType=2";
-            if (uploadRequest.isRunOpenSourceAnalysis())
-                fragUrl += "&doSonatypeScan=" + uploadRequest.isRunOpenSourceAnalysis();
-            if (uploadRequest.isRemediationScan())
-                fragUrl += "&isRemediationScan=" + uploadRequest.isRemediationScan();
-            if (uploadRequest.isExcludeThirdParty())
-                fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.isExcludeThirdParty();
 
             Gson gson = new Gson();
 
