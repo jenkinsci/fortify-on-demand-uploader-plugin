@@ -35,22 +35,10 @@ public class FodApi {
         return staticScanController;
     }
 
-    private ApplicationController applicationController;
-
-    public ApplicationController getApplicationController() {
-        return applicationController;
-    }
-
     private ReleaseController releaseController;
 
     public ReleaseController getReleaseController() {
         return releaseController;
-    }
-
-    private TenantEntitlementsController tenantEntitlementsController;
-
-    public TenantEntitlementsController getTenantEntitlementsController() {
-        return tenantEntitlementsController;
     }
 
     private LookupItemsController lookupItemsController;
@@ -78,9 +66,7 @@ public class FodApi {
         client = Create();
 
         staticScanController = new StaticScanController(this);
-        applicationController = new ApplicationController(this);
         releaseController = new ReleaseController(this);
-        tenantEntitlementsController = new TenantEntitlementsController(this);
         lookupItemsController = new LookupItemsController(this);
     }
 

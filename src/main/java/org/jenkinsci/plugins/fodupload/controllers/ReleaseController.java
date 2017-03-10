@@ -64,7 +64,6 @@ public class ReleaseController extends ControllerBase {
                 response.body().close();
 
                 Gson gson = new Gson();
-                // Create a type of GenericList<ApplicationDTO> to play nice with gson.
                 Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() {
                 }.getType();
                 GenericListResponse<ReleaseDTO> results = gson.fromJson(content, t);
@@ -157,7 +156,6 @@ public class ReleaseController extends ControllerBase {
             response.body().close();
 
             Gson gson = new Gson();
-            // Create a type of GenericList<ApplicationDTO> to play nice with gson.
             Type t = new TypeToken<GenericListResponse<ReleaseAssessmentTypeDTO>>() {
             }.getType();
             GenericListResponse<ReleaseAssessmentTypeDTO> results = gson.fromJson(content, t);
