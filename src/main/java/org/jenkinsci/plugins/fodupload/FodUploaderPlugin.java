@@ -88,8 +88,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                     api.retireToken();
                     build.setResult(success ? Result.SUCCESS : Result.UNSTABLE);
                 }
-                build.setResult(Result.FAILURE);
             }
+            build.setResult(Result.UNSTABLE);
         } catch (IOException e) {
             e.printStackTrace();
             build.setResult(Result.UNSTABLE);
