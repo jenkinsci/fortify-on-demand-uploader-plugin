@@ -27,7 +27,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     @DataBoundConstructor
     public FodUploaderPlugin(String bsiUrl, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
                              int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
-                             boolean isRemediationScan) {
+                             boolean isRemediationScan, boolean isBundledAssessment, boolean purchaseEntitlement,
+                             int entitlementPreference) {
 
         model = new JobModel(bsiUrl,
                 runOpenSourceAnalysis,
@@ -37,7 +38,10 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                 includeAllFiles,
                 excludeThirdParty,
                 isRemediationScan,
-                doPrettyLogOutput);
+                doPrettyLogOutput,
+                isBundledAssessment,
+                purchaseEntitlement,
+                entitlementPreference);
     }
 
     // logic run during a build

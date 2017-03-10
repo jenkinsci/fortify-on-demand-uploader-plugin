@@ -11,6 +11,13 @@ public class JobModel {
     private boolean isExpressScan;
     private boolean isExpressAudit;
     private int pollingInterval;
+    private boolean doPrettyLogOutput;
+    private boolean includeAllFiles;
+    private boolean excludeThirdParty;
+    private boolean isRemediationScan;
+    private boolean purchaseEntitlements;
+    private int entitlementPreference;
+    private boolean isBundledAssessment;
     private File payload;
 
     public File getPayload() {
@@ -56,14 +63,23 @@ public class JobModel {
         return isRemediationScan;
     }
 
-    private boolean doPrettyLogOutput;
-    private boolean includeAllFiles;
-    private boolean excludeThirdParty;
-    private boolean isRemediationScan;
+    public boolean isPurchaseEntitlements() {
+        return purchaseEntitlements;
+    }
+
+    public int getEntitlementPreference() {
+        return entitlementPreference;
+    }
+
+    public boolean isBundledAssessment() {
+        return isBundledAssessment;
+    }
+
 
     public JobModel(String bsiUrl, boolean runOpenSourceAnalysis, boolean isExpressAudit, boolean isExpressScan,
                     int pollingInterval, boolean includeAllFiles, boolean excludeThirdParty, boolean isRemediationScan,
-                    boolean doPrettyLogOutput) {
+                    boolean doPrettyLogOutput, boolean isBundledAssessment,
+                    boolean purchaseEntitlements, int entitlementPreference) {
         this.bsiUrl = new BsiUrl(bsiUrl);
         this.runOpenSourceAnalysis = runOpenSourceAnalysis;
         this.isExpressAudit = isExpressAudit;
@@ -73,6 +89,9 @@ public class JobModel {
         this.excludeThirdParty = excludeThirdParty;
         this.isRemediationScan = isRemediationScan;
         this.doPrettyLogOutput = doPrettyLogOutput;
+        this.entitlementPreference = entitlementPreference;
+        this.isBundledAssessment = isBundledAssessment;
+        this.purchaseEntitlements = purchaseEntitlements;
     }
 
     @Override
@@ -88,6 +107,9 @@ public class JobModel {
                         "Exclude All Files:                 %s%n" +
                         "Exclude Third Party:               %s%n" +
                         "Remediation Scan:                  %s%n" +
+                        "Purchase Entitlements:             %s%n" +
+                        "Entitlement Preference             %s%n" +
+                        "Bundled Assessment:                %s%n" +
                         "Polling Interval:                  %s%n" +
                         "Pretty Log Output:                 %s%n",
                 bsiUrl.getProjectVersionId(),
@@ -100,6 +122,9 @@ public class JobModel {
                 includeAllFiles,
                 excludeThirdParty,
                 isRemediationScan,
+                purchaseEntitlements,
+                entitlementPreference,
+                isBundledAssessment,
                 pollingInterval,
                 doPrettyLogOutput);
     }
