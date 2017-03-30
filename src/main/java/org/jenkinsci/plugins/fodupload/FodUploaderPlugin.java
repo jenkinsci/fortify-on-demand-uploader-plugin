@@ -60,6 +60,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             } else {
                 api.authenticate();
 
+                if (model == null) {
+                    logger.println("Unexpected Error");
+                    build.setResult(Result.FAILURE);
+                }
+
                 // Add all validation here
                 if (model.validate(logger)) {
                     logger.println("Starting FoD Upload.");

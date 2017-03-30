@@ -133,6 +133,7 @@ public class ReleaseController extends ControllerBase {
      * @return returns assessment type obj
      */
     public ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) {
+        final PrintStream logger = FodUploaderPlugin.getLogger();
         try {
             String filters = "frequencyTypeId:" + model.getEntitlementPreference();
             if (model.isBundledAssessment())
@@ -170,14 +171,15 @@ public class ReleaseController extends ControllerBase {
 
             // Get entitlement based on available options
             for (ReleaseAssessmentTypeDTO assessment : results.getItems()) {
-                if (assessment.getAssessmentTypeId() == model.getBsiUrl().getAssessmentTypeId()) {
-                    if (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0)
+                if (assessment.getAssessmentTypeId() == model.getBsiUrl().getAssessmentTypeId() &&
+                    assessment.isRemediation() == model.isRemediationScan() &&
+                    (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0)) {
                         return assessment;
-                    return null;
                 }
             }
             return null;
         } catch (Exception e) {
+            logger.println("Error: " + e.getMessage());
             e.printStackTrace();
             return null;
         }

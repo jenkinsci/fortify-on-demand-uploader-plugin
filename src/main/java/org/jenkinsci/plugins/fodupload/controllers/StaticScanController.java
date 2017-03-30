@@ -56,9 +56,15 @@ public class StaticScanController extends ControllerBase {
             if (api.getToken() == null)
                 api.authenticate();
 
+            logger.println("Getting Assessment");
             // Get entitlement info
             ReleaseAssessmentTypeDTO assessment = api.getReleaseController()
                     .getAssessmentType(uploadRequest);
+
+            if (assessment == null) {
+                logger.println("Assessment not found");
+                return false;
+            }
 
             // Build 'static' portion of url
             String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
