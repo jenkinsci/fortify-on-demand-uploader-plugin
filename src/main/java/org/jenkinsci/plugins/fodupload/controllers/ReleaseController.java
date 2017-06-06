@@ -101,6 +101,7 @@ public class ReleaseController extends ControllerBase {
             Request request = new Request.Builder()
                     .url(url)
                     .addHeader("Authorization", "Bearer " + api.getToken())
+                    .addHeader("Accept", "application/json")
                     .get()
                     .build();
             Response response = api.getClient().newCall(request).execute();
@@ -150,6 +151,7 @@ public class ReleaseController extends ControllerBase {
             Request request = new Request.Builder()
                     .url(url)
                     .addHeader("Authorization", "Bearer " + api.getToken())
+                    .addHeader("Accept", "application/json")
                     .get()
                     .build();
             Response response = api.getClient().newCall(request).execute();

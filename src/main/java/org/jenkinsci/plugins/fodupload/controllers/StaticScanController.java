@@ -106,6 +106,7 @@ public class StaticScanController extends ControllerBase {
                 Request request = new Request.Builder()
                         .addHeader("Authorization", "Bearer " + api.getToken())
                         .addHeader("Content-Type", "application/octet-stream")
+                        .addHeader("Accept", "application/json")
                         // Add offsets
                         .url(fragUrl + "&fragNo=" + fragmentNumber++ + "&offset=" + offset)
                         .post(RequestBody.create(byteArray, sendByteArray))
