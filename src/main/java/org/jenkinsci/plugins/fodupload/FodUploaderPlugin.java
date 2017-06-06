@@ -81,6 +81,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
                     model.setPayload(payload);
                     boolean success = api.getStaticScanController().startStaticScan(model);
                     boolean deleted = payload.delete();
+
                     if (success && deleted) {
                         logger.println("Scan Uploaded Successfully.");
                         if (getDescriptor().getDoPollFortify() && model.getPollingInterval() > 0) {
@@ -91,10 +92,11 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
                     // Success could be true then set to false from polling.
                     api.retireToken();
-                    build.setResult(success ? Result.SUCCESS : Result.UNSTABLE);
+                    build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
+                } else {
+                    build.setResult(Result.UNSTABLE);
                 }
             }
-            build.setResult(Result.UNSTABLE);
         } catch (IOException e) {
             e.printStackTrace();
             build.setResult(Result.UNSTABLE);
