@@ -42,7 +42,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     private static final String TS_PLSQL_TSQL_KEY = "PL/SQL & T-SQL";
     private static final String TS_VB6_KEY = "VB6";
     private static final String TS_VB_SCRIPT_KEY = "VBScript";
-    private static final String TS_XML_HTML_KEY = "XML/HTML";
+    private static final String TS_XML_HTML_KEY = "JS/XML/HTML";
 
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
