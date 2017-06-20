@@ -54,7 +54,7 @@ public class JobConfigModel {
     }
 
     public boolean hasLanguageLevel() {
-        return !languageLevel.isEmpty();
+        return languageLevel != null && !languageLevel.isEmpty();
     }
 
     public boolean getRunOpenSourceAnalysis() {
