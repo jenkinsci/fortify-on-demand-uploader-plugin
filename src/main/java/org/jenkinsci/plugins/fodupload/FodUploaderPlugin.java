@@ -32,7 +32,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     private static final String TS_JAVA_KEY = "JAVA/J2EE";
     private static final String TS_RUBY_KEY = "Ruby";
     private static final String TS_PYTHON_KEY = "Python";
-    private static final String TS_OBJECTIVE_C_KEY = "Objective-C";
+    private static final String TS_OBJECTIVE_C_KEY = "Swift/Objective C/C++";
     private static final String TS_ABAP_KEY = "ABAP";
     private static final String TS_ASP_KEY = "ASP";
     private static final String TS_CFML_KEY = "CFML";
@@ -42,7 +42,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     private static final String TS_PLSQL_TSQL_KEY = "PL/SQL & T-SQL";
     private static final String TS_VB6_KEY = "VB6";
     private static final String TS_VB_SCRIPT_KEY = "VBScript";
-    private static final String TS_XML_HTML_KEY = "XML/HTML";
+    private static final String TS_XML_HTML_KEY = "JS/XML/HTML";
 
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 

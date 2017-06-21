@@ -62,7 +62,7 @@ public class StaticScanController extends ControllerBase {
             String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getReleaseId() +
                     "/static-scans/start-scan?";
             fragUrl += "assessmentTypeId=" + uploadRequest.getAssessmentTypeId();
-            fragUrl += "&technologyStack=" + uploadRequest.getTechnologyStack();
+            fragUrl += "&technologyStack=" + java.net.URLEncoder.encode(uploadRequest.getTechnologyStack(), "UTF-8").replace("+", "%20");
             fragUrl += "&entitlementId=" + uploadRequest.getEntitlementId();
             fragUrl += "&entitlementFrequencyType=" + uploadRequest.getEntitlementFrequencyTypeId();
 
@@ -80,6 +80,9 @@ public class StaticScanController extends ControllerBase {
                 fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.getExcludeThirdParty();
 
             Gson gson = new Gson();
+
+            // Print out Request URL for future debugging
+            logger.println("Request URI = " + fragUrl);
 
             // Loop through chunks
 
