@@ -51,6 +51,16 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         try {
             final PrintStream logger = listener.getLogger();
             taskListener.set(listener);
+
+            Result currentResult = build.getResult();
+            if (Result.FAILURE.equals(currentResult)
+                    || Result.ABORTED.equals(currentResult)
+                    || Result.UNSTABLE.equals(currentResult)) {
+
+                logger.println("Error: Build Failed or Unstable.  Halting with Fortify on Demand upload.");
+                return;
+            }
+
             // Load api settings
             FodApi api = getDescriptor().createFodApi();
 
