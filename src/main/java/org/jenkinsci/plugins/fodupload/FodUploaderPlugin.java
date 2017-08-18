@@ -20,7 +20,7 @@ import java.io.PrintStream;
 public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
-    private static JobModel model;
+    private JobModel model;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
