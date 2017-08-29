@@ -15,6 +15,7 @@ import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
 import java.io.PrintStream;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,10 +137,13 @@ public class ReleaseController extends ControllerBase {
     public ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) {
         final PrintStream logger = FodUploaderPlugin.getLogger();
         try {
+
             String filters = "frequencyTypeId:" + model.getEntitlementPreference();
             if (model.isBundledAssessment())
                 filters += "+isBundledAssessment:true";
 
+            // encode these before we put them on the URL since we're not using the URL builder
+            filters = URLEncoder.encode(filters, "UTF-8");
             String url = String.format("%s/api/v3/releases/%s/assessment-types?scanType=1&filters=%s",
                     api.getBaseUrl(),
                     model.getBsiUrl().getProjectVersionId(),
