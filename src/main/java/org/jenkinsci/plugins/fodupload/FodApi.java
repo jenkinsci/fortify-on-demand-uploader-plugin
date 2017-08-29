@@ -76,7 +76,7 @@ public class FodApi {
     public void authenticate() {
         try {
             RequestBody formBody = new FormBody.Builder()
-                    .add("scope", "https://hpfod.com/tenant")
+                    .add("scope", "api-tenant")
                     .add("grant_type", "client_credentials")
                     .add("client_id", key)
                     .add("client_secret", secret)

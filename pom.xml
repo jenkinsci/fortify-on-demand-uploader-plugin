@@ -21,7 +21,7 @@
     </properties>
 
     <name>Fortify on Demand Uploader Plugin</name>
-    <description>Gathers build artifacts and uploads them to the HPE Fortify on Demand service with user-specified options.</description>
+    <description>Gathers build artifacts and uploads them to the Fortify on Demand service with user-specified options.</description>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Fortify+On+Demand+Uploader+Plugin</url>
 
     <licenses>

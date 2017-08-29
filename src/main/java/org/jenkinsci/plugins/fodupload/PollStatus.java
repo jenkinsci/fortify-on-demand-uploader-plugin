@@ -139,7 +139,7 @@ public class PollStatus {
                 logger.println(String.format("Low:      %d", release.getLow()));
                 logger.println();
                 logger.println("For application status details see the customer portal: ");
-                logger.println("www.hpfod.com/Releases/" + release.getReleaseId() + "/Overview");
+                logger.println(String.format("%s/Redirect/Releases/%d", fodApi.getBaseUrl(), release.getReleaseId()));
                 logger.println();
                 logger.println(String.format("Scan %s established policy check, marking build as %s.",
                         isPassed ? "passed" : "failed", isPassed ? "stable" : "unstable"));
