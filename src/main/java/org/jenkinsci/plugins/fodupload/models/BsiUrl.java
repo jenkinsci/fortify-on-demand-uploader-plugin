@@ -19,19 +19,12 @@ public class BsiUrl {
     private String endpoint;
     public String ORIGINAL_VALUE;
 
-    public BsiUrl(String bsiUrl) {
-        try {
-            ORIGINAL_VALUE = bsiUrl;
-            URI uri = new URI(bsiUrl);
-
-            endpoint = uri.getScheme() + "://" + uri.getAuthority();
-            List<NameValuePair> params = URLEncodedUtils.parse(uri, "UTF-8");
-
-            createBsiUrl(params);
-        } catch(URISyntaxException e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
-        }
+    public BsiUrl(String bsiUrl) throws URISyntaxException {
+        ORIGINAL_VALUE = bsiUrl;
+        URI uri = new URI(bsiUrl);
+        endpoint = uri.getScheme() + "://" + uri.getAuthority();
+        List<NameValuePair> params = URLEncodedUtils.parse(uri, "UTF-8");
+        createBsiUrl(params);
     }
 
     private void createBsiUrl(List<NameValuePair> params) {
@@ -57,6 +50,8 @@ public class BsiUrl {
                     break;
                 case "payloadType":
                     payloadType = param.getValue();
+                    break;
+                default:
                     break;
             }
         }
