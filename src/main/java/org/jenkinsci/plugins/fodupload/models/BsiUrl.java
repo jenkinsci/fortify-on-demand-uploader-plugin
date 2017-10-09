@@ -58,6 +58,8 @@ public class BsiUrl {
                 case "payloadType":
                     payloadType = param.getValue();
                     break;
+                default:
+                    break;
             }
         }
     }
