@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.fodupload;
 
-import org.jenkinsci.plugins.fodupload.models.JobConfigModel;
+import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
@@ -8,14 +8,14 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.jenkinsci.plugins.fodupload.models.FodEnums.*;
+import static org.jenkinsci.plugins.fodupload.models.FodEnums.APILookupItemTypes;
 
 public class PollStatus {
 
     private final static int MAX_FAILS = 3;
 
     private FodApi fodApi;
-    private JobConfigModel jobModel;
+    private JobModel jobModel;
     private int failCount = 0;
 
     private List<LookupItemsModel> analysisStatusTypes = null;
@@ -26,7 +26,7 @@ public class PollStatus {
      * @param api      api connection to use
      * @param jobModel fod api data
      */
-    public PollStatus(FodApi api, final JobConfigModel jobModel) {
+    public PollStatus(FodApi api, final JobModel jobModel) {
         fodApi = api;
         this.jobModel = jobModel;
     }
@@ -43,7 +43,7 @@ public class PollStatus {
 
         try {
             while (!finished) {
-                Thread.sleep(1000L * 60 * jobModel.getPollingInterval());
+                Thread.sleep(1000L * 60 * 1);
                 // Get the status of the release
                 ReleaseDTO release = fodApi.getReleaseController().getRelease(releaseId,
                         "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low");
@@ -112,7 +112,7 @@ public class PollStatus {
             }
             boolean isPassed = release.isPassed();
             logger.println("Pass/Fail status:       " + (isPassed ? "Passed" : "Failed"));
-            if (!jobModel.getDoPrettyLogOutput()) {
+            if (!jobModel.isDoPrettyLogOutput()) {
                 if (!isPassed) {
                     String passFailReason = release.getPassFailReasonType() == null ?
                             "Pass/Fail Policy requirements not met " :
@@ -139,10 +139,10 @@ public class PollStatus {
                 logger.println(String.format("Low:      %d", release.getLow()));
                 logger.println();
                 logger.println("For application status details see the customer portal: ");
-                logger.println(fodApi.getBaseUrl() + "/Releases/" + release.getReleaseId() + "/Overview");
+                logger.println(String.format("%s/Redirect/Releases/%d", fodApi.getBaseUrl(), release.getReleaseId()));
                 logger.println();
-                logger.println(String.format("Scan %s established policy check, marking build as %sstable.",
-                        isPassed ? "passed" : "failed", isPassed ? "" : "un"));
+                logger.println(String.format("Scan %s established policy check, marking build as %s.",
+                        isPassed ? "passed" : "failed", isPassed ? "stable" : "unstable"));
                 logger.println();
                 logger.println("------------------------------------------------------------------------------------");
             }

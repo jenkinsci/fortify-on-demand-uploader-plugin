@@ -36,18 +36,39 @@ public class FodEnums {
         DynamicScanWebServiceTypes
     }
 
-    public enum EntitlementFrequencyType {
+    public enum EntitlementPreferenceType {
         SingleScan(1),
         Subscription(2);
 
-        private final int id;
+        private final int _val;
 
-        EntitlementFrequencyType(int id) {
-            this.id = id;
+        EntitlementPreferenceType(int val) {
+            this._val = val;
         }
 
         public int getValue() {
-            return id;
+            return this._val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case 2:
+                    return "Subscription";
+                case 1:
+                default:
+                    return "Single Scan";
+            }
+        }
+
+        public static EntitlementPreferenceType fromInt(int val) {
+            switch (val) {
+                case 2:
+                    return Subscription;
+                case 1:
+                    return SingleScan;
+                default:
+                    return null;
+            }
         }
     }
 }

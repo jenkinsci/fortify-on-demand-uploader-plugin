@@ -15,9 +15,9 @@ import java.util.concurrent.TimeUnit;
 
 public class FodApi {
 
-    private final static int CONNECTION_TIMEOUT = 10;
-    private final static int WRITE_TIMEOUT = 30;
-    private final static int READ_TIMEOUT = 30;
+    private final static int CONNECTION_TIMEOUT = 30; // seconds
+    private final static int WRITE_TIMEOUT = 30; // seconds
+    private final static int READ_TIMEOUT = 30; // seconds
     public final static int MAX_SIZE = 50;
 
     private String baseUrl;
@@ -35,22 +35,10 @@ public class FodApi {
         return staticScanController;
     }
 
-    private ApplicationController applicationController;
-
-    public ApplicationController getApplicationController() {
-        return applicationController;
-    }
-
     private ReleaseController releaseController;
 
     public ReleaseController getReleaseController() {
         return releaseController;
-    }
-
-    private TenantEntitlementsController tenantEntitlementsController;
-
-    public TenantEntitlementsController getTenantEntitlementsController() {
-        return tenantEntitlementsController;
     }
 
     private LookupItemsController lookupItemsController;
@@ -78,9 +66,7 @@ public class FodApi {
         client = Create();
 
         staticScanController = new StaticScanController(this);
-        applicationController = new ApplicationController(this);
         releaseController = new ReleaseController(this);
-        tenantEntitlementsController = new TenantEntitlementsController(this);
         lookupItemsController = new LookupItemsController(this);
     }
 
@@ -90,7 +76,7 @@ public class FodApi {
     public void authenticate() {
         try {
             RequestBody formBody = new FormBody.Builder()
-                    .add("scope", "https://hpfod.com/tenant")
+                    .add("scope", "api-tenant")
                     .add("grant_type", "client_credentials")
                     .add("client_id", key)
                     .add("client_secret", secret)
@@ -169,14 +155,9 @@ public class FodApi {
         Authenticator proxyAuthenticator;
         final String credentials = Credentials.basic(proxy.getUserName(), proxy.getPassword());
 
-        proxyAuthenticator = new Authenticator() {
-            @Override
-            public Request authenticate(Route route, Response response) throws IOException {
-                return response.request().newBuilder()
-                        .header("Proxy-Authorization", credentials)
-                        .build();
-            }
-        };
+        proxyAuthenticator = (route, response) -> response.request().newBuilder()
+                .header("Proxy-Authorization", credentials)
+                .build();
 
         proxyClient.proxyAuthenticator(proxyAuthenticator);
         return proxyClient.build();

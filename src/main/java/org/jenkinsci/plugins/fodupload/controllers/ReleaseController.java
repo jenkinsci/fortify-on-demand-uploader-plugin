@@ -8,12 +8,14 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApi;
 import org.jenkinsci.plugins.fodupload.FodUploaderPlugin;
+import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
 import java.io.PrintStream;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +66,6 @@ public class ReleaseController extends ControllerBase {
                 response.body().close();
 
                 Gson gson = new Gson();
-                // Create a type of GenericList<ApplicationDTO> to play nice with gson.
                 Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() {
                 }.getType();
                 GenericListResponse<ReleaseDTO> results = gson.fromJson(content, t);
@@ -101,6 +102,7 @@ public class ReleaseController extends ControllerBase {
             Request request = new Request.Builder()
                     .url(url)
                     .addHeader("Authorization", "Bearer " + api.getToken())
+                    .addHeader("Accept", "application/json")
                     .get()
                     .build();
             Response response = api.getClient().newCall(request).execute();
@@ -128,14 +130,24 @@ public class ReleaseController extends ControllerBase {
     }
 
     /**
-     * Get a list of available assessment types for a given release
-     *
-     * @param releaseId release to get assessment types for
-     * @return List of possible assessment types
+     * Get Assessment Type from bsi url
+     * @param model JobModel
+     * @return returns assessment type obj
      */
-    public List<ReleaseAssessmentTypeDTO> getAssessmentTypeIds(final int releaseId) {
+    public ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) {
+        final PrintStream logger = FodUploaderPlugin.getLogger();
         try {
-            String url = api.getBaseUrl() + "/api/v3/releases/" + releaseId + "/assessment-types?scanType=1";
+
+            String filters = "frequencyTypeId:" + model.getEntitlementPreference();
+            if (model.isBundledAssessment())
+                filters += "+isBundledAssessment:true";
+
+            // encode these before we put them on the URL since we're not using the URL builder
+            filters = URLEncoder.encode(filters, "UTF-8");
+            String url = String.format("%s/api/v3/releases/%s/assessment-types?scanType=1&filters=%s",
+                    api.getBaseUrl(),
+                    model.getBsiUrl().getProjectVersionId(),
+                    filters);
 
             if (api.getToken() == null)
                 api.authenticate();
@@ -143,11 +155,12 @@ public class ReleaseController extends ControllerBase {
             Request request = new Request.Builder()
                     .url(url)
                     .addHeader("Authorization", "Bearer " + api.getToken())
+                    .addHeader("Accept", "application/json")
                     .get()
                     .build();
             Response response = api.getClient().newCall(request).execute();
 
-            if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
+            if (response.code() == org.apache.http.HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                 // Re-authenticate
                 api.authenticate();
             }
@@ -162,8 +175,17 @@ public class ReleaseController extends ControllerBase {
             }.getType();
             GenericListResponse<ReleaseAssessmentTypeDTO> results = gson.fromJson(content, t);
 
-            return results.getItems();
+            // Get entitlement based on available options
+            for (ReleaseAssessmentTypeDTO assessment : results.getItems()) {
+                if (assessment.getAssessmentTypeId() == model.getBsiUrl().getAssessmentTypeId() &&
+                    assessment.isRemediation() == model.isRemediationScan() &&
+                    (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0)) {
+                        return assessment;
+                }
+            }
+            return null;
         } catch (Exception e) {
+            logger.println("Error: " + e.getMessage());
             e.printStackTrace();
             return null;
         }

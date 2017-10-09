@@ -10,18 +10,18 @@
     </parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>fortify-on-demand-uploader</artifactId>
-    <version>2.0.10-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <properties>
         <jenkins.version>1.625.3</jenkins.version>
-        <java.level>7</java.level>
+        <java.level>8</java.level>
         <jenkins-test-harness.version>2.13</jenkins-test-harness.version>
         <disabledTestInjection>true</disabledTestInjection>
     </properties>
 
     <name>Fortify on Demand Uploader Plugin</name>
-    <description>Gathers build artifacts and uploads them to the HPE Fortify on Demand service with user-specified options.</description>
+    <description>Gathers build artifacts and uploads them to the Fortify on Demand service with user-specified options.</description>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Fortify+On+Demand+Uploader+Plugin</url>
 
     <licenses>
@@ -78,13 +78,13 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>3.4.1</version>
+            <version>3.9.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.squareup.okio/okio -->
         <dependency>
             <groupId>com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
-            <version>1.10.0</version>
+            <version>1.13.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
@@ -97,6 +97,18 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.3</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
         </dependency>
     </dependencies>
 </project>
