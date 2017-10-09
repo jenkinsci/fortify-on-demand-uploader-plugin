@@ -68,25 +68,31 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
             if (api == null) {
                 logger.println("Error: Failed to Authenticate with Fortify API.");
                 build.setResult(Result.UNSTABLE);
+                return;
             } else {
                 api.authenticate();
 
                 if (model == null) {
                     logger.println("Unexpected Error");
                     build.setResult(Result.FAILURE);
+                    return;
                 }
 
-                // Add all validation here
-                if (model.validate(logger)) {
+                if (model.validate(logger)) { // Add all validation here
                     logger.println("Starting FoD Upload.");
 
                     // zips the file in a temporary location
                     File payload = Utils.createZipFile(model.getBsiUrl().getTechnologyStack(), workspace, logger);
                     if (payload.length() == 0) {
-                        //noinspection ResultOfMethodCallIgnored
-                        payload.delete();
+                        if (payload != null) {
+                            boolean deleteSuccess = payload.delete();
+                            if (!deleteSuccess) {
+                                logger.println("Unable to delete empty payload.");
+                            }
+                        }
                         logger.println("Source is empty for given Technology Stack and Language Level.");
                         build.setResult(Result.FAILURE);
+                        return;
                     }
 
                     model.setPayload(payload);
