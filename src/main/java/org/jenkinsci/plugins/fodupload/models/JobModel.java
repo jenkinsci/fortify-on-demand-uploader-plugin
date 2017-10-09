@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload.models;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +94,7 @@ public class JobModel {
     public JobModel(String bsiUrl, boolean runOpenSourceAnalysis, boolean isExpressAudit, boolean isExpressScan,
                     int pollingInterval, boolean includeAllFiles, boolean excludeThirdParty, boolean isRemediationScan,
                     boolean doPrettyLogOutput, boolean isBundledAssessment,
-                    boolean purchaseEntitlements, int entitlementPreference) {
+                    boolean purchaseEntitlements, int entitlementPreference) throws URISyntaxException {
         this.bsiUrl = new BsiUrl(bsiUrl);
         this.runOpenSourceAnalysis = runOpenSourceAnalysis;
         this.isExpressAudit = isExpressAudit;

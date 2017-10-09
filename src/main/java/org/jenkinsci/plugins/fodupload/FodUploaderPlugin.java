@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 
 public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
@@ -28,7 +29,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     public FodUploaderPlugin(String bsiUrl, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
                              int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
                              boolean isRemediationScan, boolean isBundledAssessment, boolean purchaseEntitlements,
-                             int entitlementPreference) {
+                             int entitlementPreference) throws URISyntaxException {
 
         model = new JobModel(bsiUrl,
                 runOpenSourceAnalysis,
