@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
@@ -134,6 +135,7 @@ public class ReleaseController extends ControllerBase {
      * @param model JobModel
      * @return returns assessment type obj
      */
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) {
         final PrintStream logger = FodUploaderPlugin.getLogger();
         try {
