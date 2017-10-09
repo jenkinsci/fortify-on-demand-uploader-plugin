@@ -15,20 +15,23 @@ public class PollStatus {
     private final static int MAX_FAILS = 3;
 
     private FodApi fodApi;
-    private JobModel jobModel;
     private int failCount = 0;
+    private int pollingInterval;
+    private boolean isPrettyLogging;
 
     private List<LookupItemsModel> analysisStatusTypes = null;
 
     /**
      * Constructor
      *
-     * @param api      api connection to use
-     * @param jobModel fod api data
+     * @param api               api connection to use
+     * @param isPrettyLogging   enables fancier formatting for logs
+     * @param pollingInterval   the polling interval in ???
      */
-    public PollStatus(FodApi api, final JobModel jobModel) {
-        fodApi = api;
-        this.jobModel = jobModel;
+    public PollStatus(FodApi api, boolean isPrettyLogging, int pollingInterval) {
+        this.fodApi = api;
+        this.pollingInterval = pollingInterval;
+        this.isPrettyLogging = isPrettyLogging;
     }
 
     /**
@@ -43,7 +46,7 @@ public class PollStatus {
 
         try {
             while (!finished) {
-                Thread.sleep(1000L * 60 * 1);
+                Thread.sleep(1000L * 60 * 1); // TODO: Use the interval here
                 // Get the status of the release
                 ReleaseDTO release = fodApi.getReleaseController().getRelease(releaseId,
                         "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low");
@@ -112,7 +115,7 @@ public class PollStatus {
             }
             boolean isPassed = release.isPassed();
             logger.println("Pass/Fail status:       " + (isPassed ? "Passed" : "Failed"));
-            if (!jobModel.isDoPrettyLogOutput()) {
+            if (this.isPrettyLogging) {
                 if (!isPassed) {
                     String passFailReason = release.getPassFailReasonType() == null ?
                             "Pass/Fail Policy requirements not met " :
