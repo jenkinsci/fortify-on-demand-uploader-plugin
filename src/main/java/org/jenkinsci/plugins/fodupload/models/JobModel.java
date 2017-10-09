@@ -11,8 +11,6 @@ public class JobModel {
     private boolean runOpenSourceAnalysis;
     private boolean isExpressScan;
     private boolean isExpressAudit;
-    private int pollingInterval;
-    private boolean doPrettyLogOutput;
     private boolean includeAllFiles;
     private boolean excludeThirdParty;
     private boolean isRemediationScan;
@@ -24,6 +22,7 @@ public class JobModel {
     public File getPayload() {
         return payload;
     }
+
     public void setPayload(File payload) {
         this.payload = payload;
     }
@@ -42,14 +41,6 @@ public class JobModel {
 
     public boolean isExpressAudit() {
         return isExpressAudit;
-    }
-
-    public int getPollingInterval() {
-        return pollingInterval;
-    }
-
-    public boolean isDoPrettyLogOutput() {
-        return doPrettyLogOutput;
     }
 
     public boolean isIncludeAllFiles() {
@@ -78,32 +69,35 @@ public class JobModel {
 
     /**
      * Build model used to pass values around
-     * @param bsiUrl BSI URL
+     *
+     * @param bsiUrl                BSI URL
      * @param runOpenSourceAnalysis runOpenSourceAnalysis
-     * @param isExpressAudit isExpressAudit
-     * @param isExpressScan isExpressScan
-     * @param pollingInterval pollingInterval
-     * @param includeAllFiles includeAllFiles
-     * @param excludeThirdParty excludeThirdParty
-     * @param isRemediationScan isRemediationScan
-     * @param doPrettyLogOutput doPrettyLogOutput
-     * @param isBundledAssessment isBundledAssessment
-     * @param purchaseEntitlements purchaseEntitlements
+     * @param isExpressAudit        isExpressAudit
+     * @param isExpressScan         isExpressScan
+     * @param includeAllFiles       includeAllFiles
+     * @param excludeThirdParty     excludeThirdParty
+     * @param isRemediationScan     isRemediationScan
+     * @param isBundledAssessment   isBundledAssessment
+     * @param purchaseEntitlements  purchaseEntitlements
      * @param entitlementPreference entitlementPreference
      */
-    public JobModel(String bsiUrl, boolean runOpenSourceAnalysis, boolean isExpressAudit, boolean isExpressScan,
-                    int pollingInterval, boolean includeAllFiles, boolean excludeThirdParty, boolean isRemediationScan,
-                    boolean doPrettyLogOutput, boolean isBundledAssessment,
-                    boolean purchaseEntitlements, int entitlementPreference) throws URISyntaxException {
+    public JobModel(String bsiUrl,
+                    boolean runOpenSourceAnalysis,
+                    boolean isExpressAudit,
+                    boolean isExpressScan,
+                    boolean includeAllFiles,
+                    boolean excludeThirdParty,
+                    boolean isRemediationScan,
+                    boolean isBundledAssessment,
+                    boolean purchaseEntitlements,
+                    int entitlementPreference) throws URISyntaxException {
         this.bsiUrl = new BsiUrl(bsiUrl);
         this.runOpenSourceAnalysis = runOpenSourceAnalysis;
         this.isExpressAudit = isExpressAudit;
         this.isExpressScan = isExpressScan;
-        this.pollingInterval = pollingInterval;
         this.includeAllFiles = includeAllFiles;
         this.excludeThirdParty = excludeThirdParty;
         this.isRemediationScan = isRemediationScan;
-        this.doPrettyLogOutput = doPrettyLogOutput;
         this.entitlementPreference = entitlementPreference;
         this.isBundledAssessment = isBundledAssessment;
         this.purchaseEntitlements = purchaseEntitlements;
@@ -112,7 +106,7 @@ public class JobModel {
     @Override
     public String toString() {
         return String.format(
-                        "Release Id:                        %s%n" +
+                "Release Id:                        %s%n" +
                         "Assessment Type Id:                %s%n" +
                         "Technology Stack:                  %s%n" +
                         "Language Level:                    %s%n" +
@@ -124,9 +118,7 @@ public class JobModel {
                         "Remediation Scan:                  %s%n" +
                         "Purchase Entitlements:             %s%n" +
                         "Entitlement Preference             %s%n" +
-                        "Bundled Assessment:                %s%n" +
-                        "Polling Interval:                  %s%n" +
-                        "Pretty Log Output:                 %s%n",
+                        "Bundled Assessment:                %s%n",
                 bsiUrl.getProjectVersionId(),
                 bsiUrl.getAssessmentTypeId(),
                 bsiUrl.getTechnologyStack(),
@@ -139,9 +131,7 @@ public class JobModel {
                 isRemediationScan,
                 purchaseEntitlements,
                 entitlementPreference,
-                isBundledAssessment,
-                pollingInterval,
-                doPrettyLogOutput);
+                isBundledAssessment);
     }
 
     public boolean validate(PrintStream logger) {
@@ -158,7 +148,7 @@ public class JobModel {
 
         if (errors.size() > 0) {
             logger.println("Missing the following fields from BSI URL: ");
-            for (String error: errors) {
+            for (String error : errors) {
                 logger.println("    " + error);
             }
             return false;
