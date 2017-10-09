@@ -13,12 +13,19 @@ public class GenericErrorResponse {
 
     @Override
     public String toString() {
-        String result = "\n";
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+
+        int index = 0;
         for (ErrorResponse error : errors) {
-            int errorNumber = errors.indexOf(error) + 1;
-            result += errorNumber + ") " + error.getMessage() + (errorNumber > 1 ? "\n" : "");
+
+            sb.append(index);
+            sb.append(") ");
+            sb.append(error.getMessage());
+            if (index < errors.size())
+                sb.append("\n");
         }
-        return result;
+        return sb.toString();
     }
 }
 
