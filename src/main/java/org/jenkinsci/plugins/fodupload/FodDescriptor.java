@@ -15,13 +15,11 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
     private static final String CLIENT_ID = "clientId";
     private static final String CLIENT_SECRET = "clientSecret";
     private static final String BASE_URL = "baseUrl";
-    private static final String DO_POLL_FORTIFY = "doPollFortify";
 
     private FodApi api;
     private String clientId;
     private String clientSecret;
     private String baseUrl;
-    private boolean doPollFortify;
 
     // On save.
     @Override
@@ -29,7 +27,6 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
         clientId = formData.getString(CLIENT_ID);
         clientSecret = formData.getString(CLIENT_SECRET);
         baseUrl = formData.getString(BASE_URL);
-        doPollFortify = formData.getBoolean(DO_POLL_FORTIFY);
 
         save();
 
@@ -63,11 +60,6 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
     @SuppressWarnings("unused")
     public String getBaseUrl() {
         return baseUrl;
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getDoPollFortify() {
-        return doPollFortify;
     }
 
     @SuppressWarnings("unused")
