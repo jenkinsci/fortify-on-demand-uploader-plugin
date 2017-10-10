@@ -133,8 +133,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     // If your plugin doesn't really define any property on Descriptor,
     // you don't have to do this.
     @Override
-    public UploadStepDescriptor getDescriptor() {
-        return (UploadStepDescriptor) super.getDescriptor();
+    public StaticAssessmentStepDescriptor getDescriptor() {
+        return (StaticAssessmentStepDescriptor) super.getDescriptor();
     }
 
     @Override
@@ -143,13 +143,13 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @Extension
-    public static final class UploadStepDescriptor extends FodDescriptor {
+    public static final class StaticAssessmentStepDescriptor extends FodDescriptor {
         /**
          * In order to load the persisted global configuration, you have to
          * call load() in the constructor.
          */
         // Entry point when accessing global configuration
-        public UploadStepDescriptor() {
+        public StaticAssessmentStepDescriptor() {
             super();
             load();
         }
