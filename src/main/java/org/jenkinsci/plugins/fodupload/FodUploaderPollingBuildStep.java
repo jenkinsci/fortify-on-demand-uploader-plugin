@@ -54,7 +54,7 @@ public class FodUploaderPollingBuildStep extends Recorder implements SimpleBuild
 
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
-        return null;
+        return BuildStepMonitor.NONE;
     }
 
     public String getBsiUrl() {
