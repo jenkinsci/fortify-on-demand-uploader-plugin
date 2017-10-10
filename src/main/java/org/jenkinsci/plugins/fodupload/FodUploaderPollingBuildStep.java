@@ -65,7 +65,7 @@ public class FodUploaderPollingBuildStep extends Recorder implements SimpleBuild
         return pollingInterval;
     }
 
-    public boolean isPrettyLogging() {
+    public boolean getIsPrettyLogging() {
         return isPrettyLogging;
     }
 
