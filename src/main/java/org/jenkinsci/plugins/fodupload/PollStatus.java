@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
@@ -27,6 +28,7 @@ public class PollStatus {
      * @param isPrettyLogging   enables fancier formatting for logs
      * @param pollingInterval   the polling interval in ???
      */
+    @SuppressFBWarnings("URF_UNREAD_FIELD")
     public PollStatus(FodApi api, boolean isPrettyLogging, int pollingInterval) {
         this.fodApi = api;
         this.pollingInterval = pollingInterval;
