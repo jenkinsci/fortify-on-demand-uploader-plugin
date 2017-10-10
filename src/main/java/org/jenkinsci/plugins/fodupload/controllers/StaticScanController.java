@@ -9,7 +9,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
 import org.jenkinsci.plugins.fodupload.FodApi;
-import org.jenkinsci.plugins.fodupload.FodUploaderPlugin;
+import org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
@@ -41,7 +41,7 @@ public class StaticScanController extends ControllerBase {
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
     public boolean startStaticScan(final JobModel uploadRequest) {
-        PrintStream logger = FodUploaderPlugin.getLogger();
+        PrintStream logger = StaticAssessmentBuildStep.getLogger();
 
         PostStartScanResponse scanStartedResponse = null;
 

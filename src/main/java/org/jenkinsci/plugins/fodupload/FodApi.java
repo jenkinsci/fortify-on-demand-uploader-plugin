@@ -108,7 +108,7 @@ public class FodApi {
      */
     public void retireToken() {
         try {
-            PrintStream logger = FodUploaderPlugin.getLogger();
+            PrintStream logger = StaticAssessmentBuildStep.getLogger();
 
             Request request = new Request.Builder()
                     .url(baseUrl + "/oauth/retireToken")

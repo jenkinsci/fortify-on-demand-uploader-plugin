@@ -16,16 +16,16 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 
-public class FodUploaderPollingBuildStep extends Recorder implements SimpleBuildStep {
+public class PollingBuildStep extends Recorder implements SimpleBuildStep {
 
     private String bsiUrl;
     private int pollingInterval;
     private boolean isPrettyLogging;
 
     @DataBoundConstructor
-    public FodUploaderPollingBuildStep(String bsiUrl,
-                                       int pollingInterval,
-                                       boolean isPrettyLogging) {
+    public PollingBuildStep(String bsiUrl,
+                            int pollingInterval,
+                            boolean isPrettyLogging) {
 
         this.bsiUrl = bsiUrl;
         this.pollingInterval = pollingInterval;

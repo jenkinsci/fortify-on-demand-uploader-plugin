@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.fodupload;
 
-import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
@@ -41,7 +40,7 @@ public class PollStatus {
      * @return true if status is completed | cancelled.
      */
     public boolean releaseStatus(final int releaseId) {
-        PrintStream logger = FodUploaderPlugin.getLogger();
+        PrintStream logger = StaticAssessmentBuildStep.getLogger();
         boolean finished = false; // default is failure
 
         try {
@@ -106,7 +105,7 @@ public class PollStatus {
      * @param release release to print info on
      */
     private void printPassFail(ReleaseDTO release) {
-        PrintStream logger = FodUploaderPlugin.getLogger();
+        PrintStream logger = StaticAssessmentBuildStep.getLogger();
         try {
             // Break if release is null
             if (release == null) {

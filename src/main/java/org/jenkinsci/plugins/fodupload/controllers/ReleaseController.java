@@ -8,7 +8,7 @@ import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApi;
-import org.jenkinsci.plugins.fodupload.FodUploaderPlugin;
+import org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
@@ -91,7 +91,7 @@ public class ReleaseController extends ControllerBase {
      */
     public ReleaseDTO getRelease(final int releaseId, final String fields) {
         try {
-            PrintStream logger = FodUploaderPlugin.getLogger();
+            PrintStream logger = StaticAssessmentBuildStep.getLogger();
             String url = api.getBaseUrl() + "/api/v3/releases?filters=releaseId:" + releaseId;
 
             if (api.getToken() == null)
@@ -137,7 +137,7 @@ public class ReleaseController extends ControllerBase {
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) {
-        final PrintStream logger = FodUploaderPlugin.getLogger();
+        final PrintStream logger = StaticAssessmentBuildStep.getLogger();
         try {
 
             String filters = "frequencyTypeId:" + model.getEntitlementPreference();

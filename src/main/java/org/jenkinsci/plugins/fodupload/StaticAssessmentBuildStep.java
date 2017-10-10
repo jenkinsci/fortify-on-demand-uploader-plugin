@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 
-public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
+public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
     private JobModel model;
@@ -26,16 +26,16 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
     @DataBoundConstructor
-    public FodUploaderPlugin(String bsiUrl,
-                             boolean runOpenSourceAnalysis,
-                             boolean isExpressScan,
-                             boolean isExpressAudit,
-                             boolean includeAllFiles,
-                             boolean excludeThirdParty,
-                             boolean isRemediationScan,
-                             boolean isBundledAssessment,
-                             boolean purchaseEntitlements,
-                             int entitlementPreference) throws URISyntaxException {
+    public StaticAssessmentBuildStep(String bsiUrl,
+                                     boolean runOpenSourceAnalysis,
+                                     boolean isExpressScan,
+                                     boolean isExpressAudit,
+                                     boolean includeAllFiles,
+                                     boolean excludeThirdParty,
+                                     boolean isRemediationScan,
+                                     boolean isBundledAssessment,
+                                     boolean purchaseEntitlements,
+                                     int entitlementPreference) throws URISyntaxException {
 
         model = new JobModel(bsiUrl,
                 runOpenSourceAnalysis,
@@ -156,7 +156,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
         @Override
         public String getDisplayName() {
-            return "Upload to Fortify on Demand";
+            return "Fortify on Demand Static Assessment";
         }
     }
 
