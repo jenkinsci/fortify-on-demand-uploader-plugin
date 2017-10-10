@@ -48,6 +48,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                 boolean success = poller.releaseStatus(token.getProjectVersionId());
             }
         } catch (URISyntaxException e) {
+            logger.println("Failed to parse BSI.");
             e.printStackTrace();
         }
     }
