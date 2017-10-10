@@ -99,9 +99,9 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
     }
 
     FodApi createFodApi() {
-        if (!Utils.isNullOrEmpty(clientId) &&
-                !Utils.isNullOrEmpty(clientSecret)&&
-                !Utils.isNullOrEmpty(baseUrl)) {
+        if (!Utils.isNullOrEmpty(clientId)
+                && !Utils.isNullOrEmpty(clientSecret)
+                && !Utils.isNullOrEmpty(baseUrl)) {
             api = new FodApi(clientId, clientSecret, baseUrl);
             api.authenticate();
             return api;
