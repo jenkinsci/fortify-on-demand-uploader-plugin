@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload;
 
+import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
@@ -8,7 +9,6 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Recorder;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.models.BsiUrl;
-import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -57,11 +57,6 @@ public class FodUploaderPollingBuildStep extends Recorder implements SimpleBuild
         return null;
     }
 
-    @Override
-    public FodUploaderPlugin.DescriptorImpl getDescriptor() {
-        return (FodUploaderPlugin.DescriptorImpl) super.getDescriptor();
-    }
-
     public String getBsiUrl() {
         return bsiUrl;
     }
@@ -72,5 +67,27 @@ public class FodUploaderPollingBuildStep extends Recorder implements SimpleBuild
 
     public boolean isPrettyLogging() {
         return isPrettyLogging;
+    }
+
+    // Overridden for better type safety.
+    // If your plugin doesn't really define any property on Descriptor,
+    // you don't have to do this.
+    @Override
+    public PollingStepDescriptor getDescriptor() {
+        return (PollingStepDescriptor) super.getDescriptor();
+    }
+
+    @Extension
+    public static final class PollingStepDescriptor extends FodDescriptor {
+
+        public PollingStepDescriptor() {
+            super();
+            load();
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "Poll Fortify on Demand for Results";
+        }
     }
 }

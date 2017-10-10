@@ -23,7 +23,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     private JobModel model;
 
-    // Fields in index.jelly must match the parameter names in the "DataBoundConstructor"
+    // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
     @DataBoundConstructor
     public FodUploaderPlugin(String bsiUrl,
@@ -133,8 +133,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     // If your plugin doesn't really define any property on Descriptor,
     // you don't have to do this.
     @Override
-    public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl) super.getDescriptor();
+    public UploadStepDescriptor getDescriptor() {
+        return (UploadStepDescriptor) super.getDescriptor();
     }
 
     @Override
@@ -143,19 +143,24 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     }
 
     @Extension
-    public static final class DescriptorImpl extends FodDescriptor {
+    public static final class UploadStepDescriptor extends FodDescriptor {
         /**
          * In order to load the persisted global configuration, you have to
          * call load() in the constructor.
          */
         // Entry point when accessing global configuration
-        public DescriptorImpl() {
+        public UploadStepDescriptor() {
             super();
             load();
         }
+
+        @Override
+        public String getDisplayName() {
+            return "Upload to Fortify on Demand";
+        }
     }
 
-    // NOTE: The following Getters are used to return saved values in the index.jelly. Intellij
+    // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
     // marks them unused, but they actually are used.
     // These getters are also named in the following format: Get<JellyField>.
     @SuppressWarnings("unused")
@@ -208,5 +213,3 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         return model.isPurchaseEntitlements();
     }
 }
-
-
