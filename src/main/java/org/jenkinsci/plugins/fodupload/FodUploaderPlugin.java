@@ -23,7 +23,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     private JobModel model;
 
-    // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
+    // Fields in index.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
     @DataBoundConstructor
     public FodUploaderPlugin(String bsiUrl,
@@ -155,7 +155,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
         }
     }
 
-    // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
+    // NOTE: The following Getters are used to return saved values in the index.jelly. Intellij
     // marks them unused, but they actually are used.
     // These getters are also named in the following format: Get<JellyField>.
     @SuppressWarnings("unused")
