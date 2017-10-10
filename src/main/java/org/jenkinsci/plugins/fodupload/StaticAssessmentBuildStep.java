@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 
-public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
+public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
     private JobModel model;
@@ -26,20 +26,24 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
     @DataBoundConstructor
-    public FodUploaderPlugin(String bsiUrl, boolean runOpenSourceAnalysis, boolean isExpressScan, boolean isExpressAudit,
-                             int pollingInterval, boolean doPrettyLogOutput, boolean includeAllFiles, boolean excludeThirdParty,
-                             boolean isRemediationScan, boolean isBundledAssessment, boolean purchaseEntitlements,
-                             int entitlementPreference) throws URISyntaxException {
+    public StaticAssessmentBuildStep(String bsiUrl,
+                                     boolean runOpenSourceAnalysis,
+                                     boolean isExpressScan,
+                                     boolean isExpressAudit,
+                                     boolean includeAllFiles,
+                                     boolean excludeThirdParty,
+                                     boolean isRemediationScan,
+                                     boolean isBundledAssessment,
+                                     boolean purchaseEntitlements,
+                                     int entitlementPreference) throws URISyntaxException {
 
         model = new JobModel(bsiUrl,
                 runOpenSourceAnalysis,
                 isExpressAudit,
                 isExpressScan,
-                pollingInterval,
                 includeAllFiles,
                 excludeThirdParty,
                 isRemediationScan,
-                doPrettyLogOutput,
                 isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference);
@@ -101,10 +105,6 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
                     if (success && deleted) {
                         logger.println("Scan Uploaded Successfully.");
-                        if (getDescriptor().getDoPollFortify() && model.getPollingInterval() > 0) {
-                            PollStatus /*Amy*/poller = new PollStatus(api, model);
-                            success = poller.releaseStatus(model.getBsiUrl().getProjectVersionId());
-                        }
                     }
 
                     // Success could be true then set to false from polling.
@@ -122,6 +122,7 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
 
     /**
      * Gets the out for the build console output
+     *
      * @return Task Listener object
      */
     public static PrintStream getLogger() {
@@ -132,8 +133,8 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     // If your plugin doesn't really define any property on Descriptor,
     // you don't have to do this.
     @Override
-    public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl) super.getDescriptor();
+    public StaticAssessmentStepDescriptor getDescriptor() {
+        return (StaticAssessmentStepDescriptor) super.getDescriptor();
     }
 
     @Override
@@ -142,15 +143,20 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     }
 
     @Extension
-    public static final class DescriptorImpl extends FodDescriptor {
+    public static final class StaticAssessmentStepDescriptor extends FodDescriptor {
         /**
          * In order to load the persisted global configuration, you have to
          * call load() in the constructor.
          */
         // Entry point when accessing global configuration
-        public DescriptorImpl() {
+        public StaticAssessmentStepDescriptor() {
             super();
             load();
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "Fortify on Demand Static Assessment";
         }
     }
 
@@ -161,50 +167,49 @@ public class FodUploaderPlugin extends Recorder implements SimpleBuildStep {
     public String getBsiUrl() {
         return model.getBsiUrl().ORIGINAL_VALUE;
     }
+
     @SuppressWarnings("unused")
     public boolean getRunOpenSourceAnalysis() {
         return model.isRunOpenSourceAnalysis();
     }
+
     @SuppressWarnings("unused")
     public boolean getIsExpressScan() {
         return model.isExpressScan();
     }
+
     @SuppressWarnings("unused")
     public boolean getIsExpressAudit() {
         return model.isExpressAudit();
     }
-    @SuppressWarnings("unused")
-    public boolean getDoPrettyLogOutput() {
-        return model.isDoPrettyLogOutput();
-    }
+
     @SuppressWarnings("unused")
     public boolean getIncludeAllFiles() {
         return model.isIncludeAllFiles();
     }
+
     @SuppressWarnings("unused")
     public boolean getExcludeThirdParty() {
         return model.isExcludeThirdParty();
     }
+
     @SuppressWarnings("unused")
     public boolean getIsRemediationScan() {
         return model.isRemediationScan();
     }
-    @SuppressWarnings("unused")
-    public int getPollingInterval() {
-        return model.getPollingInterval();
-    }
+
     @SuppressWarnings("unused")
     public int getEntitlementPreference() {
         return model.getEntitlementPreference();
     }
+
     @SuppressWarnings("unused")
     public boolean getIsBundledAssessment() {
         return model.isBundledAssessment();
     }
+
     @SuppressWarnings("unused")
     public boolean getPurchaseEntitlements() {
         return model.isPurchaseEntitlements();
     }
 }
-
-

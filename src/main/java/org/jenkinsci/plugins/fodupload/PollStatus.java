@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.fodupload;
 
-import org.jenkinsci.plugins.fodupload.models.JobModel;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
@@ -15,20 +15,24 @@ public class PollStatus {
     private final static int MAX_FAILS = 3;
 
     private FodApi fodApi;
-    private JobModel jobModel;
     private int failCount = 0;
+    private int pollingInterval;
+    private boolean isPrettyLogging;
 
     private List<LookupItemsModel> analysisStatusTypes = null;
 
     /**
      * Constructor
      *
-     * @param api      api connection to use
-     * @param jobModel fod api data
+     * @param api               api connection to use
+     * @param isPrettyLogging   enables fancier formatting for logs
+     * @param pollingInterval   the polling interval in ???
      */
-    public PollStatus(FodApi api, final JobModel jobModel) {
-        fodApi = api;
-        this.jobModel = jobModel;
+    @SuppressFBWarnings("URF_UNREAD_FIELD")
+    public PollStatus(FodApi api, boolean isPrettyLogging, int pollingInterval) {
+        this.fodApi = api;
+        this.pollingInterval = pollingInterval;
+        this.isPrettyLogging = isPrettyLogging;
     }
 
     /**
@@ -38,12 +42,12 @@ public class PollStatus {
      * @return true if status is completed | cancelled.
      */
     public boolean releaseStatus(final int releaseId) {
-        PrintStream logger = FodUploaderPlugin.getLogger();
+        PrintStream logger = StaticAssessmentBuildStep.getLogger();
         boolean finished = false; // default is failure
 
         try {
             while (!finished) {
-                Thread.sleep(1000L * 60 * 1);
+                Thread.sleep(1000L * 60 * 1); // TODO: Use the interval here
                 // Get the status of the release
                 ReleaseDTO release = fodApi.getReleaseController().getRelease(releaseId,
                         "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low");
@@ -103,7 +107,7 @@ public class PollStatus {
      * @param release release to print info on
      */
     private void printPassFail(ReleaseDTO release) {
-        PrintStream logger = FodUploaderPlugin.getLogger();
+        PrintStream logger = StaticAssessmentBuildStep.getLogger();
         try {
             // Break if release is null
             if (release == null) {
@@ -112,7 +116,7 @@ public class PollStatus {
             }
             boolean isPassed = release.isPassed();
             logger.println("Pass/Fail status:       " + (isPassed ? "Passed" : "Failed"));
-            if (!jobModel.isDoPrettyLogOutput()) {
+            if (this.isPrettyLogging) {
                 if (!isPassed) {
                     String passFailReason = release.getPassFailReasonType() == null ?
                             "Pass/Fail Policy requirements not met " :
