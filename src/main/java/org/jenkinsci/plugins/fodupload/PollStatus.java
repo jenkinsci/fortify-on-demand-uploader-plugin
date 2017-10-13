@@ -27,7 +27,7 @@ public class PollStatus {
     /**
      * Constructor
      *
-     * @param apiConnection   api connection to use
+     * @param apiConnection   apiConnection connection to use
      * @param isPrettyLogging enables fancier formatting for logs
      * @param pollingInterval the polling interval in ???
      */

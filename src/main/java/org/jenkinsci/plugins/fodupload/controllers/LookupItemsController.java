@@ -18,7 +18,7 @@ public class LookupItemsController extends ControllerBase {
     /**
      * Constructor
      *
-     * @param apiConnection api connection object with client info
+     * @param apiConnection apiConnection connection object with client info
      */
     public LookupItemsController(FodApiConnection apiConnection) {
         super(apiConnection);
@@ -31,16 +31,16 @@ public class LookupItemsController extends ControllerBase {
      * @return array of enum values and text or null
      */
     public List<LookupItemsModel> getLookupItems(FodEnums.APILookupItemTypes type) throws IOException {
-        if (api.getToken() == null)
-            api.authenticate();
+        if (apiConnection.getToken() == null)
+            apiConnection.authenticate();
 
         Request request = new Request.Builder()
-                .url(api.getBaseUrl() + "/api/v3/lookup-items?type=" + type.toString())
-                .addHeader("Authorization", "Bearer " + api.getToken())
+                .url(apiConnection.getBaseUrl() + "/apiConnection/v3/lookup-items?type=" + type.toString())
+                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
                 .get()
                 .build();
-        Response response = api.getClient().newCall(request).execute();
+        Response response = apiConnection.getClient().newCall(request).execute();
 
         // Read the results and close the response
         String content = IOUtils.toString(response.body().byteStream(), "utf-8");

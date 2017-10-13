@@ -4,14 +4,14 @@ import org.jenkinsci.plugins.fodupload.FodApiConnection;
 
 class ControllerBase {
 
-    protected FodApiConnection api;
+    protected FodApiConnection apiConnection;
 
     /**
-     * Base constructor for all api controllers
+     * Base constructor for all apiConnection controllers
      *
-     * @param apiConnection api object (containing client etc.) of controller
+     * @param apiConnection apiConnection object (containing client etc.) of controller
      */
     ControllerBase(FodApiConnection apiConnection) {
-        this.api = apiConnection;
+        this.apiConnection = apiConnection;
     }
 }

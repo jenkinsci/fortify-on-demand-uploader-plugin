@@ -30,11 +30,11 @@ public class FodApiConnection {
     private ProxyConfiguration proxy = null;
 
     /**
-     * Constructor that encapsulates the api
+     * Constructor that encapsulates the apiConnection
      *
-     * @param key     api key
-     * @param secret  api secret
-     * @param baseUrl api url
+     * @param key     apiConnection key
+     * @param secret  apiConnection secret
+     * @param baseUrl apiConnection url
      */
     public FodApiConnection(final String key, final String secret, final String baseUrl) {
         this.key = key;
@@ -49,12 +49,12 @@ public class FodApiConnection {
     }
 
     /**
-     * Used for authenticating in the case of a time out using the saved api credentials.
+     * Used for authenticating in the case of a time out using the saved apiConnection credentials.
      */
     public void authenticate() throws IOException {
 
         RequestBody formBody = new FormBody.Builder()
-                .add("scope", "api-tenant")
+                .add("scope", "apiConnection-tenant")
                 .add("grant_type", "client_credentials")
                 .add("client_id", key)
                 .add("client_secret", secret)

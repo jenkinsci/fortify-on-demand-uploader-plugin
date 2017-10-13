@@ -24,7 +24,7 @@ public class ReleaseController extends ControllerBase {
     /**
      * Constructor
      *
-     * @param apiConnection api object with client info
+     * @param apiConnection apiConnection object with client info
      */
     public ReleaseController(FodApiConnection apiConnection) {
         super(apiConnection);
@@ -38,28 +38,28 @@ public class ReleaseController extends ControllerBase {
      */
     public List<ReleaseDTO> getReleases(final int applicationId) throws IOException {
 
-        int offset = 0, resultSize = api.MAX_SIZE;
+        int offset = 0, resultSize = apiConnection.MAX_SIZE;
         List<ReleaseDTO> releaseList = new ArrayList<>();
 
         // Pagination. Will continue until the results are less than the MAX_SIZE, which indicates that you've
         // hit the end of the results.
-        while (resultSize == api.MAX_SIZE) {
-            String url = api.getBaseUrl() + "/api/v3/applications/" + applicationId + "/releases?" +
-                    "offset=" + offset + "&limit=" + api.MAX_SIZE;
+        while (resultSize == apiConnection.MAX_SIZE) {
+            String url = apiConnection.getBaseUrl() + "/apiConnection/v3/applications/" + applicationId + "/releases?" +
+                    "offset=" + offset + "&limit=" + apiConnection.MAX_SIZE;
 
-            if (api.getToken() == null)
-                api.authenticate();
+            if (apiConnection.getToken() == null)
+                apiConnection.authenticate();
 
             Request request = new Request.Builder()
                     .url(url)
-                    .addHeader("Authorization", "Bearer " + api.getToken())
+                    .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                     .get()
                     .build();
-            Response response = api.getClient().newCall(request).execute();
+            Response response = apiConnection.getClient().newCall(request).execute();
 
             if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                 // Re-authenticate
-                api.authenticate();
+                apiConnection.authenticate();
             }
 
             // Read the results and close the response
@@ -72,7 +72,7 @@ public class ReleaseController extends ControllerBase {
             GenericListResponse<ReleaseDTO> results = gson.fromJson(content, t);
 
             resultSize = results.getItems().size();
-            offset += api.MAX_SIZE;
+            offset += apiConnection.MAX_SIZE;
             releaseList.addAll(results.getItems());
         }
         return releaseList;
@@ -89,26 +89,26 @@ public class ReleaseController extends ControllerBase {
     public ReleaseDTO getRelease(final int releaseId, final String fields) throws IOException {
 
         PrintStream logger = StaticAssessmentBuildStep.getLogger();
-        String url = api.getBaseUrl() + "/api/v3/releases?filters=releaseId:" + releaseId;
+        String url = apiConnection.getBaseUrl() + "/apiConnection/v3/releases?filters=releaseId:" + releaseId;
 
-        if (api.getToken() == null)
-            api.authenticate();
+        if (apiConnection.getToken() == null)
+            apiConnection.authenticate();
 
         if (fields.length() > 0) {
             url += "&fields=" + fields + "&limit=1";
         }
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("Authorization", "Bearer " + api.getToken())
+                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
                 .get()
                 .build();
-        Response response = api.getClient().newCall(request).execute();
+        Response response = apiConnection.getClient().newCall(request).execute();
 
         if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
             logger.println("Token expired re-authorizing");
             // Re-authenticate
-            api.authenticate();
+            apiConnection.authenticate();
         }
 
         // Read the results and close the response
@@ -137,25 +137,25 @@ public class ReleaseController extends ControllerBase {
 
         // encode these before we put them on the URL since we're not using the URL builder
         filters = URLEncoder.encode(filters, "UTF-8");
-        String url = String.format("%s/api/v3/releases/%s/assessment-types?scanType=1&filters=%s",
-                api.getBaseUrl(),
+        String url = String.format("%s/apiConnection/v3/releases/%s/assessment-types?scanType=1&filters=%s",
+                apiConnection.getBaseUrl(),
                 model.getBsiUrl().getProjectVersionId(),
                 filters);
 
-        if (api.getToken() == null)
-            api.authenticate();
+        if (apiConnection.getToken() == null)
+            apiConnection.authenticate();
 
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("Authorization", "Bearer " + api.getToken())
+                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
                 .get()
                 .build();
-        Response response = api.getClient().newCall(request).execute();
+        Response response = apiConnection.getClient().newCall(request).execute();
 
         if (response.code() == org.apache.http.HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
             // Re-authenticate
-            api.authenticate();
+            apiConnection.authenticate();
         }
 
         // Read the results and close the response

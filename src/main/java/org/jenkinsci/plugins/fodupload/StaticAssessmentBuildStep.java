@@ -71,7 +71,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 return;
             }
 
-            // Load api settings
+            // Load apiConnection settings
             apiConnection = getDescriptor().createFodApi();
 
             if (apiConnection == null) {

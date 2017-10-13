@@ -27,7 +27,7 @@ public class StaticScanController extends ControllerBase {
     /**
      * Constructor
      *
-     * @param apiConnection api object with client info
+     * @param apiConnection apiConnection object with client info
      */
     public StaticScanController(final FodApiConnection apiConnection) {
         super(apiConnection);
@@ -55,12 +55,12 @@ public class StaticScanController extends ControllerBase {
             int byteCount;
             long offset = 0;
 
-            if (api.getToken() == null)
-                api.authenticate();
+            if (apiConnection.getToken() == null)
+                apiConnection.authenticate();
 
             logger.println("Getting Assessment");
             // Get entitlement info
-            ReleaseAssessmentTypeDTO assessment = new ReleaseController(api).getAssessmentType(uploadRequest);
+            ReleaseAssessmentTypeDTO assessment = new ReleaseController(apiConnection).getAssessmentType(uploadRequest);
 
             if (assessment == null) {
                 logger.println("Assessment not found");
@@ -68,7 +68,7 @@ public class StaticScanController extends ControllerBase {
             }
 
             // Build 'static' portion of url
-            String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
+            String fragUrl = apiConnection.getBaseUrl() + "/apiConnection/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
                     "/static-scans/start-scan?";
             fragUrl += "assessmentTypeId=" + uploadRequest.getBsiUrl().getAssessmentTypeId();
             fragUrl += "&technologyStack=" + uploadRequest.getBsiUrl().getTechnologyStack();
@@ -105,7 +105,7 @@ public class StaticScanController extends ControllerBase {
 
                 MediaType byteArray = MediaType.parse("application/octet-stream");
                 Request request = new Request.Builder()
-                        .addHeader("Authorization", "Bearer " + api.getToken())
+                        .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                         .addHeader("Content-Type", "application/octet-stream")
                         .addHeader("Accept", "application/json")
                         // Add offsets
@@ -114,11 +114,11 @@ public class StaticScanController extends ControllerBase {
                         .build();
 
                 // Get the response
-                Response response = api.getClient().newCall(request).execute();
+                Response response = apiConnection.getClient().newCall(request).execute();
 
                 if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                     // Re-authenticate
-                    api.authenticate();
+                    apiConnection.authenticate();
 
                     // if you had to reauthenticate here, would the loop and request not need to be resubmitted?
                     // possible continue?
