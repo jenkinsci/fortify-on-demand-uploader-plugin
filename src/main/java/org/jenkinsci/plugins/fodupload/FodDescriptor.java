@@ -11,6 +11,8 @@ import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.io.IOException;
+
 public class FodDescriptor extends BuildStepDescriptor<Publisher> {
     private static final String CLIENT_ID = "clientId";
     private static final String CLIENT_SECRET = "clientSecret";
@@ -84,7 +86,12 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
 
         FodApi testApi = new FodApi(clientId, clientSecret, baseUrl);
 
-        testApi.authenticate();
+        try {
+            testApi.authenticate();
+        } catch (IOException e) {
+            return FormValidation.error("Unable to authenticate with Fortify on Demand");
+        }
+
         String token = testApi.getToken();
 
         if (token == null) {

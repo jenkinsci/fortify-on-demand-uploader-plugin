@@ -49,7 +49,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
             }
         } catch (URISyntaxException e) {
             logger.println("Failed to parse BSI.");
-            e.printStackTrace();
+            e.printStackTrace(logger);
         }
     }
 

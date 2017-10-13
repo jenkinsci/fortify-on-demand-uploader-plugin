@@ -3,7 +3,8 @@ package org.jenkinsci.plugins.fodupload.controllers;
 import org.jenkinsci.plugins.fodupload.FodApi;
 
 class ControllerBase {
-    FodApi api;
+
+    protected FodApi api;
 
     /**
      * Base constructor for all api controllers

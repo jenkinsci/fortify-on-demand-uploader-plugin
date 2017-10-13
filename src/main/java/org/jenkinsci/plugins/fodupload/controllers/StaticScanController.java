@@ -35,8 +35,9 @@ public class StaticScanController extends ControllerBase {
 
     /**
      * Begin a static scan on FoD
+     * <p>
+     * // * @param uploadRequest zip file to upload
      *
-    // * @param uploadRequest zip file to upload
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")

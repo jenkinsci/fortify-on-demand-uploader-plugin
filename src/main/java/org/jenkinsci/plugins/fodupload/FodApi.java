@@ -66,64 +66,58 @@ public class FodApi {
     /**
      * Used for authenticating in the case of a time out using the saved api credentials.
      */
-    public void authenticate() {
-        try {
-            RequestBody formBody = new FormBody.Builder()
-                    .add("scope", "api-tenant")
-                    .add("grant_type", "client_credentials")
-                    .add("client_id", key)
-                    .add("client_secret", secret)
-                    .build();
+    public void authenticate() throws IOException {
 
-            Request request = new Request.Builder()
-                    .url(baseUrl + "/oauth/token")
-                    .post(formBody)
-                    .build();
-            Response response = client.newCall(request).execute();
+        RequestBody formBody = new FormBody.Builder()
+                .add("scope", "api-tenant")
+                .add("grant_type", "client_credentials")
+                .add("client_id", key)
+                .add("client_secret", secret)
+                .build();
 
-            if (!response.isSuccessful())
-                throw new IOException("Unexpected code " + response);
+        Request request = new Request.Builder()
+                .url(baseUrl + "/oauth/token")
+                .post(formBody)
+                .build();
+        Response response = client.newCall(request).execute();
 
-            String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-            response.body().close();
+        if (!response.isSuccessful())
+            throw new IOException("Unexpected code " + response);
 
-            // Parse the Response
-            JsonParser parser = new JsonParser();
-            JsonObject obj = parser.parse(content).getAsJsonObject();
-            this.token = obj.get("access_token").getAsString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String content = IOUtils.toString(response.body().byteStream(), "utf-8");
+        response.body().close();
+
+        // Parse the Response
+        JsonParser parser = new JsonParser();
+        JsonObject obj = parser.parse(content).getAsJsonObject();
+        this.token = obj.get("access_token").getAsString();
     }
 
     /**
      * Retire the current token. Unclear if this actually does anything on the backend.
      */
-    public void retireToken() {
-        try {
-            PrintStream logger = StaticAssessmentBuildStep.getLogger();
+    public void retireToken() throws IOException {
 
-            Request request = new Request.Builder()
-                    .url(baseUrl + "/oauth/retireToken")
-                    .addHeader("Authorization", "Bearer " + token)
-                    .get()
-                    .build();
-            Response response = client.newCall(request).execute();
+        PrintStream logger = StaticAssessmentBuildStep.getLogger();
 
-            if (response.isSuccessful()) {
-                // Read the results and close the response
-                String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-                response.body().close();
+        Request request = new Request.Builder()
+                .url(baseUrl + "/oauth/retireToken")
+                .addHeader("Authorization", "Bearer " + token)
+                .get()
+                .build();
+        Response response = client.newCall(request).execute();
 
-                JsonParser parser = new JsonParser();
-                JsonObject obj = parser.parse(content).getAsJsonObject();
-                String messageResponse = obj.get("message").getAsString();
+        if (response.isSuccessful()) {
+            // Read the results and close the response
+            String content = IOUtils.toString(response.body().byteStream(), "utf-8");
+            response.body().close();
 
-                logger.println("Retiring Token : " + messageResponse);
-                token = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            JsonParser parser = new JsonParser();
+            JsonObject obj = parser.parse(content).getAsJsonObject();
+            String messageResponse = obj.get("message").getAsString();
+
+            logger.println("Retiring Token : " + messageResponse);
+            token = null;
         }
     }
 

@@ -9,6 +9,7 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Recorder;
 import jenkins.tasks.SimpleBuildStep;
+import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -53,8 +54,12 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @Override
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
+
+        FodApi api = null;
+        final PrintStream logger = listener.getLogger();
+
         try {
-            final PrintStream logger = listener.getLogger();
+
             taskListener.set(listener);
 
             Result currentResult = build.getResult();
@@ -67,7 +72,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             }
 
             // Load api settings
-            FodApi api = getDescriptor().createFodApi();
+            api = getDescriptor().createFodApi();
 
             if (api == null) {
                 logger.println("Error: Failed to create a connection with Fortify API");
@@ -101,7 +106,10 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 }
 
                 model.setPayload(payload);
-                boolean success = api.getStaticScanController().startStaticScan(model);
+
+                // TODO: The functionality of the API could be entirely encapsulated into this controller
+                StaticScanController staticScanController = new StaticScanController(api);
+                boolean success = staticScanController.startStaticScan(model);
                 boolean deleted = payload.delete();
 
                 if (success && deleted) {
@@ -116,8 +124,17 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger);
             build.setResult(Result.UNSTABLE);
+        } finally {
+            if (api != null) {
+                try {
+                    api.retireToken();
+                } catch (IOException e) {
+                    logger.println("Failed to retire oauth token.");
+                    e.printStackTrace(logger);
+                }
+            }
         }
     }
 
