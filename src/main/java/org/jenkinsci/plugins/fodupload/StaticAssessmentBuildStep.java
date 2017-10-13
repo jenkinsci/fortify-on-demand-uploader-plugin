@@ -71,21 +71,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 return;
             }
 
-            // Load apiConnection settings
-            apiConnection = getDescriptor().createFodApiConnection();
-
-            if (apiConnection == null) {
-                logger.println("Error: Failed to create a connection with Fortify API");
-                build.setResult(Result.UNSTABLE);
-                return;
-            }
-
-            apiConnection.authenticate();
-
             if (model == null) {
                 logger.println("Unexpected Error");
                 build.setResult(Result.FAILURE);
-                apiConnection.retireToken();
                 return;
             }
 
@@ -103,13 +91,21 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
                     logger.println("Source is empty for given Technology Stack and Language Level.");
                     build.setResult(Result.FAILURE);
-                    apiConnection.retireToken();
                     return;
                 }
 
                 model.setPayload(payload);
 
-                // TODO: The functionality of the API could be entirely encapsulated into this controller
+                // Load apiConnection settings
+                apiConnection = getDescriptor().createFodApiConnection();
+
+                if (apiConnection == null) {
+                    logger.println("Error: Failed to create a connection with Fortify API");
+                    build.setResult(Result.UNSTABLE);
+                    return;
+                }
+
+                apiConnection.authenticate();
                 StaticScanController staticScanController = new StaticScanController(apiConnection);
                 boolean success = staticScanController.startStaticScan(model);
                 boolean deleted = payload.delete();
