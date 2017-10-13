@@ -103,7 +103,7 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
                 FormValidation.error("Invalid connection information. Please check your credentials and try again.");
     }
 
-    FodApiConnection createFodApi() {
+    FodApiConnection createFodApiConnection() {
 
         if (Utils.isNullOrEmpty(clientId)
                 || Utils.isNullOrEmpty(clientSecret)

@@ -72,7 +72,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             }
 
             // Load apiConnection settings
-            apiConnection = getDescriptor().createFodApi();
+            apiConnection = getDescriptor().createFodApiConnection();
 
             if (apiConnection == null) {
                 logger.println("Error: Failed to create a connection with Fortify API");

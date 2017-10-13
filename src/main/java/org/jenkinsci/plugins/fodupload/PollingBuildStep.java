@@ -39,7 +39,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                         @Nonnull TaskListener taskListener) throws InterruptedException, IOException {
 
         final PrintStream logger = taskListener.getLogger();
-        FodApiConnection apiConnection = getDescriptor().createFodApi();
+        FodApiConnection apiConnection = getDescriptor().createFodApiConnection();
 
         try {
             BsiUrl token = new BsiUrl(this.bsiUrl);
