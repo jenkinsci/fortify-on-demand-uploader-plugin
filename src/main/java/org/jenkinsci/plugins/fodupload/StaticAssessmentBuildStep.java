@@ -70,50 +70,51 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             FodApi api = getDescriptor().createFodApi();
 
             if (api == null) {
-                logger.println("Error: Failed to Authenticate with Fortify API.");
+                logger.println("Error: Failed to create a connection with Fortify API");
                 build.setResult(Result.UNSTABLE);
                 return;
-            } else {
-                api.authenticate();
+            }
 
-                if (model == null) {
-                    logger.println("Unexpected Error");
+            api.authenticate();
+
+            if (model == null) {
+                logger.println("Unexpected Error");
+                build.setResult(Result.FAILURE);
+                return;
+            }
+
+            if (model.validate(logger)) { // Add all validation here
+                logger.println("Starting FoD Upload.");
+
+                // zips the file in a temporary location
+                File payload = Utils.createZipFile(model.getBsiUrl().getTechnologyStack(), workspace, logger);
+                if (payload.length() == 0) {
+
+                    boolean deleteSuccess = payload.delete();
+                    if (!deleteSuccess) {
+                        logger.println("Unable to delete empty payload.");
+                    }
+
+                    logger.println("Source is empty for given Technology Stack and Language Level.");
                     build.setResult(Result.FAILURE);
                     return;
                 }
 
-                if (model.validate(logger)) { // Add all validation here
-                    logger.println("Starting FoD Upload.");
+                model.setPayload(payload);
+                boolean success = api.getStaticScanController().startStaticScan(model);
+                boolean deleted = payload.delete();
 
-                    // zips the file in a temporary location
-                    File payload = Utils.createZipFile(model.getBsiUrl().getTechnologyStack(), workspace, logger);
-                    if (payload.length() == 0) {
-                        if (payload != null) {
-                            boolean deleteSuccess = payload.delete();
-                            if (!deleteSuccess) {
-                                logger.println("Unable to delete empty payload.");
-                            }
-                        }
-                        logger.println("Source is empty for given Technology Stack and Language Level.");
-                        build.setResult(Result.FAILURE);
-                        return;
-                    }
-
-                    model.setPayload(payload);
-                    boolean success = api.getStaticScanController().startStaticScan(model);
-                    boolean deleted = payload.delete();
-
-                    if (success && deleted) {
-                        logger.println("Scan Uploaded Successfully.");
-                    }
-
-                    // Success could be true then set to false from polling.
-                    api.retireToken();
-                    build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
-                } else {
-                    build.setResult(Result.UNSTABLE);
+                if (success && deleted) {
+                    logger.println("Scan Uploaded Successfully.");
                 }
+
+                // Success could be true then set to false from polling.
+                api.retireToken();
+                build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
+            } else {
+                build.setResult(Result.UNSTABLE);
             }
+
         } catch (IOException e) {
             e.printStackTrace();
             build.setResult(Result.UNSTABLE);
