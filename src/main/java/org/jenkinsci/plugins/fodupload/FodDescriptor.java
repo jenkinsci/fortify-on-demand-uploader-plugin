@@ -16,7 +16,6 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
     private static final String CLIENT_SECRET = "clientSecret";
     private static final String BASE_URL = "baseUrl";
 
-    private FodApi api;
     private String clientId;
     private String clientSecret;
     private String baseUrl;
@@ -30,7 +29,6 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
 
         save();
 
-        api = createFodApi();
         return super.configure(req, formData);
     }
 
@@ -99,13 +97,13 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
     }
 
     FodApi createFodApi() {
-        if (!Utils.isNullOrEmpty(clientId)
-                && !Utils.isNullOrEmpty(clientSecret)
-                && !Utils.isNullOrEmpty(baseUrl)) {
-            api = new FodApi(clientId, clientSecret, baseUrl);
-            api.authenticate();
-            return api;
+
+        if (Utils.isNullOrEmpty(clientId)
+                || Utils.isNullOrEmpty(clientSecret)
+                || Utils.isNullOrEmpty(baseUrl)) {
+            return null;
         }
-        return null;
+
+        return new FodApi(clientId, clientSecret, baseUrl);
     }
 }
