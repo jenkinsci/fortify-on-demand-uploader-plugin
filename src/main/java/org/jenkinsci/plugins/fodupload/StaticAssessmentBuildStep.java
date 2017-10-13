@@ -77,47 +77,48 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 return;
             }
 
-            if (model.validate(logger)) { // Add all validation here
-                logger.println("Starting FoD Upload.");
-
-                // zips the file in a temporary location
-                File payload = Utils.createZipFile(model.getBsiUrl().getTechnologyStack(), workspace, logger);
-                if (payload.length() == 0) {
-
-                    boolean deleteSuccess = payload.delete();
-                    if (!deleteSuccess) {
-                        logger.println("Unable to delete empty payload.");
-                    }
-
-                    logger.println("Source is empty for given Technology Stack and Language Level.");
-                    build.setResult(Result.FAILURE);
-                    return;
-                }
-
-                model.setPayload(payload);
-
-                // Load apiConnection settings
-                apiConnection = getDescriptor().createFodApiConnection();
-
-                if (apiConnection == null) {
-                    logger.println("Error: Failed to create a connection with Fortify API");
-                    build.setResult(Result.UNSTABLE);
-                    return;
-                }
-
-                apiConnection.authenticate();
-                StaticScanController staticScanController = new StaticScanController(apiConnection);
-                boolean success = staticScanController.startStaticScan(model);
-                boolean deleted = payload.delete();
-
-                if (success && deleted) {
-                    logger.println("Scan Uploaded Successfully.");
-                }
-
-                build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
-            } else {
+            if (!model.validate(logger)) {
                 build.setResult(Result.UNSTABLE);
+                return;
             }
+
+            logger.println("Starting FoD Upload.");
+
+            // zips the file in a temporary location
+            File payload = Utils.createZipFile(model.getBsiUrl().getTechnologyStack(), workspace, logger);
+            if (payload.length() == 0) {
+
+                boolean deleteSuccess = payload.delete();
+                if (!deleteSuccess) {
+                    logger.println("Unable to delete empty payload.");
+                }
+
+                logger.println("Source is empty for given Technology Stack and Language Level.");
+                build.setResult(Result.FAILURE);
+                return;
+            }
+
+            model.setPayload(payload);
+
+            // Load apiConnection settings
+            apiConnection = getDescriptor().createFodApiConnection();
+
+            if (apiConnection == null) {
+                logger.println("Error: Failed to create a connection with Fortify API");
+                build.setResult(Result.UNSTABLE);
+                return;
+            }
+
+            apiConnection.authenticate();
+            StaticScanController staticScanController = new StaticScanController(apiConnection);
+            boolean success = staticScanController.startStaticScan(model);
+            boolean deleted = payload.delete();
+
+            if (success && deleted) {
+                logger.println("Scan Uploaded Successfully.");
+            }
+
+            build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
 
         } catch (IOException e) {
             e.printStackTrace(logger);
