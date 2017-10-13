@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.fodupload;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
+import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
@@ -46,11 +48,15 @@ public class PollStatus {
         PrintStream logger = StaticAssessmentBuildStep.getLogger();
         boolean finished = false; // default is failure
 
+        LookupItemsController lookupItemsController = new LookupItemsController(this.fodApi);
+        ReleaseController releaseController = new ReleaseController(this.fodApi);
+
         while (!finished) {
             Thread.sleep(1000L * 60 * 1); // TODO: Use the interval here
             // Get the status of the release
-            ReleaseDTO release = fodApi.getReleaseController().getRelease(releaseId,
+            ReleaseDTO release = releaseController.getRelease(releaseId,
                     "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low");
+
             if (release == null) {
                 failCount++;
                 continue;
@@ -60,7 +66,7 @@ public class PollStatus {
 
             // Get the possible statuses only once
             if (analysisStatusTypes == null)
-                analysisStatusTypes = fodApi.getLookupItemsController().getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
+                analysisStatusTypes = lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
 
             if (failCount < MAX_FAILS) {
                 String statusString = "";

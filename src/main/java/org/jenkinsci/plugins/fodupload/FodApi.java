@@ -29,18 +29,6 @@ public class FodApi {
 
     private ProxyConfiguration proxy = null;
 
-    private ReleaseController releaseController;
-
-    public ReleaseController getReleaseController() {
-        return releaseController;
-    }
-
-    private LookupItemsController lookupItemsController;
-
-    public LookupItemsController getLookupItemsController() {
-        return lookupItemsController;
-    }
-
     /**
      * Constructor that encapsulates the api
      *
@@ -58,9 +46,6 @@ public class FodApi {
             proxy = instance.proxy;
 
         client = Create();
-
-        releaseController = new ReleaseController(this);
-        lookupItemsController = new LookupItemsController(this);
     }
 
     /**

@@ -60,8 +60,7 @@ public class StaticScanController extends ControllerBase {
 
             logger.println("Getting Assessment");
             // Get entitlement info
-            ReleaseAssessmentTypeDTO assessment = api.getReleaseController()
-                    .getAssessmentType(uploadRequest);
+            ReleaseAssessmentTypeDTO assessment = new ReleaseController(api).getAssessmentType(uploadRequest);
 
             if (assessment == null) {
                 logger.println("Assessment not found");
