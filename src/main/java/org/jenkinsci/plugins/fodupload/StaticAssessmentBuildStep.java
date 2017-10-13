@@ -85,6 +85,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             if (model == null) {
                 logger.println("Unexpected Error");
                 build.setResult(Result.FAILURE);
+                apiConnection.retireToken();
                 return;
             }
 
@@ -102,6 +103,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
                     logger.println("Source is empty for given Technology Stack and Language Level.");
                     build.setResult(Result.FAILURE);
+                    apiConnection.retireToken();
                     return;
                 }
 
@@ -116,8 +118,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                     logger.println("Scan Uploaded Successfully.");
                 }
 
-                // Success could be true then set to false from polling.
-                apiConnection.retireToken();
                 build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
             } else {
                 build.setResult(Result.UNSTABLE);
