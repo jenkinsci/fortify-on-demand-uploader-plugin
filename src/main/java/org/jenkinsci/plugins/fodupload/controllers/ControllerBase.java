@@ -2,7 +2,7 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 
-class ControllerBase {
+abstract class ControllerBase {
 
     protected FodApiConnection apiConnection;
 
