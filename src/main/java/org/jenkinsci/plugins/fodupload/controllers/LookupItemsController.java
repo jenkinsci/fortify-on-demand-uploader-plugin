@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.fodupload.FodApi;
+import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
@@ -18,10 +18,10 @@ public class LookupItemsController extends ControllerBase {
     /**
      * Constructor
      *
-     * @param api api object with client info
+     * @param apiConnection api connection object with client info
      */
-    public LookupItemsController(FodApi api) {
-        super(api);
+    public LookupItemsController(FodApiConnection apiConnection) {
+        super(apiConnection);
     }
 
     /**

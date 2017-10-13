@@ -1,17 +1,17 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
-import org.jenkinsci.plugins.fodupload.FodApi;
+import org.jenkinsci.plugins.fodupload.FodApiConnection;
 
 class ControllerBase {
 
-    protected FodApi api;
+    protected FodApiConnection api;
 
     /**
      * Base constructor for all api controllers
      *
-     * @param api api object (containing client etc.) of controller
+     * @param apiConnection api object (containing client etc.) of controller
      */
-    ControllerBase(FodApi api) {
-        this.api = api;
+    ControllerBase(FodApiConnection apiConnection) {
+        this.api = apiConnection;
     }
 }

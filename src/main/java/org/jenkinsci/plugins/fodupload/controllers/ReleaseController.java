@@ -2,12 +2,11 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.fodupload.FodApi;
+import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
@@ -16,7 +15,6 @@ import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -26,10 +24,10 @@ public class ReleaseController extends ControllerBase {
     /**
      * Constructor
      *
-     * @param api api object with client info
+     * @param apiConnection api object with client info
      */
-    public ReleaseController(FodApi api) {
-        super(api);
+    public ReleaseController(FodApiConnection apiConnection) {
+        super(apiConnection);
     }
 
     /**

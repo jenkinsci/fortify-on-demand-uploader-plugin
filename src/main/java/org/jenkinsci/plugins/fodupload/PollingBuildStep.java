@@ -39,12 +39,12 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                         @Nonnull TaskListener taskListener) throws InterruptedException, IOException {
 
         final PrintStream logger = taskListener.getLogger();
-        FodApi api = getDescriptor().createFodApi();
+        FodApiConnection apiConnection = getDescriptor().createFodApi();
 
         try {
             BsiUrl token = new BsiUrl(this.bsiUrl);
             if (this.getPollingInterval() > 0) {
-                PollStatus poller = new PollStatus(api, this.isPrettyLogging, this.pollingInterval);
+                PollStatus poller = new PollStatus(apiConnection, this.isPrettyLogging, this.pollingInterval);
                 boolean success = poller.releaseStatus(token.getProjectVersionId());
             }
         } catch (URISyntaxException e) {

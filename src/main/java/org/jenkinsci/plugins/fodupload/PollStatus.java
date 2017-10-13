@@ -17,7 +17,7 @@ public class PollStatus {
 
     private final static int MAX_FAILS = 3;
 
-    private FodApi fodApi;
+    private FodApiConnection apiConnection;
     private int failCount = 0;
     private int pollingInterval;
     private boolean isPrettyLogging;
@@ -27,13 +27,13 @@ public class PollStatus {
     /**
      * Constructor
      *
-     * @param api             api connection to use
+     * @param apiConnection   api connection to use
      * @param isPrettyLogging enables fancier formatting for logs
      * @param pollingInterval the polling interval in ???
      */
     @SuppressFBWarnings("URF_UNREAD_FIELD")
-    public PollStatus(FodApi api, boolean isPrettyLogging, int pollingInterval) {
-        this.fodApi = api;
+    public PollStatus(FodApiConnection apiConnection, boolean isPrettyLogging, int pollingInterval) {
+        this.apiConnection = apiConnection;
         this.pollingInterval = pollingInterval;
         this.isPrettyLogging = isPrettyLogging;
     }
@@ -48,8 +48,8 @@ public class PollStatus {
         PrintStream logger = StaticAssessmentBuildStep.getLogger();
         boolean finished = false; // default is failure
 
-        LookupItemsController lookupItemsController = new LookupItemsController(this.fodApi);
-        ReleaseController releaseController = new ReleaseController(this.fodApi);
+        LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection);
+        ReleaseController releaseController = new ReleaseController(this.apiConnection);
 
         while (!finished) {
             Thread.sleep(1000L * 60 * 1); // TODO: Use the interval here
@@ -147,7 +147,7 @@ public class PollStatus {
                 logger.println(String.format("Low:      %d", release.getLow()));
                 logger.println();
                 logger.println("For application status details see the customer portal: ");
-                logger.println(String.format("%s/Redirect/Releases/%d", fodApi.getBaseUrl(), release.getReleaseId()));
+                logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), release.getReleaseId()));
                 logger.println();
                 logger.println(String.format("Scan %s established policy check, marking build as %s.",
                         isPassed ? "passed" : "failed", isPassed ? "stable" : "unstable"));

@@ -13,7 +13,7 @@ import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
-public class FodApi {
+public class FodApiConnection {
 
     private final static int CONNECTION_TIMEOUT = 30; // seconds
     private final static int WRITE_TIMEOUT = 30; // seconds
@@ -36,7 +36,7 @@ public class FodApi {
      * @param secret  api secret
      * @param baseUrl api url
      */
-    public FodApi(final String key, final String secret, final String baseUrl) {
+    public FodApiConnection(final String key, final String secret, final String baseUrl) {
         this.key = key;
         this.secret = secret;
         this.baseUrl = baseUrl;

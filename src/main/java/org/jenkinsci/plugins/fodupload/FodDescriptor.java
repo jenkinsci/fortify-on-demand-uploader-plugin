@@ -84,7 +84,7 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
 
-        FodApi testApi = new FodApi(clientId, clientSecret, baseUrl);
+        FodApiConnection testApi = new FodApiConnection(clientId, clientSecret, baseUrl);
 
         try {
             testApi.authenticate();
@@ -103,7 +103,7 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
                 FormValidation.error("Invalid connection information. Please check your credentials and try again.");
     }
 
-    FodApi createFodApi() {
+    FodApiConnection createFodApi() {
 
         if (Utils.isNullOrEmpty(clientId)
                 || Utils.isNullOrEmpty(clientSecret)
@@ -111,6 +111,6 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
             return null;
         }
 
-        return new FodApi(clientId, clientSecret, baseUrl);
+        return new FodApiConnection(clientId, clientSecret, baseUrl);
     }
 }

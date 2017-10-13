@@ -43,6 +43,7 @@ public class Utils {
     private static final String TS_VB6_KEY = "VB6";
     private static final String TS_VB_SCRIPT_KEY = "VBScript";
     private static final String TS_XML_HTML_KEY = "XML/HTML";
+
     public static String getFileExpressionPatternString(String technologyStack) {
         String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +
                 "|.*\\.settings|.*\\.cpx|.*\\.xcfg|.*\\.cscfg|.*\\.cscdef|.*\\.wadcfg|.*\\.appxmanifest"
@@ -88,7 +89,7 @@ public class Utils {
      *
      * @param techStack technology stack of the folder to zip
      * @param workspace location of the files to zip
-     * @param logger logger to write status text to
+     * @param logger    logger to write status text to
      * @return a File object
      * @throws IOException no files
      */

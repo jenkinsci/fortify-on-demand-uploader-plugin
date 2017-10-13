@@ -55,7 +55,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
 
-        FodApi api = null;
+        FodApiConnection apiConnection = null;
         final PrintStream logger = listener.getLogger();
 
         try {
@@ -72,15 +72,15 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             }
 
             // Load api settings
-            api = getDescriptor().createFodApi();
+            apiConnection = getDescriptor().createFodApi();
 
-            if (api == null) {
+            if (apiConnection == null) {
                 logger.println("Error: Failed to create a connection with Fortify API");
                 build.setResult(Result.UNSTABLE);
                 return;
             }
 
-            api.authenticate();
+            apiConnection.authenticate();
 
             if (model == null) {
                 logger.println("Unexpected Error");
@@ -108,7 +108,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 model.setPayload(payload);
 
                 // TODO: The functionality of the API could be entirely encapsulated into this controller
-                StaticScanController staticScanController = new StaticScanController(api);
+                StaticScanController staticScanController = new StaticScanController(apiConnection);
                 boolean success = staticScanController.startStaticScan(model);
                 boolean deleted = payload.delete();
 
@@ -117,7 +117,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 }
 
                 // Success could be true then set to false from polling.
-                api.retireToken();
+                apiConnection.retireToken();
                 build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
             } else {
                 build.setResult(Result.UNSTABLE);
@@ -127,9 +127,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             e.printStackTrace(logger);
             build.setResult(Result.UNSTABLE);
         } finally {
-            if (api != null) {
+            if (apiConnection != null) {
                 try {
-                    api.retireToken();
+                    apiConnection.retireToken();
                 } catch (IOException e) {
                     logger.println("Failed to retire oauth token.");
                     e.printStackTrace(logger);

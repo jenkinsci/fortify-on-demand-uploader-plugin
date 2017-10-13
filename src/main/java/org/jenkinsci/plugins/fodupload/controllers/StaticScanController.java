@@ -8,7 +8,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
-import org.jenkinsci.plugins.fodupload.FodApi;
+import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
@@ -27,10 +27,10 @@ public class StaticScanController extends ControllerBase {
     /**
      * Constructor
      *
-     * @param api api object with client info
+     * @param apiConnection api object with client info
      */
-    public StaticScanController(final FodApi api) {
-        super(api);
+    public StaticScanController(final FodApiConnection apiConnection) {
+        super(apiConnection);
     }
 
     /**
