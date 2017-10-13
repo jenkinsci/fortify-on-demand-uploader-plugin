@@ -29,12 +29,6 @@ public class FodApi {
 
     private ProxyConfiguration proxy = null;
 
-    private StaticScanController staticScanController;
-
-    public StaticScanController getStaticScanController() {
-        return staticScanController;
-    }
-
     private ReleaseController releaseController;
 
     public ReleaseController getReleaseController() {
@@ -65,7 +59,6 @@ public class FodApi {
 
         client = Create();
 
-        staticScanController = new StaticScanController(this);
         releaseController = new ReleaseController(this);
         lookupItemsController = new LookupItemsController(this);
     }
