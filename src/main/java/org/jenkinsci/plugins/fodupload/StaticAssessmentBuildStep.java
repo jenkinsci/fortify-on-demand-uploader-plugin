@@ -9,6 +9,7 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Recorder;
 import jenkins.tasks.SimpleBuildStep;
+import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -53,8 +54,12 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @Override
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
+
+        FodApiConnection apiConnection = null;
+        final PrintStream logger = listener.getLogger();
+
         try {
-            final PrintStream logger = listener.getLogger();
+
             taskListener.set(listener);
 
             Result currentResult = build.getResult();
@@ -66,57 +71,67 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 return;
             }
 
-            // Load api settings
-            FodApi api = getDescriptor().createFodApi();
+            if (model == null) {
+                logger.println("Unexpected Error");
+                build.setResult(Result.FAILURE);
+                return;
+            }
 
-            if (api == null) {
-                logger.println("Error: Failed to Authenticate with Fortify API.");
+            if (!model.validate(logger)) {
                 build.setResult(Result.UNSTABLE);
                 return;
-            } else {
-                api.authenticate();
+            }
 
-                if (model == null) {
-                    logger.println("Unexpected Error");
-                    build.setResult(Result.FAILURE);
-                    return;
+            logger.println("Starting FoD Upload.");
+
+            // zips the file in a temporary location
+            File payload = Utils.createZipFile(model.getBsiUrl().getTechnologyStack(), workspace, logger);
+            if (payload.length() == 0) {
+
+                boolean deleteSuccess = payload.delete();
+                if (!deleteSuccess) {
+                    logger.println("Unable to delete empty payload.");
                 }
 
-                if (model.validate(logger)) { // Add all validation here
-                    logger.println("Starting FoD Upload.");
+                logger.println("Source is empty for given Technology Stack and Language Level.");
+                build.setResult(Result.FAILURE);
+                return;
+            }
 
-                    // zips the file in a temporary location
-                    File payload = Utils.createZipFile(model.getBsiUrl().getTechnologyStack(), workspace, logger);
-                    if (payload.length() == 0) {
-                        if (payload != null) {
-                            boolean deleteSuccess = payload.delete();
-                            if (!deleteSuccess) {
-                                logger.println("Unable to delete empty payload.");
-                            }
-                        }
-                        logger.println("Source is empty for given Technology Stack and Language Level.");
-                        build.setResult(Result.FAILURE);
-                        return;
-                    }
+            model.setPayload(payload);
 
-                    model.setPayload(payload);
-                    boolean success = api.getStaticScanController().startStaticScan(model);
-                    boolean deleted = payload.delete();
+            // Load apiConnection settings
+            apiConnection = getDescriptor().createFodApiConnection();
 
-                    if (success && deleted) {
-                        logger.println("Scan Uploaded Successfully.");
-                    }
+            if (apiConnection == null) {
+                logger.println("Error: Failed to create a connection with Fortify API");
+                build.setResult(Result.UNSTABLE);
+                return;
+            }
 
-                    // Success could be true then set to false from polling.
-                    api.retireToken();
-                    build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
-                } else {
-                    build.setResult(Result.UNSTABLE);
+            apiConnection.authenticate();
+            StaticScanController staticScanController = new StaticScanController(apiConnection);
+            boolean success = staticScanController.startStaticScan(model);
+            boolean deleted = payload.delete();
+
+            if (success && deleted) {
+                logger.println("Scan Uploaded Successfully.");
+            }
+
+            build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
+
+        } catch (IOException e) {
+            e.printStackTrace(logger);
+            build.setResult(Result.UNSTABLE);
+        } finally {
+            if (apiConnection != null) {
+                try {
+                    apiConnection.retireToken();
+                } catch (IOException e) {
+                    logger.println("Failed to retire oauth token.");
+                    e.printStackTrace(logger);
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            build.setResult(Result.UNSTABLE);
         }
     }
 

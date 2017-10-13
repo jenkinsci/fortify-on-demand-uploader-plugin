@@ -11,12 +11,13 @@ import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.io.IOException;
+
 public class FodDescriptor extends BuildStepDescriptor<Publisher> {
     private static final String CLIENT_ID = "clientId";
     private static final String CLIENT_SECRET = "clientSecret";
     private static final String BASE_URL = "baseUrl";
 
-    private FodApi api;
     private String clientId;
     private String clientSecret;
     private String baseUrl;
@@ -30,7 +31,6 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
 
         save();
 
-        api = createFodApi();
         return super.configure(req, formData);
     }
 
@@ -84,9 +84,14 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
 
-        FodApi testApi = new FodApi(clientId, clientSecret, baseUrl);
+        FodApiConnection testApi = new FodApiConnection(clientId, clientSecret, baseUrl);
 
-        testApi.authenticate();
+        try {
+            testApi.authenticate();
+        } catch (IOException e) {
+            return FormValidation.error("Unable to authenticate with Fortify on Demand");
+        }
+
         String token = testApi.getToken();
 
         if (token == null) {
@@ -98,14 +103,14 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
                 FormValidation.error("Invalid connection information. Please check your credentials and try again.");
     }
 
-    FodApi createFodApi() {
-        if (!Utils.isNullOrEmpty(clientId)
-                && !Utils.isNullOrEmpty(clientSecret)
-                && !Utils.isNullOrEmpty(baseUrl)) {
-            api = new FodApi(clientId, clientSecret, baseUrl);
-            api.authenticate();
-            return api;
+    FodApiConnection createFodApiConnection() {
+
+        if (Utils.isNullOrEmpty(clientId)
+                || Utils.isNullOrEmpty(clientSecret)
+                || Utils.isNullOrEmpty(baseUrl)) {
+            return null;
         }
-        return null;
+
+        return new FodApiConnection(clientId, clientSecret, baseUrl);
     }
 }

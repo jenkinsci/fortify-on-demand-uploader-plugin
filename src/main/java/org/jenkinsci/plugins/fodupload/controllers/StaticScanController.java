@@ -8,7 +8,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
-import org.jenkinsci.plugins.fodupload.FodApi;
+import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
@@ -27,21 +27,23 @@ public class StaticScanController extends ControllerBase {
     /**
      * Constructor
      *
-     * @param api api object with client info
+     * @param apiConnection apiConnection object with client info
      */
-    public StaticScanController(final FodApi api) {
-        super(api);
+    public StaticScanController(final FodApiConnection apiConnection) {
+        super(apiConnection);
     }
 
     /**
      * Begin a static scan on FoD
+     * <p>
+     * // * @param uploadRequest zip file to upload
      *
-    // * @param uploadRequest zip file to upload
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
     public boolean startStaticScan(final JobModel uploadRequest) {
-        PrintStream logger = StaticAssessmentBuildStep.getLogger();
+
+        final PrintStream logger = StaticAssessmentBuildStep.getLogger();
 
         PostStartScanResponse scanStartedResponse = null;
 
@@ -53,13 +55,12 @@ public class StaticScanController extends ControllerBase {
             int byteCount;
             long offset = 0;
 
-            if (api.getToken() == null)
-                api.authenticate();
+            if (apiConnection.getToken() == null)
+                apiConnection.authenticate();
 
             logger.println("Getting Assessment");
             // Get entitlement info
-            ReleaseAssessmentTypeDTO assessment = api.getReleaseController()
-                    .getAssessmentType(uploadRequest);
+            ReleaseAssessmentTypeDTO assessment = new ReleaseController(apiConnection).getAssessmentType(uploadRequest);
 
             if (assessment == null) {
                 logger.println("Assessment not found");
@@ -67,7 +68,7 @@ public class StaticScanController extends ControllerBase {
             }
 
             // Build 'static' portion of url
-            String fragUrl = api.getBaseUrl() + "/api/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
+            String fragUrl = apiConnection.getBaseUrl() + "/apiConnection/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
                     "/static-scans/start-scan?";
             fragUrl += "assessmentTypeId=" + uploadRequest.getBsiUrl().getAssessmentTypeId();
             fragUrl += "&technologyStack=" + uploadRequest.getBsiUrl().getTechnologyStack();
@@ -104,7 +105,7 @@ public class StaticScanController extends ControllerBase {
 
                 MediaType byteArray = MediaType.parse("application/octet-stream");
                 Request request = new Request.Builder()
-                        .addHeader("Authorization", "Bearer " + api.getToken())
+                        .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                         .addHeader("Content-Type", "application/octet-stream")
                         .addHeader("Accept", "application/json")
                         // Add offsets
@@ -113,11 +114,11 @@ public class StaticScanController extends ControllerBase {
                         .build();
 
                 // Get the response
-                Response response = api.getClient().newCall(request).execute();
+                Response response = apiConnection.getClient().newCall(request).execute();
 
                 if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                     // Re-authenticate
-                    api.authenticate();
+                    apiConnection.authenticate();
 
                     // if you had to reauthenticate here, would the loop and request not need to be resubmitted?
                     // possible continue?
