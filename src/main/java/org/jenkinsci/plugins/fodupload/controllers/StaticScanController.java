@@ -42,7 +42,8 @@ public class StaticScanController extends ControllerBase {
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
     public boolean startStaticScan(final JobModel uploadRequest) {
-        PrintStream logger = StaticAssessmentBuildStep.getLogger();
+
+        final PrintStream logger = StaticAssessmentBuildStep.getLogger();
 
         PostStartScanResponse scanStartedResponse = null;
 
