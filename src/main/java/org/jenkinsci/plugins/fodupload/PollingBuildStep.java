@@ -50,6 +50,10 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         } catch (URISyntaxException e) {
             logger.println("Failed to parse BSI.");
             e.printStackTrace(logger);
+        } finally {
+            if (apiConnection != null) {
+                apiConnection.retireToken();
+            }
         }
     }
 
