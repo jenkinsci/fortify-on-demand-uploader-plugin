@@ -31,7 +31,8 @@ public class PollStatus {
      *
      * @param apiConnection   apiConnection connection to use
      * @param isPrettyLogging enables fancier formatting for logs
-     * @param pollingInterval the polling interval in ???
+     * @param pollingInterval the polling interval in minutes
+     * @param logger the PrintStream that will be logged to
      */
     @SuppressFBWarnings("URF_UNREAD_FIELD")
     public PollStatus(FodApiConnection apiConnection, boolean isPrettyLogging, int pollingInterval, PrintStream logger) {
@@ -194,5 +195,3 @@ public class PollStatus {
         }
     }
 }
-
-
