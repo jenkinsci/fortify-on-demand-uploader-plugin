@@ -72,6 +72,15 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
         return items;
     }
 
+    public ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (PollingBuildStep.PolicyFailureBuildResultPreference preference : PollingBuildStep.PolicyFailureBuildResultPreference.values()) {
+            items.add(new ListBoxModel.Option(preference.toString(), String.valueOf(preference.getValue())));
+        }
+
+        return items;
+    }
+
     // Form validation
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
     public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId,

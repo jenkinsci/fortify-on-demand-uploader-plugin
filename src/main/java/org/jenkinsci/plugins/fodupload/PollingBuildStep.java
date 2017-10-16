@@ -20,15 +20,18 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
 
     private String bsiUrl;
     private int pollingInterval;
+    private int policyFailureBuildResultPreference;
     private boolean isPrettyLogging;
 
     @DataBoundConstructor
     public PollingBuildStep(String bsiUrl,
                             int pollingInterval,
+                            int policyFailureBuildResultPreference,
                             boolean isPrettyLogging) {
 
         this.bsiUrl = bsiUrl;
         this.pollingInterval = pollingInterval;
+        this.policyFailureBuildResultPreference = policyFailureBuildResultPreference;
         this.isPrettyLogging = isPrettyLogging;
     }
 
@@ -70,6 +73,10 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         return pollingInterval;
     }
 
+    public int getPolicyFailureBuildResultPreference() {
+        return this.policyFailureBuildResultPreference;
+    }
+
     public boolean getIsPrettyLogging() {
         return isPrettyLogging;
     }
@@ -93,6 +100,47 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         @Override
         public String getDisplayName() {
             return "Poll Fortify on Demand for Results";
+        }
+    }
+
+    public enum PolicyFailureBuildResultPreference {
+        None(0),
+        MarkUnstable(1),
+        MarkFailure(2);
+
+        private final int _val;
+
+        PolicyFailureBuildResultPreference(int val) {
+            this._val = val;
+        }
+
+        public int getValue() {
+            return this._val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case 2:
+                    return "Mark Failure";
+                case 1:
+                    return "Mark Unstable";
+                case 0:
+                default:
+                    return "Do nothing";
+            }
+        }
+
+        public static PolicyFailureBuildResultPreference fromInt(int val) {
+            switch (val) {
+                case 2:
+                    return MarkFailure;
+                case 1:
+                    return MarkUnstable;
+                case 0:
+                    return None;
+                default:
+                    return null;
+            }
         }
     }
 }
