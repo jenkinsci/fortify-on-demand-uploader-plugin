@@ -22,6 +22,8 @@ public class PollStatus {
     private int pollingInterval;
     private boolean isPrettyLogging;
 
+    private PrintStream logger;
+
     private List<LookupItemsModel> analysisStatusTypes = null;
 
     /**
@@ -32,10 +34,11 @@ public class PollStatus {
      * @param pollingInterval the polling interval in ???
      */
     @SuppressFBWarnings("URF_UNREAD_FIELD")
-    public PollStatus(FodApiConnection apiConnection, boolean isPrettyLogging, int pollingInterval) {
+    public PollStatus(FodApiConnection apiConnection, boolean isPrettyLogging, int pollingInterval, PrintStream logger) {
         this.apiConnection = apiConnection;
         this.pollingInterval = pollingInterval;
         this.isPrettyLogging = isPrettyLogging;
+        this.logger = logger;
     }
 
     /**
@@ -44,12 +47,13 @@ public class PollStatus {
      * @param releaseId release to poll
      * @return true if status is completed | cancelled.
      */
-    public boolean releaseStatus(final int releaseId) throws IOException, InterruptedException {
-        PrintStream logger = StaticAssessmentBuildStep.getLogger();
-        boolean finished = false; // default is failure
+    public PollReleaseStatusResult pollReleaseStatus(final int releaseId) throws IOException, InterruptedException {
+
+        boolean finished = false;
 
         LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection);
         ReleaseController releaseController = new ReleaseController(this.apiConnection);
+        PollReleaseStatusResult result = new PollReleaseStatusResult();
 
         while (!finished) {
             Thread.sleep(1000L * 60 * 1); // TODO: Use the interval here
@@ -92,70 +96,104 @@ public class PollStatus {
                         }
                     }
                 }
-                logger.println("Status: " + statusString);
+
+                logger.println("Poll Status: " + statusString);
+
                 if (finished) {
+                    result.setPassing(release.isPassed());
+                    result.setPollingSuccessful(true);
+                    if (!Utils.isNullOrEmpty(release.getPassFailReasonType()))
+                        result.setFailReason(release.getPassFailReasonType());
                     printPassFail(release);
                 }
             } else {
-                logger.println("getStatus failed 3 consecutive times terminating polling");
+                logger.println(String.format("Polling Failed %d times.  Terminating", MAX_FAILS));
                 finished = true;
             }
         }
 
-        return finished;
+        return result;
     }
 
     /**
-     * Prints some info about the release including a vuln breakdown and pass/fail reason
+     * Prints some info about the release including an issue breakdown and pass/fail reason
      *
-     * @param release release to print info on
+     * @param release release to print info for
      */
     private void printPassFail(ReleaseDTO release) {
-        PrintStream logger = StaticAssessmentBuildStep.getLogger();
-        try {
-            // Break if release is null
-            if (release == null) {
-                this.failCount++;
-                return;
-            }
-            boolean isPassed = release.isPassed();
-            logger.println("Pass/Fail status:       " + (isPassed ? "Passed" : "Failed"));
-            if (this.isPrettyLogging) {
-                if (!isPassed) {
-                    String passFailReason = release.getPassFailReasonType() == null ?
-                            "Pass/Fail Policy requirements not met " :
-                            release.getPassFailReasonType();
-                    logger.println("Failure Reason:         " + passFailReason);
-                } else {
-                    logger.println("Passed");
-                }
-                logger.println("Number of criticals:    " + release.getCritical());
-                logger.println("Number of highs:        " + release.getHigh());
-                logger.println("Number of mediums:      " + release.getMedium());
-                logger.println("Number of lows:         " + release.getLow());
 
+        boolean isPassed = release.isPassed();
+        logger.println("Pass/Fail status:       " + (isPassed ? "Passed" : "Failed"));
+        if (this.isPrettyLogging) {
+            if (!isPassed) {
+                String passFailReason = release.getPassFailReasonType() == null ?
+                        "Pass/Fail Policy requirements not met " :
+                        release.getPassFailReasonType();
+                logger.println("Failure Reason:         " + passFailReason);
             } else {
-                logger.println("------------------------------------------------------------------------------------");
-                logger.println("                        Fortify on Demand Assessment Results                        ");
-                logger.println("------------------------------------------------------------------------------------");
-                logger.println();
-                logger.println(String.format("Star Rating: %d out of 5 with %d total issue(s).", release.getRating(), release.getIssueCount()));
-                logger.println();
-                logger.println(String.format("Critical: %d", release.getCritical()));
-                logger.println(String.format("High:     %d", release.getHigh()));
-                logger.println(String.format("Medium:   %d", release.getMedium()));
-                logger.println(String.format("Low:      %d", release.getLow()));
-                logger.println();
-                logger.println("For application status details see the customer portal: ");
-                logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), release.getReleaseId()));
-                logger.println();
-                logger.println(String.format("Scan %s established policy check, marking build as %s.",
-                        isPassed ? "passed" : "failed", isPassed ? "stable" : "unstable"));
-                logger.println();
-                logger.println("------------------------------------------------------------------------------------");
+                logger.println("Passed");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            logger.println("Number of criticals:    " + release.getCritical());
+            logger.println("Number of highs:        " + release.getHigh());
+            logger.println("Number of mediums:      " + release.getMedium());
+            logger.println("Number of lows:         " + release.getLow());
+
+        } else {
+            logger.println("------------------------------------------------------------------------------------");
+            logger.println("                        Fortify on Demand Assessment Results                        ");
+            logger.println("------------------------------------------------------------------------------------");
+            logger.println();
+            logger.println(String.format("Star Rating: %d out of 5 with %d total issue(s).", release.getRating(), release.getIssueCount()));
+            logger.println();
+            logger.println(String.format("Critical: %d", release.getCritical()));
+            logger.println(String.format("High:     %d", release.getHigh()));
+            logger.println(String.format("Medium:   %d", release.getMedium()));
+            logger.println(String.format("Low:      %d", release.getLow()));
+            logger.println();
+            logger.println("For application status details see the customer portal: ");
+            logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), release.getReleaseId()));
+            logger.println();
+            logger.println(String.format("Scan %s established policy check, marking build as %s.",
+                    isPassed ? "passed" : "failed", isPassed ? "stable" : "unstable"));
+            logger.println();
+            logger.println("------------------------------------------------------------------------------------");
+        }
+    }
+
+    public class PollReleaseStatusResult {
+
+        private boolean isPollingSuccessful;
+        private boolean isPassing;
+        private String failReason;
+
+        public PollReleaseStatusResult() {
+
+        }
+
+        public boolean isPassing() {
+            return isPassing;
+        }
+
+        public void setPassing(boolean passing) {
+            isPassing = passing;
+        }
+
+        public String getFailReason() {
+            return failReason;
+        }
+
+        public void setFailReason(String failReason) {
+            this.failReason = failReason;
+        }
+
+        public boolean isPollingSuccessful() {
+            return isPollingSuccessful;
+        }
+
+        public void setPollingSuccessful(boolean pollingSuccessful) {
+            isPollingSuccessful = pollingSuccessful;
         }
     }
 }
+
+

@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.fodupload;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepMonitor;
@@ -42,13 +43,50 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                         @Nonnull TaskListener taskListener) throws InterruptedException, IOException {
 
         final PrintStream logger = taskListener.getLogger();
+
+        Result currentResult = run.getResult();
+        if (Result.FAILURE.equals(currentResult)
+                || Result.ABORTED.equals(currentResult)
+                || Result.UNSTABLE.equals(currentResult)) {
+
+            logger.println("Error: Build Failed or Unstable.  No reason to poll Fortify on Demand for results.");
+            return;
+        }
+
         FodApiConnection apiConnection = getDescriptor().createFodApiConnection();
 
         try {
             BsiUrl token = new BsiUrl(this.bsiUrl);
             if (this.getPollingInterval() > 0) {
-                PollStatus poller = new PollStatus(apiConnection, this.isPrettyLogging, this.pollingInterval);
-                boolean success = poller.releaseStatus(token.getProjectVersionId());
+                PollStatus poller = new PollStatus(apiConnection, this.isPrettyLogging, this.pollingInterval, logger);
+                PollStatus.PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
+
+                // if the polling fails, crash the build
+                if (!result.isPollingSuccessful()) {
+                    run.setResult(Result.FAILURE);
+                    return;
+                }
+
+                if (!result.isPassing()) {
+
+                    PolicyFailureBuildResultPreference pref = PolicyFailureBuildResultPreference.fromInt(this.policyFailureBuildResultPreference);
+
+                    switch (pref) {
+
+                        case MarkFailure:
+                            run.setResult(Result.FAILURE);
+                            break;
+
+                        case MarkUnstable:
+                            run.setResult(Result.UNSTABLE);
+                            break;
+
+                        case None:
+                        default:
+                            break;
+                    }
+                }
+
             }
         } catch (URISyntaxException e) {
             logger.println("Failed to parse BSI.");
@@ -137,9 +175,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                 case 1:
                     return MarkUnstable;
                 case 0:
-                    return None;
                 default:
-                    return null;
+                    return None;
             }
         }
     }
