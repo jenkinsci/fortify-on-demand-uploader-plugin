@@ -10,6 +10,8 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Recorder;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.models.BsiUrl;
+import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
+import org.jenkinsci.plugins.fodupload.polling.ScanStatusPoller;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -58,8 +60,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         try {
             BsiUrl token = new BsiUrl(this.bsiUrl);
             if (this.getPollingInterval() > 0) {
-                PollStatus poller = new PollStatus(apiConnection, this.isPrettyLogging, this.pollingInterval, logger);
-                PollStatus.PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
+                ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.isPrettyLogging, this.pollingInterval, logger);
+                PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
 
                 // if the polling fails, crash the build
                 if (!result.isPollingSuccessful()) {

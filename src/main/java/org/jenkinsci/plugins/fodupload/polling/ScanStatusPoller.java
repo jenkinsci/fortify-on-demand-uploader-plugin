@@ -1,6 +1,8 @@
-package org.jenkinsci.plugins.fodupload;
+package org.jenkinsci.plugins.fodupload.polling;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
 import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
@@ -13,7 +15,7 @@ import java.util.List;
 
 import static org.jenkinsci.plugins.fodupload.models.FodEnums.APILookupItemTypes;
 
-public class PollStatus {
+public class ScanStatusPoller {
 
     private final static int MAX_FAILS = 3;
 
@@ -35,7 +37,7 @@ public class PollStatus {
      * @param logger the PrintStream that will be logged to
      */
     @SuppressFBWarnings("URF_UNREAD_FIELD")
-    public PollStatus(FodApiConnection apiConnection, boolean isPrettyLogging, int pollingInterval, PrintStream logger) {
+    public ScanStatusPoller(FodApiConnection apiConnection, boolean isPrettyLogging, int pollingInterval, PrintStream logger) {
         this.apiConnection = apiConnection;
         this.pollingInterval = pollingInterval;
         this.isPrettyLogging = isPrettyLogging;
@@ -157,41 +159,6 @@ public class PollStatus {
             logger.println(String.format("Scan %s established policy check", isPassed ? "passed" : "failed"));
             logger.println();
             logger.println("------------------------------------------------------------------------------------");
-        }
-    }
-
-    public class PollReleaseStatusResult {
-
-        private boolean isPollingSuccessful;
-        private boolean isPassing;
-        private String failReason;
-
-        public PollReleaseStatusResult() {
-
-        }
-
-        public boolean isPassing() {
-            return isPassing;
-        }
-
-        public void setPassing(boolean passing) {
-            isPassing = passing;
-        }
-
-        public String getFailReason() {
-            return failReason;
-        }
-
-        public void setFailReason(String failReason) {
-            this.failReason = failReason;
-        }
-
-        public boolean isPollingSuccessful() {
-            return isPollingSuccessful;
-        }
-
-        public void setPollingSuccessful(boolean pollingSuccessful) {
-            isPollingSuccessful = pollingSuccessful;
         }
     }
 }
