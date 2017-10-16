@@ -110,7 +110,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             }
 
             apiConnection.authenticate();
-            StaticScanController staticScanController = new StaticScanController(apiConnection);
+            StaticScanController staticScanController = new StaticScanController(apiConnection, logger);
             boolean success = staticScanController.startStaticScan(model);
             boolean deleted = payload.delete();
 
@@ -133,15 +133,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 }
             }
         }
-    }
-
-    /**
-     * Gets the out for the build console output
-     *
-     * @return Task Listener object
-     */
-    public static PrintStream getLogger() {
-        return taskListener.get().getLogger();
     }
 
     // Overridden for better type safety.

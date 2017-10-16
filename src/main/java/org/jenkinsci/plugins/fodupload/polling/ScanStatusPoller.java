@@ -26,8 +26,6 @@ public class ScanStatusPoller {
 
     private PrintStream logger;
 
-    private List<LookupItemsModel> analysisStatusTypes = null;
-
     /**
      * Constructor
      *
@@ -52,12 +50,12 @@ public class ScanStatusPoller {
      */
     public PollReleaseStatusResult pollReleaseStatus(final int releaseId) throws IOException, InterruptedException {
 
-        boolean finished = false;
-
         LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection);
         ReleaseController releaseController = new ReleaseController(this.apiConnection);
         PollReleaseStatusResult result = new PollReleaseStatusResult();
+        List<LookupItemsModel> analysisStatusTypes = null;
 
+        boolean finished = false;
         while (!finished) {
             Thread.sleep(1000L * 60 * 1); // TODO: Use the interval here
             // Get the status of the release

@@ -83,8 +83,6 @@ public class FodApiConnection {
      */
     public void retireToken() throws IOException {
 
-        PrintStream logger = StaticAssessmentBuildStep.getLogger();
-
         Request request = new Request.Builder()
                 .url(baseUrl + "/oauth/retireToken")
                 .addHeader("Authorization", "Bearer " + token)
@@ -101,7 +99,6 @@ public class FodApiConnection {
             JsonObject obj = parser.parse(content).getAsJsonObject();
             String messageResponse = obj.get("message").getAsString();
 
-            logger.println("Retiring Token : " + messageResponse);
             token = null;
         }
     }

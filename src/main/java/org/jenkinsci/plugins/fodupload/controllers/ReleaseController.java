@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReleaseController extends ControllerBase {
+
     /**
      * Constructor
      *
@@ -88,7 +89,6 @@ public class ReleaseController extends ControllerBase {
      */
     public ReleaseDTO getRelease(final int releaseId, final String fields) throws IOException {
 
-        PrintStream logger = StaticAssessmentBuildStep.getLogger();
         String url = apiConnection.getBaseUrl() + "/apiConnection/v3/releases?filters=releaseId:" + releaseId;
 
         if (apiConnection.getToken() == null)
@@ -106,7 +106,6 @@ public class ReleaseController extends ControllerBase {
         Response response = apiConnection.getClient().newCall(request).execute();
 
         if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
-            logger.println("Token expired re-authorizing");
             // Re-authenticate
             apiConnection.authenticate();
         }
