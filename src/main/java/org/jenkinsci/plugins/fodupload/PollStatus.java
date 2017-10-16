@@ -153,8 +153,7 @@ public class PollStatus {
             logger.println("For application status details see the customer portal: ");
             logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), release.getReleaseId()));
             logger.println();
-            logger.println(String.format("Scan %s established policy check, marking build as %s.",
-                    isPassed ? "passed" : "failed", isPassed ? "stable" : "unstable"));
+            logger.println(String.format("Scan %s established policy check", isPassed ? "passed" : "failed"));
             logger.println();
             logger.println("------------------------------------------------------------------------------------");
         }
