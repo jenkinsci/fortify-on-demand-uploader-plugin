@@ -55,6 +55,8 @@ public class ScanStatusPoller {
         PollReleaseStatusResult result = new PollReleaseStatusResult();
         List<LookupItemsModel> analysisStatusTypes = null;
 
+        logger.println("Begin polling Fortify on Demand for results.");
+
         boolean finished = false;
         while (!finished) {
             Thread.sleep(1000L * 60 * 1); // TODO: Use the interval here

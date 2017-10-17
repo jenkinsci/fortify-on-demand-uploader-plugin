@@ -11,6 +11,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import jenkins.model.GlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
@@ -27,8 +28,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
     private JobModel model;
-
-    private @Inject FodGlobalDescriptor globalDescriptor;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
@@ -107,10 +106,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             model.setPayload(payload);
 
             // Load apiConnection settings
-
-
-
-            apiConnection = this.globalDescriptor.createFodApiConnection();
+            apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();
 
             if (apiConnection == null) {
                 logger.println("Error: Failed to create a connection with Fortify API");

@@ -11,6 +11,8 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import jenkins.model.GlobalConfiguration;
+import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.models.BsiUrl;
 import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
@@ -29,8 +31,6 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     private int pollingInterval;
     private int policyFailureBuildResultPreference;
     private boolean isPrettyLogging;
-
-    private @Inject FodGlobalDescriptor globalDescriptor;
 
     @DataBoundConstructor
     public PollingBuildStep(String bsiUrl,
@@ -62,41 +62,46 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
             return;
         }
 
-        FodApiConnection apiConnection = this.globalDescriptor.createFodApiConnection();
+        if (this.getPollingInterval() <= 0) {
+            logger.println("Error: Invalid polling interval (" + this.getPollingInterval() + " minutes)");
+            run.setResult(Result.UNSTABLE);
+        }
+
+
+        FodApiConnection apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();
 
         try {
             BsiUrl token = new BsiUrl(this.bsiUrl);
-            if (this.getPollingInterval() > 0) {
-                ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.isPrettyLogging, this.pollingInterval, logger);
-                PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
 
-                // if the polling fails, crash the build
-                if (!result.isPollingSuccessful()) {
-                    run.setResult(Result.FAILURE);
-                    return;
-                }
+            ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.isPrettyLogging, this.pollingInterval, logger);
+            PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
 
-                if (!result.isPassing()) {
-
-                    PolicyFailureBuildResultPreference pref = PolicyFailureBuildResultPreference.fromInt(this.policyFailureBuildResultPreference);
-
-                    switch (pref) {
-
-                        case MarkFailure:
-                            run.setResult(Result.FAILURE);
-                            break;
-
-                        case MarkUnstable:
-                            run.setResult(Result.UNSTABLE);
-                            break;
-
-                        case None:
-                        default:
-                            break;
-                    }
-                }
-
+            // if the polling fails, crash the build
+            if (!result.isPollingSuccessful()) {
+                run.setResult(Result.FAILURE);
+                return;
             }
+
+            if (!result.isPassing()) {
+
+                PolicyFailureBuildResultPreference pref = PolicyFailureBuildResultPreference.fromInt(this.policyFailureBuildResultPreference);
+
+                switch (pref) {
+
+                    case MarkFailure:
+                        run.setResult(Result.FAILURE);
+                        break;
+
+                    case MarkUnstable:
+                        run.setResult(Result.UNSTABLE);
+                        break;
+
+                    case None:
+                    default:
+                        break;
+                }
+            }
+
         } catch (URISyntaxException e) {
             logger.println("Failed to parse BSI.");
             e.printStackTrace(logger);
