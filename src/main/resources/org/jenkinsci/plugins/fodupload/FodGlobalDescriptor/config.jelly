@@ -11,7 +11,7 @@
     </f:section>
 
     <f:advanced title="Advanced Settings">
-        <f:entry title="Fortify on Demand URL" description="Link to HP FOD" field="baseUrl">
+        <f:entry title="Fortify on Demand URL" description="ex. https://ams.fortify.com" field="baseUrl">
             <f:textbox default="https://ams.fortify.com"/>
         </f:entry>
 
