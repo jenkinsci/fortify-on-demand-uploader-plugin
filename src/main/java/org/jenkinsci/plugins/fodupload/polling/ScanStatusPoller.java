@@ -32,7 +32,7 @@ public class ScanStatusPoller {
      * @param apiConnection   apiConnection connection to use
      * @param isPrettyLogging enables fancier formatting for logs
      * @param pollingInterval the polling interval in minutes
-     * @param logger the PrintStream that will be logged to
+     * @param logger          the PrintStream that will be logged to
      */
     @SuppressFBWarnings("URF_UNREAD_FIELD")
     public ScanStatusPoller(FodApiConnection apiConnection, boolean isPrettyLogging, int pollingInterval, PrintStream logger) {
@@ -69,7 +69,7 @@ public class ScanStatusPoller {
 
             // Get the status of the release
             ReleaseDTO release = releaseController.getRelease(releaseId,
-                    "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low", logger);
+                    "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low");
 
             if (release == null) {
                 failCount++;

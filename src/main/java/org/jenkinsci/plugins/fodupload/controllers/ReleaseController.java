@@ -38,7 +38,7 @@ public class ReleaseController extends ControllerBase {
      * @param fields    fields to return
      * @return ReleaseDTO object with given fields
      */
-    public ReleaseDTO getRelease(final int releaseId, final String fields, final PrintStream logger) throws IOException {
+    public ReleaseDTO getRelease(final int releaseId, final String fields) throws IOException {
 
         // TODO: Investigate why the endpoint for a release wasn't used
         String url = apiConnection.getApiUrl() + "/api/v3/releases?filters=releaseId:" + releaseId;
@@ -71,8 +71,8 @@ public class ReleaseController extends ControllerBase {
 
         Gson gson = new Gson();
         // Create a type of GenericList<ReleaseDTO> to play nice with gson.
-        Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() { }.getType();
-        logger.println(content);
+        Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() {
+        }.getType();
         GenericListResponse<ReleaseDTO> results = gson.fromJson(content, t);
         return results.getItems().get(0);
     }
