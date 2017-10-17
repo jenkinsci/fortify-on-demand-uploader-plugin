@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReleaseController extends ControllerBase {
+
     /**
      * Constructor
      *
@@ -28,55 +29,6 @@ public class ReleaseController extends ControllerBase {
      */
     public ReleaseController(FodApiConnection apiConnection) {
         super(apiConnection);
-    }
-
-    /**
-     * Get list of releases for a given application
-     *
-     * @param applicationId application to get releases of
-     * @return List of releases
-     */
-    public List<ReleaseDTO> getReleases(final int applicationId) throws IOException {
-
-        int offset = 0, resultSize = apiConnection.MAX_SIZE;
-        List<ReleaseDTO> releaseList = new ArrayList<>();
-
-        // Pagination. Will continue until the results are less than the MAX_SIZE, which indicates that you've
-        // hit the end of the results.
-        while (resultSize == apiConnection.MAX_SIZE) {
-            String url = apiConnection.getBaseUrl() + "/apiConnection/v3/applications/" + applicationId + "/releases?" +
-                    "offset=" + offset + "&limit=" + apiConnection.MAX_SIZE;
-
-            if (apiConnection.getToken() == null)
-                apiConnection.authenticate();
-
-            Request request = new Request.Builder()
-                    .url(url)
-                    .addHeader("Authorization", "Bearer " + apiConnection.getToken())
-                    .get()
-                    .build();
-            Response response = apiConnection.getClient().newCall(request).execute();
-
-            if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
-                // Re-authenticate
-                apiConnection.authenticate();
-            }
-
-            // Read the results and close the response
-            String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-            response.body().close();
-
-            Gson gson = new Gson();
-            Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() {
-            }.getType();
-            GenericListResponse<ReleaseDTO> results = gson.fromJson(content, t);
-
-            resultSize = results.getItems().size();
-            offset += apiConnection.MAX_SIZE;
-            releaseList.addAll(results.getItems());
-        }
-        return releaseList;
-
     }
 
     /**
@@ -88,15 +40,18 @@ public class ReleaseController extends ControllerBase {
      */
     public ReleaseDTO getRelease(final int releaseId, final String fields) throws IOException {
 
-        PrintStream logger = StaticAssessmentBuildStep.getLogger();
-        String url = apiConnection.getBaseUrl() + "/apiConnection/v3/releases?filters=releaseId:" + releaseId;
+        // TODO: Investigate why the endpoint for a release wasn't used
+        String url = apiConnection.getApiUrl() + "/api/v3/releases?filters=releaseId:" + releaseId;
 
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
 
         if (fields.length() > 0) {
-            url += "&fields=" + fields + "&limit=1";
+            url += "&fields=" + fields;
         }
+
+        url += "&limit=1";
+
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
@@ -106,7 +61,6 @@ public class ReleaseController extends ControllerBase {
         Response response = apiConnection.getClient().newCall(request).execute();
 
         if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
-            logger.println("Token expired re-authorizing");
             // Re-authenticate
             apiConnection.authenticate();
         }
@@ -137,8 +91,8 @@ public class ReleaseController extends ControllerBase {
 
         // encode these before we put them on the URL since we're not using the URL builder
         filters = URLEncoder.encode(filters, "UTF-8");
-        String url = String.format("%s/apiConnection/v3/releases/%s/assessment-types?scanType=1&filters=%s",
-                apiConnection.getBaseUrl(),
+        String url = String.format("%s/api/v3/releases/%s/assessment-types?scanType=1&filters=%s",
+                apiConnection.getApiUrl(),
                 model.getBsiUrl().getProjectVersionId(),
                 filters);
 

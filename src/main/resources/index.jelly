@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
 
 <div>
-    This plugin uploads code and libraries to HP Fortify on Demand.
+    This plugin uploads code and libraries to Fortify on Demand.
 </div>

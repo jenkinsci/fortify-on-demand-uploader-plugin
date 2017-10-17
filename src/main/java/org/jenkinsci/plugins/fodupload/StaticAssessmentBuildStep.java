@@ -1,19 +1,25 @@
 package org.jenkinsci.plugins.fodupload;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import jenkins.model.GlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -52,6 +58,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
     // logic run during a build
     @Override
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
 
@@ -101,16 +108,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             model.setPayload(payload);
 
             // Load apiConnection settings
-            apiConnection = getDescriptor().createFodApiConnection();
-
-            if (apiConnection == null) {
-                logger.println("Error: Failed to create a connection with Fortify API");
-                build.setResult(Result.UNSTABLE);
-                return;
-            }
-
+            apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();
             apiConnection.authenticate();
-            StaticScanController staticScanController = new StaticScanController(apiConnection);
+            StaticScanController staticScanController = new StaticScanController(apiConnection, logger);
             boolean success = staticScanController.startStaticScan(model);
             boolean deleted = payload.delete();
 
@@ -135,15 +135,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         }
     }
 
-    /**
-     * Gets the out for the build console output
-     *
-     * @return Task Listener object
-     */
-    public static PrintStream getLogger() {
-        return taskListener.get().getLogger();
-    }
-
     // Overridden for better type safety.
     // If your plugin doesn't really define any property on Descriptor,
     // you don't have to do this.
@@ -158,7 +149,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @Extension
-    public static final class StaticAssessmentStepDescriptor extends FodDescriptor {
+
+    public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {
         /**
          * In order to load the persisted global configuration, you have to
          * call load() in the constructor.
@@ -167,6 +159,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         public StaticAssessmentStepDescriptor() {
             super();
             load();
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+            return true;
         }
 
         @Override

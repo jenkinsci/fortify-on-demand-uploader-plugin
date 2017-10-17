@@ -21,6 +21,7 @@ public class FodApiConnection {
     public final static int MAX_SIZE = 50;
 
     private String baseUrl;
+    private String apiUrl;
     private OkHttpClient client;
     private String token;
 
@@ -36,10 +37,11 @@ public class FodApiConnection {
      * @param secret  apiConnection secret
      * @param baseUrl apiConnection url
      */
-    public FodApiConnection(final String key, final String secret, final String baseUrl) {
+    public FodApiConnection(final String key, final String secret, final String baseUrl, final String apiUrl) {
         this.key = key;
         this.secret = secret;
         this.baseUrl = baseUrl;
+        this.apiUrl = apiUrl;
 
         Jenkins instance = Jenkins.getInstance();
         if (instance != null)
@@ -54,14 +56,14 @@ public class FodApiConnection {
     public void authenticate() throws IOException {
 
         RequestBody formBody = new FormBody.Builder()
-                .add("scope", "apiConnection-tenant")
+                .add("scope", "api-tenant")
                 .add("grant_type", "client_credentials")
                 .add("client_id", key)
                 .add("client_secret", secret)
                 .build();
 
         Request request = new Request.Builder()
-                .url(baseUrl + "/oauth/token")
+                .url(apiUrl + "/oauth/token")
                 .post(formBody)
                 .build();
         Response response = client.newCall(request).execute();
@@ -83,25 +85,15 @@ public class FodApiConnection {
      */
     public void retireToken() throws IOException {
 
-        PrintStream logger = StaticAssessmentBuildStep.getLogger();
-
         Request request = new Request.Builder()
-                .url(baseUrl + "/oauth/retireToken")
+                .url(apiUrl + "/oauth/retireToken")
                 .addHeader("Authorization", "Bearer " + token)
                 .get()
                 .build();
         Response response = client.newCall(request).execute();
 
         if (response.isSuccessful()) {
-            // Read the results and close the response
-            String content = IOUtils.toString(response.body().byteStream(), "utf-8");
             response.body().close();
-
-            JsonParser parser = new JsonParser();
-            JsonObject obj = parser.parse(content).getAsJsonObject();
-            String messageResponse = obj.get("message").getAsString();
-
-            logger.println("Retiring Token : " + messageResponse);
             token = null;
         }
     }
@@ -149,6 +141,10 @@ public class FodApiConnection {
 
     public String getBaseUrl() {
         return baseUrl;
+    }
+
+    public String getApiUrl() {
+        return apiUrl;
     }
 
     public OkHttpClient getClient() {

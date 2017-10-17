@@ -1,11 +1,12 @@
 package org.jenkinsci.plugins.fodupload;
 
-
+import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.model.GlobalConfiguration;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.kohsuke.stapler.QueryParameter;
@@ -13,14 +14,17 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 
-public class FodDescriptor extends BuildStepDescriptor<Publisher> {
+@Extension
+public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String CLIENT_ID = "clientId";
     private static final String CLIENT_SECRET = "clientSecret";
     private static final String BASE_URL = "baseUrl";
+    private static final String API_URL = "apiUrl";
 
     private String clientId;
     private String clientSecret;
     private String baseUrl;
+    private String apiUrl;
 
     // On save.
     @Override
@@ -28,16 +32,11 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
         clientId = formData.getString(CLIENT_ID);
         clientSecret = formData.getString(CLIENT_SECRET);
         baseUrl = formData.getString(BASE_URL);
+        apiUrl = formData.getString(API_URL);
 
         save();
 
         return super.configure(req, formData);
-    }
-
-    @Override
-    public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-        // Indicates that this builder can be used with all kinds of project types
-        return true;
     }
 
     // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
@@ -63,9 +62,23 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
     }
 
     @SuppressWarnings("unused")
+    public String getApiUrl() {
+        return apiUrl;
+    }
+
+    @SuppressWarnings("unused")
     public ListBoxModel doFillEntitlementPreferenceItems() {
         ListBoxModel items = new ListBoxModel();
         for (FodEnums.EntitlementPreferenceType preferenceType : FodEnums.EntitlementPreferenceType.values()) {
+            items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
+        }
+
+        return items;
+    }
+
+    public ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (PollingBuildStep.PolicyFailureBuildResultPreference preferenceType : PollingBuildStep.PolicyFailureBuildResultPreference.values()) {
             items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
         }
 
@@ -76,15 +89,18 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
     public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId,
                                            @QueryParameter(CLIENT_SECRET) final String clientSecret,
-                                           @QueryParameter(BASE_URL) final String baseUrl) {
+                                           @QueryParameter(BASE_URL) final String baseUrl,
+                                           @QueryParameter(API_URL) final String apiUrl) {
         if (Utils.isNullOrEmpty(clientId))
             return FormValidation.error("API Key is empty!");
         if (Utils.isNullOrEmpty(clientSecret))
             return FormValidation.error("Secret Key is empty!");
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
+        if (Utils.isNullOrEmpty(apiUrl))
+            return FormValidation.error("Fortify on Demand API URL is empty!");
 
-        FodApiConnection testApi = new FodApiConnection(clientId, clientSecret, baseUrl);
+        FodApiConnection testApi = new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl);
 
         try {
             testApi.authenticate();
@@ -105,12 +121,15 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
 
     FodApiConnection createFodApiConnection() {
 
-        if (Utils.isNullOrEmpty(clientId)
-                || Utils.isNullOrEmpty(clientSecret)
-                || Utils.isNullOrEmpty(baseUrl)) {
-            return null;
-        }
+        if (Utils.isNullOrEmpty(clientId))
+            throw new NullPointerException("Client ID is null.");
+        if (Utils.isNullOrEmpty(clientSecret))
+            throw new NullPointerException("Client Secret is null.");
+        if (Utils.isNullOrEmpty(baseUrl))
+            throw new NullPointerException("Base URL is null.");
+        if (Utils.isNullOrEmpty(apiUrl))
+            throw new NullPointerException("Api URL is null.");
 
-        return new FodApiConnection(clientId, clientSecret, baseUrl);
+        return new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl);
     }
 }

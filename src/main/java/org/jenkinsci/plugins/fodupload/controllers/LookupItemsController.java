@@ -35,7 +35,7 @@ public class LookupItemsController extends ControllerBase {
             apiConnection.authenticate();
 
         Request request = new Request.Builder()
-                .url(apiConnection.getBaseUrl() + "/apiConnection/v3/lookup-items?type=" + type.toString())
+                .url(apiConnection.getApiUrl() + "/api/v3/lookup-items?type=" + type.toString())
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
                 .get()

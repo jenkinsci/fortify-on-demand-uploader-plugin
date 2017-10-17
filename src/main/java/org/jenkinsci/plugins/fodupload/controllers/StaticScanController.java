@@ -23,14 +23,16 @@ import java.util.Arrays;
 public class StaticScanController extends ControllerBase {
 
     private final static int CHUNK_SIZE = 1024 * 1024;
+    private PrintStream logger;
 
     /**
      * Constructor
      *
      * @param apiConnection apiConnection object with client info
      */
-    public StaticScanController(final FodApiConnection apiConnection) {
+    public StaticScanController(final FodApiConnection apiConnection, final PrintStream logger) {
         super(apiConnection);
+        this.logger = logger;
     }
 
     /**
@@ -42,8 +44,6 @@ public class StaticScanController extends ControllerBase {
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
     public boolean startStaticScan(final JobModel uploadRequest) {
-
-        final PrintStream logger = StaticAssessmentBuildStep.getLogger();
 
         PostStartScanResponse scanStartedResponse = null;
 
@@ -68,7 +68,7 @@ public class StaticScanController extends ControllerBase {
             }
 
             // Build 'static' portion of url
-            String fragUrl = apiConnection.getBaseUrl() + "/apiConnection/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
+            String fragUrl = apiConnection.getApiUrl() + "/api/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
                     "/static-scans/start-scan?";
             fragUrl += "assessmentTypeId=" + uploadRequest.getBsiUrl().getAssessmentTypeId();
             fragUrl += "&technologyStack=" + uploadRequest.getBsiUrl().getTechnologyStack();
