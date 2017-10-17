@@ -21,6 +21,7 @@ public class FodApiConnection {
     public final static int MAX_SIZE = 50;
 
     private String baseUrl;
+    private String apiUrl;
     private OkHttpClient client;
     private String token;
 
@@ -36,10 +37,11 @@ public class FodApiConnection {
      * @param secret  apiConnection secret
      * @param baseUrl apiConnection url
      */
-    public FodApiConnection(final String key, final String secret, final String baseUrl) {
+    public FodApiConnection(final String key, final String secret, final String baseUrl, final String apiUrl) {
         this.key = key;
         this.secret = secret;
         this.baseUrl = baseUrl;
+        this.apiUrl = apiUrl;
 
         Jenkins instance = Jenkins.getInstance();
         if (instance != null)
@@ -61,7 +63,7 @@ public class FodApiConnection {
                 .build();
 
         Request request = new Request.Builder()
-                .url(baseUrl + "/oauth/token")
+                .url(apiUrl + "/oauth/token")
                 .post(formBody)
                 .build();
         Response response = client.newCall(request).execute();
@@ -84,7 +86,7 @@ public class FodApiConnection {
     public void retireToken() throws IOException {
 
         Request request = new Request.Builder()
-                .url(baseUrl + "/oauth/retireToken")
+                .url(apiUrl + "/oauth/retireToken")
                 .addHeader("Authorization", "Bearer " + token)
                 .get()
                 .build();
@@ -146,6 +148,10 @@ public class FodApiConnection {
 
     public String getBaseUrl() {
         return baseUrl;
+    }
+
+    public String getApiUrl() {
+        return apiUrl;
     }
 
     public OkHttpClient getClient() {

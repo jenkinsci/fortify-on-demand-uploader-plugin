@@ -19,10 +19,12 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String CLIENT_ID = "clientId";
     private static final String CLIENT_SECRET = "clientSecret";
     private static final String BASE_URL = "baseUrl";
+    private static final String API_URL = "apiUrl";
 
     private String clientId;
     private String clientSecret;
     private String baseUrl;
+    private String apiUrl;
 
     // On save.
     @Override
@@ -30,6 +32,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         clientId = formData.getString(CLIENT_ID);
         clientSecret = formData.getString(CLIENT_SECRET);
         baseUrl = formData.getString(BASE_URL);
+        apiUrl = formData.getString(API_URL);
 
         save();
 
@@ -59,6 +62,11 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     }
 
     @SuppressWarnings("unused")
+    public String getApiUrl() {
+        return apiUrl;
+    }
+
+    @SuppressWarnings("unused")
     public ListBoxModel doFillEntitlementPreferenceItems() {
         ListBoxModel items = new ListBoxModel();
         for (FodEnums.EntitlementPreferenceType preferenceType : FodEnums.EntitlementPreferenceType.values()) {
@@ -81,15 +89,18 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
     public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId,
                                            @QueryParameter(CLIENT_SECRET) final String clientSecret,
-                                           @QueryParameter(BASE_URL) final String baseUrl) {
+                                           @QueryParameter(BASE_URL) final String baseUrl,
+                                           @QueryParameter(API_URL) final String apiUrl) {
         if (Utils.isNullOrEmpty(clientId))
             return FormValidation.error("API Key is empty!");
         if (Utils.isNullOrEmpty(clientSecret))
             return FormValidation.error("Secret Key is empty!");
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
+        if (Utils.isNullOrEmpty(apiUrl))
+            return FormValidation.error("Fortify on Demand API URL is empty!");
 
-        FodApiConnection testApi = new FodApiConnection(clientId, clientSecret, baseUrl);
+        FodApiConnection testApi = new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl);
 
         try {
             testApi.authenticate();
@@ -116,7 +127,9 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
             throw new NullPointerException("Client Secret is null.");
         if (Utils.isNullOrEmpty(baseUrl))
             throw new NullPointerException("Base URL is null.");
+        if (Utils.isNullOrEmpty(apiUrl))
+            throw new NullPointerException("Api URL is null.");
 
-        return new FodApiConnection(clientId, clientSecret, baseUrl);
+        return new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl);
     }
 }

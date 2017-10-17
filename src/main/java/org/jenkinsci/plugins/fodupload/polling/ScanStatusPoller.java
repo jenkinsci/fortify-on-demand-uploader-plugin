@@ -58,11 +58,18 @@ public class ScanStatusPoller {
         logger.println("Begin polling Fortify on Demand for results.");
 
         boolean finished = false;
+        int counter = 0;
+
         while (!finished) {
-            Thread.sleep(1000L * 60 * this.pollingInterval);
+
+            // don't sleep the first round
+            if (counter == 0)
+                Thread.sleep(1000L * 60 * this.pollingInterval);
+            counter++;
+
             // Get the status of the release
             ReleaseDTO release = releaseController.getRelease(releaseId,
-                    "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low");
+                    "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low", logger);
 
             if (release == null) {
                 failCount++;
@@ -100,7 +107,7 @@ public class ScanStatusPoller {
                     }
                 }
 
-                logger.println("Poll Status: " + statusString);
+                logger.println(counter + ") Poll Status: " + statusString);
 
                 if (finished) {
                     result.setPassing(release.isPassed());

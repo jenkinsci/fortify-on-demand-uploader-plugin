@@ -15,7 +15,11 @@
             <f:textbox default="https://ams.fortify.com"/>
         </f:entry>
 
+        <f:entry title="Fortify on Demand API URL" description="ex. https://api.ams.fortify.com" field="apiUrl">
+            <f:textbox default="https://api.ams.fortify.com"/>
+        </f:entry>
+
         <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
-                          method="testConnection" with="clientId,clientSecret,baseUrl"/>
+                          method="testConnection" with="clientId,clientSecret,baseUrl,apiUrl"/>
     </f:advanced>
 </j:jelly>

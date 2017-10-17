@@ -72,7 +72,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
 
         try {
             BsiUrl token = new BsiUrl(this.bsiUrl);
-
+            apiConnection.authenticate();
             ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.isPrettyLogging, this.pollingInterval, logger);
             PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
 

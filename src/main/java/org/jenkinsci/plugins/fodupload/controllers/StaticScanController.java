@@ -68,7 +68,7 @@ public class StaticScanController extends ControllerBase {
             }
 
             // Build 'static' portion of url
-            String fragUrl = apiConnection.getBaseUrl() + "/apiConnection/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
+            String fragUrl = apiConnection.getApiUrl() + "/api/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
                     "/static-scans/start-scan?";
             fragUrl += "assessmentTypeId=" + uploadRequest.getBsiUrl().getAssessmentTypeId();
             fragUrl += "&technologyStack=" + uploadRequest.getBsiUrl().getTechnologyStack();
