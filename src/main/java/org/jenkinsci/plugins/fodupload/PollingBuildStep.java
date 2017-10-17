@@ -3,10 +3,13 @@ package org.jenkinsci.plugins.fodupload;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.models.BsiUrl;
@@ -15,6 +18,7 @@ import org.jenkinsci.plugins.fodupload.polling.ScanStatusPoller;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
@@ -25,6 +29,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     private int pollingInterval;
     private int policyFailureBuildResultPreference;
     private boolean isPrettyLogging;
+
+    private @Inject FodGlobalDescriptor globalDescriptor;
 
     @DataBoundConstructor
     public PollingBuildStep(String bsiUrl,
@@ -39,6 +45,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     }
 
     @Override
+
     public void perform(@Nonnull Run<?, ?> run,
                         @Nonnull FilePath filePath,
                         @Nonnull Launcher launcher,
@@ -55,7 +62,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
             return;
         }
 
-        FodApiConnection apiConnection = getDescriptor().createFodApiConnection();
+        FodApiConnection apiConnection = this.globalDescriptor.createFodApiConnection();
 
         try {
             BsiUrl token = new BsiUrl(this.bsiUrl);
@@ -130,11 +137,16 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     }
 
     @Extension
-    public static final class PollingStepDescriptor extends FodDescriptor {
+    public static final class PollingStepDescriptor extends BuildStepDescriptor<Publisher> {
 
         public PollingStepDescriptor() {
             super();
             load();
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+            return true;
         }
 
         @Override

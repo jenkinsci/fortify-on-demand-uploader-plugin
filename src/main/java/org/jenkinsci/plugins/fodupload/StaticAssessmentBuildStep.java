@@ -3,10 +3,13 @@ package org.jenkinsci.plugins.fodupload;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
@@ -14,6 +17,7 @@ import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -23,6 +27,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
     private JobModel model;
+
+    private @Inject FodGlobalDescriptor globalDescriptor;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
@@ -101,7 +107,10 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             model.setPayload(payload);
 
             // Load apiConnection settings
-            apiConnection = getDescriptor().createFodApiConnection();
+
+
+
+            apiConnection = this.globalDescriptor.createFodApiConnection();
 
             if (apiConnection == null) {
                 logger.println("Error: Failed to create a connection with Fortify API");
@@ -149,7 +158,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @Extension
-    public static final class StaticAssessmentStepDescriptor extends FodDescriptor {
+
+    public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {
         /**
          * In order to load the persisted global configuration, you have to
          * call load() in the constructor.
@@ -158,6 +168,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         public StaticAssessmentStepDescriptor() {
             super();
             load();
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+            return true;
         }
 
         @Override

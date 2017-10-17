@@ -1,11 +1,12 @@
 package org.jenkinsci.plugins.fodupload;
 
-
+import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.model.GlobalConfiguration;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.kohsuke.stapler.QueryParameter;
@@ -13,7 +14,8 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 
-public class FodDescriptor extends BuildStepDescriptor<Publisher> {
+@Extension
+public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String CLIENT_ID = "clientId";
     private static final String CLIENT_SECRET = "clientSecret";
     private static final String BASE_URL = "baseUrl";
@@ -32,12 +34,6 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
         save();
 
         return super.configure(req, formData);
-    }
-
-    @Override
-    public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-        // Indicates that this builder can be used with all kinds of project types
-        return true;
     }
 
     // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
@@ -74,8 +70,8 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
 
     public ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
         ListBoxModel items = new ListBoxModel();
-        for (PollingBuildStep.PolicyFailureBuildResultPreference preference : PollingBuildStep.PolicyFailureBuildResultPreference.values()) {
-            items.add(new ListBoxModel.Option(preference.toString(), String.valueOf(preference.getValue())));
+        for (PollingBuildStep.PolicyFailureBuildResultPreference preferenceType : PollingBuildStep.PolicyFailureBuildResultPreference.values()) {
+            items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
         }
 
         return items;
@@ -114,11 +110,12 @@ public class FodDescriptor extends BuildStepDescriptor<Publisher> {
 
     FodApiConnection createFodApiConnection() {
 
-        if (Utils.isNullOrEmpty(clientId)
-                || Utils.isNullOrEmpty(clientSecret)
-                || Utils.isNullOrEmpty(baseUrl)) {
-            return null;
-        }
+        if (Utils.isNullOrEmpty(clientId))
+            throw new NullPointerException("Client ID is null.");
+        if (Utils.isNullOrEmpty(clientSecret))
+            throw new NullPointerException("Client Secret is null.");
+        if (Utils.isNullOrEmpty(baseUrl))
+            throw new NullPointerException("Base URL is null.");
 
         return new FodApiConnection(clientId, clientSecret, baseUrl);
     }

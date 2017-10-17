@@ -15,9 +15,6 @@
             <f:textbox default="https://ams.fortify.com"/>
         </f:entry>
 
-        <f:entry title="Poll Fortify on Demand for results" field="doPollFortify">
-            <f:checkbox/>
-        </f:entry>
         <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
                           method="testConnection" with="clientId,clientSecret,baseUrl"/>
     </f:advanced>
