@@ -59,7 +59,7 @@ public class ScanStatusPoller {
 
         boolean finished = false;
         while (!finished) {
-            Thread.sleep(1000L * 60 * 1); // TODO: Use the interval here
+            Thread.sleep(1000L * 60 * this.pollingInterval);
             // Get the status of the release
             ReleaseDTO release = releaseController.getRelease(releaseId,
                     "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low");
