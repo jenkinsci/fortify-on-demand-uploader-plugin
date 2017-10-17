@@ -63,7 +63,7 @@ public class ScanStatusPoller {
         while (!finished) {
 
             // don't sleep the first round
-            if (counter == 0)
+            if (counter != 0)
                 Thread.sleep(1000L * 60 * this.pollingInterval);
             counter++;
 
