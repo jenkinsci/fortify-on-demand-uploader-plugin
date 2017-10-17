@@ -93,14 +93,7 @@ public class FodApiConnection {
         Response response = client.newCall(request).execute();
 
         if (response.isSuccessful()) {
-            // Read the results and close the response
-            String content = IOUtils.toString(response.body().byteStream(), "utf-8");
             response.body().close();
-
-            JsonParser parser = new JsonParser();
-            JsonObject obj = parser.parse(content).getAsJsonObject();
-            String messageResponse = obj.get("message").getAsString();
-
             token = null;
         }
     }

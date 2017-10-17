@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -57,6 +58,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
     // logic run during a build
     @Override
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
 
@@ -107,13 +109,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
             // Load apiConnection settings
             apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();
-
-            if (apiConnection == null) {
-                logger.println("Error: Failed to create a connection with Fortify API");
-                build.setResult(Result.UNSTABLE);
-                return;
-            }
-
             apiConnection.authenticate();
             StaticScanController staticScanController = new StaticScanController(apiConnection, logger);
             boolean success = staticScanController.startStaticScan(model);

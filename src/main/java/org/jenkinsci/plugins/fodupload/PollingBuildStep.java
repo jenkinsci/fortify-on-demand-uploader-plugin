@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -45,7 +46,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     }
 
     @Override
-
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(@Nonnull Run<?, ?> run,
                         @Nonnull FilePath filePath,
                         @Nonnull Launcher launcher,
@@ -66,7 +67,6 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
             logger.println("Error: Invalid polling interval (" + this.getPollingInterval() + " minutes)");
             run.setResult(Result.UNSTABLE);
         }
-
 
         FodApiConnection apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();
 
