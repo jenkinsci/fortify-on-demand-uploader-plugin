@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.fodupload;
 
+import com.fortify.fod.parser.BsiToken;
+import com.fortify.fod.parser.BsiTokenParser;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
@@ -13,33 +15,32 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import jenkins.model.GlobalConfiguration;
-import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
-import org.jenkinsci.plugins.fodupload.models.BsiUrl;
 import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
 import org.jenkinsci.plugins.fodupload.polling.ScanStatusPoller;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 
 public class PollingBuildStep extends Recorder implements SimpleBuildStep {
 
-    private String bsiUrl;
+    private static final BsiTokenParser tokenParser = new BsiTokenParser();
+
+    private String bsiToken;
     private int pollingInterval;
     private int policyFailureBuildResultPreference;
     private boolean isPrettyLogging;
 
     @DataBoundConstructor
-    public PollingBuildStep(String bsiUrl,
+    public PollingBuildStep(String bsiToken,
                             int pollingInterval,
                             int policyFailureBuildResultPreference,
                             boolean isPrettyLogging) {
 
-        this.bsiUrl = bsiUrl;
+        this.bsiToken = bsiToken;
         this.pollingInterval = pollingInterval;
         this.policyFailureBuildResultPreference = policyFailureBuildResultPreference;
         this.isPrettyLogging = isPrettyLogging;
@@ -71,7 +72,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         FodApiConnection apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();
 
         try {
-            BsiUrl token = new BsiUrl(this.bsiUrl);
+
+            BsiToken token = tokenParser.parse(this.bsiToken);
             apiConnection.authenticate();
             ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.isPrettyLogging, this.pollingInterval, logger);
             PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
@@ -117,8 +119,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         return BuildStepMonitor.NONE;
     }
 
-    public String getBsiUrl() {
-        return bsiUrl;
+    public String getBsiToken() {
+        return bsiToken;
     }
 
     public int getPollingInterval() {

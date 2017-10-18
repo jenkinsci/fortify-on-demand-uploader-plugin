@@ -19,10 +19,10 @@ import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
 public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
@@ -33,7 +33,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
     @DataBoundConstructor
-    public StaticAssessmentBuildStep(String bsiUrl,
+    public StaticAssessmentBuildStep(String bsiToken,
                                      boolean runOpenSourceAnalysis,
                                      boolean isExpressScan,
                                      boolean isExpressAudit,
@@ -42,9 +42,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      boolean isRemediationScan,
                                      boolean isBundledAssessment,
                                      boolean purchaseEntitlements,
-                                     int entitlementPreference) throws URISyntaxException {
+                                     int entitlementPreference) throws URISyntaxException, UnsupportedEncodingException {
 
-        model = new JobModel(bsiUrl,
+        model = new JobModel(bsiToken,
                 runOpenSourceAnalysis,
                 isExpressAudit,
                 isExpressScan,
@@ -92,7 +92,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             logger.println("Starting FoD Upload.");
 
             // zips the file in a temporary location
-            File payload = Utils.createZipFile(model.getBsiUrl().getTechnologyStack(), workspace, logger);
+            File payload = Utils.createZipFile(model.getBsiToken().getTechnologyStack(), workspace, logger);
             if (payload.length() == 0) {
 
                 boolean deleteSuccess = payload.delete();
@@ -176,8 +176,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     // marks them unused, but they actually are used.
     // These getters are also named in the following format: Get<JellyField>.
     @SuppressWarnings("unused")
-    public String getBsiUrl() {
-        return model.getBsiUrl().ORIGINAL_VALUE;
+    public String getBsiToken() {
+        return model.getBsiTokenOriginal();
     }
 
     @SuppressWarnings("unused")
