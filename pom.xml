@@ -65,11 +65,21 @@
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
+        <repository>
+            <id>fortify</id>
+            <name>fortify</name>
+            <url>https://dl.bintray.com/fortify/maven-public</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>fortify</id>
+            <name>fortify</name>
+            <url>https://dl.bintray.com/fortify/maven-public</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -109,6 +119,12 @@
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
             <version>1.2</version>
+        </dependency>
+        <!-- https://bintray.com/fortify/maven-public/bsi-token-parser -->
+        <dependency>
+            <groupId>com.fortify.fod</groupId>
+            <artifactId>BSITokenParser</artifactId>
+            <version>1.0.2</version>
         </dependency>
     </dependencies>
 </project>

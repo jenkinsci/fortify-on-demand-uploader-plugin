@@ -9,7 +9,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
-import org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
@@ -68,17 +67,17 @@ public class StaticScanController extends ControllerBase {
             }
 
             // Build 'static' portion of url
-            String fragUrl = apiConnection.getApiUrl() + "/api/v3/releases/" + uploadRequest.getBsiUrl().getProjectVersionId() +
+            String fragUrl = apiConnection.getApiUrl() + "/api/v3/releases/" + uploadRequest.getBsiToken().getProjectVersionId() +
                     "/static-scans/start-scan?";
-            fragUrl += "assessmentTypeId=" + uploadRequest.getBsiUrl().getAssessmentTypeId();
-            fragUrl += "&technologyStack=" + uploadRequest.getBsiUrl().getTechnologyStack();
+            fragUrl += "assessmentTypeId=" + uploadRequest.getBsiToken().getAssessmentTypeId();
+            fragUrl += "&technologyStack=" + uploadRequest.getBsiToken().getTechnologyStack();
             fragUrl += "&entitlementId=" + assessment.getEntitlementId();
             fragUrl += "&entitlementFrequencyType=" + assessment.getFrequencyTypeId();
             fragUrl += "&isBundledAssessment=" + assessment.isBundledAssessment();
             if (assessment.getParentAssessmentTypeId() != 0 && assessment.isBundledAssessment())
                 fragUrl += "&parentAssessmentTypeId=" + assessment.getParentAssessmentTypeId();
-            if (uploadRequest.getBsiUrl().hasLanguageLevel())
-                fragUrl += "&languageLevel=" + uploadRequest.getBsiUrl().getLanguageLevel();
+            if (uploadRequest.getBsiToken().getTechnologyVersion() != null)
+                fragUrl += "&languageLevel=" + uploadRequest.getBsiToken().getLanguageLevel();
             fragUrl += "&doSonatypeScan=" + uploadRequest.isRunOpenSourceAnalysis();
             fragUrl += "&isRemediationScan=" + uploadRequest.isRemediationScan();
             fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.isExcludeThirdParty();

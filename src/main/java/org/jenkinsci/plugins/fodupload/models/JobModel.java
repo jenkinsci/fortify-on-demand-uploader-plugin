@@ -1,13 +1,21 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import com.fortify.fod.parser.BsiToken;
+import com.fortify.fod.parser.BsiTokenParser;
+
 import java.io.File;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class JobModel {
-    private BsiUrl bsiUrl;
+
+    private static final BsiTokenParser tokenParser = new BsiTokenParser();
+
+    private String bsiTokenOriginal;
+    private BsiToken bsiToken;
     private boolean runOpenSourceAnalysis;
     private boolean isExpressScan;
     private boolean isExpressAudit;
@@ -27,8 +35,8 @@ public class JobModel {
         this.payload = payload;
     }
 
-    public BsiUrl getBsiUrl() {
-        return bsiUrl;
+    public BsiToken getBsiToken() {
+        return bsiToken;
     }
 
     public boolean isRunOpenSourceAnalysis() {
@@ -70,7 +78,7 @@ public class JobModel {
     /**
      * Build model used to pass values around
      *
-     * @param bsiUrl                BSI URL
+     * @param bsiToken              BSI Token
      * @param runOpenSourceAnalysis runOpenSourceAnalysis
      * @param isExpressAudit        isExpressAudit
      * @param isExpressScan         isExpressScan
@@ -81,7 +89,7 @@ public class JobModel {
      * @param purchaseEntitlements  purchaseEntitlements
      * @param entitlementPreference entitlementPreference
      */
-    public JobModel(String bsiUrl,
+    public JobModel(String bsiToken,
                     boolean runOpenSourceAnalysis,
                     boolean isExpressAudit,
                     boolean isExpressScan,
@@ -90,8 +98,10 @@ public class JobModel {
                     boolean isRemediationScan,
                     boolean isBundledAssessment,
                     boolean purchaseEntitlements,
-                    int entitlementPreference) throws URISyntaxException {
-        this.bsiUrl = new BsiUrl(bsiUrl);
+                    int entitlementPreference) throws URISyntaxException, UnsupportedEncodingException {
+
+        this.bsiTokenOriginal = bsiToken;
+        this.bsiToken = tokenParser.parse(bsiToken);
         this.runOpenSourceAnalysis = runOpenSourceAnalysis;
         this.isExpressAudit = isExpressAudit;
         this.isExpressScan = isExpressScan;
@@ -119,10 +129,10 @@ public class JobModel {
                         "Purchase Entitlements:             %s%n" +
                         "Entitlement Preference             %s%n" +
                         "Bundled Assessment:                %s%n",
-                bsiUrl.getProjectVersionId(),
-                bsiUrl.getAssessmentTypeId(),
-                bsiUrl.getTechnologyStack(),
-                bsiUrl.getLanguageLevel(),
+                bsiToken.getProjectVersionId(),
+                bsiToken.getAssessmentTypeId(),
+                bsiToken.getTechnologyStack(),
+                bsiToken.getLanguageLevel(),
                 runOpenSourceAnalysis,
                 isExpressScan,
                 isExpressAudit,
@@ -134,25 +144,30 @@ public class JobModel {
                 isBundledAssessment);
     }
 
+    // TODO: More validation, though this should never happen with the new format
     public boolean validate(PrintStream logger) {
         List<String> errors = new ArrayList<>();
 
-        if (!bsiUrl.hasAssessmentTypeId())
+        if (bsiToken.getAssessmentTypeId() != 0)
             errors.add("Assessment Type");
 
-        if (!bsiUrl.hasTechnologyStack())
+        if (bsiToken.getTechnologyVersion() != null)
             errors.add("Technology Stack");
 
-        if (!bsiUrl.hasProjectVersionId())
+        if (bsiToken.getProjectVersionId() != 0)
             errors.add("Release Id");
 
         if (errors.size() > 0) {
-            logger.println("Missing the following fields from BSI URL: ");
+            logger.println("Missing the following fields from BSI Token: ");
             for (String error : errors) {
                 logger.println("    " + error);
             }
             return false;
         }
         return true;
+    }
+
+    public String getBsiTokenOriginal() {
+        return bsiTokenOriginal;
     }
 }
