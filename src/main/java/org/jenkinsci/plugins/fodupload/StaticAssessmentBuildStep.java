@@ -28,6 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
 public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
+
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
     private JobModel model;
@@ -36,23 +37,13 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     // Entry point when building
     @DataBoundConstructor
     public StaticAssessmentBuildStep(String bsiToken,
-                                     boolean runOpenSourceAnalysis,
-                                     boolean isExpressScan,
-                                     boolean isExpressAudit,
                                      boolean includeAllFiles,
-                                     boolean excludeThirdParty,
-                                     boolean isRemediationScan,
                                      boolean isBundledAssessment,
                                      boolean purchaseEntitlements,
                                      int entitlementPreference) throws URISyntaxException, UnsupportedEncodingException {
 
         model = new JobModel(bsiToken,
-                runOpenSourceAnalysis,
-                isExpressAudit,
-                isExpressScan,
                 includeAllFiles,
-                excludeThirdParty,
-                isRemediationScan,
                 isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference);
@@ -193,33 +184,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public boolean getRunOpenSourceAnalysis() {
-        return model.isRunOpenSourceAnalysis();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsExpressScan() {
-        return model.isExpressScan();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsExpressAudit() {
-        return model.isExpressAudit();
-    }
-
-    @SuppressWarnings("unused")
     public boolean getIncludeAllFiles() {
         return model.isIncludeAllFiles();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getExcludeThirdParty() {
-        return model.isExcludeThirdParty();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsRemediationScan() {
-        return model.isRemediationScan();
     }
 
     @SuppressWarnings("unused")

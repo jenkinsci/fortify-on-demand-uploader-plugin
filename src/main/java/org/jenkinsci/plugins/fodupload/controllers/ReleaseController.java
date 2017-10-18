@@ -120,9 +120,8 @@ public class ReleaseController extends ControllerBase {
 
         // Get entitlement based on available options
         for (ReleaseAssessmentTypeDTO assessment : results.getItems()) {
-            if (assessment.getAssessmentTypeId() == model.getBsiToken().getAssessmentTypeId() &&
-                    assessment.isRemediation() == model.isRemediationScan() &&
-                    (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0)) {
+            if (assessment.getAssessmentTypeId() == model.getBsiToken().getAssessmentTypeId()
+                    && (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0)) {
                 return assessment;
             }
         }

@@ -78,13 +78,16 @@ public class StaticScanController extends ControllerBase {
                 fragUrl += "&parentAssessmentTypeId=" + assessment.getParentAssessmentTypeId();
             if (uploadRequest.getBsiToken().getTechnologyVersion() != null)
                 fragUrl += "&languageLevel=" + uploadRequest.getBsiToken().getLanguageLevel();
-            fragUrl += "&doSonatypeScan=" + uploadRequest.isRunOpenSourceAnalysis();
+            fragUrl += "&doSonatypeScan=" + uploadRequest.getBsiToken().getIncludeOpenSourceAnalysis();
+
+
+
+            fragUrl += "&excludeThirdPartyLibs=" + !uploadRequest.getBsiToken().getIncludeThirdParty();
+            fragUrl += "&scanPreferenceType=" + uploadRequest.getBsiToken().getScanPreferenceId();
+            fragUrl += "&auditPreferenceType=" + uploadRequest.getBsiToken().getAuditPreferenceId();
+
+            // TODO: Figure out if we can submit the remediation scan
             fragUrl += "&isRemediationScan=" + uploadRequest.isRemediationScan();
-            fragUrl += "&excludeThirdPartyLibs=" + uploadRequest.isExcludeThirdParty();
-            if (uploadRequest.isExpressScan())
-                fragUrl += "&scanPreferenceType=2";
-            if (uploadRequest.isExpressAudit())
-                fragUrl += "&auditPreferenceType=2";
 
             Gson gson = new Gson();
 

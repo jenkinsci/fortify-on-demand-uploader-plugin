@@ -16,12 +16,7 @@ public class JobModel {
 
     private String bsiTokenOriginal;
     private BsiToken bsiToken;
-    private boolean runOpenSourceAnalysis;
-    private boolean isExpressScan;
-    private boolean isExpressAudit;
     private boolean includeAllFiles;
-    private boolean excludeThirdParty;
-    private boolean isRemediationScan;
     private boolean purchaseEntitlements;
     private int entitlementPreference;
     private boolean isBundledAssessment;
@@ -39,28 +34,8 @@ public class JobModel {
         return bsiToken;
     }
 
-    public boolean isRunOpenSourceAnalysis() {
-        return runOpenSourceAnalysis;
-    }
-
-    public boolean isExpressScan() {
-        return isExpressScan;
-    }
-
-    public boolean isExpressAudit() {
-        return isExpressAudit;
-    }
-
     public boolean isIncludeAllFiles() {
         return includeAllFiles;
-    }
-
-    public boolean isExcludeThirdParty() {
-        return excludeThirdParty;
-    }
-
-    public boolean isRemediationScan() {
-        return isRemediationScan;
     }
 
     public boolean isPurchaseEntitlements() {
@@ -79,35 +54,20 @@ public class JobModel {
      * Build model used to pass values around
      *
      * @param bsiToken              BSI Token
-     * @param runOpenSourceAnalysis runOpenSourceAnalysis
-     * @param isExpressAudit        isExpressAudit
-     * @param isExpressScan         isExpressScan
      * @param includeAllFiles       includeAllFiles
-     * @param excludeThirdParty     excludeThirdParty
-     * @param isRemediationScan     isRemediationScan
      * @param isBundledAssessment   isBundledAssessment
      * @param purchaseEntitlements  purchaseEntitlements
      * @param entitlementPreference entitlementPreference
      */
     public JobModel(String bsiToken,
-                    boolean runOpenSourceAnalysis,
-                    boolean isExpressAudit,
-                    boolean isExpressScan,
                     boolean includeAllFiles,
-                    boolean excludeThirdParty,
-                    boolean isRemediationScan,
                     boolean isBundledAssessment,
                     boolean purchaseEntitlements,
                     int entitlementPreference) throws URISyntaxException, UnsupportedEncodingException {
 
         this.bsiTokenOriginal = bsiToken;
         this.bsiToken = tokenParser.parse(bsiToken);
-        this.runOpenSourceAnalysis = runOpenSourceAnalysis;
-        this.isExpressAudit = isExpressAudit;
-        this.isExpressScan = isExpressScan;
         this.includeAllFiles = includeAllFiles;
-        this.excludeThirdParty = excludeThirdParty;
-        this.isRemediationScan = isRemediationScan;
         this.entitlementPreference = entitlementPreference;
         this.isBundledAssessment = isBundledAssessment;
         this.purchaseEntitlements = purchaseEntitlements;
@@ -116,29 +76,19 @@ public class JobModel {
     @Override
     public String toString() {
         return String.format(
-                "Release Id:                        %s%n" +
-                        "Assessment Type Id:                %s%n" +
-                        "Technology Stack:                  %s%n" +
-                        "Language Level:                    %s%n" +
-                        "Run Open Source Analysis:          %s%n" +
-                        "Express Scan:                      %s%n" +
-                        "Express Audit:                     %s%n" +
-                        "Exclude All Files:                 %s%n" +
-                        "Exclude Third Party:               %s%n" +
-                        "Remediation Scan:                  %s%n" +
-                        "Purchase Entitlements:             %s%n" +
-                        "Entitlement Preference             %s%n" +
-                        "Bundled Assessment:                %s%n",
+                    "Release Id:                        %s%n" +
+                            "Assessment Type Id:                %s%n" +
+                            "Technology Stack:                  %s%n" +
+                            "Language Level:                    %s%n" +
+                            "Include All Files:                 %s%n" +
+                            "Purchase Entitlements:             %s%n" +
+                            "Entitlement Preference             %s%n" +
+                            "Bundled Assessment:                %s%n",
                 bsiToken.getProjectVersionId(),
                 bsiToken.getAssessmentTypeId(),
                 bsiToken.getTechnologyStack(),
                 bsiToken.getLanguageLevel(),
-                runOpenSourceAnalysis,
-                isExpressScan,
-                isExpressAudit,
                 includeAllFiles,
-                excludeThirdParty,
-                isRemediationScan,
                 purchaseEntitlements,
                 entitlementPreference,
                 isBundledAssessment);
