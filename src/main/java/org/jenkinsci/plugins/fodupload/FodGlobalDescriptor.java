@@ -66,25 +66,6 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         return apiUrl;
     }
 
-    @SuppressWarnings("unused")
-    public ListBoxModel doFillEntitlementPreferenceItems() {
-        ListBoxModel items = new ListBoxModel();
-        for (FodEnums.EntitlementPreferenceType preferenceType : FodEnums.EntitlementPreferenceType.values()) {
-            items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
-        }
-
-        return items;
-    }
-
-    public ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
-        ListBoxModel items = new ListBoxModel();
-        for (PollingBuildStep.PolicyFailureBuildResultPreference preferenceType : PollingBuildStep.PolicyFailureBuildResultPreference.values()) {
-            items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
-        }
-
-        return items;
-    }
-
     // Form validation
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
     public FormValidation doTestConnection(@QueryParameter(CLIENT_ID) final String clientId,

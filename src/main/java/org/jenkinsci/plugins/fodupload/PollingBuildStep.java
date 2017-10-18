@@ -14,6 +14,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
@@ -119,18 +120,22 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         return BuildStepMonitor.NONE;
     }
 
+    @SuppressWarnings("unused")
     public String getBsiToken() {
         return bsiToken;
     }
 
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public int getPollingInterval() {
         return pollingInterval;
     }
 
+    @SuppressWarnings("unused")
     public int getPolicyFailureBuildResultPreference() {
         return this.policyFailureBuildResultPreference;
     }
 
+    @SuppressWarnings("unused")
     public boolean getIsPrettyLogging() {
         return isPrettyLogging;
     }
@@ -159,6 +164,16 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         @Override
         public String getDisplayName() {
             return "Poll Fortify on Demand for Results";
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
+            ListBoxModel items = new ListBoxModel();
+            for (PollingBuildStep.PolicyFailureBuildResultPreference preferenceType : PollingBuildStep.PolicyFailureBuildResultPreference.values()) {
+                items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
+            }
+
+            return items;
         }
     }
 

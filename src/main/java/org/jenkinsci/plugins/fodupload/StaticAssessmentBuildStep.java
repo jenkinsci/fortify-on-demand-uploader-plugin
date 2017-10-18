@@ -12,9 +12,11 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -169,6 +171,16 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @Override
         public String getDisplayName() {
             return "Fortify on Demand Static Assessment";
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillEntitlementPreferenceItems() {
+            ListBoxModel items = new ListBoxModel();
+            for (FodEnums.EntitlementPreferenceType preferenceType : FodEnums.EntitlementPreferenceType.values()) {
+                items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
+            }
+
+            return items;
         }
     }
 
