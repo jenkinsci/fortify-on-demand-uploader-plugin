@@ -20,6 +20,7 @@ public class JobModel {
     private boolean purchaseEntitlements;
     private int entitlementPreference;
     private boolean isBundledAssessment;
+    private boolean isRemediationPreferred;
     private File payload;
 
     public File getPayload() {
@@ -50,6 +51,14 @@ public class JobModel {
         return isBundledAssessment;
     }
 
+    public String getBsiTokenOriginal() {
+        return bsiTokenOriginal;
+    }
+
+    public boolean isRemediationPreferred() {
+        return isRemediationPreferred;
+    }
+
     /**
      * Build model used to pass values around
      *
@@ -63,7 +72,8 @@ public class JobModel {
                     boolean includeAllFiles,
                     boolean isBundledAssessment,
                     boolean purchaseEntitlements,
-                    int entitlementPreference) throws URISyntaxException, UnsupportedEncodingException {
+                    int entitlementPreference,
+                    boolean isRemediationPreferred) throws URISyntaxException, UnsupportedEncodingException {
 
         this.bsiTokenOriginal = bsiToken;
         this.bsiToken = tokenParser.parse(bsiToken);
@@ -71,6 +81,7 @@ public class JobModel {
         this.entitlementPreference = entitlementPreference;
         this.isBundledAssessment = isBundledAssessment;
         this.purchaseEntitlements = purchaseEntitlements;
+        this.isRemediationPreferred = isRemediationPreferred;
     }
 
     @Override
@@ -115,9 +126,5 @@ public class JobModel {
             return false;
         }
         return true;
-    }
-
-    public String getBsiTokenOriginal() {
-        return bsiTokenOriginal;
     }
 }
