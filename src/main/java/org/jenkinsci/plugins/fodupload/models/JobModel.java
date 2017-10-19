@@ -126,13 +126,13 @@ public class JobModel {
     public boolean validate(PrintStream logger) {
         List<String> errors = new ArrayList<>();
 
-        if (bsiToken.getAssessmentTypeId() != 0)
+        if (bsiToken.getAssessmentTypeId() == 0)
             errors.add("Assessment Type");
 
-        if (bsiToken.getTechnologyVersion() != null)
+        if (bsiToken.getTechnologyVersion() == null)
             errors.add("Technology Stack");
 
-        if (bsiToken.getProjectVersionId() != 0)
+        if (bsiToken.getProjectVersionId() == 0)
             errors.add("Release Id");
 
         if (errors.size() > 0) {
