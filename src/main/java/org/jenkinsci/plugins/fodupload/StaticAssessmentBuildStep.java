@@ -28,6 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
 public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
+
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
     private JobModel model;
@@ -36,26 +37,26 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     // Entry point when building
     @DataBoundConstructor
     public StaticAssessmentBuildStep(String bsiToken,
-                                     boolean runOpenSourceAnalysis,
-                                     boolean isExpressScan,
-                                     boolean isExpressAudit,
                                      boolean includeAllFiles,
-                                     boolean excludeThirdParty,
-                                     boolean isRemediationScan,
                                      boolean isBundledAssessment,
                                      boolean purchaseEntitlements,
-                                     int entitlementPreference) throws URISyntaxException, UnsupportedEncodingException {
+                                     int entitlementPreference,
+                                     boolean isRemediationPreferred,
+                                     boolean runOpenSourceAnalysisOverride,
+                                     boolean isExpressScanOverride,
+                                     boolean isExpressAuditOverride,
+                                     boolean includeThirdPartyOverride) throws URISyntaxException, UnsupportedEncodingException {
 
         model = new JobModel(bsiToken,
-                runOpenSourceAnalysis,
-                isExpressAudit,
-                isExpressScan,
                 includeAllFiles,
-                excludeThirdParty,
-                isRemediationScan,
                 isBundledAssessment,
                 purchaseEntitlements,
-                entitlementPreference);
+                entitlementPreference,
+                isRemediationPreferred,
+                runOpenSourceAnalysisOverride,
+                isExpressScanOverride,
+                isExpressAuditOverride,
+                includeThirdPartyOverride);
     }
 
     // logic run during a build
@@ -193,33 +194,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public boolean getRunOpenSourceAnalysis() {
-        return model.isRunOpenSourceAnalysis();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsExpressScan() {
-        return model.isExpressScan();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsExpressAudit() {
-        return model.isExpressAudit();
-    }
-
-    @SuppressWarnings("unused")
     public boolean getIncludeAllFiles() {
         return model.isIncludeAllFiles();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getExcludeThirdParty() {
-        return model.isExcludeThirdParty();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsRemediationScan() {
-        return model.isRemediationScan();
     }
 
     @SuppressWarnings("unused")
@@ -235,5 +211,25 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @SuppressWarnings("unused")
     public boolean getPurchaseEntitlements() {
         return model.isPurchaseEntitlements();
+    }
+
+    @SuppressWarnings("unused")
+    public boolean getRunOpenSourceAnalysisOverride() {
+        return model.isRunOpenSourceAnalysisOverride();
+    }
+
+    @SuppressWarnings("unused")
+    public boolean getIsExpressScanOverride() {
+        return model.isExpressScanOverride();
+    }
+
+    @SuppressWarnings("unused")
+    public boolean getIsExpressAuditOverride() {
+        return model.isExpressAuditOverride();
+    }
+
+    @SuppressWarnings("unused")
+    public boolean getIncludeThirdPartyOverride() {
+        return model.isIncludeThirdPartyOverride();
     }
 }

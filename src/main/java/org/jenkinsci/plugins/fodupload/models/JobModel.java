@@ -16,15 +16,19 @@ public class JobModel {
 
     private String bsiTokenOriginal;
     private BsiToken bsiToken;
-    private boolean runOpenSourceAnalysis;
-    private boolean isExpressScan;
-    private boolean isExpressAudit;
     private boolean includeAllFiles;
-    private boolean excludeThirdParty;
-    private boolean isRemediationScan;
     private boolean purchaseEntitlements;
     private int entitlementPreference;
     private boolean isBundledAssessment;
+    private boolean isRemediationPreferred;
+
+    // These override options are for supporting the legacy BSI Urls
+    // TODO: Remove these in the future when users can no longer generate BSI URLs in FoD
+    private boolean runOpenSourceAnalysisOverride;
+    private boolean isExpressScanOverride;
+    private boolean isExpressAuditOverride;
+    private boolean includeThirdPartyOverride;
+
     private File payload;
 
     public File getPayload() {
@@ -39,28 +43,8 @@ public class JobModel {
         return bsiToken;
     }
 
-    public boolean isRunOpenSourceAnalysis() {
-        return runOpenSourceAnalysis;
-    }
-
-    public boolean isExpressScan() {
-        return isExpressScan;
-    }
-
-    public boolean isExpressAudit() {
-        return isExpressAudit;
-    }
-
     public boolean isIncludeAllFiles() {
         return includeAllFiles;
-    }
-
-    public boolean isExcludeThirdParty() {
-        return excludeThirdParty;
-    }
-
-    public boolean isRemediationScan() {
-        return isRemediationScan;
     }
 
     public boolean isPurchaseEntitlements() {
@@ -75,42 +59,46 @@ public class JobModel {
         return isBundledAssessment;
     }
 
+    public String getBsiTokenOriginal() {
+        return bsiTokenOriginal;
+    }
+
+    public boolean isRemediationPreferred() {
+        return isRemediationPreferred;
+    }
+
     /**
      * Build model used to pass values around
      *
      * @param bsiToken              BSI Token
-     * @param runOpenSourceAnalysis runOpenSourceAnalysis
-     * @param isExpressAudit        isExpressAudit
-     * @param isExpressScan         isExpressScan
      * @param includeAllFiles       includeAllFiles
-     * @param excludeThirdParty     excludeThirdParty
-     * @param isRemediationScan     isRemediationScan
      * @param isBundledAssessment   isBundledAssessment
      * @param purchaseEntitlements  purchaseEntitlements
      * @param entitlementPreference entitlementPreference
      */
     public JobModel(String bsiToken,
-                    boolean runOpenSourceAnalysis,
-                    boolean isExpressAudit,
-                    boolean isExpressScan,
                     boolean includeAllFiles,
-                    boolean excludeThirdParty,
-                    boolean isRemediationScan,
                     boolean isBundledAssessment,
                     boolean purchaseEntitlements,
-                    int entitlementPreference) throws URISyntaxException, UnsupportedEncodingException {
+                    int entitlementPreference,
+                    boolean isRemediationPreferred,
+                    boolean runOpenSourceAnalysisOverride,
+                    boolean isExpressScanOverride,
+                    boolean isExpressAuditOverride,
+                    boolean includeThirdPartyOverride) throws URISyntaxException, UnsupportedEncodingException {
 
         this.bsiTokenOriginal = bsiToken;
         this.bsiToken = tokenParser.parse(bsiToken);
-        this.runOpenSourceAnalysis = runOpenSourceAnalysis;
-        this.isExpressAudit = isExpressAudit;
-        this.isExpressScan = isExpressScan;
         this.includeAllFiles = includeAllFiles;
-        this.excludeThirdParty = excludeThirdParty;
-        this.isRemediationScan = isRemediationScan;
         this.entitlementPreference = entitlementPreference;
         this.isBundledAssessment = isBundledAssessment;
         this.purchaseEntitlements = purchaseEntitlements;
+        this.isRemediationPreferred = isRemediationPreferred;
+
+        this.runOpenSourceAnalysisOverride = runOpenSourceAnalysisOverride;
+        this.isExpressScanOverride = isExpressScanOverride;
+        this.isExpressAuditOverride = isExpressAuditOverride;
+        this.includeThirdPartyOverride = includeThirdPartyOverride;
     }
 
     @Override
@@ -120,12 +108,7 @@ public class JobModel {
                         "Assessment Type Id:                %s%n" +
                         "Technology Stack:                  %s%n" +
                         "Language Level:                    %s%n" +
-                        "Run Open Source Analysis:          %s%n" +
-                        "Express Scan:                      %s%n" +
-                        "Express Audit:                     %s%n" +
-                        "Exclude All Files:                 %s%n" +
-                        "Exclude Third Party:               %s%n" +
-                        "Remediation Scan:                  %s%n" +
+                        "Include All Files:                 %s%n" +
                         "Purchase Entitlements:             %s%n" +
                         "Entitlement Preference             %s%n" +
                         "Bundled Assessment:                %s%n",
@@ -133,12 +116,7 @@ public class JobModel {
                 bsiToken.getAssessmentTypeId(),
                 bsiToken.getTechnologyStack(),
                 bsiToken.getLanguageLevel(),
-                runOpenSourceAnalysis,
-                isExpressScan,
-                isExpressAudit,
                 includeAllFiles,
-                excludeThirdParty,
-                isRemediationScan,
                 purchaseEntitlements,
                 entitlementPreference,
                 isBundledAssessment);
@@ -148,13 +126,13 @@ public class JobModel {
     public boolean validate(PrintStream logger) {
         List<String> errors = new ArrayList<>();
 
-        if (bsiToken.getAssessmentTypeId() != 0)
+        if (bsiToken.getAssessmentTypeId() == 0)
             errors.add("Assessment Type");
 
-        if (bsiToken.getTechnologyVersion() != null)
+        if (bsiToken.getTechnologyType() == null)
             errors.add("Technology Stack");
 
-        if (bsiToken.getProjectVersionId() != 0)
+        if (bsiToken.getProjectVersionId() == 0)
             errors.add("Release Id");
 
         if (errors.size() > 0) {
@@ -167,7 +145,19 @@ public class JobModel {
         return true;
     }
 
-    public String getBsiTokenOriginal() {
-        return bsiTokenOriginal;
+    public boolean isIncludeThirdPartyOverride() {
+        return includeThirdPartyOverride;
+    }
+
+    public boolean isExpressAuditOverride() {
+        return isExpressAuditOverride;
+    }
+
+    public boolean isExpressScanOverride() {
+        return isExpressScanOverride;
+    }
+
+    public boolean isRunOpenSourceAnalysisOverride() {
+        return runOpenSourceAnalysisOverride;
     }
 }

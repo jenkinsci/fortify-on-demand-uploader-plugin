@@ -1,8 +1,10 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
     <f:entry title="BSI Token" field="bsiToken">
         <f:textbox />
     </f:entry>
+
     <f:section title="Entitlement Options">
         <f:entry title="Entitlement Preference" field="entitlementPreference">
             <f:select/>
@@ -13,26 +15,29 @@
         <f:entry title="Bundled Assessment" field="isBundledAssessment">
             <f:checkbox/>
         </f:entry>
+        <f:entry title="Prefer Remediation if Available" field="isRemediationPreferred">
+            <f:checkbox/>
+        </f:entry>
     </f:section>
 
-    <f:advanced title="Additional Options">
+    <f:advanced title="Advanced Options">
         <f:section title="Additional Options">
-            <f:entry title="Open source component analysis" field="runOpenSourceAnalysis">
-                <f:checkbox/>
-            </f:entry>
-            <f:entry title="Enable express scan preference" field="isExpressScan">
-                <f:checkbox/>
-            </f:entry>
-            <f:entry title="Enable automated audit preference" field="isExpressAudit">
-                <f:checkbox/>
-            </f:entry>
             <f:entry title="Include all project files" field="includeAllFiles">
                 <f:checkbox/>
             </f:entry>
-            <f:entry title="Exclude third-party libraries" field="excludeThirdParty">
+        </f:section>
+
+        <f:section title="Override Options">
+            <f:entry title="Open source component analysis" field="runOpenSourceAnalysisOverride">
                 <f:checkbox/>
             </f:entry>
-            <f:entry title="Is a remediation scan" field="isRemediationScan">
+            <f:entry title="Enable express scan preference" field="isExpressScanOverride">
+                <f:checkbox/>
+            </f:entry>
+            <f:entry title="Enable automated audit preference" field="isExpressAuditOverride">
+                <f:checkbox/>
+            </f:entry>
+            <f:entry title="Include third-party libraries" field="includeThirdPartyOverride">
                 <f:checkbox/>
             </f:entry>
         </f:section>

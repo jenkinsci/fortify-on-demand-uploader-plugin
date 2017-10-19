@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.IOUtils;
@@ -31,11 +32,17 @@ public class LookupItemsController extends ControllerBase {
      * @return array of enum values and text or null
      */
     public List<LookupItemsModel> getLookupItems(FodEnums.APILookupItemTypes type) throws IOException {
+
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
 
+        String url = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+                .addPathSegments("/api/v3/lookup-items")
+                .addQueryParameter("type", type.toString())
+                .build().toString();
+
         Request request = new Request.Builder()
-                .url(apiConnection.getApiUrl() + "/api/v3/lookup-items?type=" + type.toString())
+                .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
                 .get()

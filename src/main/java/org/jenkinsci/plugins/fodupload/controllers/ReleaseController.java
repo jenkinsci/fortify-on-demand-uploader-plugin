@@ -2,11 +2,14 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.models.FodApiFilterList;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
@@ -14,7 +17,7 @@ import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URLEncoder;
+import java.net.URISyntaxException;
 
 public class ReleaseController extends ControllerBase {
 
@@ -36,17 +39,22 @@ public class ReleaseController extends ControllerBase {
      */
     public ReleaseDTO getRelease(final int releaseId, final String fields) throws IOException {
 
-        // TODO: Investigate why the endpoint for a release wasn't used
-        String url = apiConnection.getApiUrl() + "/api/v3/releases?filters=releaseId:" + releaseId;
-
+        // TODO: Remove every method authenticating the connection, leave that to the user
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
 
-        if (fields.length() > 0) {
-            url += "&fields=" + fields;
-        }
+        FodApiFilterList filters = new FodApiFilterList().addFilter("releaseId", releaseId);
 
-        url += "&limit=1";
+        // TODO: Investigate why the endpoint for a release wasn't used
+        HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+                .addPathSegments("/api/v3/releases")
+                .addQueryParameter("limit", "1")
+                .addQueryParameter("filters", filters.toString());
+
+        if (fields.length() > 0)
+            builder = builder.addQueryParameter("fields", fields);
+
+        String url = builder.build().toString();
 
         Request request = new Request.Builder()
                 .url(url)
@@ -79,18 +87,21 @@ public class ReleaseController extends ControllerBase {
      * @param model JobModel
      * @return returns assessment type obj
      */
-    public ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) throws IOException {
+    ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) throws IOException, URISyntaxException {
 
-        String filters = "frequencyTypeId:" + model.getEntitlementPreference();
+
+        FodApiFilterList filters = new FodApiFilterList()
+                .addFilter("frequencyTypeId", model.getEntitlementPreference())
+                .addFilter("assessmentTypeId", model.getBsiToken().getAssessmentTypeId());
+
         if (model.isBundledAssessment())
-            filters += "+isBundledAssessment:true";
+            filters.addFilter("isBundledAssessment", true);
 
-        // encode these before we put them on the URL since we're not using the URL builder
-        filters = URLEncoder.encode(filters, "UTF-8");
-        String url = String.format("%s/api/v3/releases/%s/assessment-types?scanType=1&filters=%s",
-                apiConnection.getApiUrl(),
-                model.getBsiToken().getProjectVersionId(),
-                filters);
+        String url = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+                .addPathSegments(String.format("/api/v3/releases/%s/assessment-types", model.getBsiToken().getProjectVersionId()))
+                .addQueryParameter("scanType", "1")
+                .addQueryParameter("filters", filters.toString())
+                .build().toString();
 
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
@@ -101,6 +112,7 @@ public class ReleaseController extends ControllerBase {
                 .addHeader("Accept", "application/json")
                 .get()
                 .build();
+
         Response response = apiConnection.getClient().newCall(request).execute();
 
         if (response.code() == org.apache.http.HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
@@ -120,9 +132,7 @@ public class ReleaseController extends ControllerBase {
 
         // Get entitlement based on available options
         for (ReleaseAssessmentTypeDTO assessment : results.getItems()) {
-            if (assessment.getAssessmentTypeId() == model.getBsiToken().getAssessmentTypeId() &&
-                    assessment.isRemediation() == model.isRemediationScan() &&
-                    (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0)) {
+            if (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0) {
                 return assessment;
             }
         }
