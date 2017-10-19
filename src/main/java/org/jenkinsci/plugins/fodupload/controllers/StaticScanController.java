@@ -78,7 +78,7 @@ public class StaticScanController extends ControllerBase {
             HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
                     .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan", token.getProjectVersionId()))
                     .addQueryParameter("assessmentTypeId", Integer.toString(token.getAssessmentTypeId()))
-                    .addQueryParameter("technologyStack", token.getTechnologyVersion())
+                    .addQueryParameter("technologyStack", token.getTechnologyType())
                     .addQueryParameter("entitlementId", Integer.toString(assessmentType.getEntitlementId()))
                     .addQueryParameter("entitlementFrequencyType", Integer.toString(assessmentType.getFrequencyTypeId()))
                     .addQueryParameter("isBundledAssessment", Boolean.toString(assessmentType.isBundledAssessment()))
