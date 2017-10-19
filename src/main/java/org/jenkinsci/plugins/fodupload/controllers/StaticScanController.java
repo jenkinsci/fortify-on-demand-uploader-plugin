@@ -1,12 +1,10 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
+import com.fortify.fod.parser.BsiToken;
 import com.google.gson.Gson;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.util.IOUtils;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import okhttp3.*;
 import org.apache.commons.httpclient.HttpStatus;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
@@ -59,35 +57,39 @@ public class StaticScanController extends ControllerBase {
 
             logger.println("Getting Assessment");
             // Get entitlement info
-            ReleaseAssessmentTypeDTO assessment = new ReleaseController(apiConnection).getAssessmentType(uploadRequest);
+            ReleaseAssessmentTypeDTO assessmentType = new ReleaseController(apiConnection).getAssessmentType(uploadRequest);
 
-            if (assessment == null) {
+            if (assessmentType == null) {
                 logger.println("Assessment not found");
                 return false;
             }
 
-            // Build 'static' portion of url
-            String fragUrl = apiConnection.getApiUrl() + "/api/v3/releases/" + uploadRequest.getBsiToken().getProjectVersionId() +
-                    "/static-scans/start-scan?";
-            fragUrl += "assessmentTypeId=" + uploadRequest.getBsiToken().getAssessmentTypeId();
-            fragUrl += "&technologyStack=" + uploadRequest.getBsiToken().getTechnologyStack();
-            fragUrl += "&entitlementId=" + assessment.getEntitlementId();
-            fragUrl += "&entitlementFrequencyType=" + assessment.getFrequencyTypeId();
-            fragUrl += "&isBundledAssessment=" + assessment.isBundledAssessment();
-            if (assessment.getParentAssessmentTypeId() != 0 && assessment.isBundledAssessment())
-                fragUrl += "&parentAssessmentTypeId=" + assessment.getParentAssessmentTypeId();
-            if (uploadRequest.getBsiToken().getTechnologyVersion() != null)
-                fragUrl += "&languageLevel=" + uploadRequest.getBsiToken().getLanguageLevel();
-            fragUrl += "&doSonatypeScan=" + uploadRequest.getBsiToken().getIncludeOpenSourceAnalysis();
+            BsiToken token = uploadRequest.getBsiToken();
+            boolean isRemediationScan = uploadRequest.isRemediationPreferred() && assessmentType.isRemediation();
 
-            fragUrl += "&excludeThirdPartyLibs=" + !uploadRequest.getBsiToken().getIncludeThirdParty();
-            fragUrl += "&scanPreferenceType=" + uploadRequest.getBsiToken().getScanPreferenceId();
-            fragUrl += "&auditPreferenceType=" + uploadRequest.getBsiToken().getAuditPreferenceId();
+            HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+                    .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan", token.getProjectVersionId()))
+                    .addQueryParameter("assessmentTypeId", Integer.toString(token.getAssessmentTypeId()))
+                    .addQueryParameter("technologyStack", token.getTechnologyVersion())
+                    .addQueryParameter("entitlementId", Integer.toString(assessmentType.getEntitlementId()))
+                    .addQueryParameter("entitlementFrequencyType", Integer.toString(assessmentType.getFrequencyTypeId()))
+                    .addQueryParameter("isBundledAssessment", Boolean.toString(assessmentType.isBundledAssessment()))
+                    .addQueryParameter("doSonatypeScan", Boolean.toString(token.getIncludeOpenSourceAnalysis()))
+                    .addQueryParameter("excludeThirdPartyLibs", Boolean.toString(!token.getIncludeThirdParty()))
+                    .addQueryParameter("scanPreferenceType", Integer.toString(token.getScanPreferenceId()))
+                    .addQueryParameter("auditPreferenceType", Integer.toString(token.getAuditPreferenceId()))
+                    .addQueryParameter("isRemediationScan",Boolean.toString(isRemediationScan));
 
-            // TODO: Figure out if we can submit the remediation scan
-            fragUrl += "&isRemediationScan=" + uploadRequest.isRemediationPreferred();
+            if (assessmentType.getParentAssessmentTypeId() != 0 && assessmentType.isBundledAssessment()) {
+                builder = builder.addQueryParameter("parentAssessmentTypeId", Integer.toString(assessmentType.getParentAssessmentTypeId()));
+            }
 
-            Gson gson = new Gson();
+            if (uploadRequest.getBsiToken().getTechnologyVersion() != null) {
+                builder = builder.addQueryParameter("languageLevel", token.getTechnologyVersion());
+            }
+
+            // TODO: Come back and fix the request to set fragNo and offset query parameters
+            String fragUrl = builder.build().toString();
 
             // Loop through chunks
 
@@ -134,6 +136,7 @@ public class StaticScanController extends ControllerBase {
                 if (response.code() != 202) {
                     String responseJsonStr = IOUtils.toString(response.body().byteStream(), "utf-8");
 
+                    Gson gson = new Gson();
                     // final response has 200, try to deserialize it
                     if (response.code() == 200) {
 
@@ -153,6 +156,7 @@ public class StaticScanController extends ControllerBase {
                 response.body().close();
 
             } // end while
+
         } catch (Exception e) {
             e.printStackTrace(logger);
             return false;

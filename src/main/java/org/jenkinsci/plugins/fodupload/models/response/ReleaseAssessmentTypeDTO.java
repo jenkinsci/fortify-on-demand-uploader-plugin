@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.fodupload.models.response;
 
+@SuppressWarnings("unused")
 public class ReleaseAssessmentTypeDTO {
+
     private int assessmentTypeId;
     private String name;
     private String scanType;
@@ -59,7 +61,11 @@ public class ReleaseAssessmentTypeDTO {
         return isBundledAssessment;
     }
 
-    public boolean isRemediation() { return isRemediation; }
+    public boolean isRemediation() {
+        return isRemediation;
+    }
 
-    public int getRemediationScansAvailable() { return remediationScansAvailable; }
+    public int getRemediationScansAvailable() {
+        return remediationScansAvailable;
+    }
 }

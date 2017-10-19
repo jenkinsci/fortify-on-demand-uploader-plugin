@@ -18,8 +18,6 @@ import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLEncoder;
 
 public class ReleaseController extends ControllerBase {
 
@@ -41,17 +39,22 @@ public class ReleaseController extends ControllerBase {
      */
     public ReleaseDTO getRelease(final int releaseId, final String fields) throws IOException {
 
-        // TODO: Investigate why the endpoint for a release wasn't used
-        String url = apiConnection.getApiUrl() + "/api/v3/releases?filters=releaseId:" + releaseId;
-
+        // TODO: Remove every method authenticating the connection, leave that to the user
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
 
-        if (fields.length() > 0) {
-            url += "&fields=" + fields;
-        }
+        FodApiFilterList filters = new FodApiFilterList().addFilter("releaseId", releaseId);
 
-        url += "&limit=1";
+        // TODO: Investigate why the endpoint for a release wasn't used
+        HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+                .addPathSegments("/api/v3/releases")
+                .addQueryParameter("limit", "1")
+                .addQueryParameter("filters", filters.toString());
+
+        if (fields.length() > 0)
+            builder = builder.addQueryParameter("fields", fields);
+
+        String url = builder.build().toString();
 
         Request request = new Request.Builder()
                 .url(url)
@@ -88,8 +91,8 @@ public class ReleaseController extends ControllerBase {
 
 
         FodApiFilterList filters = new FodApiFilterList()
-                                    .addFilter("frequencyTypeId", model.getEntitlementPreference())
-                                    .addFilter("assessmentTypeId", model.getBsiToken().getAssessmentTypeId());
+                .addFilter("frequencyTypeId", model.getEntitlementPreference())
+                .addFilter("assessmentTypeId", model.getBsiToken().getAssessmentTypeId());
 
         if (model.isBundledAssessment())
             filters.addFilter("isBundledAssessment", true);
@@ -109,7 +112,6 @@ public class ReleaseController extends ControllerBase {
                 .addQueryParameter("scanType", "1")
                 .addQueryParameter("filters", filters.toString())
                 .build().toString();
-
 
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
