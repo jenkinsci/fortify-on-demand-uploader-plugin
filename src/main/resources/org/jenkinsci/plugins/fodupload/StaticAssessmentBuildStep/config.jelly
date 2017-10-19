@@ -15,6 +15,9 @@
         <f:entry title="Bundled Assessment" field="isBundledAssessment">
             <f:checkbox/>
         </f:entry>
+        <f:entry title="Prefer Remediation if Available" field="isRemediationPreferred">
+            <f:checkbox/>
+        </f:entry>
     </f:section>
 
     <f:advanced title="Advanced Options">
@@ -22,15 +25,8 @@
             <f:entry title="Include all project files" field="includeAllFiles">
                 <f:checkbox/>
             </f:entry>
-
-            <f:entry title="Prefer Remediation if Available" field="isRemediationPreferred">
-                <f:checkbox/>
-            </f:entry>
         </f:section>
 
-    </f:advanced>
-
-    <f:advanced title="Override Options">
         <f:section title="Override Options">
             <f:entry title="Open source component analysis" field="runOpenSourceAnalysis">
                 <f:checkbox/>
@@ -44,10 +40,6 @@
             <f:entry title="Include third-party libraries" field="includeThirdParty">
                 <f:checkbox/>
             </f:entry>
-            <f:entry title="Is a remediation scan" field="isRemediationScan">
-                <f:checkbox/>
-            </f:entry>
         </f:section>
     </f:advanced>
-
 </j:jelly>
