@@ -97,17 +97,7 @@ public class ReleaseController extends ControllerBase {
         if (model.isBundledAssessment())
             filters.addFilter("isBundledAssessment", true);
 
-        // decide between URI building implementation
-
-        URIBuilder builder = new URIBuilder(apiConnection.getApiUrl());
-        builder.setPath(String.format("/api/v3/releases/%s/assessment-types", model.getBsiToken().getProjectVersionId()));
-        builder.addParameter("scanType", "1");
-        builder.addParameter("filters", filters.toString());
-        String url = builder.build().toString();
-
-        // OR
-
-        String url2 = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+        String url = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
                 .addPathSegments(String.format("/api/v3/releases/%s/assessment-types", model.getBsiToken().getProjectVersionId()))
                 .addQueryParameter("scanType", "1")
                 .addQueryParameter("filters", filters.toString())
@@ -117,7 +107,7 @@ public class ReleaseController extends ControllerBase {
             apiConnection.authenticate();
 
         Request request = new Request.Builder()
-                .url(url2)
+                .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
                 .get()
