@@ -19,6 +19,8 @@ import java.util.Arrays;
 
 public class StaticScanController extends ControllerBase {
 
+    private final static int EXPRESS_SCAN_PREFERENCE_ID = 2;
+    private final static int EXPRESS_AUDIT_PREFERENCE_ID = 2;
     private final static int CHUNK_SIZE = 1024 * 1024;
     private PrintStream logger;
 
@@ -67,6 +69,12 @@ public class StaticScanController extends ControllerBase {
             BsiToken token = uploadRequest.getBsiToken();
             boolean isRemediationScan = uploadRequest.isRemediationPreferred() && assessmentType.isRemediation();
 
+            // TODO: remove these override options once legacy BSI URL is no longer present in FoD
+            boolean excludeThirdPartyLibs = !token.getIncludeThirdParty() || !uploadRequest.isIncludeThirdPartyOverride();
+            boolean includeOpenSourceScan = token.getIncludeOpenSourceAnalysis() || uploadRequest.isRunOpenSourceAnalysisOverride();
+            int scanPreferenceId = uploadRequest.isExpressScanOverride() ? EXPRESS_SCAN_PREFERENCE_ID : token.getScanPreferenceId();
+            int auditPreferenceId = uploadRequest.isExpressAuditOverride() ? EXPRESS_AUDIT_PREFERENCE_ID : token.getAuditPreferenceId();
+
             HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
                     .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan", token.getProjectVersionId()))
                     .addQueryParameter("assessmentTypeId", Integer.toString(token.getAssessmentTypeId()))
@@ -74,11 +82,11 @@ public class StaticScanController extends ControllerBase {
                     .addQueryParameter("entitlementId", Integer.toString(assessmentType.getEntitlementId()))
                     .addQueryParameter("entitlementFrequencyType", Integer.toString(assessmentType.getFrequencyTypeId()))
                     .addQueryParameter("isBundledAssessment", Boolean.toString(assessmentType.isBundledAssessment()))
-                    .addQueryParameter("doSonatypeScan", Boolean.toString(token.getIncludeOpenSourceAnalysis()))
-                    .addQueryParameter("excludeThirdPartyLibs", Boolean.toString(!token.getIncludeThirdParty()))
-                    .addQueryParameter("scanPreferenceType", Integer.toString(token.getScanPreferenceId()))
-                    .addQueryParameter("auditPreferenceType", Integer.toString(token.getAuditPreferenceId()))
-                    .addQueryParameter("isRemediationScan",Boolean.toString(isRemediationScan));
+                    .addQueryParameter("doSonatypeScan", Boolean.toString(includeOpenSourceScan))
+                    .addQueryParameter("excludeThirdPartyLibs", Boolean.toString(excludeThirdPartyLibs))
+                    .addQueryParameter("scanPreferenceType", Integer.toString(scanPreferenceId))
+                    .addQueryParameter("auditPreferenceType", Integer.toString(auditPreferenceId))
+                    .addQueryParameter("isRemediationScan", Boolean.toString(isRemediationScan));
 
             if (assessmentType.getParentAssessmentTypeId() != 0 && assessmentType.isBundledAssessment()) {
                 builder = builder.addQueryParameter("parentAssessmentTypeId", Integer.toString(assessmentType.getParentAssessmentTypeId()));

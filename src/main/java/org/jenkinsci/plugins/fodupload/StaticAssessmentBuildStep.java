@@ -212,4 +212,24 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public boolean getPurchaseEntitlements() {
         return model.isPurchaseEntitlements();
     }
+
+    @SuppressWarnings("unused")
+    public boolean getRunOpenSourceAnalysisOverride() {
+        return model.isRunOpenSourceAnalysisOverride();
+    }
+
+    @SuppressWarnings("unused")
+    public boolean getIsExpressScanOverride() {
+        return model.isExpressScanOverride();
+    }
+
+    @SuppressWarnings("unused")
+    public boolean getIsExpressAuditOverride() {
+        return model.isExpressAuditOverride();
+    }
+
+    @SuppressWarnings("unused")
+    public boolean getIncludeThirdPartyOverride() {
+        return model.isIncludeThirdPartyOverride();
+    }
 }
