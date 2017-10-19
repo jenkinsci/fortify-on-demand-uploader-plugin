@@ -21,6 +21,14 @@ public class JobModel {
     private int entitlementPreference;
     private boolean isBundledAssessment;
     private boolean isRemediationPreferred;
+
+    // These override options are for supporting the legacy BSI Urls
+    // TODO: Remove these in the future when users can no longer generate BSI URLs in FoD
+    private boolean runOpenSourceAnalysisOverride;
+    private boolean isExpressScanOverride;
+    private boolean isExpressAuditOverride;
+    private boolean includeThirdPartyOverride;
+
     private File payload;
 
     public File getPayload() {
@@ -73,7 +81,11 @@ public class JobModel {
                     boolean isBundledAssessment,
                     boolean purchaseEntitlements,
                     int entitlementPreference,
-                    boolean isRemediationPreferred) throws URISyntaxException, UnsupportedEncodingException {
+                    boolean isRemediationPreferred,
+                    boolean runOpenSourceAnalysisOverride,
+                    boolean isExpressScanOverride,
+                    boolean isExpressAuditOverride,
+                    boolean includeThirdPartyOverride) throws URISyntaxException, UnsupportedEncodingException {
 
         this.bsiTokenOriginal = bsiToken;
         this.bsiToken = tokenParser.parse(bsiToken);
@@ -82,19 +94,24 @@ public class JobModel {
         this.isBundledAssessment = isBundledAssessment;
         this.purchaseEntitlements = purchaseEntitlements;
         this.isRemediationPreferred = isRemediationPreferred;
+
+        this.runOpenSourceAnalysisOverride = runOpenSourceAnalysisOverride;
+        this.isExpressScanOverride = isExpressScanOverride;
+        this.isExpressAuditOverride = isExpressAuditOverride;
+        this.includeThirdPartyOverride = includeThirdPartyOverride;
     }
 
     @Override
     public String toString() {
         return String.format(
-                    "Release Id:                        %s%n" +
-                            "Assessment Type Id:                %s%n" +
-                            "Technology Stack:                  %s%n" +
-                            "Language Level:                    %s%n" +
-                            "Include All Files:                 %s%n" +
-                            "Purchase Entitlements:             %s%n" +
-                            "Entitlement Preference             %s%n" +
-                            "Bundled Assessment:                %s%n",
+                "Release Id:                        %s%n" +
+                        "Assessment Type Id:                %s%n" +
+                        "Technology Stack:                  %s%n" +
+                        "Language Level:                    %s%n" +
+                        "Include All Files:                 %s%n" +
+                        "Purchase Entitlements:             %s%n" +
+                        "Entitlement Preference             %s%n" +
+                        "Bundled Assessment:                %s%n",
                 bsiToken.getProjectVersionId(),
                 bsiToken.getAssessmentTypeId(),
                 bsiToken.getTechnologyStack(),
@@ -126,5 +143,21 @@ public class JobModel {
             return false;
         }
         return true;
+    }
+
+    public boolean isIncludeThirdPartyOverride() {
+        return includeThirdPartyOverride;
+    }
+
+    public boolean isExpressAuditOverride() {
+        return isExpressAuditOverride;
+    }
+
+    public boolean isExpressScanOverride() {
+        return isExpressScanOverride;
+    }
+
+    public boolean isRunOpenSourceAnalysisOverride() {
+        return runOpenSourceAnalysisOverride;
     }
 }

@@ -41,14 +41,22 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      boolean isBundledAssessment,
                                      boolean purchaseEntitlements,
                                      int entitlementPreference,
-                                     boolean isRemediationPreferred) throws URISyntaxException, UnsupportedEncodingException {
+                                     boolean isRemediationPreferred,
+                                     boolean runOpenSourceAnalysisOverride,
+                                     boolean isExpressScanOverride,
+                                     boolean isExpressAuditOverride,
+                                     boolean includeThirdPartyOverride) throws URISyntaxException, UnsupportedEncodingException {
 
         model = new JobModel(bsiToken,
                 includeAllFiles,
                 isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred);
+                isRemediationPreferred,
+                runOpenSourceAnalysisOverride,
+                isExpressScanOverride,
+                isExpressAuditOverride,
+                includeThirdPartyOverride);
     }
 
     // logic run during a build

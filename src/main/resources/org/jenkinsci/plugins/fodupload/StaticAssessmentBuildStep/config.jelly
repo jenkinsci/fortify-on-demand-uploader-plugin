@@ -28,16 +28,16 @@
         </f:section>
 
         <f:section title="Override Options">
-            <f:entry title="Open source component analysis" field="runOpenSourceAnalysis">
+            <f:entry title="Open source component analysis" field="runOpenSourceAnalysisOverride">
                 <f:checkbox/>
             </f:entry>
-            <f:entry title="Enable express scan preference" field="isExpressScan">
+            <f:entry title="Enable express scan preference" field="isExpressScanOverride">
                 <f:checkbox/>
             </f:entry>
-            <f:entry title="Enable automated audit preference" field="isExpressAudit">
+            <f:entry title="Enable automated audit preference" field="isExpressAuditOverride">
                 <f:checkbox/>
             </f:entry>
-            <f:entry title="Include third-party libraries" field="includeThirdParty">
+            <f:entry title="Include third-party libraries" field="includeThirdPartyOverride">
                 <f:checkbox/>
             </f:entry>
         </f:section>
