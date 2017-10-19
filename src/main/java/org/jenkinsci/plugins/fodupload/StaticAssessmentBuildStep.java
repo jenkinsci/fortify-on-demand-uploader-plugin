@@ -214,6 +214,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
+    public boolean getIsRemediationPreferred() {
+        return model.isRemediationPreferred();
+    }
+
+    @SuppressWarnings("unused")
     public boolean getRunOpenSourceAnalysisOverride() {
         return model.isRunOpenSourceAnalysisOverride();
     }
