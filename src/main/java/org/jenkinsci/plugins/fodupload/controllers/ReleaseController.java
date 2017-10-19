@@ -2,11 +2,14 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.models.FodApiFilterList;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
@@ -14,6 +17,8 @@ import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 
 public class ReleaseController extends ControllerBase {
@@ -79,28 +84,43 @@ public class ReleaseController extends ControllerBase {
      * @param model JobModel
      * @return returns assessment type obj
      */
-    public ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) throws IOException {
+    ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) throws IOException, URISyntaxException {
 
-        String filters = "frequencyTypeId:" + model.getEntitlementPreference();
+
+        FodApiFilterList filters = new FodApiFilterList()
+                                    .addFilter("frequencyTypeId", model.getEntitlementPreference())
+                                    .addFilter("assessmentTypeId", model.getBsiToken().getAssessmentTypeId());
+
         if (model.isBundledAssessment())
-            filters += "+isBundledAssessment:true";
+            filters.addFilter("isBundledAssessment", true);
 
-        // encode these before we put them on the URL since we're not using the URL builder
-        filters = URLEncoder.encode(filters, "UTF-8");
-        String url = String.format("%s/api/v3/releases/%s/assessment-types?scanType=1&filters=%s",
-                apiConnection.getApiUrl(),
-                model.getBsiToken().getProjectVersionId(),
-                filters);
+        // decide between URI building implementation
+
+        URIBuilder builder = new URIBuilder(apiConnection.getApiUrl());
+        builder.setPath(String.format("/api/v3/releases/%s/assessment-types", model.getBsiToken().getProjectVersionId()));
+        builder.addParameter("scanType", "1");
+        builder.addParameter("filters", filters.toString());
+        String url = builder.build().toString();
+
+        // OR
+
+        String url2 = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+                .addPathSegments(String.format("/api/v3/releases/%s/assessment-types", model.getBsiToken().getProjectVersionId()))
+                .addQueryParameter("scanType", "1")
+                .addQueryParameter("filters", filters.toString())
+                .build().toString();
+
 
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
 
         Request request = new Request.Builder()
-                .url(url)
+                .url(url2)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
                 .get()
                 .build();
+
         Response response = apiConnection.getClient().newCall(request).execute();
 
         if (response.code() == org.apache.http.HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
@@ -120,8 +140,7 @@ public class ReleaseController extends ControllerBase {
 
         // Get entitlement based on available options
         for (ReleaseAssessmentTypeDTO assessment : results.getItems()) {
-            if (assessment.getAssessmentTypeId() == model.getBsiToken().getAssessmentTypeId()
-                    && (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0)) {
+            if (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0) {
                 return assessment;
             }
         }
