@@ -92,7 +92,7 @@ public class StaticScanController extends ControllerBase {
                 builder = builder.addQueryParameter("parentAssessmentTypeId", Integer.toString(assessmentType.getParentAssessmentTypeId()));
             }
 
-            if (uploadRequest.getBsiToken().getTechnologyVersion() != null) {
+            if (token.getTechnologyVersion() != null) {
                 builder = builder.addQueryParameter("languageLevel", token.getTechnologyVersion());
             }
 
