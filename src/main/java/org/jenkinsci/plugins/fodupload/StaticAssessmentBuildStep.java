@@ -69,7 +69,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         final PrintStream logger = listener.getLogger();
 
         try {
-
             taskListener.set(listener);
 
             Result currentResult = build.getResult();
@@ -114,7 +113,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();
             apiConnection.authenticate();
             StaticScanController staticScanController = new StaticScanController(apiConnection, logger);
-            boolean success = staticScanController.startStaticScan(model, null);
+            String notes = String.format("[%d] %s - Assessment submitted from Jenkins FoD Plugin",
+                    build.getNumber(),
+                    build.getDisplayName());
+
+            boolean success = staticScanController.startStaticScan(model, notes);
             boolean deleted = payload.delete();
 
             if (success && deleted) {
