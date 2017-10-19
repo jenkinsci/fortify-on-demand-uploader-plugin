@@ -6,7 +6,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.util.IOUtils;
 import okhttp3.*;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
@@ -21,6 +23,7 @@ public class StaticScanController extends ControllerBase {
 
     private final static int EXPRESS_SCAN_PREFERENCE_ID = 2;
     private final static int EXPRESS_AUDIT_PREFERENCE_ID = 2;
+    private final static int MAX_NOTES_LENGTH = 250;
     private final static int CHUNK_SIZE = 1024 * 1024;
     private PrintStream logger;
 
@@ -42,7 +45,7 @@ public class StaticScanController extends ControllerBase {
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
-    public boolean startStaticScan(final JobModel uploadRequest) {
+    public boolean startStaticScan(final JobModel uploadRequest, final String notes) {
 
         PostStartScanResponse scanStartedResponse = null;
 
@@ -87,6 +90,11 @@ public class StaticScanController extends ControllerBase {
                     .addQueryParameter("scanPreferenceType", Integer.toString(scanPreferenceId))
                     .addQueryParameter("auditPreferenceType", Integer.toString(auditPreferenceId))
                     .addQueryParameter("isRemediationScan", Boolean.toString(isRemediationScan));
+
+            if (!Utils.isNullOrEmpty(notes)) {
+                String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);
+                builder = builder.addQueryParameter("notes", truncatedNotes);
+            }
 
             if (assessmentType.getParentAssessmentTypeId() != 0 && assessmentType.isBundledAssessment()) {
                 builder = builder.addQueryParameter("parentAssessmentTypeId", Integer.toString(assessmentType.getParentAssessmentTypeId()));

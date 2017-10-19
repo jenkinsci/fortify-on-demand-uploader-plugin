@@ -114,7 +114,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();
             apiConnection.authenticate();
             StaticScanController staticScanController = new StaticScanController(apiConnection, logger);
-            boolean success = staticScanController.startStaticScan(model);
+            boolean success = staticScanController.startStaticScan(model, null);
             boolean deleted = payload.delete();
 
             if (success && deleted) {
