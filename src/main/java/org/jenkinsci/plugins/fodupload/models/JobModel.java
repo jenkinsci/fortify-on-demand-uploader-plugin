@@ -129,7 +129,7 @@ public class JobModel {
         if (bsiToken.getAssessmentTypeId() == 0)
             errors.add("Assessment Type");
 
-        if (bsiToken.getTechnologyVersion() == null)
+        if (bsiToken.getTechnologyType() == null)
             errors.add("Technology Stack");
 
         if (bsiToken.getProjectVersionId() == 0)
