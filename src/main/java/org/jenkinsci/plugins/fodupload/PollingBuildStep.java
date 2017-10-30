@@ -33,18 +33,15 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     private String bsiToken;
     private int pollingInterval;
     private int policyFailureBuildResultPreference;
-    private boolean isPrettyLogging;
 
     @DataBoundConstructor
     public PollingBuildStep(String bsiToken,
                             int pollingInterval,
-                            int policyFailureBuildResultPreference,
-                            boolean isPrettyLogging) {
+                            int policyFailureBuildResultPreference) {
 
         this.bsiToken = bsiToken;
         this.pollingInterval = pollingInterval;
         this.policyFailureBuildResultPreference = policyFailureBuildResultPreference;
-        this.isPrettyLogging = isPrettyLogging;
     }
 
     @Override
@@ -76,7 +73,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
 
             BsiToken token = tokenParser.parse(this.bsiToken);
             apiConnection.authenticate();
-            ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.isPrettyLogging, this.pollingInterval, logger);
+            ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.pollingInterval, logger);
             PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
 
             // if the polling fails, crash the build
@@ -133,11 +130,6 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     @SuppressWarnings("unused")
     public int getPolicyFailureBuildResultPreference() {
         return this.policyFailureBuildResultPreference;
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsPrettyLogging() {
-        return isPrettyLogging;
     }
 
     // Overridden for better type safety.

@@ -22,7 +22,6 @@ public class ScanStatusPoller {
     private FodApiConnection apiConnection;
     private int failCount = 0;
     private int pollingInterval;
-    private boolean isPrettyLogging;
 
     private PrintStream logger;
 
@@ -30,15 +29,13 @@ public class ScanStatusPoller {
      * Constructor
      *
      * @param apiConnection   apiConnection connection to use
-     * @param isPrettyLogging enables fancier formatting for logs
      * @param pollingInterval the polling interval in minutes
      * @param logger          the PrintStream that will be logged to
      */
     @SuppressFBWarnings("URF_UNREAD_FIELD")
-    public ScanStatusPoller(FodApiConnection apiConnection, boolean isPrettyLogging, int pollingInterval, PrintStream logger) {
+    public ScanStatusPoller(FodApiConnection apiConnection, int pollingInterval, PrintStream logger) {
         this.apiConnection = apiConnection;
         this.pollingInterval = pollingInterval;
-        this.isPrettyLogging = isPrettyLogging;
         this.logger = logger;
     }
 
@@ -133,39 +130,18 @@ public class ScanStatusPoller {
     private void printPassFail(ReleaseDTO release) {
 
         boolean isPassed = release.isPassed();
-        logger.println("Pass/Fail status:       " + (isPassed ? "Passed" : "Failed"));
-        if (this.isPrettyLogging) {
-            if (!isPassed) {
-                String passFailReason = release.getPassFailReasonType() == null ?
-                        "Pass/Fail Policy requirements not met " :
-                        release.getPassFailReasonType();
-                logger.println("Failure Reason:         " + passFailReason);
-            } else {
-                logger.println("Passed");
-            }
-            logger.println("Number of criticals:    " + release.getCritical());
-            logger.println("Number of highs:        " + release.getHigh());
-            logger.println("Number of mediums:      " + release.getMedium());
-            logger.println("Number of lows:         " + release.getLow());
-
-        } else {
-            logger.println("------------------------------------------------------------------------------------");
-            logger.println("                        Fortify on Demand Assessment Results                        ");
-            logger.println("------------------------------------------------------------------------------------");
-            logger.println();
-            logger.println(String.format("Star Rating: %d out of 5 with %d total issue(s).", release.getRating(), release.getIssueCount()));
-            logger.println();
-            logger.println(String.format("Critical: %d", release.getCritical()));
-            logger.println(String.format("High:     %d", release.getHigh()));
-            logger.println(String.format("Medium:   %d", release.getMedium()));
-            logger.println(String.format("Low:      %d", release.getLow()));
-            logger.println();
-            logger.println("For application status details see the customer portal: ");
-            logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), release.getReleaseId()));
-            logger.println();
-            logger.println(String.format("Scan %s established policy check", isPassed ? "passed" : "failed"));
-            logger.println();
-            logger.println("------------------------------------------------------------------------------------");
+        logger.println(String.format("Critical: %d", release.getCritical()));
+        logger.println(String.format("High:     %d", release.getHigh()));
+        logger.println(String.format("Medium:   %d", release.getMedium()));
+        logger.println(String.format("Low:      %d", release.getLow()));
+        logger.println("For application status details see the customer portal: ");
+        logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), release.getReleaseId()));
+        logger.println(String.format("Scan %s established policy check", isPassed ? "passed" : "failed"));
+        if (!isPassed) {
+            String passFailReason = release.getPassFailReasonType() == null ?
+                    "Pass/Fail Policy requirements not met " :
+                    release.getPassFailReasonType();
+            logger.println("Failure Reason:         " + passFailReason);
         }
     }
 }

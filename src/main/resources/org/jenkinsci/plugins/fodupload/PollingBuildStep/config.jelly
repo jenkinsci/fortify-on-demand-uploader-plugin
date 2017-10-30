@@ -9,7 +9,4 @@
     <f:entry title="Policy Compliance Failure Build Result Preference" field="policyFailureBuildResultPreference">
         <f:select/>
     </f:entry>
-    <f:entry title="Enable detailed assessment result log" field="isPrettyLogging">
-        <f:checkbox/>
-    </f:entry>
 </j:jelly>
