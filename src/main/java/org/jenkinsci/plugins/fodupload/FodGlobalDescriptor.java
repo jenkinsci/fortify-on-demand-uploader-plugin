@@ -26,6 +26,10 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private String baseUrl;
     private String apiUrl;
 
+    public FodGlobalDescriptor() {
+        load();
+    }
+
     // On save.
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
