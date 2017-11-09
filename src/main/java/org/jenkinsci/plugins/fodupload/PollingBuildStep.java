@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 
+@SuppressWarnings("unused")
 public class PollingBuildStep extends Recorder implements SimpleBuildStep {
 
     private static final BsiTokenParser tokenParser = new BsiTokenParser();

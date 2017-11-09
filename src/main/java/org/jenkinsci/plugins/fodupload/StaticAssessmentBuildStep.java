@@ -27,6 +27,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
+@SuppressWarnings("unused")
 public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
 
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
