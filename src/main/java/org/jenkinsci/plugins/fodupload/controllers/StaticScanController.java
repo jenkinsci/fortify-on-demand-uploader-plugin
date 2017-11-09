@@ -65,7 +65,7 @@ public class StaticScanController extends ControllerBase {
             ReleaseAssessmentTypeDTO assessmentType = new ReleaseController(apiConnection).getAssessmentType(uploadRequest);
 
             if (assessmentType == null) {
-                logger.println("Assessment not found");
+                logger.println("Entitlement not found.  Please make sure that your entitlements are good for the selected preference.");
                 return false;
             }
 
