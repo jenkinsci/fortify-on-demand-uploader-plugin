@@ -1,14 +1,9 @@
 package org.jenkinsci.plugins.fodupload;
 
 import hudson.Extension;
-import hudson.model.AbstractProject;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import net.sf.json.JSONObject;
-import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 

@@ -1,15 +1,13 @@
 package org.jenkinsci.plugins.fodupload;
 
-import com.google.gson.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
 import okhttp3.*;
-
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.fodupload.controllers.*;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
