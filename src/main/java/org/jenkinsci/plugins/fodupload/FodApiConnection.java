@@ -1,15 +1,13 @@
 package org.jenkinsci.plugins.fodupload;
 
-import com.google.gson.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
 import okhttp3.*;
-
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.fodupload.controllers.*;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +35,7 @@ public class FodApiConnection {
      * @param secret  apiConnection secret
      * @param baseUrl apiConnection url
      */
-    public FodApiConnection(final String key, final String secret, final String baseUrl, final String apiUrl) {
+    FodApiConnection(final String key, final String secret, final String baseUrl, final String apiUrl) {
         this.key = key;
         this.secret = secret;
         this.baseUrl = baseUrl;
@@ -83,7 +81,7 @@ public class FodApiConnection {
     /**
      * Retire the current token. Unclear if this actually does anything on the backend.
      */
-    public void retireToken() throws IOException {
+    void retireToken() throws IOException {
 
         Request request = new Request.Builder()
                 .url(apiUrl + "/oauth/retireToken")

@@ -6,7 +6,7 @@
     <f:entry title="Polling Interval" description="In minutes" field="pollingInterval">
         <f:textbox default="0"/>
     </f:entry>
-    <f:entry title="Policy Compliance Failure Build Result Preference" field="policyFailureBuildResultPreference">
+    <f:entry title="Action if Failing Security Policy" field="policyFailureBuildResultPreference">
         <f:select/>
     </f:entry>
 </j:jelly>

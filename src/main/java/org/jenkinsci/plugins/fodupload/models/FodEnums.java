@@ -37,8 +37,9 @@ public class FodEnums {
     }
 
     public enum EntitlementPreferenceType {
-        SingleScan(1),
-        Subscription(2);
+
+        Subscription(2),
+        SingleScan(1);
 
         private final int _val;
 

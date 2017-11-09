@@ -66,7 +66,7 @@ public class ScanStatusPoller {
 
             // Get the status of the release
             ReleaseDTO release = releaseController.getRelease(releaseId,
-                    "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low");
+                    "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low,releaseId,rating,currentStaticScanId,releaseName");
 
             if (release == null) {
                 failCount++;

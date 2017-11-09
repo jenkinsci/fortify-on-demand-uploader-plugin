@@ -27,7 +27,6 @@ public class Utils {
         return string == null || string.isEmpty();
     }
 
-
     private static final String TS_DOT_NET_KEY = ".NET";
     private static final String TS_JAVA_KEY = "JAVA/J2EE";
     private static final String TS_RUBY_KEY = "Ruby";
