@@ -15,7 +15,7 @@ public class JobModel {
     private static final BsiTokenParser tokenParser = new BsiTokenParser();
 
     private String bsiTokenOriginal;
-    private BsiToken bsiToken;
+    private transient BsiToken bsiToken;
     private boolean includeAllFiles;
     private boolean purchaseEntitlements;
     private int entitlementPreference;
@@ -99,6 +99,11 @@ public class JobModel {
         this.isExpressScanOverride = isExpressScanOverride;
         this.isExpressAuditOverride = isExpressAuditOverride;
         this.includeThirdPartyOverride = includeThirdPartyOverride;
+    }
+
+    private Object readResolve() throws URISyntaxException, UnsupportedEncodingException {
+        bsiToken = tokenParser.parse(bsiTokenOriginal);
+        return this;
     }
 
     @Override
