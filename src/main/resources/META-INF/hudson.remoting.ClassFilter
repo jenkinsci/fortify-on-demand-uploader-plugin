@@ -1,2 +1,0 @@
-# for compatibility with old JobModel instances which still saved the bsiToken field:
-com.fortify.fod.parser.BsiToken
