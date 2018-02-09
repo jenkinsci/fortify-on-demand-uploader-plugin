@@ -15,7 +15,7 @@ public class JobModel {
     private static final BsiTokenParser tokenParser = new BsiTokenParser();
 
     private String bsiTokenOriginal;
-    private BsiToken bsiToken;
+    private transient BsiToken bsiTokenCache;
     private boolean includeAllFiles;
     private boolean purchaseEntitlements;
     private int entitlementPreference;
@@ -40,7 +40,7 @@ public class JobModel {
     }
 
     public BsiToken getBsiToken() {
-        return bsiToken;
+        return bsiTokenCache;
     }
 
     public boolean isIncludeAllFiles() {
@@ -88,7 +88,7 @@ public class JobModel {
                     boolean includeThirdPartyOverride) throws URISyntaxException, UnsupportedEncodingException {
 
         this.bsiTokenOriginal = bsiToken;
-        this.bsiToken = tokenParser.parse(bsiToken);
+        this.bsiTokenCache = tokenParser.parse(bsiToken);
         this.includeAllFiles = includeAllFiles;
         this.entitlementPreference = entitlementPreference;
         this.isBundledAssessment = isBundledAssessment;
@@ -99,6 +99,11 @@ public class JobModel {
         this.isExpressScanOverride = isExpressScanOverride;
         this.isExpressAuditOverride = isExpressAuditOverride;
         this.includeThirdPartyOverride = includeThirdPartyOverride;
+    }
+
+    private Object readResolve() throws URISyntaxException, UnsupportedEncodingException {
+        bsiTokenCache = tokenParser.parse(bsiTokenOriginal);
+        return this;
     }
 
     @Override
@@ -112,10 +117,10 @@ public class JobModel {
                         "Purchase Entitlements:             %s%n" +
                         "Entitlement Preference             %s%n" +
                         "Bundled Assessment:                %s%n",
-                bsiToken.getProjectVersionId(),
-                bsiToken.getAssessmentTypeId(),
-                bsiToken.getTechnologyStack(),
-                bsiToken.getLanguageLevel(),
+                bsiTokenCache.getProjectVersionId(),
+                bsiTokenCache.getAssessmentTypeId(),
+                bsiTokenCache.getTechnologyStack(),
+                bsiTokenCache.getLanguageLevel(),
                 includeAllFiles,
                 purchaseEntitlements,
                 entitlementPreference,
@@ -126,13 +131,13 @@ public class JobModel {
     public boolean validate(PrintStream logger) {
         List<String> errors = new ArrayList<>();
 
-        if (bsiToken.getAssessmentTypeId() == 0)
+        if (bsiTokenCache.getAssessmentTypeId() == 0)
             errors.add("Assessment Type");
 
-        if (bsiToken.getTechnologyType() == null)
+        if (bsiTokenCache.getTechnologyType() == null)
             errors.add("Technology Stack");
 
-        if (bsiToken.getProjectVersionId() == 0)
+        if (bsiTokenCache.getProjectVersionId() == 0)
             errors.add("Release Id");
 
         if (errors.size() > 0) {
