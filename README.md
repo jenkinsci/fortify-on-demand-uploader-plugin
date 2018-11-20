@@ -8,5 +8,5 @@ This is a Jenkins plugin for the Fortify on Demand service. An API key from the 
 For requirements, usage, and other important details please see the official Jenkins Wiki entry: 
 
 https://wiki.jenkins-ci.org/display/JENKINS/Fortify+On+Demand+Uploader+Plugin
-
+ 
 More information about Fortify on Demand: https://ams.fortify.com
