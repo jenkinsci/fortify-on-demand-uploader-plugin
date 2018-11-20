@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>fortify-on-demand-uploader</artifactId>
-    <version>3.0.9-SNAPSHOT</version>
+    <version>3.0.9</version>
     <packaging>hpi</packaging>
 
     <properties>
@@ -35,7 +35,7 @@
         <connection>scm:git:git@github.com:jenkinsci/fortify-on-demand-uploader-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/fortify-on-demand-uploader-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/fortify-on-demand-uploader-plugin</url>
-        <tag>HEAD</tag>
+        <tag>fortify-on-demand-uploader-3.0.9</tag>
     </scm>
 
     <developers>
