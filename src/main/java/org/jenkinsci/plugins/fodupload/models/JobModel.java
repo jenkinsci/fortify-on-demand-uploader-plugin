@@ -9,6 +9,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JobModel {
 
@@ -21,7 +23,7 @@ public class JobModel {
     private int entitlementPreference;
     private boolean isBundledAssessment;
     private boolean isRemediationPreferred;
-
+   
     // These override options are for supporting the legacy BSI Urls
     // TODO: Remove these in the future when users can no longer generate BSI URLs in FoD
     private boolean runOpenSourceAnalysisOverride;
@@ -43,6 +45,8 @@ public class JobModel {
         return bsiTokenCache;
     }
 
+    
+    
     public boolean isIncludeAllFiles() {
         return includeAllFiles;
     }
@@ -75,6 +79,11 @@ public class JobModel {
      * @param isBundledAssessment   isBundledAssessment
      * @param purchaseEntitlements  purchaseEntitlements
      * @param entitlementPreference entitlementPreference
+     * @param isRemediationPreferred isRemediationPreferred
+     * @param runOpenSourceAnalysisOverride runOpenSourceAnalysisOverride
+     * @param isExpressScanOverride isExpressScanOverride
+     * @param isExpressAuditOverride isExpressAuditOverride
+     * @param includeThirdPartyOverride includeThirdPartyOverride
      */
     public JobModel(String bsiToken,
                     boolean includeAllFiles,
@@ -88,7 +97,6 @@ public class JobModel {
                     boolean includeThirdPartyOverride) throws URISyntaxException, UnsupportedEncodingException {
 
         this.bsiTokenOriginal = bsiToken;
-        this.bsiTokenCache = tokenParser.parse(bsiToken);
         this.includeAllFiles = includeAllFiles;
         this.entitlementPreference = entitlementPreference;
         this.isBundledAssessment = isBundledAssessment;
@@ -109,7 +117,7 @@ public class JobModel {
     @Override
     public String toString() {
         return String.format(
-                "Release Id:                        %s%n" +
+                        "Release Id:                        %s%n" +
                         "Assessment Type Id:                %s%n" +
                         "Technology Stack:                  %s%n" +
                         "Language Level:                    %s%n" +
@@ -127,8 +135,19 @@ public class JobModel {
                 isBundledAssessment);
     }
 
+    public boolean initializeBuildModel()
+    {
+        try {
+            this.bsiTokenCache = tokenParser.parse(bsiTokenOriginal);
+        } catch (Exception ex) {
+            return false;
+        } 
+        return (this.bsiTokenCache != null);
+    }
+    
     // TODO: More validation, though this should never happen with the new format
     public boolean validate(PrintStream logger) {
+        
         List<String> errors = new ArrayList<>();
 
         if (bsiTokenCache.getAssessmentTypeId() == 0)

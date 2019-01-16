@@ -1,10 +1,15 @@
 package org.jenkinsci.plugins.fodupload;
 
+import com.fortify.fod.parser.BsiToken;
+import com.fortify.fod.parser.BsiTokenParser;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -12,11 +17,13 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -26,27 +33,41 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
+import org.kohsuke.stapler.QueryParameter;
+
 
 @SuppressWarnings("unused")
 public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
 
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
-
+    private static final String CLIENT_ID = "clientId";
+    private static final String CLIENT_SECRET = "clientSecret";
+    private static final String USERNAME = "username";
+    private static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
+    private static final String TENANT_ID = "tenantId";
     private JobModel model;
+    private AuthenticationModel authModel;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
     @DataBoundConstructor
     public StaticAssessmentBuildStep(String bsiToken,
-                                     boolean includeAllFiles,
-                                     boolean isBundledAssessment,
-                                     boolean purchaseEntitlements,
-                                     int entitlementPreference,
-                                     boolean isRemediationPreferred,
-                                     boolean runOpenSourceAnalysisOverride,
-                                     boolean isExpressScanOverride,
-                                     boolean isExpressAuditOverride,
-                                     boolean includeThirdPartyOverride) throws URISyntaxException, UnsupportedEncodingException {
+                                    String projectAuthType,
+                                    String clientId,
+                                    String clientSecret,
+                                    String username,
+                                    String personalAccessToken,
+                                    String tenantId,
+                                    boolean includeAllFiles,
+                                    boolean isBundledAssessment,
+                                    boolean purchaseEntitlements,
+                                    int entitlementPreference,
+                                    boolean isRemediationPreferred,
+                                    boolean runOpenSourceAnalysisOverride,
+                                    boolean isExpressScanOverride,
+                                    boolean isExpressAuditOverride,
+                                    boolean includeThirdPartyOverride) throws URISyntaxException, UnsupportedEncodingException {
 
         model = new JobModel(bsiToken,
                 includeAllFiles,
@@ -58,17 +79,48 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 isExpressScanOverride,
                 isExpressAuditOverride,
                 includeThirdPartyOverride);
+        
+        authModel = new AuthenticationModel(projectAuthType != null ? projectAuthType: "useGlobalAuthType" ,
+                                            clientId,
+                                            clientSecret,
+                                            username,
+                                            personalAccessToken,
+                                            tenantId);
     }
 
+   
+    
+    @Override
+    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) 
+    {
+        final PrintStream logger = listener.getLogger();
+        if (model == null) {
+            logger.println("Unexpected Error");
+            build.setResult(Result.FAILURE);
+            return false;
+        }
+
+        if(model.initializeBuildModel() == false){
+            logger.println("Invalid BSI Token");
+            build.setResult(Result.FAILURE);
+            return false;
+        }
+        
+        if (!model.validate(logger)) {
+            build.setResult(Result.FAILURE);
+            return false;
+        }
+        return true;
+    }
+    
     // logic run during a build
     @Override
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
 
-        FodApiConnection apiConnection = null;
         final PrintStream logger = listener.getLogger();
-
+        FodApiConnection apiConnection = null;
         try {
             taskListener.set(listener);
 
@@ -78,17 +130,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                     || Result.UNSTABLE.equals(currentResult)) {
 
                 logger.println("Error: Build Failed or Unstable.  Halting with Fortify on Demand upload.");
-                return;
-            }
-
-            if (model == null) {
-                logger.println("Unexpected Error");
-                build.setResult(Result.FAILURE);
-                return;
-            }
-
-            if (!model.validate(logger)) {
-                build.setResult(Result.UNSTABLE);
                 return;
             }
 
@@ -110,8 +151,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
             model.setPayload(payload);
 
-            // Load apiConnection settings
-            apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();
+            // Create apiConnection 
+            apiConnection = ApiConnectionFactory.createApiConnection(authModel);
             apiConnection.authenticate();
             StaticScanController staticScanController = new StaticScanController(apiConnection, logger);
             String notes = String.format("[%d] %s - Assessment submitted from Jenkins FoD Plugin",
@@ -137,7 +178,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 } catch (IOException e) {
                     logger.println("Failed to retire oauth token.");
                     e.printStackTrace(logger);
-                }
+                } 
             }
         }
     }
@@ -164,7 +205,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
          */
         // Entry point when accessing global configuration
         public StaticAssessmentStepDescriptor() {
-            super();
+              super();
             load();
         }
 
@@ -172,12 +213,76 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
         }
-
+        
+        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken)
+        {
+            if(bsiToken != null && !bsiToken.isEmpty() ){
+                BsiTokenParser tokenParser = new BsiTokenParser();
+                try{
+                    BsiToken testToken = tokenParser.parse(bsiToken);
+                    if(testToken != null){
+                        return FormValidation.ok();
+                    }
+                }
+                catch( Exception ex){
+                    return FormValidation.error("Could not parse BSI token.");
+                }  
+            }
+            else 
+                return FormValidation.error("Please specify BSI Token");
+            return FormValidation.error("Please specify BSI Token");
+        }
+        
         @Override
         public String getDisplayName() {
             return "Fortify on Demand Static Assessment";
         }
+ 
+        
+         //testConnections
+        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
+        public FormValidation doTestApiKeyConnection(@QueryParameter(CLIENT_ID) final String clientId,
+                                               @QueryParameter(CLIENT_SECRET) final String clientSecret)
+        {
+            FodApiConnection testApi;
+            String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
+            String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
+            if (Utils.isNullOrEmpty(baseUrl))
+                return FormValidation.error("Fortify on Demand URL is empty!");
+            if (Utils.isNullOrEmpty(apiUrl))
+                return FormValidation.error("Fortify on Demand API URL is empty!");
+            if (Utils.isNullOrEmpty(clientId))
+                return FormValidation.error("API Key is empty!");
+            if (Utils.isNullOrEmpty(clientSecret))
+                return FormValidation.error("Secret is empty!");
+            testApi = new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
+            return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
+        }
 
+        // Form validation
+        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
+        public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(USERNAME) final String username,
+                                               @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                               @QueryParameter(TENANT_ID) final String tenantId)
+        {
+            FodApiConnection testApi;
+            String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
+            String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl(); 
+            if (Utils.isNullOrEmpty(baseUrl))
+                return FormValidation.error("Fortify on Demand URL is empty!");
+            if (Utils.isNullOrEmpty(apiUrl))
+                return FormValidation.error("Fortify on Demand API URL is empty!");
+            if (Utils.isNullOrEmpty(username))
+                return FormValidation.error("Username is empty!");
+            if (Utils.isNullOrEmpty(personalAccessToken))
+                return FormValidation.error("Personal Access Token is empty!");
+            if (Utils.isNullOrEmpty(tenantId))
+             return FormValidation.error("Tenant ID is null.");
+            testApi = new FodApiConnection(tenantId + "\\" + username, personalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
+            return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
+
+        }
+        
         @SuppressWarnings("unused")
         public ListBoxModel doFillEntitlementPreferenceItems() {
             ListBoxModel items = new ListBoxModel();
@@ -187,6 +292,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
             return items;
         }
+        
+        
     }
 
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
@@ -197,6 +304,26 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         return model.getBsiTokenOriginal();
     }
 
+    @SuppressWarnings("unused")
+    public String getClientId() {
+        return authModel.getClientId();
+    }
+    
+    @SuppressWarnings("unused")
+    public String getClientSecret() {
+        return authModel.getClientSecret();
+    }
+    
+    @SuppressWarnings("unused")
+    public String getUsername() {
+        return authModel.getUsername();
+    }
+    
+    @SuppressWarnings("unused")
+    public String getPersonalAccessToken() {
+        return authModel.getPersonalAccessToken();
+    }
+    
     @SuppressWarnings("unused")
     public boolean getIncludeAllFiles() {
         return model.isIncludeAllFiles();
@@ -241,4 +368,16 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public boolean getIncludeThirdPartyOverride() {
         return model.isIncludeThirdPartyOverride();
     }
+    
+     public boolean getAuthTypeIsGlobal()
+    {
+        return authModel.getProjectAuthType().equals("useGlobalAuthType");
+    }
+    
+    public boolean getAuthTypeIsPersonalToken()
+    {
+         return authModel.getProjectAuthType().equals("personalAccessTokenType");
+    }
+   
+    
 }

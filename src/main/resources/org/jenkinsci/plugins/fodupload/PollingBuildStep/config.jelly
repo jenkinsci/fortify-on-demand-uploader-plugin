@@ -3,10 +3,33 @@
     <f:entry title="BSI Token" field="bsiToken">
         <f:textbox />
     </f:entry>
-    <f:entry title="Polling Interval" description="In minutes" field="pollingInterval">
-        <f:textbox default="0"/>
-    </f:entry>
-    <f:entry title="Action if Failing Security Policy" field="policyFailureBuildResultPreference">
-        <f:select/>
-    </f:entry>
+    <f:section title="Authentication - Select to override global authentication settings">
+        
+        <f:block>
+            <table>
+               <f:optionalBlock name="projectAuthType" title="Use Personal Access Token" value="personalAccessTokenType"  checked="${instance.authTypeIsPersonalToken}" inline="true">
+                <f:entry title="Username" field="username">
+                    <f:textbox/>
+                </f:entry>
+                <f:entry title="Personal Access Token" field="personalAccessToken">
+                    <f:password/>
+                </f:entry>
+                 <f:entry title="Tenant ID" field="tenantId">
+                    <f:textbox/>
+                </f:entry>
+                <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
+                          method="testPersonalAccessTokenConnection" with="username,personalAccessToken,tenantId"/>
+              </f:optionalBlock>
+            </table>
+        </f:block>
+    </f:section>
+    
+    <f:section title="Polling Options">
+        <f:entry title="Polling Interval" description="In minutes" field="pollingInterval">
+            <f:textbox default="0"/>
+        </f:entry>
+        <f:entry title="Action if Failing Security Policy" field="policyFailureBuildResultPreference">
+            <f:select/>
+        </f:entry>
+     </f:section>
 </j:jelly>

@@ -10,6 +10,8 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
 
 public class FodApiConnection {
 
@@ -17,13 +19,16 @@ public class FodApiConnection {
     private final static int WRITE_TIMEOUT = 30; // seconds
     private final static int READ_TIMEOUT = 30; // seconds
     public final static int MAX_SIZE = 50;
+    
 
     private String baseUrl;
     private String apiUrl;
     private OkHttpClient client;
     private String token;
+    private GrantType grantType;
+    private String scope;
 
-    private String key;
+    private String id;
     private String secret;
 
     private ProxyConfiguration proxy = null;
@@ -33,13 +38,15 @@ public class FodApiConnection {
      *
      * @param key     apiConnection key
      * @param secret  apiConnection secret
-     * @param baseUrl apiConnection url
+     * @param baseUrl apiConnection baseUrl
      */
-    FodApiConnection(final String key, final String secret, final String baseUrl, final String apiUrl) {
-        this.key = key;
+    FodApiConnection(final String id, final String secret, final String baseUrl, final String apiUrl, final GrantType grantType, final String scope) {
+        this.id = id;
         this.secret = secret;
         this.baseUrl = baseUrl;
         this.apiUrl = apiUrl;
+        this.grantType = grantType;
+        this.scope = scope;
 
         Jenkins instance = Jenkins.getInstance();
         if (instance != null)
@@ -53,12 +60,25 @@ public class FodApiConnection {
      */
     public void authenticate() throws IOException {
 
-        RequestBody formBody = new FormBody.Builder()
-                .add("scope", "api-tenant")
+        RequestBody formBody = null;
+        if(grantType == GrantType.CLIENT_CREDENTIALS)
+        {
+            formBody = new FormBody.Builder()
+                .add("scope", scope)
                 .add("grant_type", "client_credentials")
-                .add("client_id", key)
+                .add("client_id", id)
                 .add("client_secret", secret)
                 .build();
+        }
+        else if(grantType == GrantType.PASSWORD)
+        {
+             formBody = new FormBody.Builder()
+                .add("scope", scope)
+                .add("grant_type", "password")
+                .add("username", id)
+                .add("password", secret)
+                .build();
+        }
 
         Request request = new Request.Builder()
                 .url(apiUrl + "/oauth/token")
@@ -129,8 +149,8 @@ public class FodApiConnection {
         return token;
     }
 
-    public String getKey() {
-        return key;
+    public String getId() {
+        return id;
     }
 
     public String getSecret() {

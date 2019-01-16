@@ -36,6 +36,8 @@ public class FodEnums {
         DynamicScanWebServiceTypes
     }
 
+    public enum GrantType {CLIENT_CREDENTIALS, PASSWORD};
+    
     public enum EntitlementPreferenceType {
 
         Subscription(2),

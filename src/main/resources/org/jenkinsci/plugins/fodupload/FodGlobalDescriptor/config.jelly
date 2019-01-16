@@ -1,17 +1,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-    <f:section title="Fortify on Demand">
-        <f:entry title="API Key" field="clientId">
-            <f:textbox/>
-        </f:entry>
-        <f:entry title="Secret Key" field="clientSecret">
-            <f:password/>
-        </f:entry>
-    </f:section>
-
-    <f:advanced title="Advanced Settings">
-
+    <f:section title="Fortify on Demand">     
         <f:entry title="Fortify on Demand URL" description="ex. https://ams.fortify.com" field="baseUrl">
             <f:textbox default="https://ams.fortify.com"/>
         </f:entry>
@@ -19,8 +9,35 @@
         <f:entry title="Fortify on Demand API URL" description="ex. https://api.ams.fortify.com" field="apiUrl">
             <f:textbox default="https://api.ams.fortify.com"/>
         </f:entry>
+     </f:section>   
+     
+        <f:block >
+            <table >
+              <f:radioBlock name="globalAuthType" title="Use API key for authentication" checked="${instance.authTypeIsApiKey}" value="apiKeyType"  >
+                <f:entry title="API Key" field="clientId">
+                    <f:textbox/>
+                </f:entry>
+                <f:entry title="Secret" field="clientSecret">
+                    <f:password/>
+                </f:entry>
+                <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
+                          method="testApiKeyConnection" with="clientId,clientSecret,baseUrl,apiUrl"/>
+              </f:radioBlock>
+               <f:radioBlock name="globalAuthType" title="Use Personal Access Token for authentication" checked="${instance.authTypeIsPersonalToken}" value="personalAccessTokenType" >
+                <f:entry title="Username" field="username">
+                    <f:textbox/>
+                </f:entry>
+                <f:entry title="Personal Access Token" field="personalAccessToken">
+                    <f:password/>
+                </f:entry>
+                 <f:entry title="Tenant ID" field="tenantId">
+                    <f:textbox/>
+                </f:entry>
+                <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
+                          method="testPersonalAccessTokenConnection" with="username,personalAccessToken,tenantId,baseUrl,apiUrl"/>
+              </f:radioBlock>
+            </table>
+        </f:block>
+    
 
-        <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
-                          method="testConnection" with="clientId,clientSecret,baseUrl,apiUrl"/>
-    </f:advanced>
 </j:jelly>
