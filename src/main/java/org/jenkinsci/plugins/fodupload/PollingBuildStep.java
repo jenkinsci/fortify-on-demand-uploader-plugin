@@ -43,16 +43,11 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     private String bsiToken;
     private int pollingInterval;
     private int policyFailureBuildResultPreference;
-    String projectAuthType;
-    private String clientId;
-    private String clientSecret;
-    private String username;
-    private String personalAccessToken;
     private AuthenticationModel authModel;
-
+    
     @DataBoundConstructor
     public PollingBuildStep(String bsiToken,
-                            String projectAuthType,
+                            boolean overrideGlobalConfig,
                             int pollingInterval,
                             int policyFailureBuildResultPreference,
                             String clientId,
@@ -64,13 +59,11 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         this.bsiToken = bsiToken;
         this.pollingInterval = pollingInterval;
         this.policyFailureBuildResultPreference = policyFailureBuildResultPreference;
-        authModel = new AuthenticationModel(projectAuthType,
-                                            clientId,
-                                            clientSecret,
+        authModel = new AuthenticationModel(overrideGlobalConfig,
                                             username,
                                             personalAccessToken,
                                             tenantId);
-         
+     
     }
 
     @Override
@@ -94,6 +87,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         if (this.getPollingInterval() <= 0) {
             logger.println("Error: Invalid polling interval (" + this.getPollingInterval() + " minutes)");
             run.setResult(Result.UNSTABLE);
+            return;
         }
 
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
@@ -101,39 +95,44 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         try {
 
             BsiToken token = tokenParser.parse(this.bsiToken);
-            apiConnection.authenticate();
-            ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.pollingInterval, logger);
-            PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
+            if(apiConnection != null)
+            {
+                apiConnection.authenticate();
+                ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.pollingInterval, logger);
+                PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
 
-            // if the polling fails, crash the build
-            if (!result.isPollingSuccessful()) {
-                run.setResult(Result.FAILURE);
-                return;
-            }
-
-            if (!result.isPassing()) {
-
-                PolicyFailureBuildResultPreference pref = PolicyFailureBuildResultPreference.fromInt(this.policyFailureBuildResultPreference);
-
-                switch (pref) {
-
-                    case MarkFailure:
-                        run.setResult(Result.FAILURE);
-                        break;
-
-                    case MarkUnstable:
-                        run.setResult(Result.UNSTABLE);
-                        break;
-
-                    case None:
-                    default:
-                        break;
+                // if the polling fails, crash the build
+                if (!result.isPollingSuccessful()) {
+                    run.setResult(Result.FAILURE);
+                    return;
                 }
-            }
 
+                if (!result.isPassing()) {
+
+                    PolicyFailureBuildResultPreference pref = PolicyFailureBuildResultPreference.fromInt(this.policyFailureBuildResultPreference);
+
+                    switch (pref) {
+
+                        case MarkFailure:
+                            run.setResult(Result.FAILURE);
+                            break;
+
+                        case MarkUnstable:
+                            run.setResult(Result.UNSTABLE);
+                            break;
+
+                        case None:
+                        default:
+                            break;
+                    }
+                }
+            }else{
+                logger.println("Failed to authenticate");
+                run.setResult(Result.FAILURE);   
+            }
+            
         } catch (URISyntaxException e) {
             logger.println("Failed to parse BSI.");
-            e.printStackTrace(logger);
         } finally {
             if (apiConnection != null) {
                 apiConnection.retireToken();
@@ -160,26 +159,25 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     public int getPolicyFailureBuildResultPreference() {
         return this.policyFailureBuildResultPreference;
     }
-
-    
-    @SuppressWarnings("unused")
-    public String getClientId() {
-        return clientId;
-    }
-    
-    @SuppressWarnings("unused")
-    public String getClientSecret() {
-        return clientSecret;
-    }
     
     @SuppressWarnings("unused")
     public String getUsername() {
-        return username;
+        return authModel.getUsername();
     }
     
     @SuppressWarnings("unused")
     public String getPersonalAccessToken() {
-        return personalAccessToken;
+        return authModel.getPersonalAccessToken();
+    }
+    
+    @SuppressWarnings("unused")
+    public String getTenantId() {
+        return authModel.getTenantId();
+    }
+    
+    @SuppressWarnings("unused")
+    public boolean getOverrideGlobalConfig() {
+        return authModel.getOverrideGlobalConfig();
     }
     
     // Overridden for better type safety.
@@ -192,7 +190,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
 
     @Extension
     public static final class PollingStepDescriptor extends BuildStepDescriptor<Publisher> {
-
+   
         public PollingStepDescriptor() {
             super();
             load();
@@ -208,35 +206,53 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
             return "Poll Fortify on Demand for Results";
         }
 
-           //testConnections
-        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
-        public FormValidation doTestApiKeyConnection(@QueryParameter(CLIENT_ID) final String clientId,
-                                               @QueryParameter(CLIENT_SECRET) final String clientSecret)
+        
+         public FormValidation doCheckBsiToken(@QueryParameter String bsiToken)
         {
-            FodApiConnection testApi;
-            String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
-            String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-            if (Utils.isNullOrEmpty(baseUrl))
-                return FormValidation.error("Fortify on Demand URL is empty!");
-            if (Utils.isNullOrEmpty(apiUrl))
-                return FormValidation.error("Fortify on Demand API URL is empty!");
-            if (Utils.isNullOrEmpty(clientId))
-                return FormValidation.error("API Key is empty!");
-            if (Utils.isNullOrEmpty(clientSecret))
-                return FormValidation.error("Secret is empty!");
-            testApi = new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl, FodEnums.GrantType.CLIENT_CREDENTIALS, "api-tenant");
-            return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
+            if(bsiToken != null && !bsiToken.isEmpty() ){
+                BsiTokenParser tokenParser = new BsiTokenParser();
+                try{
+                    BsiToken testToken = tokenParser.parse(bsiToken);
+                    if(testToken != null){
+                        return FormValidation.ok();
+                    }
+                }
+                catch( Exception ex){
+                    return FormValidation.error("Could not parse BSI token.");
+                }  
+            }
+            else 
+                return FormValidation.error("Please specify BSI Token");
+            return FormValidation.error("Please specify BSI Token");
         }
-
+        
+         
+        public FormValidation doCheckPollingInterval(@QueryParameter String pollingInterval)
+        {
+            if(Utils.isNullOrEmpty(pollingInterval))
+                return FormValidation.error("Polling interval is required to perform this step.");
+            try {
+                int pollingIntervalNumeric = Integer.parseInt(pollingInterval);
+                if(pollingIntervalNumeric <= 0)
+                    return FormValidation.error("Value must be greater than 0");
+            }
+            catch (NumberFormatException ex)
+            {
+                return FormValidation.error("Value must be integer");
+            }
+            return FormValidation.ok();
+        } 
+       
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
+        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
         public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(USERNAME) final String username,
                                                @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                @QueryParameter(TENANT_ID) final String tenantId)
         {
             FodApiConnection testApi;
             String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
-            String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl(); 
+            String apiUrl =  GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
             if (Utils.isNullOrEmpty(baseUrl))
                 return FormValidation.error("Fortify on Demand URL is empty!");
             if (Utils.isNullOrEmpty(apiUrl))
@@ -263,15 +279,6 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         }
     }
 
-    public boolean getAuthTypeIsApiKey()
-    {
-        return projectAuthType.equals("apiKeyType");
-    }
-
-    public boolean getAuthTypeIsPersonalToken()
-    {
-        return authModel.getProjectAuthType().equals("personalAccessTokenType");
-    }
     
     public enum PolicyFailureBuildResultPreference {
         None(0),

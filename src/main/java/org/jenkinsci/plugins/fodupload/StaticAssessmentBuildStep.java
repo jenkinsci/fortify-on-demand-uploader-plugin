@@ -53,9 +53,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     // Entry point when building
     @DataBoundConstructor
     public StaticAssessmentBuildStep(String bsiToken,
-                                    String projectAuthType,
-                                    String clientId,
-                                    String clientSecret,
+                                    boolean overrideGlobalConfig,
                                     String username,
                                     String personalAccessToken,
                                     String tenantId,
@@ -80,12 +78,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 isExpressAuditOverride,
                 includeThirdPartyOverride);
         
-        authModel = new AuthenticationModel(projectAuthType != null ? projectAuthType: "useGlobalAuthType" ,
-                                            clientId,
-                                            clientSecret,
+        authModel = new AuthenticationModel(overrideGlobalConfig,
                                             username,
                                             personalAccessToken,
                                             tenantId);
+              
     }
 
    
@@ -151,26 +148,38 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
             model.setPayload(payload);
 
-            // Create apiConnection 
+            
+             // Create apiConnection 
             apiConnection = ApiConnectionFactory.createApiConnection(authModel);
-            apiConnection.authenticate();
-            StaticScanController staticScanController = new StaticScanController(apiConnection, logger);
-            String notes = String.format("[%d] %s - Assessment submitted from Jenkins FoD Plugin",
-                    build.getNumber(),
-                    build.getDisplayName());
+            if(apiConnection != null){
+                apiConnection.authenticate();
 
-            boolean success = staticScanController.startStaticScan(model, notes);
-            boolean deleted = payload.delete();
+                StaticScanController staticScanController = new StaticScanController(apiConnection, logger);
+                String notes = String.format("[%d] %s - Assessment submitted from Jenkins FoD Plugin",
+                        build.getNumber(),
+                        build.getDisplayName());
 
-            if (success && deleted) {
-                logger.println("Scan Uploaded Successfully.");
+                boolean success = staticScanController.startStaticScan(model, notes);
+                boolean deleted = payload.delete();
+
+                if (success && deleted) {
+                    logger.println("Scan Uploaded Successfully.");
+                }
+                build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
             }
-
-            build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
+            else
+            {
+                logger.println("Failed to authenticate");
+                build.setResult(Result.FAILURE);
+            }
+           
 
         } catch (IOException e) {
-            e.printStackTrace(logger);
-            build.setResult(Result.UNSTABLE);
+            logger.println(e.getMessage());
+            build.setResult(Result.FAILURE);
+        } catch (IllegalArgumentException iae) {
+            logger.println(iae.getMessage());
+            build.setResult(Result.FAILURE);
         } finally {
             if (apiConnection != null) {
                 try {
@@ -199,13 +208,14 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @Extension
 
     public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {
+        
         /**
          * In order to load the persisted global configuration, you have to
          * call load() in the constructor.
          */
         // Entry point when accessing global configuration
         public StaticAssessmentStepDescriptor() {
-              super();
+            super();
             load();
         }
 
@@ -213,7 +223,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
         }
-        
+       
         public FormValidation doCheckBsiToken(@QueryParameter String bsiToken)
         {
             if(bsiToken != null && !bsiToken.isEmpty() ){
@@ -238,36 +248,17 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             return "Fortify on Demand Static Assessment";
         }
  
-        
-         //testConnections
-        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
-        public FormValidation doTestApiKeyConnection(@QueryParameter(CLIENT_ID) final String clientId,
-                                               @QueryParameter(CLIENT_SECRET) final String clientSecret)
-        {
-            FodApiConnection testApi;
-            String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
-            String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-            if (Utils.isNullOrEmpty(baseUrl))
-                return FormValidation.error("Fortify on Demand URL is empty!");
-            if (Utils.isNullOrEmpty(apiUrl))
-                return FormValidation.error("Fortify on Demand API URL is empty!");
-            if (Utils.isNullOrEmpty(clientId))
-                return FormValidation.error("API Key is empty!");
-            if (Utils.isNullOrEmpty(clientSecret))
-                return FormValidation.error("Secret is empty!");
-            testApi = new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
-            return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
-        }
 
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
+        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
         public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(USERNAME) final String username,
                                                @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                @QueryParameter(TENANT_ID) final String tenantId)
         {
             FodApiConnection testApi;
             String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
-            String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl(); 
+            String apiUrl =  GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
             if (Utils.isNullOrEmpty(baseUrl))
                 return FormValidation.error("Fortify on Demand URL is empty!");
             if (Utils.isNullOrEmpty(apiUrl))
@@ -305,16 +296,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public String getClientId() {
-        return authModel.getClientId();
-    }
-    
-    @SuppressWarnings("unused")
-    public String getClientSecret() {
-        return authModel.getClientSecret();
-    }
-    
-    @SuppressWarnings("unused")
     public String getUsername() {
         return authModel.getUsername();
     }
@@ -323,6 +304,17 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public String getPersonalAccessToken() {
         return authModel.getPersonalAccessToken();
     }
+    
+    @SuppressWarnings("unused")
+    public String getTenantId() {
+        return authModel.getTenantId();
+    }
+    
+    @SuppressWarnings("unused")
+    public boolean getOverrideGlobalConfig() {
+        return authModel.getOverrideGlobalConfig();
+    }
+    
     
     @SuppressWarnings("unused")
     public boolean getIncludeAllFiles() {
@@ -369,15 +361,5 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         return model.isIncludeThirdPartyOverride();
     }
     
-     public boolean getAuthTypeIsGlobal()
-    {
-        return authModel.getProjectAuthType().equals("useGlobalAuthType");
-    }
-    
-    public boolean getAuthTypeIsPersonalToken()
-    {
-         return authModel.getProjectAuthType().equals("personalAccessTokenType");
-    }
-   
     
 }

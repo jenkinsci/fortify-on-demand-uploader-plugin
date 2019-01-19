@@ -1,40 +1,24 @@
 package org.jenkinsci.plugins.fodupload.models;
 
 public class AuthenticationModel {
-    private String projectAuthType;
-    private String clientId;
-    private String clientSecret;
+    private boolean overrideGlobalConfig;
     private String username;
     private String personalAccessToken;
     private String tenantId;
     
-    public AuthenticationModel( String projectAuthType,
-                                String clientId ,
-                                String clientSecret,
+    public AuthenticationModel( boolean overrideGlobalConfig,
                                 String username,
                                 String personalAccessToken,
                                 String tenantId){
-        this.projectAuthType = projectAuthType;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
+        this.overrideGlobalConfig = overrideGlobalConfig;
         this.username = username;
         this.personalAccessToken = personalAccessToken;
         this.tenantId = tenantId;
     }
     
-    public String getProjectAuthType()
+    public boolean getOverrideGlobalConfig()
     {
-        return projectAuthType;
-    }
-    
-    public String getClientId()
-    {
-        return clientId;
-    }
-    
-    public String getClientSecret()
-    {
-        return clientSecret;
+        return overrideGlobalConfig;
     }
     
     public String getUsername()

@@ -7,7 +7,7 @@
         
         <f:block>
             <table>
-               <f:optionalBlock name="projectAuthType" title="Use Personal Access Token" value="personalAccessTokenType"  checked="${instance.authTypeIsPersonalToken}" inline="true">
+               <f:optionalBlock name="overrideGlobalConfig" title="Use Personal Access Token" checked="${instance.overrideGlobalConfig}" inline="true">
                 <f:entry title="Username" field="username">
                     <f:textbox/>
                 </f:entry>
@@ -26,7 +26,7 @@
     
     <f:section title="Polling Options">
         <f:entry title="Polling Interval" description="In minutes" field="pollingInterval">
-            <f:textbox default="0"/>
+            <f:textbox/>
         </f:entry>
         <f:entry title="Action if Failing Security Policy" field="policyFailureBuildResultPreference">
             <f:select/>

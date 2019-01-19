@@ -167,37 +167,37 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         {
             
             if (Utils.isNullOrEmpty(baseUrl))
-                throw new NullPointerException("Base URL is null.");
+                throw new IllegalArgumentException("Base URL is null.");
             if (Utils.isNullOrEmpty(apiUrl))
-                throw new NullPointerException("Api URL is null.");
+                throw new IllegalArgumentException("Api URL is null.");
             
             if(globalAuthType.equals("apiKeyType"))
             {
                 if (Utils.isNullOrEmpty(clientId))
-                    throw new NullPointerException("Client ID is null.");
+                    throw new IllegalArgumentException("Client ID is null.");
                 if (Utils.isNullOrEmpty(clientSecret))
-                    throw new NullPointerException("Client Secret is null.");
+                    throw new IllegalArgumentException("Client Secret is null.");
                 return new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
             }
             else if(globalAuthType.equals("personalAccessTokenType"))
             {
                 if (Utils.isNullOrEmpty(username))
-                        throw new NullPointerException("Username is null.");
+                        throw new IllegalArgumentException("Username is null.");
                 if (Utils.isNullOrEmpty(personalAccessToken))
-                        throw new NullPointerException("Personal Access Token is null.");
+                        throw new IllegalArgumentException("Personal Access Token is null.");
                  if (Utils.isNullOrEmpty(tenantId))
-                        throw new NullPointerException("Tenant ID is null.");
+                        throw new IllegalArgumentException("Tenant ID is null.");
                 return new FodApiConnection(tenantId + "\\" +username, personalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
             }
             else
             {
-                throw new NullPointerException("Invalid authentication type");
+                throw new IllegalArgumentException("Invalid authentication type");
             }
             
         }
         else 
         {
-            throw new NullPointerException("No Global authentication method configured");
+            throw new IllegalArgumentException("No authentication method configured");
         }
         
     }

@@ -17,6 +17,7 @@ import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+import org.jenkinsci.plugins.fodupload.Utils;
 
 public class ReleaseController extends ControllerBase {
 
@@ -77,7 +78,10 @@ public class ReleaseController extends ControllerBase {
         Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() {
         }.getType();
         GenericListResponse<ReleaseDTO> results = gson.fromJson(content, t);
-        return results.getItems().get(0);
+        if(results.getItems().size() > 0)
+            return results.getItems().get(0);
+        else 
+            return null;
     }
 
     /**
@@ -123,16 +127,19 @@ public class ReleaseController extends ControllerBase {
         String content = IOUtils.toString(response.body().byteStream(), "utf-8");
         response.body().close();
 
-        Gson gson = new Gson();
-        // Create a type of GenericList<ApplicationDTO> to play nice with gson.
-        Type t = new TypeToken<GenericListResponse<ReleaseAssessmentTypeDTO>>() {
-        }.getType();
-        GenericListResponse<ReleaseAssessmentTypeDTO> results = gson.fromJson(content, t);
+        if(!Utils.isNullOrEmpty(content)) // check if any content is returned
+        {
+            Gson gson = new Gson();
+            // Create a type of GenericList<ApplicationDTO> to play nice with gson.
+            Type t = new TypeToken<GenericListResponse<ReleaseAssessmentTypeDTO>>() {
+            }.getType();
+            GenericListResponse<ReleaseAssessmentTypeDTO> results = gson.fromJson(content, t);
 
-        // Get entitlement based on available options
-        for (ReleaseAssessmentTypeDTO assessment : results.getItems()) {
-            if (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0) {
-                return assessment;
+            // Get entitlement based on available options
+            for (ReleaseAssessmentTypeDTO assessment : results.getItems()) {
+                if (model.isPurchaseEntitlements() || assessment.getEntitlementId() > 0) {
+                    return assessment;
+                }
             }
         }
         return null;

@@ -79,6 +79,10 @@ public class FodApiConnection {
                 .add("password", secret)
                 .build();
         }
+        else
+        {
+            throw new IOException("Invalid Grant Type" );
+        }
 
         Request request = new Request.Builder()
                 .url(apiUrl + "/oauth/token")
