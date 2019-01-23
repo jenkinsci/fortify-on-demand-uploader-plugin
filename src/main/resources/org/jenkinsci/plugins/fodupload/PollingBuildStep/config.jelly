@@ -6,30 +6,28 @@
     <f:section title="Authentication - Select to override global authentication settings">
         
         <f:block>
-            <table>
                <f:optionalBlock name="overrideGlobalConfig" title="Use Personal Access Token" checked="${instance.overrideGlobalConfig}" inline="true">
                 <f:entry title="Username" field="username">
-                    <f:textbox/>
+                    <f:textbox style="width: 160px;" />
                 </f:entry>
                 <f:entry title="Personal Access Token" field="personalAccessToken">
-                    <f:password/>
+                    <f:password style="width: 160px;" />
                 </f:entry>
                  <f:entry title="Tenant ID" field="tenantId">
-                    <f:textbox/>
+                    <f:textbox style="width: 160px;" />
                 </f:entry>
                 <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
                           method="testPersonalAccessTokenConnection" with="username,personalAccessToken,tenantId"/>
               </f:optionalBlock>
-            </table>
         </f:block>
     </f:section>
     
     <f:section title="Polling Options">
         <f:entry title="Polling Interval" description="In minutes" field="pollingInterval">
-            <f:textbox/>
+            <f:textbox style="width: 160px;"/>
         </f:entry>
         <f:entry title="Action if Failing Security Policy" field="policyFailureBuildResultPreference">
-            <f:select/>
+            <f:select style="width: 160px;"/>
         </f:entry>
      </f:section>
 </j:jelly>
