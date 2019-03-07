@@ -21,12 +21,13 @@ import java.io.PrintStream;
 
 public class SharedUploadBuildStep {
 
-    private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
-    private static final String CLIENT_ID = "clientId";
-    private static final String CLIENT_SECRET = "clientSecret";
-    private static final String USERNAME = "username";
-    private static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
-    private static final String TENANT_ID = "tenantId";
+    public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
+    public static final String CLIENT_ID = "clientId";
+    public static final String CLIENT_SECRET = "clientSecret";
+    public static final String USERNAME = "username";
+    public static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
+    public static final String TENANT_ID = "tenantId";
+
     private JobModel model;
     private AuthenticationModel authModel;
 
@@ -125,7 +126,7 @@ public class SharedUploadBuildStep {
 
 
             // Create apiConnection
-            apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+            apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
             if(apiConnection != null){
                 apiConnection.authenticate();
 
@@ -216,5 +217,13 @@ public class SharedUploadBuildStep {
         }
 
         return items;
+    }
+
+    public AuthenticationModel getAuthModel() {
+        return authModel;
+    }
+
+    public JobModel getModel() {
+        return model;
     }
 }

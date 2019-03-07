@@ -28,15 +28,6 @@ import org.kohsuke.stapler.QueryParameter;
 @SuppressWarnings("unused")
 public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
 
-    private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
-    private static final String CLIENT_ID = "clientId";
-    private static final String CLIENT_SECRET = "clientSecret";
-    private static final String USERNAME = "username";
-    private static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
-    private static final String TENANT_ID = "tenantId";
-    private JobModel model;
-    private AuthenticationModel authModel;
-
     SharedUploadBuildStep sharedBuildStep;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
@@ -137,9 +128,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-        public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(USERNAME) final String username,
-                                                                   @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                   @QueryParameter(TENANT_ID) final String tenantId)
+        public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
+                                                                   @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId)
         {
             return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
 
@@ -158,73 +149,73 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     // These getters are also named in the following format: Get<JellyField>.
     @SuppressWarnings("unused")
     public String getBsiToken() {
-        return model.getBsiTokenOriginal();
+        return sharedBuildStep.getModel().getBsiTokenOriginal();
     }
 
     @SuppressWarnings("unused")
     public String getUsername() {
-        return authModel.getUsername();
+        return sharedBuildStep.getAuthModel().getUsername();
     }
 
     @SuppressWarnings("unused")
     public String getPersonalAccessToken() {
-        return authModel.getPersonalAccessToken();
+        return sharedBuildStep.getAuthModel().getPersonalAccessToken();
     }
 
     @SuppressWarnings("unused")
     public String getTenantId() {
-        return authModel.getTenantId();
+        return sharedBuildStep.getAuthModel().getTenantId();
     }
 
     @SuppressWarnings("unused")
     public boolean getOverrideGlobalConfig() {
-        return authModel.getOverrideGlobalConfig();
+        return sharedBuildStep.getAuthModel().getOverrideGlobalConfig();
     }
 
 
     @SuppressWarnings("unused")
     public boolean getIncludeAllFiles() {
-        return model.isIncludeAllFiles();
+        return sharedBuildStep.getModel().isIncludeAllFiles();
     }
 
     @SuppressWarnings("unused")
     public int getEntitlementPreference() {
-        return model.getEntitlementPreference();
+        return sharedBuildStep.getModel().getEntitlementPreference();
     }
 
     @SuppressWarnings("unused")
     public boolean getIsBundledAssessment() {
-        return model.isBundledAssessment();
+        return sharedBuildStep.getModel().isBundledAssessment();
     }
 
     @SuppressWarnings("unused")
     public boolean getPurchaseEntitlements() {
-        return model.isPurchaseEntitlements();
+        return sharedBuildStep.getModel().isPurchaseEntitlements();
     }
 
     @SuppressWarnings("unused")
     public boolean getIsRemediationPreferred() {
-        return model.isRemediationPreferred();
+        return sharedBuildStep.getModel().isRemediationPreferred();
     }
 
     @SuppressWarnings("unused")
     public boolean getRunOpenSourceAnalysisOverride() {
-        return model.isRunOpenSourceAnalysisOverride();
+        return sharedBuildStep.getModel().isRunOpenSourceAnalysisOverride();
     }
 
     @SuppressWarnings("unused")
     public boolean getIsExpressScanOverride() {
-        return model.isExpressScanOverride();
+        return sharedBuildStep.getModel().isExpressScanOverride();
     }
 
     @SuppressWarnings("unused")
     public boolean getIsExpressAuditOverride() {
-        return model.isExpressAuditOverride();
+        return sharedBuildStep.getModel().isExpressAuditOverride();
     }
 
     @SuppressWarnings("unused")
     public boolean getIncludeThirdPartyOverride() {
-        return model.isIncludeThirdPartyOverride();
+        return sharedBuildStep.getModel().isIncludeThirdPartyOverride();
     }
 
 

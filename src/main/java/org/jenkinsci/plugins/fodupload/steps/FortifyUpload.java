@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload.steps;
 
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -8,6 +9,8 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -15,6 +18,7 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 
 import java.io.PrintStream;
 import java.util.Set;
@@ -33,7 +37,7 @@ public class FortifyUpload extends FortifyStep {
     boolean includeAllFiles;
     boolean isBundledAssessment;
     boolean purchaseEntitlements;
-    int entitlementPreference = 2;
+    int entitlementPreference;
     boolean isRemediationPreferred;
     boolean runOpenSourceAnalysisOverride;
     boolean isExpressScanOverride;
@@ -98,10 +102,10 @@ public class FortifyUpload extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setBundledAssessment(boolean bundledAssessment) {
-        isBundledAssessment = bundledAssessment;
+    public void setIsBundledAssessment(boolean isBundledAssessment) {
+        this.isBundledAssessment = isBundledAssessment;
     }
-    public boolean getBundledAssessment() {
+    public boolean getIsBundledAssessment() {
         return isBundledAssessment;
     }
 
@@ -123,8 +127,8 @@ public class FortifyUpload extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setIsRemediationPreferred(boolean remediationPreferred) {
-        isRemediationPreferred = remediationPreferred;
+    public void setIsRemediationPreferred(boolean isRemediationPreferred) {
+        this.isRemediationPreferred = isRemediationPreferred;
     }
     public boolean getIsRemediationPreferred() {
         return isRemediationPreferred;
@@ -140,18 +144,18 @@ public class FortifyUpload extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setExpressScanOverride(boolean expressScanOverride) {
-        isExpressScanOverride = expressScanOverride;
+    public void setIsExpressScanOverride(boolean isExpressScanOverride) {
+        this.isExpressScanOverride = isExpressScanOverride;
     }
-    public boolean getExpressScanOverride() {
+    public boolean getIsExpressScanOverride() {
         return isExpressScanOverride;
     }
 
     @DataBoundSetter
-    public void setExpressAuditOverride(boolean expressAuditOverride) {
-        isExpressAuditOverride = expressAuditOverride;
+    public void setIsExpressAuditOverride(boolean isExpressAuditOverride) {
+        this.isExpressAuditOverride = isExpressAuditOverride;
     }
-    public boolean getExpressAuditOverride() {
+    public boolean getIsExpressAuditOverride() {
         return isExpressAuditOverride;
     }
 
@@ -227,6 +231,22 @@ public class FortifyUpload extends FortifyStep {
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
             return ImmutableSet.of(Run.class, FilePath.class, Launcher.class, TaskListener.class);
+        }
+
+        // Form validation
+        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
+        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+        public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
+                                                                   @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId)
+        {
+            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
+
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillEntitlementPreferenceItems() {
+            return SharedUploadBuildStep.doFillEntitlementPreferenceItems();
         }
 
     }
