@@ -94,7 +94,7 @@ public class JobModel {
                     boolean runOpenSourceAnalysisOverride,
                     boolean isExpressScanOverride,
                     boolean isExpressAuditOverride,
-                    boolean includeThirdPartyOverride) throws URISyntaxException, UnsupportedEncodingException {
+                    boolean includeThirdPartyOverride) {
 
         this.bsiTokenOriginal = bsiToken;
         this.includeAllFiles = includeAllFiles;
