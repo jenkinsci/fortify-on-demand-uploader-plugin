@@ -18,7 +18,7 @@
         <java.level>8</java.level>
         <jenkins-test-harness.version>2.13</jenkins-test-harness.version>
         <disabledTestInjection>true</disabledTestInjection>
-        <skipTests>true</skipTests>
+        <skipTests>false</skipTests>
     </properties>
 
     <name>Fortify on Demand Uploader Plugin</name>

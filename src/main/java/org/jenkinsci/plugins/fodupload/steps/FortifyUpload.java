@@ -30,21 +30,21 @@ public class FortifyUpload extends FortifyStep {
 
     private String bsiToken;
 
-    boolean overrideGlobalConfig;
-    String username;
-    String personalAccessToken;
-    String tenantId;
-    boolean includeAllFiles;
-    boolean isBundledAssessment;
-    boolean purchaseEntitlements;
-    int entitlementPreference;
-    boolean isRemediationPreferred;
-    boolean runOpenSourceAnalysisOverride;
-    boolean isExpressScanOverride;
-    boolean isExpressAuditOverride;
-    boolean includeThirdPartyOverride;
+    private boolean overrideGlobalConfig;
+    private String username;
+    private String personalAccessToken;
+    private String tenantId;
+    private boolean includeAllFiles;
+    private boolean isBundledAssessment;
+    private boolean purchaseEntitlements;
+    private int entitlementPreference;
+    private boolean isRemediationPreferred;
+    private boolean runOpenSourceAnalysisOverride;
+    private boolean isExpressScanOverride;
+    private boolean isExpressAuditOverride;
+    private boolean includeThirdPartyOverride;
 
-    SharedUploadBuildStep commonBuildStep;
+    private SharedUploadBuildStep commonBuildStep;
 
     @DataBoundConstructor
     public FortifyUpload(String bsiToken) {
@@ -170,7 +170,7 @@ public class FortifyUpload extends FortifyStep {
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
-        log.println("Fortify Upload PreBuild Running...");
+        log.println("Fortify on Demand Upload PreBuild Running...");
         commonBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
                 username,
@@ -197,7 +197,7 @@ public class FortifyUpload extends FortifyStep {
     @Override
     public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
         PrintStream log = listener.getLogger();
-        log.println("Fortify Upload Running...");
+        log.println("Fortify on Demand Upload Running...");
         commonBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
                 username,

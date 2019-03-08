@@ -12,9 +12,7 @@ import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
-import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -85,8 +83,8 @@ public class SharedUploadBuildStep {
         return true;
     }
 
-    public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
-                        @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
+    public void perform(Run<?, ?> build, FilePath workspace,
+                        Launcher launcher, TaskListener listener) {
 
         final PrintStream logger = listener.getLogger();
         FodApiConnection apiConnection = null;
@@ -168,7 +166,7 @@ public class SharedUploadBuildStep {
         }
     }
 
-    public static FormValidation doCheckBsiToken(@QueryParameter String bsiToken)
+    public static FormValidation doCheckBsiToken(String bsiToken)
     {
         if(bsiToken != null && !bsiToken.isEmpty() ){
             BsiTokenParser tokenParser = new BsiTokenParser();
@@ -187,9 +185,9 @@ public class SharedUploadBuildStep {
         return FormValidation.error("Please specify BSI Token");
     }
 
-    public static FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(USERNAME) final String username,
-                                                                      @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                      @QueryParameter(TENANT_ID) final String tenantId)
+    public static FormValidation doTestPersonalAccessTokenConnection(final String username,
+                                                                      final String personalAccessToken,
+                                                                      final String tenantId)
     {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
