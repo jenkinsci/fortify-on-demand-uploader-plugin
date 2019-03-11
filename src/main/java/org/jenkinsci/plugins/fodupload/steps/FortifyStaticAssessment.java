@@ -24,7 +24,7 @@ import java.io.PrintStream;
 import java.util.Set;
 
 
-public class FortifyUpload extends FortifyStep {
+public class FortifyStaticAssessment extends FortifyStep {
 
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
@@ -47,7 +47,7 @@ public class FortifyUpload extends FortifyStep {
     private SharedUploadBuildStep commonBuildStep;
 
     @DataBoundConstructor
-    public FortifyUpload(String bsiToken) {
+    public FortifyStaticAssessment(String bsiToken) {
         super();
         this.bsiToken = bsiToken != null ? bsiToken.trim() : "";
     }
@@ -225,7 +225,7 @@ public class FortifyUpload extends FortifyStep {
 
         @Override
         public String getFunctionName() {
-            return "fodUpload";
+            return "fodStaticAssessment";
         }
 
         @Override
@@ -252,16 +252,16 @@ public class FortifyUpload extends FortifyStep {
     }
 
     private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
-        private transient FortifyUpload upload;
+        private transient FortifyStaticAssessment upload;
 
-        protected Execution(FortifyUpload upload, StepContext context) {
+        protected Execution(FortifyStaticAssessment upload, StepContext context) {
             super(context);
             this.upload = upload;
         }
 
         @Override
         protected Void run() throws Exception {
-            getContext().get(TaskListener.class).getLogger().println("Running fodUpload step");
+            getContext().get(TaskListener.class).getLogger().println("Running fodStaticAssessment step");
             upload.perform(getContext().get(Run.class), getContext().get(FilePath.class),
                     getContext().get(Launcher.class), getContext().get(TaskListener.class));
 
