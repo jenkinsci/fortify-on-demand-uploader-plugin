@@ -33,8 +33,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 
 
 @SuppressWarnings("unused")
@@ -226,6 +228,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
        
         public FormValidation doCheckBsiToken(@QueryParameter String bsiToken)
         {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             if(bsiToken != null && !bsiToken.isEmpty() ){
                 BsiTokenParser tokenParser = new BsiTokenParser();
                 try{
@@ -252,10 +255,12 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+        @POST
         public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(USERNAME) final String username,
                                                @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                @QueryParameter(TENANT_ID) final String tenantId)
         {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             FodApiConnection testApi;
             String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
             String apiUrl =  GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();

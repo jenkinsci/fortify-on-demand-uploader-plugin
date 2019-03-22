@@ -8,7 +8,9 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
+import org.kohsuke.stapler.verb.POST;
 
 @Extension
 public class FodGlobalDescriptor extends GlobalConfiguration {
@@ -119,11 +121,13 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     }
    
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
+    @POST
     public FormValidation doTestApiKeyConnection(@QueryParameter(CLIENT_ID) final String clientId,
                                            @QueryParameter(CLIENT_SECRET) final String clientSecret,
                                            @QueryParameter(BASE_URL) final String baseUrl,
                                            @QueryParameter(API_URL) final String apiUrl)
     {
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
@@ -139,12 +143,14 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     
     // Form validation
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
+    @POST
     public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(USERNAME) final String username,
                                            @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                            @QueryParameter(TENANT_ID) final String tenantId,
                                            @QueryParameter(BASE_URL) final String baseUrl,
                                            @QueryParameter(API_URL) final String apiUrl)
     {
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
