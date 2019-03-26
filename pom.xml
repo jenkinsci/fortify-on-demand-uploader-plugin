@@ -18,6 +18,7 @@
         <java.level>8</java.level>
         <jenkins-test-harness.version>2.13</jenkins-test-harness.version>
         <disabledTestInjection>true</disabledTestInjection>
+        <skipTests>false</skipTests>
     </properties>
 
     <name>Fortify on Demand Uploader Plugin</name>
@@ -84,6 +85,12 @@
     </pluginRepositories>
 
     <dependencies>
+        <!-- for Jenkins Pipelines -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <version>2.16</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
