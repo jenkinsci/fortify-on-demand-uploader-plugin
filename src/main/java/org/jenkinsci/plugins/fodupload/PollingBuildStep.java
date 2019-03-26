@@ -26,9 +26,11 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 
 import static org.jenkinsci.plugins.fodupload.SharedPollingBuildStep.*;
 
@@ -129,11 +131,12 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         public String getDisplayName() {
             return "Poll Fortify on Demand for Results";
         }
-
         
         public FormValidation doCheckBsiToken(@QueryParameter String bsiToken)
         {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             return SharedPollingBuildStep.doCheckBsiToken(bsiToken);
+
         }
         
          
@@ -145,12 +148,13 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+        @POST
         public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(USERNAME) final String username,
                                                @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                @QueryParameter(TENANT_ID) final String tenantId)
         {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
-
         }
         
         @SuppressWarnings("unused")

@@ -21,8 +21,15 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 
 
 @SuppressWarnings("unused")
@@ -116,6 +123,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
         public FormValidation doCheckBsiToken(@QueryParameter String bsiToken)
         {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             return SharedUploadBuildStep.doCheckBsiToken(bsiToken);
         }
 
@@ -128,12 +136,13 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+        @POST
         public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
                                                                    @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                                    @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId)
         {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
-
         }
 
         @SuppressWarnings("unused")
