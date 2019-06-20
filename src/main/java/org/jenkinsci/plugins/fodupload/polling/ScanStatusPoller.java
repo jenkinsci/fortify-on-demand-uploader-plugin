@@ -65,8 +65,10 @@ public class ScanStatusPoller {
             counter++;
 
             // Get the status of the release
+            // The string passed in is a field filter. 
+            // This will pull back a subset of the fields available at /api/v3/releases/{releaseId}/scans/{scanId}
             ReleaseDTO release = releaseController.getRelease(releaseId,
-                    "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low,releaseId,rating,currentStaticScanId,releaseName");
+                    "currentAnalysisStatusTypeId,isPassed,passFailReasonTypeId,passFailReasonType,critical,high,medium,low,releaseId,rating,currentStaticScanId,releaseName");
 
             if (release == null) {
                 failCount++;
