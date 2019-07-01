@@ -63,8 +63,9 @@ public class StaticScanSummaryController extends ControllerBase  {
 
         if(results != null) {
             return results;
-        } else
+        } else {
             return null;
+        }
     }
 
 }

@@ -84,7 +84,10 @@ public class ScanSummaryDTO {
 
     public boolean getIsSubscriptionEntitlement() { return isSubscriptionEntitlement; }
 
-    public ScanPauseDetail[] getPauseDetails() { return pauseDetails; }
+    public ScanPauseDetail[] getPauseDetails() {
+        ScanPauseDetail[] returnDetails = pauseDetails;
+        return returnDetails;
+    }
 
     public String getCancelReason() { return cancelReason; }
 

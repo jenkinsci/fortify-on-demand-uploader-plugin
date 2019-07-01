@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload;
 
 import com.fortify.fod.parser.BsiToken;
 import com.fortify.fod.parser.BsiTokenParser;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Result;
@@ -180,6 +181,7 @@ public class SharedPollingBuildStep {
     }
 
     // Form validation
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public static FormValidation doTestPersonalAccessTokenConnection(final String username,
                                                                final String personalAccessToken,
                                                                final String tenantId)

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -21,6 +22,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 
     protected Run<?, ?> lastBuild;
 
+    @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     protected void setLastBuild(Run<?, ?> lastBuild) {
         this.lastBuild = lastBuild;
     }

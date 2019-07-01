@@ -6,6 +6,7 @@ import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
 import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanSummaryController;
+import org.jenkinsci.plugins.fodupload.models.AnalysisStatusTypeEnum;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ScanPauseDetail;
@@ -93,7 +94,7 @@ public class ScanStatusPoller {
                 List<String> complete = new ArrayList<>();
 
                 for (LookupItemsModel item : analysisStatusTypes) {
-                    if (item.getText().equalsIgnoreCase("Completed") || item.getText().equalsIgnoreCase(("Canceled")))
+                    if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
                         complete.add(item.getValue());
                 }
 
@@ -124,10 +125,11 @@ public class ScanStatusPoller {
                     if(scanSummaryDTO.getPauseDetails() != null)
                         printPauseMessages(scanSummaryDTO);
 
-                    if(statusString == "Canceled")
+                    if(statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
                         printCancelMessages(scanSummaryDTO);
-                    else
+                    } else {
                         printPassFail(release);
+                    }
                 }
             } else {
                 logger.println(String.format("Polling Failed %d times.  Terminating", MAX_FAILS));
@@ -169,8 +171,8 @@ public class ScanStatusPoller {
     }
     private void printPauseMessages(ScanSummaryDTO scanSummary) {
         for(ScanPauseDetail spd : scanSummary.getPauseDetails()) {
-            logger.println(String.format("Pause reason:        %s",  spd.getReason()));
-            logger.println(String.format("Pause reason notes:  %s", spd.getNotes()));
+            logger.println(String.format("Pause reason:         %s",  spd.getReason()));
+            logger.println(String.format("Pause reason notes:   %s", spd.getNotes()));
             logger.println();
         }
     }
