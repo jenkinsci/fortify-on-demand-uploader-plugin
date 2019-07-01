@@ -124,17 +124,10 @@ public class ScanStatusPoller {
                     if(scanSummaryDTO.getPauseDetails() != null)
                         printPauseMessages(scanSummaryDTO);
 
-                    switch( statusString)
-                    {
-                        case "Canceled":
-                            printCancelMessages(scanSummaryDTO);
-                            break;
-                        case "Paused":
-                            printPauseMessages(scanSummaryDTO);
-                            break;
-                        default:
-                            printPassFail(release);
-                    }
+                    if(statusString == "Canceled")
+                        printCancelMessages(scanSummaryDTO);
+                    else
+                        printPassFail(release);
                 }
             } else {
                 logger.println(String.format("Polling Failed %d times.  Terminating", MAX_FAILS));
@@ -167,17 +160,14 @@ public class ScanStatusPoller {
             logger.println("Failure Reason:         " + passFailReason);
         }
     }
-    private void printCancelMessages(ScanSummaryDTO scanSummary){
+    private void printCancelMessages(ScanSummaryDTO scanSummary) {
         logger.println("For application status details see the customer portal: ");
         logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), scanSummary.getReleaseId()));
         logger.println(String.format("Cancel reason:        %s",  scanSummary.getCancelReason()));
         logger.println(String.format("Cancel reason notes:  %s", scanSummary.getAnalysisStatusReasonNotes()));
         logger.println();
     }
-    private void printPauseMessages(ScanSummaryDTO scanSummary){
-        logger.println("For application status details see the customer portal: ");
-        logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), scanSummary.getReleaseId()));
-
+    private void printPauseMessages(ScanSummaryDTO scanSummary) {
         for(ScanPauseDetail spd : scanSummary.getPauseDetails()) {
             logger.println(String.format("Pause reason:        %s",  spd.reason));
             logger.println(String.format("Pause reason notes:  %s", spd.notes));
