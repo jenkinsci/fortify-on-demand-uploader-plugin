@@ -169,8 +169,8 @@ public class ScanStatusPoller {
     }
     private void printPauseMessages(ScanSummaryDTO scanSummary) {
         for(ScanPauseDetail spd : scanSummary.getPauseDetails()) {
-            logger.println(String.format("Pause reason:        %s",  spd.reason));
-            logger.println(String.format("Pause reason notes:  %s", spd.notes));
+            logger.println(String.format("Pause reason:        %s",  spd.getReason()));
+            logger.println(String.format("Pause reason notes:  %s", spd.getNotes()));
             logger.println();
         }
     }
