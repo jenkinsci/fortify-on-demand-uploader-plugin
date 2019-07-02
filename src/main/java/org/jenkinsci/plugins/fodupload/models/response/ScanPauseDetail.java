@@ -5,7 +5,15 @@ public class ScanPauseDetail {
     private String reason = "";
     private String notes = "";
 
-    public String getPausedOn() { return pausedOn; }
-    public String getReason() { return reason; }
-    public String getNotes() { return notes; }
+    public String getPausedOn() {
+        return pausedOn;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
 }

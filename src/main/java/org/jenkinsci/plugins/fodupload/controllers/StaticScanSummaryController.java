@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Type;
 
-public class StaticScanSummaryController extends ControllerBase  {
+public class StaticScanSummaryController extends ControllerBase {
     private PrintStream logger;
 
 
@@ -23,7 +23,9 @@ public class StaticScanSummaryController extends ControllerBase  {
         super(apiConnection);
         this.logger = logger;
     }
-    public ScanSummaryDTO getReleaseScanSummary(final int releaseId, final int scanId)  throws IOException {
+
+    public ScanSummaryDTO getReleaseScanSummary(final int releaseId, final int scanId) throws IOException {
+
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
 
@@ -44,7 +46,6 @@ public class StaticScanSummaryController extends ControllerBase  {
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();
 
-
         if (response.code() == HttpStatus.SC_FORBIDDEN) {
             // Re-authenticate
             apiConnection.authenticate();
@@ -59,9 +60,10 @@ public class StaticScanSummaryController extends ControllerBase  {
         // Create a type of ScanSummaryDTO to play nice with gson.
         Type t = new TypeToken<ScanSummaryDTO>() {
         }.getType();
+
         ScanSummaryDTO results = gson.fromJson(content, t);
 
-        if(results != null) {
+        if (results != null) {
             return results;
         } else {
             return null;

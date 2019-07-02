@@ -26,7 +26,6 @@ public class ScanStatusPoller {
     private FodApiConnection apiConnection;
     private int failCount = 0;
     private int pollingInterval;
-
     private PrintStream logger;
 
     /**
@@ -113,6 +112,12 @@ public class ScanStatusPoller {
 
                 logger.println(counter + ") Poll Status: " + statusString);
 
+
+                if (statusString.equals(AnalysisStatusTypeEnum.Waiting.name())) {
+                    ScanSummaryDTO scanSummaryDTO = scanSummaryController.getReleaseScanSummary(release.getReleaseId(), release.getCurrentStaticScanId());
+                    if (scanSummaryDTO.getPauseDetails() != null)
+                        printPauseMessages(scanSummaryDTO);
+                }
                 if (finished) {
                     result.setPassing(release.isPassed());
                     result.setPollingSuccessful(true);
@@ -120,12 +125,8 @@ public class ScanStatusPoller {
                     if (!Utils.isNullOrEmpty(release.getPassFailReasonType()))
                         result.setFailReason(release.getPassFailReasonType());
 
-                    ScanSummaryDTO scanSummaryDTO = scanSummaryController.getReleaseScanSummary(release.getReleaseId(), release.getCurrentStaticScanId());
-
-                    if(scanSummaryDTO.getPauseDetails() != null)
-                        printPauseMessages(scanSummaryDTO);
-
-                    if(statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
+                    if (statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
+                        ScanSummaryDTO scanSummaryDTO = scanSummaryController.getReleaseScanSummary(release.getReleaseId(), release.getCurrentStaticScanId());
                         printCancelMessages(scanSummaryDTO);
                     } else {
                         printPassFail(release);
@@ -162,16 +163,25 @@ public class ScanStatusPoller {
             logger.println("Failure Reason:         " + passFailReason);
         }
     }
+
     private void printCancelMessages(ScanSummaryDTO scanSummary) {
-        logger.println("For application status details see the customer portal: ");
-        logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), scanSummary.getReleaseId()));
-        logger.println(String.format("Cancel reason:        %s",  scanSummary.getCancelReason()));
+        logger.println("-------Scan Cancelled------- ");
+        logger.println();
+        logger.println(String.format("Cancel reason:        %s", scanSummary.getCancelReason()));
         logger.println(String.format("Cancel reason notes:  %s", scanSummary.getAnalysisStatusReasonNotes()));
         logger.println();
+        logger.println("For application status details see the customer portal: ");
+        logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), scanSummary.getReleaseId()));
+        logger.println();
     }
+
     private void printPauseMessages(ScanSummaryDTO scanSummary) {
-        for(ScanPauseDetail spd : scanSummary.getPauseDetails()) {
-            logger.println(String.format("Pause reason:         %s",  spd.getReason()));
+        logger.println("-------Scan Paused------- ");
+        logger.println();
+        logger.println("Review the last pause entry below");
+        logger.println();
+        for (ScanPauseDetail spd : scanSummary.getPauseDetails()) {
+            logger.println(String.format("Pause reason:         %s", spd.getReason()));
             logger.println(String.format("Pause reason notes:   %s", spd.getNotes()));
             logger.println();
         }
