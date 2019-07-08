@@ -5,8 +5,12 @@ import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
 import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
+import org.jenkinsci.plugins.fodupload.controllers.StaticScanSummaryController;
+import org.jenkinsci.plugins.fodupload.models.AnalysisStatusTypeEnum;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
+import org.jenkinsci.plugins.fodupload.models.response.ScanPauseDetail;
+import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -22,7 +26,6 @@ public class ScanStatusPoller {
     private FodApiConnection apiConnection;
     private int failCount = 0;
     private int pollingInterval;
-
     private PrintStream logger;
 
     /**
@@ -49,6 +52,7 @@ public class ScanStatusPoller {
 
         LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection);
         ReleaseController releaseController = new ReleaseController(this.apiConnection);
+        StaticScanSummaryController scanSummaryController = new StaticScanSummaryController(this.apiConnection, logger);
         PollReleaseStatusResult result = new PollReleaseStatusResult();
         List<LookupItemsModel> analysisStatusTypes = null;
 
@@ -65,8 +69,10 @@ public class ScanStatusPoller {
             counter++;
 
             // Get the status of the release
+            // The string passed in is a field filter. 
+            // This will pull back a subset of the fields available at /api/v3/releases/{releaseId}/scans/{scanId}
             ReleaseDTO release = releaseController.getRelease(releaseId,
-                    "currentAnalysisStatusTypeId,isPassed,passFailReasonId,critical,high,medium,low,releaseId,rating,currentStaticScanId,releaseName");
+                    "currentAnalysisStatusTypeId,isPassed,passFailReasonTypeId,passFailReasonType,critical,high,medium,low,releaseId,rating,currentStaticScanId,releaseName");
 
             if (release == null) {
                 failCount++;
@@ -87,7 +93,7 @@ public class ScanStatusPoller {
                 List<String> complete = new ArrayList<>();
 
                 for (LookupItemsModel item : analysisStatusTypes) {
-                    if (item.getText().equalsIgnoreCase("Completed") || item.getText().equalsIgnoreCase(("Canceled")))
+                    if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
                         complete.add(item.getValue());
                 }
 
@@ -106,12 +112,25 @@ public class ScanStatusPoller {
 
                 logger.println(counter + ") Poll Status: " + statusString);
 
+
+                if (statusString.equals(AnalysisStatusTypeEnum.Waiting.name())) {
+                    ScanSummaryDTO scanSummaryDTO = scanSummaryController.getReleaseScanSummary(release.getReleaseId(), release.getCurrentStaticScanId());
+                    if (scanSummaryDTO.getPauseDetails() != null)
+                        printPauseMessages(scanSummaryDTO);
+                }
                 if (finished) {
                     result.setPassing(release.isPassed());
                     result.setPollingSuccessful(true);
+
                     if (!Utils.isNullOrEmpty(release.getPassFailReasonType()))
                         result.setFailReason(release.getPassFailReasonType());
-                    printPassFail(release);
+
+                    if (statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
+                        ScanSummaryDTO scanSummaryDTO = scanSummaryController.getReleaseScanSummary(release.getReleaseId(), release.getCurrentStaticScanId());
+                        printCancelMessages(scanSummaryDTO);
+                    } else {
+                        printPassFail(release);
+                    }
                 }
             } else {
                 logger.println(String.format("Polling Failed %d times.  Terminating", MAX_FAILS));
@@ -142,6 +161,29 @@ public class ScanStatusPoller {
                     "Pass/Fail Policy requirements not met " :
                     release.getPassFailReasonType();
             logger.println("Failure Reason:         " + passFailReason);
+        }
+    }
+
+    private void printCancelMessages(ScanSummaryDTO scanSummary) {
+        logger.println("-------Scan Cancelled------- ");
+        logger.println();
+        logger.println(String.format("Cancel reason:        %s", scanSummary.getCancelReason()));
+        logger.println(String.format("Cancel reason notes:  %s", scanSummary.getAnalysisStatusReasonNotes()));
+        logger.println();
+        logger.println("For application status details see the customer portal: ");
+        logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), scanSummary.getReleaseId()));
+        logger.println();
+    }
+
+    private void printPauseMessages(ScanSummaryDTO scanSummary) {
+        logger.println("-------Scan Paused------- ");
+        logger.println();
+        logger.println("Review the last pause entry below");
+        logger.println();
+        for (ScanPauseDetail spd : scanSummary.getPauseDetails()) {
+            logger.println(String.format("Pause reason:         %s", spd.getReason()));
+            logger.println(String.format("Pause reason notes:   %s", spd.getNotes()));
+            logger.println();
         }
     }
 }
