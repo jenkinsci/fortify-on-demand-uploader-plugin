@@ -13,11 +13,14 @@ import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
+import sun.applet.Main;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Properties;
 
 public class StaticScanController extends ControllerBase {
 
@@ -77,7 +80,14 @@ public class StaticScanController extends ControllerBase {
             boolean includeOpenSourceScan = token.getIncludeOpenSourceAnalysis() || uploadRequest.isRunOpenSourceAnalysisOverride();
             int scanPreferenceId = uploadRequest.isExpressScanOverride() ? EXPRESS_SCAN_PREFERENCE_ID : token.getScanPreferenceId();
             int auditPreferenceId = uploadRequest.isExpressAuditOverride() ? EXPRESS_AUDIT_PREFERENCE_ID : token.getAuditPreferenceId();
+            String projectVersion;
+            try (InputStream inputStream = this.getClass().getResourceAsStream("/application.properties")) {
+                Properties props = new Properties();
+                props.load(inputStream);
+                projectVersion = props.getProperty("application.version", "Not Found");
+            }
 
+            //inputStream.close();
             HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
                     .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan", token.getProjectVersionId()))
                     .addQueryParameter("assessmentTypeId", Integer.toString(token.getAssessmentTypeId()))
@@ -89,7 +99,10 @@ public class StaticScanController extends ControllerBase {
                     .addQueryParameter("excludeThirdPartyLibs", Boolean.toString(excludeThirdPartyLibs))
                     .addQueryParameter("scanPreferenceType", Integer.toString(scanPreferenceId))
                     .addQueryParameter("auditPreferenceType", Integer.toString(auditPreferenceId))
-                    .addQueryParameter("isRemediationScan", Boolean.toString(isRemediationScan));
+                    .addQueryParameter("isRemediationScan", Boolean.toString(isRemediationScan))
+                    .addQueryParameter("scanMethodType", "CICD")
+                    .addQueryParameter("scanTool", "Jenkins")
+                    .addQueryParameter("scanToolVersion", projectVersion != null ? projectVersion : "NotFound"); // TODO Remove test code
 
             if (!Utils.isNullOrEmpty(notes)) {
                 String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);
