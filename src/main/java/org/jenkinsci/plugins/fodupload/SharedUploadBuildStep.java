@@ -43,7 +43,8 @@ public class SharedUploadBuildStep {
                                  boolean runOpenSourceAnalysisOverride,
                                  boolean isExpressScanOverride,
                                  boolean isExpressAuditOverride,
-                                 boolean includeThirdPartyOverride){
+                                 boolean includeThirdPartyOverride,
+                                 String srcLocation){
 
         model = new JobModel(bsiToken,
                 includeAllFiles,
@@ -54,7 +55,8 @@ public class SharedUploadBuildStep {
                 runOpenSourceAnalysisOverride,
                 isExpressScanOverride,
                 isExpressAuditOverride,
-                includeThirdPartyOverride);
+                includeThirdPartyOverride,
+                srcLocation);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -106,9 +108,10 @@ public class SharedUploadBuildStep {
             if (model.getBsiToken()==null){ // Hack because pipeline step doesn't call prebuild
                 model.initializeBuildModel();
             }
-
+            
+            FilePath workspaceModified = new FilePath(workspace, model.getSrcLocation());
             // zips the file in a temporary location
-            File payload = Utils.createZipFile(model.getBsiToken().getTechnologyStack(), workspace, logger);
+            File payload = Utils.createZipFile(model.getBsiToken().getTechnologyStack(), workspaceModified, logger);
             if (payload.length() == 0) {
 
                 boolean deleteSuccess = payload.delete();

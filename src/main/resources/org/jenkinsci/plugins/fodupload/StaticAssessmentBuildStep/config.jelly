@@ -3,6 +3,9 @@
     <f:entry title="BSI Token" field="bsiToken">
         <f:textbox />
     </f:entry>
+    <f:entry title="Source Location" field="srcLocation">
+        <f:textbox />
+    </f:entry>
     <f:section title="Authentication - Select to override global authentication settings">
         <f:block>
             <f:optionalBlock name="overrideGlobalConfig" field ="overrideGlobalConfig" title="Configure Personal Access Token"  checked="${instance.overrideGlobalConfig}"  inline="true">
@@ -45,7 +48,7 @@
                 <f:checkbox/>
             </f:entry>
         </f:section>
-
+        
         <f:section title="Override Options">
             <f:entry title="Open source component analysis" field="runOpenSourceAnalysisOverride" help="/plugin/fortify-on-demand-uploader/help-runOpenSourceAnalysis.html">
                 <f:checkbox/>

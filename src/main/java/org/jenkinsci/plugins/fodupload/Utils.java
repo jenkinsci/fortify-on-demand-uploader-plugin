@@ -95,6 +95,16 @@ public class Utils {
     public static File createZipFile(String techStack, FilePath workspace, PrintStream logger) throws IOException {
         logger.println("Begin Create Zip.");
 
+        // TODO: Testcode
+        FilePath workspace2 = new FilePath(workspace, "\\src\\");
+        logger.println("New File Path is: " + workspace2);
+        FilePath workspace3 = new FilePath(workspace, "\\testPath\\");
+        logger.println("New File Path is: " + workspace3);
+        FilePath temp = workspace.child("\\testPath\\");
+        logger.println("New File Path attempt 1 is: " + temp);
+        FilePath temp2 = workspace.child("");
+        logger.println("New File Path attempt 2 is: " + temp2);
+
         String tempDir = System.getProperty("java.io.tmpdir");
         File dir = new File(tempDir);
 
@@ -103,8 +113,8 @@ public class Utils {
         try (FileOutputStream fos = new FileOutputStream(tempZip)) {
             final Pattern pattern = Pattern.compile(Utils.getFileExpressionPatternString(techStack),
                     Pattern.CASE_INSENSITIVE);
-
-            workspace.zip(fos, new RegexFileFilter(pattern));
+            // TODO: Testcode
+            workspace2.zip(fos, new RegexFileFilter(pattern));
             logger.println("Temporary file created at: " + tempZip.getAbsolutePath());
 
         } catch (Exception e) {

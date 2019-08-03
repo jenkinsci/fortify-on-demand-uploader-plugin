@@ -30,6 +30,7 @@ public class JobModel {
     private boolean isExpressScanOverride;
     private boolean isExpressAuditOverride;
     private boolean includeThirdPartyOverride;
+    private String srcLocation;
 
     private File payload;
 
@@ -70,6 +71,10 @@ public class JobModel {
     public boolean isRemediationPreferred() {
         return isRemediationPreferred;
     }
+    
+    public String getSrcLocation() {
+        return srcLocation;
+    }
 
     /**
      * Build model used to pass values around
@@ -94,7 +99,8 @@ public class JobModel {
                     boolean runOpenSourceAnalysisOverride,
                     boolean isExpressScanOverride,
                     boolean isExpressAuditOverride,
-                    boolean includeThirdPartyOverride) {
+                    boolean includeThirdPartyOverride,
+                    String srcLocation) {
 
         this.bsiTokenOriginal = bsiToken;
         this.includeAllFiles = includeAllFiles;
@@ -107,6 +113,7 @@ public class JobModel {
         this.isExpressScanOverride = isExpressScanOverride;
         this.isExpressAuditOverride = isExpressAuditOverride;
         this.includeThirdPartyOverride = includeThirdPartyOverride;
+        this.srcLocation = srcLocation;
     }
 
     private Object readResolve() throws URISyntaxException, UnsupportedEncodingException {

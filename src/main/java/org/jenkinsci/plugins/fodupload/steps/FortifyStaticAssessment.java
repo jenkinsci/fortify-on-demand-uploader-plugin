@@ -43,6 +43,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     private boolean isExpressScanOverride;
     private boolean isExpressAuditOverride;
     private boolean includeThirdPartyOverride;
+    private String srcLocation;
 
     private SharedUploadBuildStep commonBuildStep;
 
@@ -167,6 +168,14 @@ public class FortifyStaticAssessment extends FortifyStep {
         return includeThirdPartyOverride;
     }
 
+    @DataBoundSetter
+    public void setSrcLocation(String srcLocation) {
+        this.srcLocation = srcLocation != null ? srcLocation.trim() : "";
+    }
+    public String getSrcLocation() {
+        return srcLocation;
+    }
+
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
@@ -184,7 +193,8 @@ public class FortifyStaticAssessment extends FortifyStep {
                 runOpenSourceAnalysisOverride,
                 isExpressScanOverride,
                 isExpressAuditOverride,
-                includeThirdPartyOverride);
+                includeThirdPartyOverride,
+                srcLocation);
 
         return true;
     }
@@ -211,7 +221,8 @@ public class FortifyStaticAssessment extends FortifyStep {
                 runOpenSourceAnalysisOverride,
                 isExpressScanOverride,
                 isExpressAuditOverride,
-                includeThirdPartyOverride);
+                includeThirdPartyOverride,
+                srcLocation);
 
         commonBuildStep.perform(build, workspace, launcher, listener);
     }

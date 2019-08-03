@@ -53,7 +53,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      boolean runOpenSourceAnalysisOverride,
                                      boolean isExpressScanOverride,
                                      boolean isExpressAuditOverride,
-                                     boolean includeThirdPartyOverride) {
+                                     boolean includeThirdPartyOverride,
+                                     String srcLocation) {
 
         sharedBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
@@ -68,7 +69,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 runOpenSourceAnalysisOverride,
                 isExpressScanOverride,
                 isExpressAuditOverride,
-                includeThirdPartyOverride);
+                includeThirdPartyOverride,
+                srcLocation);
 
     }
 
