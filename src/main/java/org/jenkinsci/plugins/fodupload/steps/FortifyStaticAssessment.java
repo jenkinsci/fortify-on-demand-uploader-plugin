@@ -34,15 +34,9 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String username;
     private String personalAccessToken;
     private String tenantId;
-    private boolean includeAllFiles;
-    private boolean isBundledAssessment;
     private boolean purchaseEntitlements;
     private int entitlementPreference;
     private boolean isRemediationPreferred;
-    private boolean runOpenSourceAnalysisOverride;
-    private boolean isExpressScanOverride;
-    private boolean isExpressAuditOverride;
-    private boolean includeThirdPartyOverride;
 
     private SharedUploadBuildStep commonBuildStep;
 
@@ -93,24 +87,6 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setIncludeAllFiles(boolean includeAllFiles) {
-        this.includeAllFiles = includeAllFiles;
-    }
-
-    public boolean getIncludeAllFiles() {
-        return includeAllFiles;
-    }
-
-    @DataBoundSetter
-    public void setIsBundledAssessment(boolean isBundledAssessment) {
-        this.isBundledAssessment = isBundledAssessment;
-    }
-    public boolean getIsBundledAssessment() {
-        return isBundledAssessment;
-    }
-
-
-    @DataBoundSetter
     public void setPurchaseEntitlements(boolean purchaseEntitlements) {
         this.purchaseEntitlements = purchaseEntitlements;
     }
@@ -134,39 +110,6 @@ public class FortifyStaticAssessment extends FortifyStep {
         return isRemediationPreferred;
     }
 
-    @DataBoundSetter
-    public void setRunOpenSourceAnalysisOverride(boolean runOpenSourceAnalysisOverride) {
-        this.runOpenSourceAnalysisOverride = runOpenSourceAnalysisOverride;
-    }
-
-    public boolean getRunOpenSourceAnalysisOverride() {
-        return runOpenSourceAnalysisOverride;
-    }
-
-    @DataBoundSetter
-    public void setIsExpressScanOverride(boolean isExpressScanOverride) {
-        this.isExpressScanOverride = isExpressScanOverride;
-    }
-    public boolean getIsExpressScanOverride() {
-        return isExpressScanOverride;
-    }
-
-    @DataBoundSetter
-    public void setIsExpressAuditOverride(boolean isExpressAuditOverride) {
-        this.isExpressAuditOverride = isExpressAuditOverride;
-    }
-    public boolean getIsExpressAuditOverride() {
-        return isExpressAuditOverride;
-    }
-
-    @DataBoundSetter
-    public void setIncludeThirdPartyOverride(boolean includeThirdPartyOverride) {
-        this.includeThirdPartyOverride = includeThirdPartyOverride;
-    }
-    public boolean getIncludeThirdPartyOverride() {
-        return includeThirdPartyOverride;
-    }
-
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
@@ -176,15 +119,9 @@ public class FortifyStaticAssessment extends FortifyStep {
                 username,
                 personalAccessToken,
                 tenantId,
-                includeAllFiles,
-                isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                runOpenSourceAnalysisOverride,
-                isExpressScanOverride,
-                isExpressAuditOverride,
-                includeThirdPartyOverride);
+                isRemediationPreferred);
 
         return true;
     }
@@ -203,15 +140,9 @@ public class FortifyStaticAssessment extends FortifyStep {
                 username,
                 personalAccessToken,
                 tenantId,
-                includeAllFiles,
-                isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                runOpenSourceAnalysisOverride,
-                isExpressScanOverride,
-                isExpressAuditOverride,
-                includeThirdPartyOverride);
+                isRemediationPreferred);
 
         commonBuildStep.perform(build, workspace, launcher, listener);
     }

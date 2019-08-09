@@ -45,30 +45,18 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String username,
                                      String personalAccessToken,
                                      String tenantId,
-                                     boolean includeAllFiles,
-                                     boolean isBundledAssessment,
                                      boolean purchaseEntitlements,
                                      int entitlementPreference,
-                                     boolean isRemediationPreferred,
-                                     boolean runOpenSourceAnalysisOverride,
-                                     boolean isExpressScanOverride,
-                                     boolean isExpressAuditOverride,
-                                     boolean includeThirdPartyOverride) {
+                                     boolean isRemediationPreferred) {
 
         sharedBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
                 username,
                 personalAccessToken,
                 tenantId,
-                includeAllFiles,
-                isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                runOpenSourceAnalysisOverride,
-                isExpressScanOverride,
-                isExpressAuditOverride,
-                includeThirdPartyOverride);
+                isRemediationPreferred);
 
     }
 
@@ -181,20 +169,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         return sharedBuildStep.getAuthModel().getOverrideGlobalConfig();
     }
 
-
-    @SuppressWarnings("unused")
-    public boolean getIncludeAllFiles() {
-        return sharedBuildStep.getModel().isIncludeAllFiles();
-    }
-
     @SuppressWarnings("unused")
     public int getEntitlementPreference() {
         return sharedBuildStep.getModel().getEntitlementPreference();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsBundledAssessment() {
-        return sharedBuildStep.getModel().isBundledAssessment();
     }
 
     @SuppressWarnings("unused")
@@ -206,26 +183,5 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public boolean getIsRemediationPreferred() {
         return sharedBuildStep.getModel().isRemediationPreferred();
     }
-
-    @SuppressWarnings("unused")
-    public boolean getRunOpenSourceAnalysisOverride() {
-        return sharedBuildStep.getModel().isRunOpenSourceAnalysisOverride();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsExpressScanOverride() {
-        return sharedBuildStep.getModel().isExpressScanOverride();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsExpressAuditOverride() {
-        return sharedBuildStep.getModel().isExpressAuditOverride();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIncludeThirdPartyOverride() {
-        return sharedBuildStep.getModel().isIncludeThirdPartyOverride();
-    }
-
 
 }

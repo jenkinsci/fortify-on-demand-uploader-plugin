@@ -35,26 +35,14 @@ public class SharedUploadBuildStep {
                                  String username,
                                  String personalAccessToken,
                                  String tenantId,
-                                 boolean includeAllFiles,
-                                 boolean isBundledAssessment,
                                  boolean purchaseEntitlements,
                                  int entitlementPreference,
-                                 boolean isRemediationPreferred,
-                                 boolean runOpenSourceAnalysisOverride,
-                                 boolean isExpressScanOverride,
-                                 boolean isExpressAuditOverride,
-                                 boolean includeThirdPartyOverride){
+                                 boolean isRemediationPreferred){
 
         model = new JobModel(bsiToken,
-                includeAllFiles,
-                isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                runOpenSourceAnalysisOverride,
-                isExpressScanOverride,
-                isExpressAuditOverride,
-                includeThirdPartyOverride);
+                isRemediationPreferred);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,

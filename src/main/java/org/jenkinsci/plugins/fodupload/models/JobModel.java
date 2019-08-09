@@ -18,18 +18,9 @@ public class JobModel {
 
     private String bsiTokenOriginal;
     private transient BsiToken bsiTokenCache;
-    private boolean includeAllFiles;
     private boolean purchaseEntitlements;
     private int entitlementPreference;
-    private boolean isBundledAssessment;
     private boolean isRemediationPreferred;
-   
-    // These override options are for supporting the legacy BSI Urls
-    // TODO: Remove these in the future when users can no longer generate BSI URLs in FoD
-    private boolean runOpenSourceAnalysisOverride;
-    private boolean isExpressScanOverride;
-    private boolean isExpressAuditOverride;
-    private boolean includeThirdPartyOverride;
 
     private File payload;
 
@@ -45,22 +36,12 @@ public class JobModel {
         return bsiTokenCache;
     }
 
-    
-    
-    public boolean isIncludeAllFiles() {
-        return includeAllFiles;
-    }
-
     public boolean isPurchaseEntitlements() {
         return purchaseEntitlements;
     }
 
     public int getEntitlementPreference() {
         return entitlementPreference;
-    }
-
-    public boolean isBundledAssessment() {
-        return isBundledAssessment;
     }
 
     public String getBsiTokenOriginal() {
@@ -75,38 +56,19 @@ public class JobModel {
      * Build model used to pass values around
      *
      * @param bsiToken              BSI Token
-     * @param includeAllFiles       includeAllFiles
-     * @param isBundledAssessment   isBundledAssessment
      * @param purchaseEntitlements  purchaseEntitlements
      * @param entitlementPreference entitlementPreference
      * @param isRemediationPreferred isRemediationPreferred
-     * @param runOpenSourceAnalysisOverride runOpenSourceAnalysisOverride
-     * @param isExpressScanOverride isExpressScanOverride
-     * @param isExpressAuditOverride isExpressAuditOverride
-     * @param includeThirdPartyOverride includeThirdPartyOverride
      */
     public JobModel(String bsiToken,
-                    boolean includeAllFiles,
-                    boolean isBundledAssessment,
                     boolean purchaseEntitlements,
                     int entitlementPreference,
-                    boolean isRemediationPreferred,
-                    boolean runOpenSourceAnalysisOverride,
-                    boolean isExpressScanOverride,
-                    boolean isExpressAuditOverride,
-                    boolean includeThirdPartyOverride) {
+                    boolean isRemediationPreferred) {
 
         this.bsiTokenOriginal = bsiToken;
-        this.includeAllFiles = includeAllFiles;
         this.entitlementPreference = entitlementPreference;
-        this.isBundledAssessment = isBundledAssessment;
         this.purchaseEntitlements = purchaseEntitlements;
         this.isRemediationPreferred = isRemediationPreferred;
-
-        this.runOpenSourceAnalysisOverride = runOpenSourceAnalysisOverride;
-        this.isExpressScanOverride = isExpressScanOverride;
-        this.isExpressAuditOverride = isExpressAuditOverride;
-        this.includeThirdPartyOverride = includeThirdPartyOverride;
     }
 
     private Object readResolve() throws URISyntaxException, UnsupportedEncodingException {
@@ -129,10 +91,8 @@ public class JobModel {
                 bsiTokenCache.getAssessmentTypeId(),
                 bsiTokenCache.getTechnologyStack(),
                 bsiTokenCache.getLanguageLevel(),
-                includeAllFiles,
                 purchaseEntitlements,
-                entitlementPreference,
-                isBundledAssessment);
+                entitlementPreference);
     }
 
     public boolean initializeBuildModel()
@@ -167,21 +127,5 @@ public class JobModel {
             return false;
         }
         return true;
-    }
-
-    public boolean isIncludeThirdPartyOverride() {
-        return includeThirdPartyOverride;
-    }
-
-    public boolean isExpressAuditOverride() {
-        return isExpressAuditOverride;
-    }
-
-    public boolean isExpressScanOverride() {
-        return isExpressScanOverride;
-    }
-
-    public boolean isRunOpenSourceAnalysisOverride() {
-        return runOpenSourceAnalysisOverride;
     }
 }
