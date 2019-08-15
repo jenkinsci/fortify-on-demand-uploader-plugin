@@ -75,11 +75,7 @@ public class StaticScanController extends ControllerBase {
             BsiToken token = uploadRequest.getBsiToken();
             boolean isRemediationScan = uploadRequest.isRemediationPreferred() && assessmentType.isRemediation();
 
-            // TODO: remove these override options once legacy BSI URL is no longer present in FoD
-            boolean excludeThirdPartyLibs = !token.getIncludeThirdParty() || !uploadRequest.isIncludeThirdPartyOverride();
-            boolean includeOpenSourceScan = token.getIncludeOpenSourceAnalysis() || uploadRequest.isRunOpenSourceAnalysisOverride();
-            int scanPreferenceId = uploadRequest.isExpressScanOverride() ? EXPRESS_SCAN_PREFERENCE_ID : token.getScanPreferenceId();
-            int auditPreferenceId = uploadRequest.isExpressAuditOverride() ? EXPRESS_AUDIT_PREFERENCE_ID : token.getAuditPreferenceId();
+
             String projectVersion;
             try (InputStream inputStream = this.getClass().getResourceAsStream("/application.properties")) {
                 Properties props = new Properties();
@@ -94,11 +90,6 @@ public class StaticScanController extends ControllerBase {
                     .addQueryParameter("technologyStack", token.getTechnologyType())
                     .addQueryParameter("entitlementId", Integer.toString(assessmentType.getEntitlementId()))
                     .addQueryParameter("entitlementFrequencyType", Integer.toString(assessmentType.getFrequencyTypeId()))
-                    .addQueryParameter("isBundledAssessment", Boolean.toString(assessmentType.isBundledAssessment()))
-                    .addQueryParameter("doSonatypeScan", Boolean.toString(includeOpenSourceScan))
-                    .addQueryParameter("excludeThirdPartyLibs", Boolean.toString(excludeThirdPartyLibs))
-                    .addQueryParameter("scanPreferenceType", Integer.toString(scanPreferenceId))
-                    .addQueryParameter("auditPreferenceType", Integer.toString(auditPreferenceId))
                     .addQueryParameter("isRemediationScan", Boolean.toString(isRemediationScan))
                     .addQueryParameter("scanMethodType", "CICD")
                     .addQueryParameter("scanTool", "Jenkins")
@@ -107,10 +98,6 @@ public class StaticScanController extends ControllerBase {
             if (!Utils.isNullOrEmpty(notes)) {
                 String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);
                 builder = builder.addQueryParameter("notes", truncatedNotes);
-            }
-
-            if (assessmentType.getParentAssessmentTypeId() != 0 && assessmentType.isBundledAssessment()) {
-                builder = builder.addQueryParameter("parentAssessmentTypeId", Integer.toString(assessmentType.getParentAssessmentTypeId()));
             }
 
             if (token.getTechnologyVersion() != null) {

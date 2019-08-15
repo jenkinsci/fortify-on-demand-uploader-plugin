@@ -31,34 +31,9 @@
         <f:entry title="Purchase Entitlements" field="purchaseEntitlements">
             <f:checkbox/>
         </f:entry>
-        <f:entry title="Bundled Assessment" field="isBundledAssessment">
-            <f:checkbox/>
-        </f:entry>
         <f:entry title="Prefer Remediation if Available" field="isRemediationPreferred" help="/plugin/fortify-on-demand-uploader/help-isRemediationPreferred.html">
             <f:checkbox/>
         </f:entry>
     </f:section>
 
-    <f:advanced title="Advanced Options" align="left">
-        <f:section title="Additional Options">
-            <f:entry title="Include all project files" field="includeAllFiles" help="/plugin/fortify-on-demand-uploader/help-includeAllFiles.html">
-                <f:checkbox/>
-            </f:entry>
-        </f:section>
-
-        <f:section title="Override Options">
-            <f:entry title="Open source component analysis" field="runOpenSourceAnalysisOverride" help="/plugin/fortify-on-demand-uploader/help-runOpenSourceAnalysis.html">
-                <f:checkbox/>
-            </f:entry>
-            <f:entry title="Enable express scan preference" field="isExpressScanOverride">
-                <f:checkbox/>
-            </f:entry>
-            <f:entry title="Enable automated audit preference" field="isExpressAuditOverride">
-                <f:checkbox/>
-            </f:entry>
-            <f:entry title="Include third-party libraries" field="includeThirdPartyOverride">
-                <f:checkbox/>
-            </f:entry>
-        </f:section>
-    </f:advanced>
 </j:jelly>
