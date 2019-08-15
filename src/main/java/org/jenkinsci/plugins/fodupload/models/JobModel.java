@@ -21,6 +21,7 @@ public class JobModel {
     private boolean purchaseEntitlements;
     private int entitlementPreference;
     private boolean isRemediationPreferred;
+    private String srcLocation;
 
     private File payload;
 
@@ -67,12 +68,14 @@ public class JobModel {
     public JobModel(String bsiToken,
                     boolean purchaseEntitlements,
                     int entitlementPreference,
-                    boolean isRemediationPreferred) {
+                    boolean isRemediationPreferred,
+                    String srcLocation) {
 
         this.bsiTokenOriginal = bsiToken;
         this.entitlementPreference = entitlementPreference;
         this.purchaseEntitlements = purchaseEntitlements;
         this.isRemediationPreferred = isRemediationPreferred;
+        this.srcLocation = srcLocation;
     }
 
     private Object readResolve() throws URISyntaxException, UnsupportedEncodingException {

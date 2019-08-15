@@ -37,12 +37,14 @@ public class SharedUploadBuildStep {
                                  String tenantId,
                                  boolean purchaseEntitlements,
                                  int entitlementPreference,
-                                 boolean isRemediationPreferred){
+                                 boolean isRemediationPreferred,
+                                 String srcLocation){
 
         model = new JobModel(bsiToken,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred);
+                isRemediationPreferred,
+                srcLocation);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
