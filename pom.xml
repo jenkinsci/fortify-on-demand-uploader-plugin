@@ -21,7 +21,7 @@
         <skipTests>false</skipTests>
     </properties>
 
-    <name>Fortify on Demand Uploader Plugin</name>
+    <name>Fortify on Demand</name>
     <description>Gathers build artifacts and uploads them to the Fortify on Demand service with user-specified options.</description>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Fortify+On+Demand+Uploader+Plugin</url>
 
@@ -41,23 +41,19 @@
 
     <developers>
         <developer>
-            <id>ryancblack</id>
-            <name>Ryan Black</name>
-            <email>ryanblack@gmail.com</email>
+            <id>ryanpritchard</id>
+            <name>Ryan Pritchard</name>
+            <email>ryan.pritchard@microfocus.com</email>
         </developer>
         <developer>
-            <id>michael-a-marshall</id>
-            <name>Michael Marshall</name>
-            <email>michaelmarshallatwork@gmail.com</email>
+            <id>vetocohen</id>
+            <name>Vodrie Cohen</name>
+            <email>vodrie.cohen@microfocus.com</email>
         </developer>
         <developer>
-            <id>petebeegle</id>
-            <name>Pete Beegle</name>
-        </developer>
-        <developer>
-            <id>mtgibbs</id>
-            <name>Matt Gibbs</name>
-            <email>matt@mtgibbs.xyz</email>
+            <id>timsotack</id>
+            <name>Tim Sotack</name>
+            <email>tim.sotack@microfocus.com</email>
         </developer>
     </developers>
 
