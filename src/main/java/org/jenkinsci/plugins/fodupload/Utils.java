@@ -11,22 +11,6 @@ import java.util.regex.Pattern;
 
 public class Utils {
 
-    private static final String TS_DOT_NET_KEY = ".NET";
-    private static final String TS_JAVA_KEY = "JAVA/J2EE";
-    private static final String TS_RUBY_KEY = "Ruby";
-    private static final String TS_PYTHON_KEY = "Python";
-    private static final String TS_OBJECTIVE_C_KEY = "Objective-C";
-    private static final String TS_ABAP_KEY = "ABAP";
-    private static final String TS_ASP_KEY = "ASP";
-    private static final String TS_CFML_KEY = "CFML";
-    private static final String TS_COBOL_KEY = "COBOL";
-    private static final String TS_ANDROID_KEY = "Android";
-    private static final String TS_PHP_KEY = "PHP";
-    private static final String TS_PLSQL_TSQL_KEY = "PL/SQL & T-SQL";
-    private static final String TS_VB6_KEY = "VB6";
-    private static final String TS_VB_SCRIPT_KEY = "VBScript";
-    private static final String TS_XML_HTML_KEY = "XML/HTML";
-
     public static int tryParseInt(String value) {
         try {
             return Integer.parseInt(value);
@@ -42,6 +26,22 @@ public class Utils {
     public static boolean isNullOrEmpty(String string) {
         return string == null || string.isEmpty();
     }
+
+    private static final String TS_DOT_NET_KEY = ".NET";
+    private static final String TS_JAVA_KEY = "JAVA/J2EE";
+    private static final String TS_RUBY_KEY = "Ruby";
+    private static final String TS_PYTHON_KEY = "Python";
+    private static final String TS_OBJECTIVE_C_KEY = "Objective-C";
+    private static final String TS_ABAP_KEY = "ABAP";
+    private static final String TS_ASP_KEY = "ASP";
+    private static final String TS_CFML_KEY = "CFML";
+    private static final String TS_COBOL_KEY = "COBOL";
+    private static final String TS_ANDROID_KEY = "Android";
+    private static final String TS_PHP_KEY = "PHP";
+    private static final String TS_PLSQL_TSQL_KEY = "PL/SQL & T-SQL";
+    private static final String TS_VB6_KEY = "VB6";
+    private static final String TS_VB_SCRIPT_KEY = "VBScript";
+    private static final String TS_XML_HTML_KEY = "XML/HTML";
 
     public static String getFileExpressionPatternString(String technologyStack) {
         String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +
@@ -94,7 +94,16 @@ public class Utils {
      */
     public static File createZipFile(String techStack, FilePath workspace, PrintStream logger) throws IOException {
         logger.println("Begin Create Zip.");
-        logger.println("Source file directory: " + workspace);
+
+        // TODO: Testcode
+        FilePath workspace2 = new FilePath(workspace, "\\src\\");
+        logger.println("New File Path is: " + workspace2);
+        FilePath workspace3 = new FilePath(workspace, "\\testPath\\");
+        logger.println("New File Path is: " + workspace3);
+        FilePath temp = workspace.child("\\testPath\\");
+        logger.println("New File Path attempt 1 is: " + temp);
+        FilePath temp2 = workspace.child("");
+        logger.println("New File Path attempt 2 is: " + temp2);
 
         String tempDir = System.getProperty("java.io.tmpdir");
         File dir = new File(tempDir);
@@ -104,7 +113,8 @@ public class Utils {
         try (FileOutputStream fos = new FileOutputStream(tempZip)) {
             final Pattern pattern = Pattern.compile(Utils.getFileExpressionPatternString(techStack),
                     Pattern.CASE_INSENSITIVE);
-            workspace.zip(fos, new RegexFileFilter(pattern));
+            // TODO: Testcode
+            workspace2.zip(fos, new RegexFileFilter(pattern));
             logger.println("Temporary file created at: " + tempZip.getAbsolutePath());
 
         } catch (Exception e) {
