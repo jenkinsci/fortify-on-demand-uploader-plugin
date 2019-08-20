@@ -37,12 +37,14 @@ public class SharedUploadBuildStep {
                                  String tenantId,
                                  boolean purchaseEntitlements,
                                  int entitlementPreference,
-                                 boolean isRemediationPreferred){
+                                 boolean isRemediationPreferred,
+                                 String srcLocation){
 
         model = new JobModel(bsiToken,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred);
+                isRemediationPreferred,
+                srcLocation);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -94,9 +96,10 @@ public class SharedUploadBuildStep {
             if (model.getBsiToken()==null){ // Hack because pipeline step doesn't call prebuild
                 model.initializeBuildModel();
             }
-
+            
+            FilePath workspaceModified = new FilePath(workspace, model.getSrcLocation());
             // zips the file in a temporary location
-            File payload = Utils.createZipFile(model.getBsiToken().getTechnologyStack(), workspace, logger);
+            File payload = Utils.createZipFile(model.getBsiToken().getTechnologyStack(), workspaceModified, logger);
             if (payload.length() == 0) {
 
                 boolean deleteSuccess = payload.delete();

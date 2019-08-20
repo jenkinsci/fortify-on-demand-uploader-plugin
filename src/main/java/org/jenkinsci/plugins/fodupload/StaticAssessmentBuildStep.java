@@ -47,7 +47,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String tenantId,
                                      boolean purchaseEntitlements,
                                      int entitlementPreference,
-                                     boolean isRemediationPreferred) {
+                                     boolean isRemediationPreferred,
+                                     String srcLocation) {
 
         sharedBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
@@ -56,7 +57,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 tenantId,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred);
+                isRemediationPreferred,
+                srcLocation);
 
     }
 
@@ -182,6 +184,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @SuppressWarnings("unused")
     public boolean getIsRemediationPreferred() {
         return sharedBuildStep.getModel().isRemediationPreferred();
+    }
+
+    @SuppressWarnings("unused")
+    public String getSrcLocation() {
+        return sharedBuildStep.getModel().getSrcLocation();
     }
 
 }
