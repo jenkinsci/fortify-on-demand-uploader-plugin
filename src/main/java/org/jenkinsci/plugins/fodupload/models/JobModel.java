@@ -90,10 +90,8 @@ public class JobModel {
                         "Assessment Type Id:                %s%n" +
                         "Technology Stack:                  %s%n" +
                         "Language Level:                    %s%n" +
-                        "Include All Files:                 %s%n" +
                         "Purchase Entitlements:             %s%n" +
-                        "Entitlement Preference             %s%n" +
-                        "Bundled Assessment:                %s%n",
+                        "Entitlement Preference             %s%n",
                 bsiTokenCache.getProjectVersionId(),
                 bsiTokenCache.getAssessmentTypeId(),
                 bsiTokenCache.getTechnologyStack(),
