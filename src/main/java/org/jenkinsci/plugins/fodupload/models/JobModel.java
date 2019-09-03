@@ -19,9 +19,11 @@ public class JobModel {
     private String bsiTokenOriginal;
     private transient BsiToken bsiTokenCache;
     private boolean purchaseEntitlements;
-    private int entitlementPreference;
-    private boolean isRemediationPreferred;
+    private String entitlementPreference;
     private String srcLocation;
+    private int inProgressScanActionOption;
+    private String remediationScanPreferenceType;
+    private String inProgressScanActionType;
 
     private File payload;
 
@@ -41,20 +43,28 @@ public class JobModel {
         return purchaseEntitlements;
     }
 
-    public int getEntitlementPreference() {
+    public String getEntitlementPreference() {
         return entitlementPreference;
     }
 
     public String getBsiTokenOriginal() {
         return bsiTokenOriginal;
     }
-
-    public boolean isRemediationPreferred() {
-        return isRemediationPreferred;
-    }
     
     public String getSrcLocation() {
         return srcLocation;
+    }
+
+    public int getInProgressScanActionOption() {
+        return inProgressScanActionOption;
+    }
+
+    public String getRemediationScanPreferenceType() {
+        return remediationScanPreferenceType;
+    }
+
+    public String getInProgressScanActionType() {
+        return inProgressScanActionType;
     }
 
     /**
@@ -63,19 +73,23 @@ public class JobModel {
      * @param bsiToken              BSI Token
      * @param purchaseEntitlements  purchaseEntitlements
      * @param entitlementPreference entitlementPreference
-     * @param isRemediationPreferred isRemediationPreferred
+     * @param srcLocation           srcLocation
+     * @param remediationScanPreferenceType remediationScanPreferenceType
+     * @param inProgressScanActionType inProgressScanActionType
      */
     public JobModel(String bsiToken,
                     boolean purchaseEntitlements,
-                    int entitlementPreference,
-                    boolean isRemediationPreferred,
-                    String srcLocation) {
+                    String entitlementPreference,
+                    String srcLocation,
+                    String remediationScanPreferenceType,
+                    String inProgressScanActionType) {
 
         this.bsiTokenOriginal = bsiToken;
         this.entitlementPreference = entitlementPreference;
         this.purchaseEntitlements = purchaseEntitlements;
-        this.isRemediationPreferred = isRemediationPreferred;
         this.srcLocation = srcLocation;
+        this.remediationScanPreferenceType = remediationScanPreferenceType;
+        this.inProgressScanActionType = inProgressScanActionType;
     }
 
     private Object readResolve() throws URISyntaxException, UnsupportedEncodingException {
@@ -91,13 +105,15 @@ public class JobModel {
                         "Technology Stack:                  %s%n" +
                         "Language Level:                    %s%n" +
                         "Purchase Entitlements:             %s%n" +
-                        "Entitlement Preference             %s%n",
+                        "Entitlement Preference:            %s%n" +
+                        "In Progress Scan Action:           %s%n",
                 bsiTokenCache.getProjectVersionId(),
                 bsiTokenCache.getAssessmentTypeId(),
                 bsiTokenCache.getTechnologyStack(),
                 bsiTokenCache.getLanguageLevel(),
                 purchaseEntitlements,
-                entitlementPreference);
+                entitlementPreference,
+                inProgressScanActionType);
     }
 
     public boolean initializeBuildModel()

@@ -36,6 +36,7 @@ public class ReleaseController extends ControllerBase {
      * @param releaseId release to get
      * @param fields    fields to return
      * @return ReleaseDTO object with given fields
+     * @throws java.io.IOException in some circumstances
      */
     public ReleaseDTO getRelease(final int releaseId, final String fields) throws IOException {
 
@@ -84,6 +85,7 @@ public class ReleaseController extends ControllerBase {
             return null;
     }
 
+    //TODO DELETE ALL OF THIS! I don't think it's used after ticket US-318012
     /**
      * Get Assessment Type from bsi url
      *

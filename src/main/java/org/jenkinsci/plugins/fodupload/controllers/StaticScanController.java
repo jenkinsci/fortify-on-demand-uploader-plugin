@@ -34,6 +34,7 @@ public class StaticScanController extends ControllerBase {
      * Constructor
      *
      * @param apiConnection apiConnection object with client info
+     * @param logger logger object to display to console
      */
     public StaticScanController(final FodApiConnection apiConnection, final PrintStream logger) {
         super(apiConnection);
@@ -42,9 +43,9 @@ public class StaticScanController extends ControllerBase {
 
     /**
      * Begin a static scan on FoD
-     * <p>
-     * // * @param uploadRequest zip file to upload
      *
+     * @param uploadRequest zip file to upload
+     * @param notes notes
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
@@ -64,17 +65,8 @@ public class StaticScanController extends ControllerBase {
                 apiConnection.authenticate();
 
             logger.println("Getting Assessment");
-            // Get entitlement info
-            ReleaseAssessmentTypeDTO assessmentType = new ReleaseController(apiConnection).getAssessmentType(uploadRequest);
-
-            if (assessmentType == null) {
-                logger.println("Entitlement not found.  Please make sure that your entitlements are good for the selected preference.");
-                return false;
-            }
-
+            
             BsiToken token = uploadRequest.getBsiToken();
-            boolean isRemediationScan = uploadRequest.isRemediationPreferred() && assessmentType.isRemediation();
-
 
             String projectVersion;
             try (InputStream inputStream = this.getClass().getResourceAsStream("/application.properties")) {
@@ -82,18 +74,19 @@ public class StaticScanController extends ControllerBase {
                 props.load(inputStream);
                 projectVersion = props.getProperty("application.version", "Not Found");
             }
-
-            //inputStream.close();
+            
             HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
-                    .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan", token.getProjectVersionId()))
-                    .addQueryParameter("assessmentTypeId", Integer.toString(token.getAssessmentTypeId()))
+                    .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", token.getProjectVersionId()))
+                    .addQueryParameter("bsiToken", uploadRequest.getBsiTokenOriginal())
                     .addQueryParameter("technologyStack", token.getTechnologyType())
-                    .addQueryParameter("entitlementId", Integer.toString(assessmentType.getEntitlementId()))
-                    .addQueryParameter("entitlementFrequencyType", Integer.toString(assessmentType.getFrequencyTypeId()))
-                    .addQueryParameter("isRemediationScan", Boolean.toString(isRemediationScan))
+                    .addQueryParameter("entitlementPreferenceType", uploadRequest.getEntitlementPreference())
+                    .addQueryParameter("purchaseEntitlement", Boolean.toString(uploadRequest.isPurchaseEntitlements()))
+                    .addQueryParameter("remdiationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType())
+                    .addQueryParameter("inProgressScanActionType", uploadRequest.getInProgressScanActionType())
                     .addQueryParameter("scanMethodType", "CICD")
                     .addQueryParameter("scanTool", "Jenkins")
-                    .addQueryParameter("scanToolVersion", projectVersion != null ? projectVersion : "NotFound"); // TODO Remove test code
+                    .addQueryParameter("scanToolVersion", projectVersion != null ? projectVersion : "NotFound"); 
+
 
             if (!Utils.isNullOrEmpty(notes)) {
                 String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);

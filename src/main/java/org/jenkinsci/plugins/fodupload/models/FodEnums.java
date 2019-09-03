@@ -39,9 +39,10 @@ public class FodEnums {
     public enum GrantType {CLIENT_CREDENTIALS, PASSWORD};
     
     public enum EntitlementPreferenceType {
-
-        Subscription(2),
-        SingleScan(1);
+        SubscriptionFirstThenSingleScan(4),
+        SingleScanFirstThenSubscription(3),
+        SubscriptionOnly(2),
+        SingleScanOnly(1);
 
         private final int _val;
 
@@ -55,20 +56,28 @@ public class FodEnums {
 
         public String toString() {
             switch (this._val) {
+                case 4:
+                    return "SubscriptionFirstThenSingleScan";
+                case 3:
+                    return "SingleScanFirstThenSubscription";
                 case 2:
-                    return "Subscription";
+                    return "SubscriptionOnly";
                 case 1:
                 default:
-                    return "Single Scan";
+                    return "SingleScanOnly";
             }
         }
 
         public static EntitlementPreferenceType fromInt(int val) {
             switch (val) {
+                case 4:
+                    return SubscriptionFirstThenSingleScan;
+                case 3:
+                    return SingleScanFirstThenSubscription;
                 case 2:
-                    return Subscription;
+                    return SubscriptionOnly;
                 case 1:
-                    return SingleScan;
+                    return SingleScanOnly;
                 default:
                     return null;
             }

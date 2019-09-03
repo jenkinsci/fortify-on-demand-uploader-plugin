@@ -3,9 +3,11 @@
     <f:entry title="BSI Token" field="bsiToken">
         <f:textbox />
     </f:entry>
+
     <f:entry title="Source Location" help="/plugin/fortify-on-demand-uploader/help-srcLocation.html">
         <f:textbox field="srcLocation"/>
     </f:entry>
+
     <f:section title="Authentication - Select to override global authentication settings">
         <f:block>
             <f:optionalBlock name="overrideGlobalConfig" field ="overrideGlobalConfig" title="Configure Personal Access Token"  checked="${instance.overrideGlobalConfig}"  inline="true">
@@ -31,9 +33,21 @@
         <f:entry title="Purchase Entitlements" field="purchaseEntitlements">
             <f:checkbox/>
         </f:entry>
-        <f:entry title="Prefer Remediation if Available" field="isRemediationPreferred" help="/plugin/fortify-on-demand-uploader/help-isRemediationPreferred.html">
-            <f:checkbox/>
+        <f:entry title="Remediation Preference" field="remediationScanPreferenceType">
+            <select name="remediationScanPreferenceType">
+                <option value="RemediationScanIfAvailable">Remediate Scan If Available</option>
+                <option value="RemediationScanOnly">Remediation Scan Only</option>
+                <option value="NonRemediationScanOnly">Non-Remediation Scan Only</option>
+            </select>
         </f:entry>
     </f:section>
 
+    <f:section title="Scan Options">
+        <f:entry title="" field="inProgressScanActionType">
+            <select name="inProgressScanActionType">
+                <option value="DoNotStartScan">Do Not Start Scan</option>
+                <option value="CancelInProgressScan">Cancel Scan Then Start</option>
+            </select>
+        </f:entry>
+    </f:section>
 </j:jelly>

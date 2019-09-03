@@ -47,6 +47,8 @@ public class ScanStatusPoller {
      *
      * @param releaseId release to poll
      * @return true if status is completed | cancelled.
+     * @throws java.io.IOException in certain cases
+     * @throws InterruptedException in certain cases
      */
     public PollReleaseStatusResult pollReleaseStatus(final int releaseId) throws IOException, InterruptedException {
 

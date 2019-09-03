@@ -46,9 +46,10 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String personalAccessToken,
                                      String tenantId,
                                      boolean purchaseEntitlements,
-                                     int entitlementPreference,
-                                     boolean isRemediationPreferred,
-                                     String srcLocation) {
+                                     String entitlementPreference,
+                                     String srcLocation,
+                                     String remediationScanPreferenceType,
+                                     String inProgressScanActionType) {
 
         sharedBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
@@ -57,8 +58,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 tenantId,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                srcLocation);
+                srcLocation,
+                remediationScanPreferenceType,
+                inProgressScanActionType);
 
     }
 
@@ -172,7 +174,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public int getEntitlementPreference() {
+    public String getEntitlementPreference() {
         return sharedBuildStep.getModel().getEntitlementPreference();
     }
 
@@ -182,13 +184,22 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public boolean getIsRemediationPreferred() {
-        return sharedBuildStep.getModel().isRemediationPreferred();
-    }
-
-    @SuppressWarnings("unused")
     public String getSrcLocation() {
         return sharedBuildStep.getModel().getSrcLocation();
     }
 
+    @SuppressWarnings("unused")
+    public int getInProgressScanActionOption() {
+        return sharedBuildStep.getModel().getInProgressScanActionOption();
+    }
+
+    @SuppressWarnings("unused")
+    public String getRemediationScanPreferenceType() {
+        return sharedBuildStep.getModel().getRemediationScanPreferenceType();
+    }
+
+    @SuppressWarnings("unused")
+    public String getInProgressScanActionType() {
+        return sharedBuildStep.getModel().getInProgressScanActionType();
+    }
 }

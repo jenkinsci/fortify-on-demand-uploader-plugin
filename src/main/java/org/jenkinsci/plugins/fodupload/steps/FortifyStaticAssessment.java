@@ -35,9 +35,10 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String personalAccessToken;
     private String tenantId;
     private boolean purchaseEntitlements;
-    private int entitlementPreference;
-    private boolean isRemediationPreferred;
+    private String entitlementPreference;
     private String srcLocation;
+    private String remediationScanPreferenceType;
+    private String inProgressScanActionType;
 
     private SharedUploadBuildStep commonBuildStep;
 
@@ -96,19 +97,11 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setEntitlementPreference(int entitlementPreference) {
+    public void setEntitlementPreference(String entitlementPreference) {
         this.entitlementPreference = entitlementPreference;
     }
-    public int getEntitlementPreference() {
+    public String getEntitlementPreference() {
         return entitlementPreference;
-    }
-
-    @DataBoundSetter
-    public void setIsRemediationPreferred(boolean isRemediationPreferred) {
-        this.isRemediationPreferred = isRemediationPreferred;
-    }
-    public boolean getIsRemediationPreferred() {
-        return isRemediationPreferred;
     }
 
     @DataBoundSetter
@@ -120,6 +113,23 @@ public class FortifyStaticAssessment extends FortifyStep {
         return srcLocation;
     }
 
+    @DataBoundSetter
+    public void setRemediationScanPreferenceType(String remediationScanPreferenceType) {
+        this.remediationScanPreferenceType = remediationScanPreferenceType;
+    }
+    
+    public String getRemediationScanPreferenceType() {
+        return remediationScanPreferenceType;
+    }
+
+    @DataBoundSetter
+    public void setInProgressScanActionType(String inProgressScanActionType) {
+        this.inProgressScanActionType = inProgressScanActionType;
+    }
+    
+    public String getInProgressScanActionType() {
+        return inProgressScanActionType;
+    }
 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -132,8 +142,9 @@ public class FortifyStaticAssessment extends FortifyStep {
                 tenantId,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                srcLocation);
+                srcLocation,
+                remediationScanPreferenceType,
+                inProgressScanActionType);
 
         return true;
     }
@@ -154,8 +165,9 @@ public class FortifyStaticAssessment extends FortifyStep {
                 tenantId,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                srcLocation);
+                srcLocation,
+                remediationScanPreferenceType,
+                inProgressScanActionType);
 
         commonBuildStep.perform(build, workspace, launcher, listener);
     }

@@ -31,8 +31,12 @@
         <f:entry title="Purchase Entitlements" field="purchaseEntitlements">
             <f:checkbox/>
         </f:entry>
-        <f:entry title="Prefer Remediation if Available" field="isRemediationPreferred" help="/plugin/fortify-on-demand-uploader/help-isRemediationPreferred.html">
-            <f:checkbox/>
+        <f:entry title="Remediation Preference" field="remediationScanPreferenceType">
+            <select name="remediationScanPreferenceType">
+                <option value="RemediationScanIfAvailable">Remediate Scan If Available</option>
+                <option value="RemediationScanOnly">Remediation Scan Only</option>
+                <option value="NonRemediationScanOnly">Non-Remediation Scan Only</option>
+            </select>
         </f:entry>
     </f:section>
 

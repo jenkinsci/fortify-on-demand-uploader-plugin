@@ -57,6 +57,8 @@ public class FodApiConnection {
 
     /**
      * Used for authenticating in the case of a time out using the saved apiConnection credentials.
+     *
+     * @throws java.io.IOException in some circumstances
      */
     public void authenticate() throws IOException {
 
