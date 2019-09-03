@@ -39,7 +39,7 @@ public class ScanSummaryDTO {
     }
 
     public String getApplicationName() {
-        return applicationName;
+        return applicationName != null ? applicationName : "";
     }
 
     public int getReleaseId() {
@@ -47,7 +47,7 @@ public class ScanSummaryDTO {
     }
 
     public String getReleaseName() {
-        return releaseName;
+        return releaseName != null ? releaseName : "";
     }
 
     public int getScanId() {
@@ -59,7 +59,7 @@ public class ScanSummaryDTO {
     }
 
     public String getScanType() {
-        return scanType;
+        return scanType != null ? scanType : "";
     }
 
     public int getAssessmentTypeId() {
@@ -67,7 +67,7 @@ public class ScanSummaryDTO {
     }
 
     public String getAssessmentTypeName() {
-        return assessmentTypeName;
+        return assessmentTypeName != null ? assessmentTypeName : "";
     }
 
     public int getAnalysisStatusTypeId() {
@@ -75,15 +75,15 @@ public class ScanSummaryDTO {
     }
 
     public String getAnalysisStatusType() {
-        return analysisStatusType;
+        return analysisStatusType != null ? analysisStatusType : "";
     }
 
     public String getStartedDatetime() {
-        return startedDatetime;
+        return startedDatetime != null ? startedDatetime : "";
     }
 
     public String getCompletedDateTime() {
-        return completedDateTime;
+        return completedDateTime != null ? completedDateTime : "";
     }
 
     public int getTotalIssues() {
@@ -111,7 +111,7 @@ public class ScanSummaryDTO {
     }
 
     public String getNotes() {
-        return notes;
+        return notes != null ? notes : "";
     }
 
     public boolean getIsFalsePositiveChallenge() {
@@ -140,11 +140,11 @@ public class ScanSummaryDTO {
     }
 
     public String getCancelReason() {
-        return cancelReason;
+        return cancelReason != null ? cancelReason : "Currently unavailable";
     }
 
     public String getAnalysisStatusReasonNotes() {
-        return analysisStatusReasonNotes;
+        return analysisStatusReasonNotes != null ? analysisStatusReasonNotes : "Currently unavailable";
     }
 
     public int getScanMethodTypeId() {
@@ -152,15 +152,15 @@ public class ScanSummaryDTO {
     }
 
     public String getScanMethodTypeName() {
-        return scanMethodTypeName;
+        return scanMethodTypeName != null ? scanMethodTypeName : "Currently unavailable";
     }
 
     public String getScanTool() {
-        return scanTool;
+        return scanTool != null ? scanTool : "Currently unavailable";
     }
 
     public String getScanToolVersion() {
-        return scanToolVersion;
+        return scanToolVersion != null ? scanToolVersion : "Currently unavailable";
     }
 }
 

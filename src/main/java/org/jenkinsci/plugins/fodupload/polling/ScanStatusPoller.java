@@ -129,7 +129,11 @@ public class ScanStatusPoller {
 
                     if (statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
                         ScanSummaryDTO scanSummaryDTO = scanSummaryController.getReleaseScanSummary(release.getReleaseId(), release.getCurrentStaticScanId());
-                        printCancelMessages(scanSummaryDTO);
+                        if(scanSummaryDTO == null) {
+                            logger.println("Scan summary is unavailable");
+                        } else {
+                            printCancelMessages(scanSummaryDTO);
+                        }
                     } else {
                         printPassFail(release);
                     }
@@ -167,25 +171,33 @@ public class ScanStatusPoller {
     }
 
     private void printCancelMessages(ScanSummaryDTO scanSummary) {
-        logger.println("-------Scan Cancelled------- ");
-        logger.println();
-        logger.println(String.format("Cancel reason:        %s", scanSummary.getCancelReason()));
-        logger.println(String.format("Cancel reason notes:  %s", scanSummary.getAnalysisStatusReasonNotes()));
-        logger.println();
-        logger.println("For application status details see the customer portal: ");
-        logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), scanSummary.getReleaseId()));
-        logger.println();
+        if(scanSummary == null){
+            logger.println("Unable to retrieve scan summary data");
+        } else {
+            logger.println("-------Scan Cancelled------- ");
+            logger.println();
+            logger.println(String.format("Cancel reason:        %s", scanSummary.getCancelReason()));
+            logger.println(String.format("Cancel reason notes:  %s", scanSummary.getAnalysisStatusReasonNotes()));
+            logger.println();
+            logger.println("For application status details see the customer portal: ");
+            logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), scanSummary.getReleaseId()));
+            logger.println();
+        }
     }
 
     private void printPauseMessages(ScanSummaryDTO scanSummary) {
-        logger.println("-------Scan Paused------- ");
-        logger.println();
-        logger.println("Review the last pause entry below");
-        logger.println();
-        for (ScanPauseDetail spd : scanSummary.getPauseDetails()) {
-            logger.println(String.format("Pause reason:         %s", spd.getReason()));
-            logger.println(String.format("Pause reason notes:   %s", spd.getNotes()));
+        if(scanSummary == null){
+            logger.println("Unable to retrieve scan summary data");
+        } else {
+            logger.println("-------Scan Paused------- ");
             logger.println();
+            logger.println("Review the last pause entry below");
+            logger.println();
+            for (ScanPauseDetail spd : scanSummary.getPauseDetails()) {
+                logger.println(String.format("Pause reason:         %s", spd.getReason()));
+                logger.println(String.format("Pause reason notes:   %s", spd.getNotes()));
+                logger.println();
+            }
         }
     }
 }
