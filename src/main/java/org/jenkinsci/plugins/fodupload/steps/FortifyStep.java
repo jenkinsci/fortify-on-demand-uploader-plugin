@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload.steps;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +28,6 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
     protected void setLastBuild(Run<?, ?> lastBuild) {
         this.lastBuild = lastBuild;
     }
-
 
 
     @Override

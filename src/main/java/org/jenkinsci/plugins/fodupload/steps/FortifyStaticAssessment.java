@@ -52,18 +52,13 @@ public class FortifyStaticAssessment extends FortifyStep {
         return bsiToken;
     }
 
-    @DataBoundSetter
-    public void setOverrideGlobalConfig(boolean overrideGlobalConfig) {
-        this.overrideGlobalConfig = overrideGlobalConfig;
-    }
-
     public boolean getOverrideGlobalConfig() {
         return overrideGlobalConfig;
     }
 
     @DataBoundSetter
-    public void setUsername(String username) {
-        this.username = username;
+    public void setOverrideGlobalConfig(boolean overrideGlobalConfig) {
+        this.overrideGlobalConfig = overrideGlobalConfig;
     }
 
     public String getUsername() {
@@ -71,8 +66,8 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setPersonalAccessToken(String personalAccessToken) {
-        this.personalAccessToken = personalAccessToken;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPersonalAccessToken() {
@@ -80,8 +75,8 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setPersonalAccessToken(String personalAccessToken) {
+        this.personalAccessToken = personalAccessToken;
     }
 
     public String getTenantId() {
@@ -89,24 +84,26 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setPurchaseEntitlements(boolean purchaseEntitlements) {
-        this.purchaseEntitlements = purchaseEntitlements;
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
+
     public boolean getPurchaseEntitlements() {
         return purchaseEntitlements;
     }
 
     @DataBoundSetter
-    public void setEntitlementPreference(String entitlementPreference) {
-        this.entitlementPreference = entitlementPreference;
+    public void setPurchaseEntitlements(boolean purchaseEntitlements) {
+        this.purchaseEntitlements = purchaseEntitlements;
     }
+
     public String getEntitlementPreference() {
         return entitlementPreference;
     }
 
     @DataBoundSetter
-    public void setSrcLocation(String srcLocation) {
-        this.srcLocation = srcLocation != null ? srcLocation.trim() : "";
+    public void setEntitlementPreference(String entitlementPreference) {
+        this.entitlementPreference = entitlementPreference;
     }
 
     public String getSrcLocation() {
@@ -114,21 +111,26 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setRemediationScanPreferenceType(String remediationScanPreferenceType) {
-        this.remediationScanPreferenceType = remediationScanPreferenceType;
+    public void setSrcLocation(String srcLocation) {
+        this.srcLocation = srcLocation != null ? srcLocation.trim() : "";
     }
-    
+
     public String getRemediationScanPreferenceType() {
         return remediationScanPreferenceType;
     }
 
     @DataBoundSetter
-    public void setInProgressScanActionType(String inProgressScanActionType) {
-        this.inProgressScanActionType = inProgressScanActionType;
+    public void setRemediationScanPreferenceType(String remediationScanPreferenceType) {
+        this.remediationScanPreferenceType = remediationScanPreferenceType;
     }
-    
+
     public String getInProgressScanActionType() {
         return inProgressScanActionType;
+    }
+
+    @DataBoundSetter
+    public void setInProgressScanActionType(String inProgressScanActionType) {
+        this.inProgressScanActionType = inProgressScanActionType;
     }
 
     @Override
@@ -192,10 +194,9 @@ public class FortifyStaticAssessment extends FortifyStep {
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-        public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
-                                                                   @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId)
-        {
+        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
+                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId) {
             return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
 
         }
@@ -208,6 +209,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
+        private static final long serialVersionUID = 1L;
         private transient FortifyStaticAssessment upload;
 
         protected Execution(FortifyStaticAssessment upload, StepContext context) {
@@ -223,7 +225,5 @@ public class FortifyStaticAssessment extends FortifyStep {
 
             return null;
         }
-
-        private static final long serialVersionUID = 1L;
     }
 }

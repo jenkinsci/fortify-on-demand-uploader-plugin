@@ -27,6 +27,31 @@ public class JobModel {
 
     private File payload;
 
+    /**
+     * Build model used to pass values around
+     *
+     * @param bsiToken                      BSI Token
+     * @param purchaseEntitlements          purchaseEntitlements
+     * @param entitlementPreference         entitlementPreference
+     * @param srcLocation                   srcLocation
+     * @param remediationScanPreferenceType remediationScanPreferenceType
+     * @param inProgressScanActionType      inProgressScanActionType
+     */
+    public JobModel(String bsiToken,
+                    boolean purchaseEntitlements,
+                    String entitlementPreference,
+                    String srcLocation,
+                    String remediationScanPreferenceType,
+                    String inProgressScanActionType) {
+
+        this.bsiTokenOriginal = bsiToken;
+        this.entitlementPreference = entitlementPreference;
+        this.purchaseEntitlements = purchaseEntitlements;
+        this.srcLocation = srcLocation;
+        this.remediationScanPreferenceType = remediationScanPreferenceType;
+        this.inProgressScanActionType = inProgressScanActionType;
+    }
+
     public File getPayload() {
         return payload;
     }
@@ -50,7 +75,7 @@ public class JobModel {
     public String getBsiTokenOriginal() {
         return bsiTokenOriginal;
     }
-    
+
     public String getSrcLocation() {
         return srcLocation;
     }
@@ -67,31 +92,6 @@ public class JobModel {
         return inProgressScanActionType;
     }
 
-    /**
-     * Build model used to pass values around
-     *
-     * @param bsiToken              BSI Token
-     * @param purchaseEntitlements  purchaseEntitlements
-     * @param entitlementPreference entitlementPreference
-     * @param srcLocation           srcLocation
-     * @param remediationScanPreferenceType remediationScanPreferenceType
-     * @param inProgressScanActionType inProgressScanActionType
-     */
-    public JobModel(String bsiToken,
-                    boolean purchaseEntitlements,
-                    String entitlementPreference,
-                    String srcLocation,
-                    String remediationScanPreferenceType,
-                    String inProgressScanActionType) {
-
-        this.bsiTokenOriginal = bsiToken;
-        this.entitlementPreference = entitlementPreference;
-        this.purchaseEntitlements = purchaseEntitlements;
-        this.srcLocation = srcLocation;
-        this.remediationScanPreferenceType = remediationScanPreferenceType;
-        this.inProgressScanActionType = inProgressScanActionType;
-    }
-
     private Object readResolve() throws URISyntaxException, UnsupportedEncodingException {
         bsiTokenCache = tokenParser.parse(bsiTokenOriginal);
         return this;
@@ -100,7 +100,7 @@ public class JobModel {
     @Override
     public String toString() {
         return String.format(
-                        "Release Id:                        %s%n" +
+                "Release Id:                        %s%n" +
                         "Assessment Type Id:                %s%n" +
                         "Technology Stack:                  %s%n" +
                         "Language Level:                    %s%n" +
@@ -116,19 +116,18 @@ public class JobModel {
                 inProgressScanActionType);
     }
 
-    public boolean initializeBuildModel()
-    {
+    public boolean initializeBuildModel() {
         try {
             this.bsiTokenCache = tokenParser.parse(bsiTokenOriginal);
         } catch (Exception ex) {
             return false;
-        } 
+        }
         return (this.bsiTokenCache != null);
     }
-    
+
     // TODO: More validation, though this should never happen with the new format
     public boolean validate(PrintStream logger) {
-        
+
         List<String> errors = new ArrayList<>();
 
         if (bsiTokenCache.getAssessmentTypeId() == 0)

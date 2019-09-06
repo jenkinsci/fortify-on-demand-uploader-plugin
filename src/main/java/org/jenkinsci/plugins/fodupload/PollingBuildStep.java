@@ -26,6 +26,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
@@ -51,7 +52,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                             String tenantId) {
 
         sharedBuildStep = new SharedPollingBuildStep(bsiToken,
-                overrideGlobalConfig,pollingInterval,
+                overrideGlobalConfig, pollingInterval,
                 policyFailureBuildResultPreference, clientId, clientSecret,
                 username, personalAccessToken, tenantId);
     }
@@ -85,27 +86,27 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     public int getPolicyFailureBuildResultPreference() {
         return sharedBuildStep.getPolicyFailureBuildResultPreference();
     }
-    
+
     @SuppressWarnings("unused")
     public String getUsername() {
         return sharedBuildStep.getAuthModel().getUsername();
     }
-    
+
     @SuppressWarnings("unused")
     public String getPersonalAccessToken() {
         return sharedBuildStep.getAuthModel().getPersonalAccessToken();
     }
-    
+
     @SuppressWarnings("unused")
     public String getTenantId() {
         return sharedBuildStep.getAuthModel().getTenantId();
     }
-    
+
     @SuppressWarnings("unused")
     public boolean getOverrideGlobalConfig() {
         return sharedBuildStep.getAuthModel().getOverrideGlobalConfig();
     }
-    
+
     // Overridden for better type safety.
     // If your plugin doesn't really define any property on Descriptor,
     // you don't have to do this.
@@ -116,7 +117,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
 
     @Extension
     public static final class PollingStepDescriptor extends BuildStepDescriptor<Publisher> {
-   
+
         public PollingStepDescriptor() {
             super();
             load();
@@ -131,32 +132,29 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         public String getDisplayName() {
             return "Poll Fortify on Demand for Results";
         }
-        
-        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken)
-        {
+
+        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             return SharedPollingBuildStep.doCheckBsiToken(bsiToken);
 
         }
-        
-         
-        public FormValidation doCheckPollingInterval(@QueryParameter String pollingInterval)
-        {
+
+
+        public FormValidation doCheckPollingInterval(@QueryParameter String pollingInterval) {
             return SharedPollingBuildStep.doCheckPollingInterval(pollingInterval);
         }
-       
+
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
         @POST
-        public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(USERNAME) final String username,
-                                               @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                               @QueryParameter(TENANT_ID) final String tenantId)
-        {
+        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(USERNAME) final String username,
+                                                                  @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                  @QueryParameter(TENANT_ID) final String tenantId) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
         }
-        
+
         @SuppressWarnings("unused")
         public ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
             return SharedPollingBuildStep.doFillPolicyFailureBuildResultPreferenceItems();

@@ -47,7 +47,7 @@ public class ScanStatusPoller {
      *
      * @param releaseId release to poll
      * @return true if status is completed | cancelled.
-     * @throws java.io.IOException in certain cases
+     * @throws java.io.IOException  in certain cases
      * @throws InterruptedException in certain cases
      */
     public PollReleaseStatusResult pollReleaseStatus(final int releaseId) throws IOException, InterruptedException {
@@ -129,7 +129,7 @@ public class ScanStatusPoller {
 
                     if (statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
                         ScanSummaryDTO scanSummaryDTO = scanSummaryController.getReleaseScanSummary(release.getReleaseId(), release.getCurrentStaticScanId());
-                        if(scanSummaryDTO == null) {
+                        if (scanSummaryDTO == null) {
                             logger.println("Scan summary is unavailable");
                         } else {
                             printCancelMessages(scanSummaryDTO);
@@ -171,7 +171,7 @@ public class ScanStatusPoller {
     }
 
     private void printCancelMessages(ScanSummaryDTO scanSummary) {
-        if(scanSummary == null){
+        if (scanSummary == null) {
             logger.println("Unable to retrieve scan summary data");
         } else {
             logger.println("-------Scan Cancelled------- ");
@@ -186,7 +186,7 @@ public class ScanStatusPoller {
     }
 
     private void printPauseMessages(ScanSummaryDTO scanSummary) {
-        if(scanSummary == null){
+        if (scanSummary == null) {
             logger.println("Unable to retrieve scan summary data");
         } else {
             logger.println("-------Scan Paused------- ");
