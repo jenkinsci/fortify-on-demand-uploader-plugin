@@ -3,6 +3,11 @@
     <f:entry title="BSI Token" field="bsiToken">
         <f:textbox />
     </f:entry>
+
+    <f:entry title="Source Location" help="/plugin/fortify-on-demand-uploader/help-srcLocation.html">
+        <f:textbox field="srcLocation"/>
+    </f:entry>
+
     <f:section title="Authentication - Select to override global authentication settings">
         <f:block>
             <f:optionalBlock name="overrideGlobalConfig" field ="overrideGlobalConfig" title="Configure Personal Access Token"  checked="${instance.overrideGlobalConfig}"  inline="true">
@@ -36,6 +41,12 @@
                 <option value="RemediationScanIfAvailable">Remediate Scan If Available</option>
                 <option value="RemediationScanOnly">Remediation Scan Only</option>
                 <option value="NonRemediationScanOnly">Non-Remediation Scan Only</option>
+            </select>
+        </f:entry>
+        <f:entry title="Action when scan is in progress" field="inProgressScanActionType">
+            <select name="inProgressScanActionType">
+                <option value="DoNotStartScan">Do Not Start Scan</option>
+                <option value="CancelInProgressScan">Cancel Scan Then Start</option>
             </select>
         </f:entry>
     </f:section>
