@@ -119,7 +119,10 @@ public class FodApiConnection {
         if (response.isSuccessful()) {
             response.body().close();
             token = null;
+        } else {
+            throw new IOException(response.toString());
         }
+        
     }
 
     /**

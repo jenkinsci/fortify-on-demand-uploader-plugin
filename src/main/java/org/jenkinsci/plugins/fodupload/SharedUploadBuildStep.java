@@ -153,8 +153,7 @@ public class SharedUploadBuildStep {
                 try {
                     apiConnection.retireToken();
                 } catch (IOException e) {
-                    logger.println("Failed to retire oauth token.");
-                    e.printStackTrace(logger);
+                    logger.println(String.format("Failed to retire oauth token. Response code is %s", e));
                 }
             }
         }
