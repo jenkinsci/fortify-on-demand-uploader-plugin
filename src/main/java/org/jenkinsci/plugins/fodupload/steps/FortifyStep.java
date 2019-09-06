@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload.steps;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
