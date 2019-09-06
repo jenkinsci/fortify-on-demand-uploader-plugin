@@ -34,7 +34,7 @@ public class StaticScanController extends ControllerBase {
      * Constructor
      *
      * @param apiConnection apiConnection object with client info
-     * @param logger logger object to display to console
+     * @param logger        logger object to display to console
      */
     public StaticScanController(final FodApiConnection apiConnection, final PrintStream logger) {
         super(apiConnection);
@@ -45,7 +45,7 @@ public class StaticScanController extends ControllerBase {
      * Begin a static scan on FoD
      *
      * @param uploadRequest zip file to upload
-     * @param notes notes
+     * @param notes         notes
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
@@ -65,7 +65,7 @@ public class StaticScanController extends ControllerBase {
                 apiConnection.authenticate();
 
             logger.println("Getting Assessment");
-            
+
             BsiToken token = uploadRequest.getBsiToken();
 
             String projectVersion;
@@ -74,7 +74,7 @@ public class StaticScanController extends ControllerBase {
                 props.load(inputStream);
                 projectVersion = props.getProperty("application.version", "Not Found");
             }
-            
+
             HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
                     .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", token.getProjectVersionId()))
                     .addQueryParameter("bsiToken", uploadRequest.getBsiTokenOriginal())
@@ -85,7 +85,7 @@ public class StaticScanController extends ControllerBase {
                     .addQueryParameter("inProgressScanActionType", uploadRequest.getInProgressScanActionType())
                     .addQueryParameter("scanMethodType", "CICD")
                     .addQueryParameter("scanTool", "Jenkins")
-                    .addQueryParameter("scanToolVersion", projectVersion != null ? projectVersion : "NotFound"); 
+                    .addQueryParameter("scanToolVersion", projectVersion != null ? projectVersion : "NotFound");
 
 
             if (!Utils.isNullOrEmpty(notes)) {

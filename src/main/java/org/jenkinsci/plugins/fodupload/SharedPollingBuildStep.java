@@ -37,14 +37,14 @@ public class SharedPollingBuildStep {
     private AuthenticationModel authModel;
 
     public SharedPollingBuildStep(String bsiToken,
-                            boolean overrideGlobalConfig,
-                            int pollingInterval,
-                            int policyFailureBuildResultPreference,
-                            String clientId,
-                            String clientSecret,
-                            String username,
-                            String personalAccessToken,
-                            String tenantId){
+                                  boolean overrideGlobalConfig,
+                                  int pollingInterval,
+                                  int policyFailureBuildResultPreference,
+                                  String clientId,
+                                  String clientSecret,
+                                  String username,
+                                  String personalAccessToken,
+                                  String tenantId) {
 
         this.bsiToken = bsiToken;
         this.pollingInterval = pollingInterval;
@@ -53,6 +53,67 @@ public class SharedPollingBuildStep {
                 username,
                 personalAccessToken,
                 tenantId);
+    }
+
+    public static FormValidation doCheckBsiToken(String bsiToken) {
+        if (bsiToken != null && !bsiToken.isEmpty()) {
+            BsiTokenParser tokenParser = new BsiTokenParser();
+            try {
+                BsiToken testToken = tokenParser.parse(bsiToken);
+                if (testToken != null) {
+                    return FormValidation.ok();
+                }
+            } catch (Exception ex) {
+                return FormValidation.error("Could not parse BSI token.");
+            }
+        } else
+            return FormValidation.error("Please specify BSI Token");
+        return FormValidation.error("Please specify BSI Token");
+    }
+
+    public static FormValidation doCheckPollingInterval(String pollingInterval) {
+        if (Utils.isNullOrEmpty(pollingInterval))
+            return FormValidation.error("Polling interval is required to perform this step.");
+        try {
+            int pollingIntervalNumeric = Integer.parseInt(pollingInterval);
+            if (pollingIntervalNumeric <= 0)
+                return FormValidation.error("Value must be greater than 0");
+        } catch (NumberFormatException ex) {
+            return FormValidation.error("Value must be integer");
+        }
+        return FormValidation.ok();
+    }
+
+    // Form validation
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    public static FormValidation doTestPersonalAccessTokenConnection(final String username,
+                                                                     final String personalAccessToken,
+                                                                     final String tenantId) {
+        FodApiConnection testApi;
+        String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
+        String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
+        if (Utils.isNullOrEmpty(baseUrl))
+            return FormValidation.error("Fortify on Demand URL is empty!");
+        if (Utils.isNullOrEmpty(apiUrl))
+            return FormValidation.error("Fortify on Demand API URL is empty!");
+        if (Utils.isNullOrEmpty(username))
+            return FormValidation.error("Username is empty!");
+        if (Utils.isNullOrEmpty(personalAccessToken))
+            return FormValidation.error("Personal Access Token is empty!");
+        if (Utils.isNullOrEmpty(tenantId))
+            return FormValidation.error("Tenant ID is null.");
+        testApi = new FodApiConnection(tenantId + "\\" + username, personalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant");
+        return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
+
+    }
+
+    public static ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (PolicyFailureBuildResultPreference preferenceType : PolicyFailureBuildResultPreference.values()) {
+            items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
+        }
+
+        return items;
     }
 
     public void perform(Run<?, ?> run,
@@ -82,8 +143,7 @@ public class SharedPollingBuildStep {
         try {
 
             BsiToken token = tokenParser.parse(this.getBsiToken());
-            if(apiConnection != null)
-            {
+            if (apiConnection != null) {
                 apiConnection.authenticate();
                 ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.getPollingInterval(), logger);
                 PollReleaseStatusResult result = poller.pollReleaseStatus(token.getProjectVersionId());
@@ -113,7 +173,7 @@ public class SharedPollingBuildStep {
                             break;
                     }
                 }
-            }else{
+            } else {
                 logger.println("Failed to authenticate");
                 run.setResult(Result.FAILURE);
             }
@@ -143,76 +203,6 @@ public class SharedPollingBuildStep {
         return authModel;
     }
 
-
-    public static FormValidation doCheckBsiToken(String bsiToken)
-    {
-        if(bsiToken != null && !bsiToken.isEmpty() ){
-            BsiTokenParser tokenParser = new BsiTokenParser();
-            try{
-                BsiToken testToken = tokenParser.parse(bsiToken);
-                if(testToken != null){
-                    return FormValidation.ok();
-                }
-            }
-            catch( Exception ex){
-                return FormValidation.error("Could not parse BSI token.");
-            }
-        }
-        else
-            return FormValidation.error("Please specify BSI Token");
-        return FormValidation.error("Please specify BSI Token");
-    }
-
-
-    public static FormValidation doCheckPollingInterval(String pollingInterval)
-    {
-        if(Utils.isNullOrEmpty(pollingInterval))
-            return FormValidation.error("Polling interval is required to perform this step.");
-        try {
-            int pollingIntervalNumeric = Integer.parseInt(pollingInterval);
-            if(pollingIntervalNumeric <= 0)
-                return FormValidation.error("Value must be greater than 0");
-        }
-        catch (NumberFormatException ex)
-        {
-            return FormValidation.error("Value must be integer");
-        }
-        return FormValidation.ok();
-    }
-
-    // Form validation
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    public static FormValidation doTestPersonalAccessTokenConnection(final String username,
-                                                               final String personalAccessToken,
-                                                               final String tenantId)
-    {
-        FodApiConnection testApi;
-        String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
-        String apiUrl =  GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-        if (Utils.isNullOrEmpty(baseUrl))
-            return FormValidation.error("Fortify on Demand URL is empty!");
-        if (Utils.isNullOrEmpty(apiUrl))
-            return FormValidation.error("Fortify on Demand API URL is empty!");
-        if (Utils.isNullOrEmpty(username))
-            return FormValidation.error("Username is empty!");
-        if (Utils.isNullOrEmpty(personalAccessToken))
-            return FormValidation.error("Personal Access Token is empty!");
-        if (Utils.isNullOrEmpty(tenantId))
-            return FormValidation.error("Tenant ID is null.");
-        testApi = new FodApiConnection(tenantId + "\\" + username, personalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant");
-        return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
-
-    }
-
-    public static ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
-        ListBoxModel items = new ListBoxModel();
-        for (PolicyFailureBuildResultPreference preferenceType : PolicyFailureBuildResultPreference.values()) {
-            items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
-        }
-
-        return items;
-    }
-
     public enum PolicyFailureBuildResultPreference {
         None(0),
         MarkUnstable(1),
@@ -222,6 +212,18 @@ public class SharedPollingBuildStep {
 
         PolicyFailureBuildResultPreference(int val) {
             this._val = val;
+        }
+
+        public static PolicyFailureBuildResultPreference fromInt(int val) {
+            switch (val) {
+                case 2:
+                    return MarkFailure;
+                case 1:
+                    return MarkUnstable;
+                case 0:
+                default:
+                    return None;
+            }
         }
 
         public int getValue() {
@@ -237,18 +239,6 @@ public class SharedPollingBuildStep {
                 case 0:
                 default:
                     return "Do nothing";
-            }
-        }
-
-        public static PolicyFailureBuildResultPreference fromInt(int val) {
-            switch (val) {
-                case 2:
-                    return MarkFailure;
-                case 1:
-                    return MarkUnstable;
-                case 0:
-                default:
-                    return None;
             }
         }
     }

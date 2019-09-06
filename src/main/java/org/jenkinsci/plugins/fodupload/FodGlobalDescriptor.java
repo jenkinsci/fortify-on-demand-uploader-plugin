@@ -8,6 +8,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
+
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
 import org.kohsuke.stapler.verb.POST;
@@ -15,7 +16,7 @@ import org.kohsuke.stapler.verb.POST;
 @Extension
 public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String CLIENT_ID = "clientId";
-    private static final String GLOBAL_AUTH_TYPE= "globalAuthType";
+    private static final String GLOBAL_AUTH_TYPE = "globalAuthType";
     private static final String CLIENT_SECRET = "clientSecret";
     private static final String USERNAME = "username";
     private static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
@@ -23,7 +24,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String BASE_URL = "baseUrl";
     private static final String API_URL = "apiUrl";
 
-    private String globalAuthType; 
+    private String globalAuthType;
     private String clientId;
     private String clientSecret;
     private String username;
@@ -40,16 +41,12 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         JSONObject globalAuthTypeObject = formData.getJSONObject(GLOBAL_AUTH_TYPE);
-        if(globalAuthTypeObject.size() > 0)
-        {
+        if (globalAuthTypeObject.size() > 0) {
             globalAuthType = globalAuthTypeObject.getString("value");
-            if(globalAuthType.equals("apiKeyType"))
-            {
+            if (globalAuthType.equals("apiKeyType")) {
                 clientId = globalAuthTypeObject.getString(CLIENT_ID);
                 clientSecret = globalAuthTypeObject.getString(CLIENT_SECRET);
-            }
-            else if (globalAuthType.equals("personalAccessTokenType"))
-            {
+            } else if (globalAuthType.equals("personalAccessTokenType")) {
                 username = globalAuthTypeObject.getString(USERNAME);
                 personalAccessToken = globalAuthTypeObject.getString(PERSONAL_ACCESS_TOKEN);
                 tenantId = globalAuthTypeObject.getString(TENANT_ID);
@@ -69,37 +66,37 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     public String getDisplayName() {
         return "Fortify Uploader Plugin";
     }
-    
+
     @SuppressWarnings("unused")
     public String getGlobalAuthType() {
         return globalAuthType;
     }
-    
+
     @SuppressWarnings("unused")
     public String getClientId() {
         return clientId;
     }
-    
+
     @SuppressWarnings("unused")
     public String getClientSecret() {
         return clientSecret;
     }
-    
+
     @SuppressWarnings("unused")
     public String getUsername() {
         return username;
     }
-    
+
     @SuppressWarnings("unused")
     public String getPersonalAccessToken() {
         return personalAccessToken;
     }
-   
+
     @SuppressWarnings("unused")
     public String getTenantId() {
         return tenantId;
     }
-    
+
     @SuppressWarnings("unused")
     public String getBaseUrl() {
         return baseUrl;
@@ -110,23 +107,20 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         return apiUrl;
     }
 
-    public boolean getAuthTypeIsApiKey()
-    {
+    public boolean getAuthTypeIsApiKey() {
         return globalAuthType.equals("apiKeyType");
     }
-    
-    public boolean getAuthTypeIsPersonalToken()
-    {
+
+    public boolean getAuthTypeIsPersonalToken() {
         return globalAuthType.equals("personalAccessTokenType");
     }
-   
+
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
     @POST
     public FormValidation doTestApiKeyConnection(@QueryParameter(CLIENT_ID) final String clientId,
-                                           @QueryParameter(CLIENT_SECRET) final String clientSecret,
-                                           @QueryParameter(BASE_URL) final String baseUrl,
-                                           @QueryParameter(API_URL) final String apiUrl)
-    {
+                                                 @QueryParameter(CLIENT_SECRET) final String clientSecret,
+                                                 @QueryParameter(BASE_URL) final String baseUrl,
+                                                 @QueryParameter(API_URL) final String apiUrl) {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
         if (Utils.isNullOrEmpty(baseUrl))
@@ -140,16 +134,15 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         testApi = new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
         return testConnection(testApi);
     }
-    
+
     // Form validation
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
     @POST
-    public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(USERNAME) final String username,
-                                           @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                           @QueryParameter(TENANT_ID) final String tenantId,
-                                           @QueryParameter(BASE_URL) final String baseUrl,
-                                           @QueryParameter(API_URL) final String apiUrl)
-    {
+    public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(USERNAME) final String username,
+                                                              @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                              @QueryParameter(TENANT_ID) final String tenantId,
+                                                              @QueryParameter(BASE_URL) final String baseUrl,
+                                                              @QueryParameter(API_URL) final String apiUrl) {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
         if (Utils.isNullOrEmpty(baseUrl))
@@ -164,48 +157,40 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
             return FormValidation.error("Tenant ID is null.");
         testApi = new FodApiConnection(tenantId + "\\" + username, personalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
         return testConnection(testApi);
-        
+
     }
 
     FodApiConnection createFodApiConnection() {
 
-        if(!Utils.isNullOrEmpty(globalAuthType))
-        {
-            
+        if (!Utils.isNullOrEmpty(globalAuthType)) {
+
             if (Utils.isNullOrEmpty(baseUrl))
                 throw new IllegalArgumentException("Base URL is null.");
             if (Utils.isNullOrEmpty(apiUrl))
                 throw new IllegalArgumentException("Api URL is null.");
-            
-            if(globalAuthType.equals("apiKeyType"))
-            {
+
+            if (globalAuthType.equals("apiKeyType")) {
                 if (Utils.isNullOrEmpty(clientId))
                     throw new IllegalArgumentException("Client ID is null.");
                 if (Utils.isNullOrEmpty(clientSecret))
                     throw new IllegalArgumentException("Client Secret is null.");
                 return new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
-            }
-            else if(globalAuthType.equals("personalAccessTokenType"))
-            {
+            } else if (globalAuthType.equals("personalAccessTokenType")) {
                 if (Utils.isNullOrEmpty(username))
-                        throw new IllegalArgumentException("Username is null.");
+                    throw new IllegalArgumentException("Username is null.");
                 if (Utils.isNullOrEmpty(personalAccessToken))
-                        throw new IllegalArgumentException("Personal Access Token is null.");
-                 if (Utils.isNullOrEmpty(tenantId))
-                        throw new IllegalArgumentException("Tenant ID is null.");
-                return new FodApiConnection(tenantId + "\\" +username, personalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
-            }
-            else
-            {
+                    throw new IllegalArgumentException("Personal Access Token is null.");
+                if (Utils.isNullOrEmpty(tenantId))
+                    throw new IllegalArgumentException("Tenant ID is null.");
+                return new FodApiConnection(tenantId + "\\" + username, personalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
+            } else {
                 throw new IllegalArgumentException("Invalid authentication type");
             }
-            
-        }
-        else 
-        {
+
+        } else {
             throw new IllegalArgumentException("No authentication method configured");
         }
-        
+
     }
 
     public FormValidation testConnection(FodApiConnection testApi) {

@@ -36,8 +36,10 @@ public class FodEnums {
         DynamicScanWebServiceTypes
     }
 
-    public enum GrantType {CLIENT_CREDENTIALS, PASSWORD};
-    
+    public enum GrantType {CLIENT_CREDENTIALS, PASSWORD}
+
+    ;
+
     public enum EntitlementPreferenceType {
         SubscriptionFirstThenSingleScan(4),
         SingleScanFirstThenSubscription(3),
@@ -48,6 +50,21 @@ public class FodEnums {
 
         EntitlementPreferenceType(int val) {
             this._val = val;
+        }
+
+        public static EntitlementPreferenceType fromInt(int val) {
+            switch (val) {
+                case 4:
+                    return SubscriptionFirstThenSingleScan;
+                case 3:
+                    return SingleScanFirstThenSubscription;
+                case 2:
+                    return SubscriptionOnly;
+                case 1:
+                    return SingleScanOnly;
+                default:
+                    return null;
+            }
         }
 
         public int getValue() {
@@ -65,21 +82,6 @@ public class FodEnums {
                 case 1:
                 default:
                     return "SingleScanOnly";
-            }
-        }
-
-        public static EntitlementPreferenceType fromInt(int val) {
-            switch (val) {
-                case 4:
-                    return SubscriptionFirstThenSingleScan;
-                case 3:
-                    return SingleScanFirstThenSubscription;
-                case 2:
-                    return SubscriptionOnly;
-                case 1:
-                    return SingleScanOnly;
-                default:
-                    return null;
             }
         }
     }

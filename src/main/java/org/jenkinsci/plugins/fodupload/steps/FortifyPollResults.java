@@ -178,8 +178,7 @@ public class FortifyPollResults extends FortifyStep {
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedPollingBuildStep.USERNAME) final String username,
                                                                   @QueryParameter(SharedPollingBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                  @QueryParameter(SharedPollingBuildStep.TENANT_ID) final String tenantId)
-        {
+                                                                  @QueryParameter(SharedPollingBuildStep.TENANT_ID) final String tenantId) {
             return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
 
         }
@@ -192,6 +191,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
+        private static final long serialVersionUID = 1L;
         private transient FortifyPollResults polling;
 
         protected Execution(FortifyPollResults polling, StepContext context) {
@@ -207,7 +207,5 @@ public class FortifyPollResults extends FortifyStep {
 
             return null;
         }
-
-        private static final long serialVersionUID = 1L;
     }
 }

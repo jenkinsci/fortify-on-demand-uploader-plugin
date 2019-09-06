@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.kohsuke.stapler.QueryParameter;
@@ -65,10 +66,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
 
-
     @Override
-    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener)
-    {
+    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         return sharedBuildStep.prebuild(build, listener);
     }
 
@@ -92,57 +91,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
-    }
-
-    @Extension
-
-    public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {
-
-        /**
-         * In order to load the persisted global configuration, you have to
-         * call load() in the constructor.
-         */
-        // Entry point when accessing global configuration
-        public StaticAssessmentStepDescriptor() {
-            super();
-            load();
-        }
-
-        @Override
-        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-            return true;
-        }
-
-        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken)
-        {
-            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedUploadBuildStep.doCheckBsiToken(bsiToken);
-        }
-
-        @Override
-        public String getDisplayName() {
-            return "Fortify on Demand Static Assessment";
-        }
-
-
-        // Form validation
-        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
-        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-        @POST
-        public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
-                                                                   @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId)
-        {
-            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
-        }
-
-        @SuppressWarnings("unused")
-        public ListBoxModel doFillEntitlementPreferenceItems() {
-            return SharedUploadBuildStep.doFillEntitlementPreferenceItems();
-        }
-
-
     }
 
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
@@ -201,5 +149,54 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @SuppressWarnings("unused")
     public String getInProgressScanActionType() {
         return sharedBuildStep.getModel().getInProgressScanActionType();
+    }
+
+    @Extension
+
+    public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {
+
+        /**
+         * In order to load the persisted global configuration, you have to
+         * call load() in the constructor.
+         */
+        // Entry point when accessing global configuration
+        public StaticAssessmentStepDescriptor() {
+            super();
+            load();
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+            return true;
+        }
+
+        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            return SharedUploadBuildStep.doCheckBsiToken(bsiToken);
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "Fortify on Demand Static Assessment";
+        }
+
+
+        // Form validation
+        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
+        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+        @POST
+        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
+                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillEntitlementPreferenceItems() {
+            return SharedUploadBuildStep.doFillEntitlementPreferenceItems();
+        }
+
+
     }
 }

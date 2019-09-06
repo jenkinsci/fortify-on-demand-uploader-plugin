@@ -17,6 +17,7 @@ import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+
 import org.jenkinsci.plugins.fodupload.Utils;
 
 public class ReleaseController extends ControllerBase {
@@ -79,13 +80,14 @@ public class ReleaseController extends ControllerBase {
         Type t = new TypeToken<GenericListResponse<ReleaseDTO>>() {
         }.getType();
         GenericListResponse<ReleaseDTO> results = gson.fromJson(content, t);
-        if(results.getItems().size() > 0)
+        if (results.getItems().size() > 0)
             return results.getItems().get(0);
-        else 
+        else
             return null;
     }
 
     //TODO DELETE ALL OF THIS! I don't think it's used after ticket US-318012
+
     /**
      * Get Assessment Type from bsi url
      *
@@ -126,7 +128,7 @@ public class ReleaseController extends ControllerBase {
         String content = IOUtils.toString(response.body().byteStream(), "utf-8");
         response.body().close();
 
-        if(!Utils.isNullOrEmpty(content)) // check if any content is returned
+        if (!Utils.isNullOrEmpty(content)) // check if any content is returned
         {
             Gson gson = new Gson();
             // Create a type of GenericList<ApplicationDTO> to play nice with gson.
