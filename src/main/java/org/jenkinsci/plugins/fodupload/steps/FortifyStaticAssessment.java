@@ -206,6 +206,10 @@ public class FortifyStaticAssessment extends FortifyStep {
             return SharedUploadBuildStep.doFillEntitlementPreferenceItems();
         }
 
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillRemediationScanPreferenceTypeItems() {
+            return SharedUploadBuildStep.doFillRemediationScanPreferenceTypeItems();
+        }
     }
 
     private static class Execution extends SynchronousNonBlockingStepExecution<Void> {

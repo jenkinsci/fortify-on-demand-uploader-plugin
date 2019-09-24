@@ -102,6 +102,15 @@ public class SharedUploadBuildStep {
         return items;
     }
 
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillRemediationScanPreferenceTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.RemediationScanPreferenceType remediationType : FodEnums.RemediationScanPreferenceType.values()) {
+            items.add(new ListBoxModel.Option(remediationType.toString(), String.valueOf(remediationType.toString())));
+        }
+        return items;
+    }
+
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         final PrintStream logger = listener.getLogger();
         if (model == null) {

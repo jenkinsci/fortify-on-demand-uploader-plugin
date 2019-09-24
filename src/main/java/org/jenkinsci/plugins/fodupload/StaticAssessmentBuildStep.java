@@ -137,11 +137,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public int getInProgressScanActionOption() {
-        return sharedBuildStep.getModel().getInProgressScanActionOption();
-    }
-
-    @SuppressWarnings("unused")
     public String getRemediationScanPreferenceType() {
         return sharedBuildStep.getModel().getRemediationScanPreferenceType();
     }
@@ -197,6 +192,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             return SharedUploadBuildStep.doFillEntitlementPreferenceItems();
         }
 
-
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillRemediationScanPreferenceTypeItems() {
+            return SharedUploadBuildStep.doFillRemediationScanPreferenceTypeItems();
+        }
     }
 }

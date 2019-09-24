@@ -85,4 +85,44 @@ public class FodEnums {
             }
         }
     }
+
+    public enum RemediationScanPreferenceType {
+        NonRemediationScanOnly(3),
+        RemediationScanOnly(2),
+        RemediationScanIfAvailable(1);
+
+        private final int _val;
+
+        RemediationScanPreferenceType(int val) {
+            this._val = val;
+        }
+
+        public static RemediationScanPreferenceType fromInt(int val) {
+            switch (val) {
+                case 3:
+                    return NonRemediationScanOnly;
+                case 2:
+                    return RemediationScanOnly;
+                case 1:
+                default:
+                    return RemediationScanIfAvailable;
+            }
+        }
+
+        public int getValue() {
+            return this._val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case 3:
+                    return "NonRemediationScanOnly";
+                case 2:
+                    return "RemediationScanOnly";
+                case 1:
+                default:
+                    return "RemediationScanIfAvailable";
+            }
+        }
+    }
 }
