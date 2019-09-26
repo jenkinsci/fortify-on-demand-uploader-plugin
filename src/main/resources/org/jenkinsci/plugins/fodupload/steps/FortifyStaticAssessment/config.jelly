@@ -3,6 +3,11 @@
     <f:entry title="BSI Token" field="bsiToken">
         <f:textbox />
     </f:entry>
+
+    <f:entry title="Source Location" help="/plugin/fortify-on-demand-uploader/help-srcLocation.html">
+        <f:textbox field="srcLocation"/>
+    </f:entry>
+
     <f:section title="Authentication - Select to override global authentication settings">
         <f:block>
             <f:optionalBlock name="overrideGlobalConfig" field ="overrideGlobalConfig" title="Configure Personal Access Token"  checked="${instance.overrideGlobalConfig}"  inline="true">
@@ -31,34 +36,19 @@
         <f:entry title="Purchase Entitlements" field="purchaseEntitlements">
             <f:checkbox/>
         </f:entry>
-        <f:entry title="Bundled Assessment" field="isBundledAssessment">
-            <f:checkbox/>
+        <f:entry title="Remediation Preference" field="remediationScanPreferenceType">
+            <select name="remediationScanPreferenceType">
+                <option value="RemediationScanIfAvailable">Remediate Scan If Available</option>
+                <option value="RemediationScanOnly">Remediation Scan Only</option>
+                <option value="NonRemediationScanOnly">Non-Remediation Scan Only</option>
+            </select>
         </f:entry>
-        <f:entry title="Prefer Remediation if Available" field="isRemediationPreferred" help="/plugin/fortify-on-demand-uploader/help-isRemediationPreferred.html">
-            <f:checkbox/>
+        <f:entry title="Action when scan is in progress" field="inProgressScanActionType">
+            <select name="inProgressScanActionType">
+                <option value="DoNotStartScan">Do Not Start Scan</option>
+                <option value="CancelInProgressScan">Cancel Scan Then Start</option>
+            </select>
         </f:entry>
     </f:section>
 
-    <f:advanced title="Advanced Options" align="left">
-        <f:section title="Additional Options">
-            <f:entry title="Include all project files" field="includeAllFiles" help="/plugin/fortify-on-demand-uploader/help-includeAllFiles.html">
-                <f:checkbox/>
-            </f:entry>
-        </f:section>
-
-        <f:section title="Override Options">
-            <f:entry title="Open source component analysis" field="runOpenSourceAnalysisOverride" help="/plugin/fortify-on-demand-uploader/help-runOpenSourceAnalysis.html">
-                <f:checkbox/>
-            </f:entry>
-            <f:entry title="Enable express scan preference" field="isExpressScanOverride">
-                <f:checkbox/>
-            </f:entry>
-            <f:entry title="Enable automated audit preference" field="isExpressAuditOverride">
-                <f:checkbox/>
-            </f:entry>
-            <f:entry title="Include third-party libraries" field="includeThirdPartyOverride">
-                <f:checkbox/>
-            </f:entry>
-        </f:section>
-    </f:advanced>
 </j:jelly>

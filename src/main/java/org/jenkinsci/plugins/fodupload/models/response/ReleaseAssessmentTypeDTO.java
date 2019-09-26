@@ -13,7 +13,6 @@ public class ReleaseAssessmentTypeDTO {
     private int units;
     private int unitsAvailable;
     private int parentAssessmentTypeId;
-    private boolean isBundledAssessment;
     private boolean isRemediation;
     private int remediationScansAvailable;
 
@@ -55,10 +54,6 @@ public class ReleaseAssessmentTypeDTO {
 
     public int getParentAssessmentTypeId() {
         return parentAssessmentTypeId;
-    }
-
-    public boolean isBundledAssessment() {
-        return isBundledAssessment;
     }
 
     public boolean isRemediation() {

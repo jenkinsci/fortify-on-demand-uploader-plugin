@@ -11,22 +11,6 @@ import java.util.regex.Pattern;
 
 public class Utils {
 
-    public static int tryParseInt(String value) {
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException nfe) {
-            return 0;
-        }
-    }
-
-    public static boolean isNullOrEmpty(List list) {
-        return list == null || list.isEmpty();
-    }
-
-    public static boolean isNullOrEmpty(String string) {
-        return string == null || string.isEmpty();
-    }
-
     private static final String TS_DOT_NET_KEY = ".NET";
     private static final String TS_JAVA_KEY = "JAVA/J2EE";
     private static final String TS_RUBY_KEY = "Ruby";
@@ -42,6 +26,22 @@ public class Utils {
     private static final String TS_VB6_KEY = "VB6";
     private static final String TS_VB_SCRIPT_KEY = "VBScript";
     private static final String TS_XML_HTML_KEY = "XML/HTML";
+
+    public static int tryParseInt(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException nfe) {
+            return 0;
+        }
+    }
+
+    public static boolean isNullOrEmpty(List list) {
+        return list == null || list.isEmpty();
+    }
+
+    public static boolean isNullOrEmpty(String string) {
+        return string == null || string.isEmpty();
+    }
 
     public static String getFileExpressionPatternString(String technologyStack) {
         String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +
@@ -94,6 +94,7 @@ public class Utils {
      */
     public static File createZipFile(String techStack, FilePath workspace, PrintStream logger) throws IOException {
         logger.println("Begin Create Zip.");
+        logger.println("Source file directory: " + workspace);
 
         String tempDir = System.getProperty("java.io.tmpdir");
         File dir = new File(tempDir);
@@ -103,7 +104,6 @@ public class Utils {
         try (FileOutputStream fos = new FileOutputStream(tempZip)) {
             final Pattern pattern = Pattern.compile(Utils.getFileExpressionPatternString(techStack),
                     Pattern.CASE_INSENSITIVE);
-
             workspace.zip(fos, new RegexFileFilter(pattern));
             logger.println("Temporary file created at: " + tempZip.getAbsolutePath());
 

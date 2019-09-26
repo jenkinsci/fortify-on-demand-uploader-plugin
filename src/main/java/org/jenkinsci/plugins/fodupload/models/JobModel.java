@@ -18,20 +18,38 @@ public class JobModel {
 
     private String bsiTokenOriginal;
     private transient BsiToken bsiTokenCache;
-    private boolean includeAllFiles;
     private boolean purchaseEntitlements;
-    private int entitlementPreference;
-    private boolean isBundledAssessment;
-    private boolean isRemediationPreferred;
-   
-    // These override options are for supporting the legacy BSI Urls
-    // TODO: Remove these in the future when users can no longer generate BSI URLs in FoD
-    private boolean runOpenSourceAnalysisOverride;
-    private boolean isExpressScanOverride;
-    private boolean isExpressAuditOverride;
-    private boolean includeThirdPartyOverride;
+    private String entitlementPreference;
+    private String srcLocation;
+    private String remediationScanPreferenceType;
+    private String inProgressScanActionType;
 
     private File payload;
+
+    /**
+     * Build model used to pass values around
+     *
+     * @param bsiToken                      BSI Token
+     * @param purchaseEntitlements          purchaseEntitlements
+     * @param entitlementPreference         entitlementPreference
+     * @param srcLocation                   srcLocation
+     * @param remediationScanPreferenceType remediationScanPreferenceType
+     * @param inProgressScanActionType      inProgressScanActionType
+     */
+    public JobModel(String bsiToken,
+                    boolean purchaseEntitlements,
+                    String entitlementPreference,
+                    String srcLocation,
+                    String remediationScanPreferenceType,
+                    String inProgressScanActionType) {
+
+        this.bsiTokenOriginal = bsiToken;
+        this.entitlementPreference = entitlementPreference;
+        this.purchaseEntitlements = purchaseEntitlements;
+        this.srcLocation = srcLocation;
+        this.remediationScanPreferenceType = remediationScanPreferenceType;
+        this.inProgressScanActionType = inProgressScanActionType;
+    }
 
     public File getPayload() {
         return payload;
@@ -45,68 +63,28 @@ public class JobModel {
         return bsiTokenCache;
     }
 
-    
-    
-    public boolean isIncludeAllFiles() {
-        return includeAllFiles;
-    }
-
     public boolean isPurchaseEntitlements() {
         return purchaseEntitlements;
     }
 
-    public int getEntitlementPreference() {
+    public String getEntitlementPreference() {
         return entitlementPreference;
-    }
-
-    public boolean isBundledAssessment() {
-        return isBundledAssessment;
     }
 
     public String getBsiTokenOriginal() {
         return bsiTokenOriginal;
     }
 
-    public boolean isRemediationPreferred() {
-        return isRemediationPreferred;
+    public String getSrcLocation() {
+        return srcLocation;
     }
 
-    /**
-     * Build model used to pass values around
-     *
-     * @param bsiToken              BSI Token
-     * @param includeAllFiles       includeAllFiles
-     * @param isBundledAssessment   isBundledAssessment
-     * @param purchaseEntitlements  purchaseEntitlements
-     * @param entitlementPreference entitlementPreference
-     * @param isRemediationPreferred isRemediationPreferred
-     * @param runOpenSourceAnalysisOverride runOpenSourceAnalysisOverride
-     * @param isExpressScanOverride isExpressScanOverride
-     * @param isExpressAuditOverride isExpressAuditOverride
-     * @param includeThirdPartyOverride includeThirdPartyOverride
-     */
-    public JobModel(String bsiToken,
-                    boolean includeAllFiles,
-                    boolean isBundledAssessment,
-                    boolean purchaseEntitlements,
-                    int entitlementPreference,
-                    boolean isRemediationPreferred,
-                    boolean runOpenSourceAnalysisOverride,
-                    boolean isExpressScanOverride,
-                    boolean isExpressAuditOverride,
-                    boolean includeThirdPartyOverride) {
+    public String getRemediationScanPreferenceType() {
+        return remediationScanPreferenceType;
+    }
 
-        this.bsiTokenOriginal = bsiToken;
-        this.includeAllFiles = includeAllFiles;
-        this.entitlementPreference = entitlementPreference;
-        this.isBundledAssessment = isBundledAssessment;
-        this.purchaseEntitlements = purchaseEntitlements;
-        this.isRemediationPreferred = isRemediationPreferred;
-
-        this.runOpenSourceAnalysisOverride = runOpenSourceAnalysisOverride;
-        this.isExpressScanOverride = isExpressScanOverride;
-        this.isExpressAuditOverride = isExpressAuditOverride;
-        this.includeThirdPartyOverride = includeThirdPartyOverride;
+    public String getInProgressScanActionType() {
+        return inProgressScanActionType;
     }
 
     private Object readResolve() throws URISyntaxException, UnsupportedEncodingException {
@@ -117,37 +95,34 @@ public class JobModel {
     @Override
     public String toString() {
         return String.format(
-                        "Release Id:                        %s%n" +
+                "Release Id:                        %s%n" +
                         "Assessment Type Id:                %s%n" +
                         "Technology Stack:                  %s%n" +
                         "Language Level:                    %s%n" +
-                        "Include All Files:                 %s%n" +
                         "Purchase Entitlements:             %s%n" +
-                        "Entitlement Preference             %s%n" +
-                        "Bundled Assessment:                %s%n",
+                        "Entitlement Preference:            %s%n" +
+                        "In Progress Scan Action:           %s%n",
                 bsiTokenCache.getProjectVersionId(),
                 bsiTokenCache.getAssessmentTypeId(),
                 bsiTokenCache.getTechnologyStack(),
                 bsiTokenCache.getLanguageLevel(),
-                includeAllFiles,
                 purchaseEntitlements,
                 entitlementPreference,
-                isBundledAssessment);
+                inProgressScanActionType);
     }
 
-    public boolean initializeBuildModel()
-    {
+    public boolean initializeBuildModel() {
         try {
             this.bsiTokenCache = tokenParser.parse(bsiTokenOriginal);
         } catch (Exception ex) {
             return false;
-        } 
+        }
         return (this.bsiTokenCache != null);
     }
-    
+
     // TODO: More validation, though this should never happen with the new format
     public boolean validate(PrintStream logger) {
-        
+
         List<String> errors = new ArrayList<>();
 
         if (bsiTokenCache.getAssessmentTypeId() == 0)
@@ -167,21 +142,5 @@ public class JobModel {
             return false;
         }
         return true;
-    }
-
-    public boolean isIncludeThirdPartyOverride() {
-        return includeThirdPartyOverride;
-    }
-
-    public boolean isExpressAuditOverride() {
-        return isExpressAuditOverride;
-    }
-
-    public boolean isExpressScanOverride() {
-        return isExpressScanOverride;
-    }
-
-    public boolean isRunOpenSourceAnalysisOverride() {
-        return runOpenSourceAnalysisOverride;
     }
 }

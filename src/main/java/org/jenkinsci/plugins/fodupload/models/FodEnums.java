@@ -36,17 +36,35 @@ public class FodEnums {
         DynamicScanWebServiceTypes
     }
 
-    public enum GrantType {CLIENT_CREDENTIALS, PASSWORD};
-    
-    public enum EntitlementPreferenceType {
+    public enum GrantType {CLIENT_CREDENTIALS, PASSWORD}
 
-        Subscription(2),
-        SingleScan(1);
+    ;
+
+    public enum EntitlementPreferenceType {
+        SubscriptionFirstThenSingleScan(4),
+        SingleScanFirstThenSubscription(3),
+        SubscriptionOnly(2),
+        SingleScanOnly(1);
 
         private final int _val;
 
         EntitlementPreferenceType(int val) {
             this._val = val;
+        }
+
+        public static EntitlementPreferenceType fromInt(int val) {
+            switch (val) {
+                case 4:
+                    return SubscriptionFirstThenSingleScan;
+                case 3:
+                    return SingleScanFirstThenSubscription;
+                case 2:
+                    return SubscriptionOnly;
+                case 1:
+                    return SingleScanOnly;
+                default:
+                    return null;
+            }
         }
 
         public int getValue() {
@@ -55,22 +73,55 @@ public class FodEnums {
 
         public String toString() {
             switch (this._val) {
+                case 4:
+                    return "SubscriptionFirstThenSingleScan";
+                case 3:
+                    return "SingleScanFirstThenSubscription";
                 case 2:
-                    return "Subscription";
+                    return "SubscriptionOnly";
                 case 1:
                 default:
-                    return "Single Scan";
+                    return "SingleScanOnly";
+            }
+        }
+    }
+
+    public enum RemediationScanPreferenceType {
+        NonRemediationScanOnly(3),
+        RemediationScanOnly(2),
+        RemediationScanIfAvailable(1);
+
+        private final int _val;
+
+        RemediationScanPreferenceType(int val) {
+            this._val = val;
+        }
+
+        public static RemediationScanPreferenceType fromInt(int val) {
+            switch (val) {
+                case 3:
+                    return NonRemediationScanOnly;
+                case 2:
+                    return RemediationScanOnly;
+                case 1:
+                default:
+                    return RemediationScanIfAvailable;
             }
         }
 
-        public static EntitlementPreferenceType fromInt(int val) {
-            switch (val) {
+        public int getValue() {
+            return this._val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case 3:
+                    return "NonRemediationScanOnly";
                 case 2:
-                    return Subscription;
+                    return "RemediationScanOnly";
                 case 1:
-                    return SingleScan;
                 default:
-                    return null;
+                    return "RemediationScanIfAvailable";
             }
         }
     }

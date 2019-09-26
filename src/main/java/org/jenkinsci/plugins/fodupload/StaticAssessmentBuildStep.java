@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.kohsuke.stapler.QueryParameter;
@@ -45,38 +46,28 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String username,
                                      String personalAccessToken,
                                      String tenantId,
-                                     boolean includeAllFiles,
-                                     boolean isBundledAssessment,
                                      boolean purchaseEntitlements,
-                                     int entitlementPreference,
-                                     boolean isRemediationPreferred,
-                                     boolean runOpenSourceAnalysisOverride,
-                                     boolean isExpressScanOverride,
-                                     boolean isExpressAuditOverride,
-                                     boolean includeThirdPartyOverride) {
+                                     String entitlementPreference,
+                                     String srcLocation,
+                                     String remediationScanPreferenceType,
+                                     String inProgressScanActionType) {
 
         sharedBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
                 username,
                 personalAccessToken,
                 tenantId,
-                includeAllFiles,
-                isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                runOpenSourceAnalysisOverride,
-                isExpressScanOverride,
-                isExpressAuditOverride,
-                includeThirdPartyOverride);
+                srcLocation,
+                remediationScanPreferenceType,
+                inProgressScanActionType);
 
     }
 
 
-
     @Override
-    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener)
-    {
+    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         return sharedBuildStep.prebuild(build, listener);
     }
 
@@ -100,57 +91,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
-    }
-
-    @Extension
-
-    public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {
-
-        /**
-         * In order to load the persisted global configuration, you have to
-         * call load() in the constructor.
-         */
-        // Entry point when accessing global configuration
-        public StaticAssessmentStepDescriptor() {
-            super();
-            load();
-        }
-
-        @Override
-        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-            return true;
-        }
-
-        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken)
-        {
-            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedUploadBuildStep.doCheckBsiToken(bsiToken);
-        }
-
-        @Override
-        public String getDisplayName() {
-            return "Fortify on Demand Static Assessment";
-        }
-
-
-        // Form validation
-        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
-        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-        @POST
-        public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
-                                                                   @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId)
-        {
-            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
-        }
-
-        @SuppressWarnings("unused")
-        public ListBoxModel doFillEntitlementPreferenceItems() {
-            return SharedUploadBuildStep.doFillEntitlementPreferenceItems();
-        }
-
-
     }
 
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
@@ -181,20 +121,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         return sharedBuildStep.getAuthModel().getOverrideGlobalConfig();
     }
 
-
     @SuppressWarnings("unused")
-    public boolean getIncludeAllFiles() {
-        return sharedBuildStep.getModel().isIncludeAllFiles();
-    }
-
-    @SuppressWarnings("unused")
-    public int getEntitlementPreference() {
+    public String getEntitlementPreference() {
         return sharedBuildStep.getModel().getEntitlementPreference();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getIsBundledAssessment() {
-        return sharedBuildStep.getModel().isBundledAssessment();
     }
 
     @SuppressWarnings("unused")
@@ -203,29 +132,69 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public boolean getIsRemediationPreferred() {
-        return sharedBuildStep.getModel().isRemediationPreferred();
+    public String getSrcLocation() {
+        return sharedBuildStep.getModel().getSrcLocation();
     }
 
     @SuppressWarnings("unused")
-    public boolean getRunOpenSourceAnalysisOverride() {
-        return sharedBuildStep.getModel().isRunOpenSourceAnalysisOverride();
+    public String getRemediationScanPreferenceType() {
+        return sharedBuildStep.getModel().getRemediationScanPreferenceType();
     }
 
     @SuppressWarnings("unused")
-    public boolean getIsExpressScanOverride() {
-        return sharedBuildStep.getModel().isExpressScanOverride();
+    public String getInProgressScanActionType() {
+        return sharedBuildStep.getModel().getInProgressScanActionType();
     }
 
-    @SuppressWarnings("unused")
-    public boolean getIsExpressAuditOverride() {
-        return sharedBuildStep.getModel().isExpressAuditOverride();
+    @Extension
+
+    public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {
+
+        /**
+         * In order to load the persisted global configuration, you have to
+         * call load() in the constructor.
+         */
+        // Entry point when accessing global configuration
+        public StaticAssessmentStepDescriptor() {
+            super();
+            load();
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+            return true;
+        }
+
+        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            return SharedUploadBuildStep.doCheckBsiToken(bsiToken);
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "Fortify on Demand Static Assessment";
+        }
+
+
+        // Form validation
+        @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
+        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+        @POST
+        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
+                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillEntitlementPreferenceItems() {
+            return SharedUploadBuildStep.doFillEntitlementPreferenceItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillRemediationScanPreferenceTypeItems() {
+            return SharedUploadBuildStep.doFillRemediationScanPreferenceTypeItems();
+        }
     }
-
-    @SuppressWarnings("unused")
-    public boolean getIncludeThirdPartyOverride() {
-        return sharedBuildStep.getModel().isIncludeThirdPartyOverride();
-    }
-
-
 }

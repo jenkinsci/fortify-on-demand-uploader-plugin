@@ -10,15 +10,16 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
+
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
 
 public class FodApiConnection {
 
+    public final static int MAX_SIZE = 50;
     private final static int CONNECTION_TIMEOUT = 30; // seconds
     private final static int WRITE_TIMEOUT = 30; // seconds
-    private final static int READ_TIMEOUT = 30; // seconds
-    public final static int MAX_SIZE = 50;
+    private final static int READ_TIMEOUT = 90; // seconds
     
 
     private String baseUrl;
@@ -57,31 +58,28 @@ public class FodApiConnection {
 
     /**
      * Used for authenticating in the case of a time out using the saved apiConnection credentials.
+     *
+     * @throws java.io.IOException in some circumstances
      */
     public void authenticate() throws IOException {
 
         RequestBody formBody = null;
-        if(grantType == GrantType.CLIENT_CREDENTIALS)
-        {
+        if (grantType == GrantType.CLIENT_CREDENTIALS) {
             formBody = new FormBody.Builder()
-                .add("scope", scope)
-                .add("grant_type", "client_credentials")
-                .add("client_id", id)
-                .add("client_secret", secret)
-                .build();
-        }
-        else if(grantType == GrantType.PASSWORD)
-        {
-             formBody = new FormBody.Builder()
-                .add("scope", scope)
-                .add("grant_type", "password")
-                .add("username", id)
-                .add("password", secret)
-                .build();
-        }
-        else
-        {
-            throw new IOException("Invalid Grant Type" );
+                    .add("scope", scope)
+                    .add("grant_type", "client_credentials")
+                    .add("client_id", id)
+                    .add("client_secret", secret)
+                    .build();
+        } else if (grantType == GrantType.PASSWORD) {
+            formBody = new FormBody.Builder()
+                    .add("scope", scope)
+                    .add("grant_type", "password")
+                    .add("username", id)
+                    .add("password", secret)
+                    .build();
+        } else {
+            throw new IOException("Invalid Grant Type");
         }
 
         Request request = new Request.Builder()
@@ -117,7 +115,10 @@ public class FodApiConnection {
         if (response.isSuccessful()) {
             response.body().close();
             token = null;
+        } else {
+            throw new IOException(response.toString());
         }
+
     }
 
     /**

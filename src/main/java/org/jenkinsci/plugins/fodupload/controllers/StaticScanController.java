@@ -13,11 +13,14 @@ import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
+import sun.applet.Main;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Properties;
 
 public class StaticScanController extends ControllerBase {
 
@@ -31,6 +34,7 @@ public class StaticScanController extends ControllerBase {
      * Constructor
      *
      * @param apiConnection apiConnection object with client info
+     * @param logger        logger object to display to console
      */
     public StaticScanController(final FodApiConnection apiConnection, final PrintStream logger) {
         super(apiConnection);
@@ -39,9 +43,9 @@ public class StaticScanController extends ControllerBase {
 
     /**
      * Begin a static scan on FoD
-     * <p>
-     * // * @param uploadRequest zip file to upload
      *
+     * @param uploadRequest zip file to upload
+     * @param notes         notes
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
@@ -61,43 +65,32 @@ public class StaticScanController extends ControllerBase {
                 apiConnection.authenticate();
 
             logger.println("Getting Assessment");
-            // Get entitlement info
-            ReleaseAssessmentTypeDTO assessmentType = new ReleaseController(apiConnection).getAssessmentType(uploadRequest);
-
-            if (assessmentType == null) {
-                logger.println("Entitlement not found.  Please make sure that your entitlements are good for the selected preference.");
-                return false;
-            }
 
             BsiToken token = uploadRequest.getBsiToken();
-            boolean isRemediationScan = uploadRequest.isRemediationPreferred() && assessmentType.isRemediation();
 
-            // TODO: remove these override options once legacy BSI URL is no longer present in FoD
-            boolean excludeThirdPartyLibs = !token.getIncludeThirdParty() || !uploadRequest.isIncludeThirdPartyOverride();
-            boolean includeOpenSourceScan = token.getIncludeOpenSourceAnalysis() || uploadRequest.isRunOpenSourceAnalysisOverride();
-            int scanPreferenceId = uploadRequest.isExpressScanOverride() ? EXPRESS_SCAN_PREFERENCE_ID : token.getScanPreferenceId();
-            int auditPreferenceId = uploadRequest.isExpressAuditOverride() ? EXPRESS_AUDIT_PREFERENCE_ID : token.getAuditPreferenceId();
+            String projectVersion;
+            try (InputStream inputStream = this.getClass().getResourceAsStream("/application.properties")) {
+                Properties props = new Properties();
+                props.load(inputStream);
+                projectVersion = props.getProperty("application.version", "Not Found");
+            }
 
             HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
-                    .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan", token.getProjectVersionId()))
-                    .addQueryParameter("assessmentTypeId", Integer.toString(token.getAssessmentTypeId()))
+                    .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", token.getProjectVersionId()))
+                    .addQueryParameter("bsiToken", uploadRequest.getBsiTokenOriginal())
                     .addQueryParameter("technologyStack", token.getTechnologyType())
-                    .addQueryParameter("entitlementId", Integer.toString(assessmentType.getEntitlementId()))
-                    .addQueryParameter("entitlementFrequencyType", Integer.toString(assessmentType.getFrequencyTypeId()))
-                    .addQueryParameter("isBundledAssessment", Boolean.toString(assessmentType.isBundledAssessment()))
-                    .addQueryParameter("doSonatypeScan", Boolean.toString(includeOpenSourceScan))
-                    .addQueryParameter("excludeThirdPartyLibs", Boolean.toString(excludeThirdPartyLibs))
-                    .addQueryParameter("scanPreferenceType", Integer.toString(scanPreferenceId))
-                    .addQueryParameter("auditPreferenceType", Integer.toString(auditPreferenceId))
-                    .addQueryParameter("isRemediationScan", Boolean.toString(isRemediationScan));
+                    .addQueryParameter("entitlementPreferenceType", uploadRequest.getEntitlementPreference())
+                    .addQueryParameter("purchaseEntitlement", Boolean.toString(uploadRequest.isPurchaseEntitlements()))
+                    .addQueryParameter("remdiationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType())
+                    .addQueryParameter("inProgressScanActionType", uploadRequest.getInProgressScanActionType())
+                    .addQueryParameter("scanMethodType", "CICD")
+                    .addQueryParameter("scanTool", "Jenkins")
+                    .addQueryParameter("scanToolVersion", projectVersion != null ? projectVersion : "NotFound");
+
 
             if (!Utils.isNullOrEmpty(notes)) {
                 String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);
                 builder = builder.addQueryParameter("notes", truncatedNotes);
-            }
-
-            if (assessmentType.getParentAssessmentTypeId() != 0 && assessmentType.isBundledAssessment()) {
-                builder = builder.addQueryParameter("parentAssessmentTypeId", Integer.toString(assessmentType.getParentAssessmentTypeId()));
             }
 
             if (token.getTechnologyVersion() != null) {

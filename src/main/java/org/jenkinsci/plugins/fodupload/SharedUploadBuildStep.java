@@ -35,26 +35,18 @@ public class SharedUploadBuildStep {
                                  String username,
                                  String personalAccessToken,
                                  String tenantId,
-                                 boolean includeAllFiles,
-                                 boolean isBundledAssessment,
                                  boolean purchaseEntitlements,
-                                 int entitlementPreference,
-                                 boolean isRemediationPreferred,
-                                 boolean runOpenSourceAnalysisOverride,
-                                 boolean isExpressScanOverride,
-                                 boolean isExpressAuditOverride,
-                                 boolean includeThirdPartyOverride){
+                                 String entitlementPreference,
+                                 String srcLocation,
+                                 String remediationScanPreferenceType,
+                                 String inProgressScanActionType) {
 
         model = new JobModel(bsiToken,
-                includeAllFiles,
-                isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                runOpenSourceAnalysisOverride,
-                isExpressScanOverride,
-                isExpressAuditOverride,
-                includeThirdPartyOverride);
+                srcLocation,
+                remediationScanPreferenceType,
+                inProgressScanActionType);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -62,8 +54,64 @@ public class SharedUploadBuildStep {
                 tenantId);
     }
 
-    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener)
-    {
+    public static FormValidation doCheckBsiToken(String bsiToken) {
+        if (bsiToken != null && !bsiToken.isEmpty()) {
+            BsiTokenParser tokenParser = new BsiTokenParser();
+            try {
+                BsiToken testToken = tokenParser.parse(bsiToken);
+                if (testToken != null) {
+                    return FormValidation.ok();
+                }
+            } catch (Exception ex) {
+                return FormValidation.error("Could not parse BSI token.");
+            }
+        } else
+            return FormValidation.error("Please specify BSI Token");
+        return FormValidation.error("Please specify BSI Token");
+    }
+
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    public static FormValidation doTestPersonalAccessTokenConnection(final String username,
+                                                                     final String personalAccessToken,
+                                                                     final String tenantId) {
+        FodApiConnection testApi;
+        String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
+        String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
+        if (Utils.isNullOrEmpty(baseUrl))
+            return FormValidation.error("Fortify on Demand URL is empty!");
+        if (Utils.isNullOrEmpty(apiUrl))
+            return FormValidation.error("Fortify on Demand API URL is empty!");
+        if (Utils.isNullOrEmpty(username))
+            return FormValidation.error("Username is empty!");
+        if (Utils.isNullOrEmpty(personalAccessToken))
+            return FormValidation.error("Personal Access Token is empty!");
+        if (Utils.isNullOrEmpty(tenantId))
+            return FormValidation.error("Tenant ID is null.");
+        testApi = new FodApiConnection(tenantId + "\\" + username, personalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant");
+        return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
+
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillEntitlementPreferenceItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.EntitlementPreferenceType preferenceType : FodEnums.EntitlementPreferenceType.values()) {
+            items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.toString())));
+        }
+
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillRemediationScanPreferenceTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.RemediationScanPreferenceType remediationType : FodEnums.RemediationScanPreferenceType.values()) {
+            items.add(new ListBoxModel.Option(remediationType.toString(), String.valueOf(remediationType.toString())));
+        }
+        return items;
+    }
+
+    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         final PrintStream logger = listener.getLogger();
         if (model == null) {
             logger.println("Unexpected Error");
@@ -71,7 +119,7 @@ public class SharedUploadBuildStep {
             return false;
         }
 
-        if(model.initializeBuildModel() == false){
+        if (model.initializeBuildModel() == false) {
             logger.println("Invalid BSI Token");
             build.setResult(Result.FAILURE);
             return false;
@@ -103,12 +151,13 @@ public class SharedUploadBuildStep {
 
             logger.println("Starting FoD Upload.");
 
-            if (model.getBsiToken()==null){ // Hack because pipeline step doesn't call prebuild
+            if (model.getBsiToken() == null) { // Hack because pipeline step doesn't call prebuild
                 model.initializeBuildModel();
             }
 
+            FilePath workspaceModified = new FilePath(workspace, model.getSrcLocation());
             // zips the file in a temporary location
-            File payload = Utils.createZipFile(model.getBsiToken().getTechnologyStack(), workspace, logger);
+            File payload = Utils.createZipFile(model.getBsiToken().getTechnologyStack(), workspaceModified, logger);
             if (payload.length() == 0) {
 
                 boolean deleteSuccess = payload.delete();
@@ -126,7 +175,7 @@ public class SharedUploadBuildStep {
 
             // Create apiConnection
             apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
-            if(apiConnection != null){
+            if (apiConnection != null) {
                 apiConnection.authenticate();
 
                 StaticScanController staticScanController = new StaticScanController(apiConnection, logger);
@@ -141,9 +190,7 @@ public class SharedUploadBuildStep {
                     logger.println("Scan Uploaded Successfully.");
                 }
                 build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
-            }
-            else
-            {
+            } else {
                 logger.println("Failed to authenticate");
                 build.setResult(Result.FAILURE);
             }
@@ -160,63 +207,10 @@ public class SharedUploadBuildStep {
                 try {
                     apiConnection.retireToken();
                 } catch (IOException e) {
-                    logger.println("Failed to retire oauth token.");
-                    e.printStackTrace(logger);
+                    logger.println(String.format("Failed to retire oauth token. Response code is %s", e));
                 }
             }
         }
-    }
-
-    public static FormValidation doCheckBsiToken(String bsiToken)
-    {
-        if(bsiToken != null && !bsiToken.isEmpty() ){
-            BsiTokenParser tokenParser = new BsiTokenParser();
-            try{
-                BsiToken testToken = tokenParser.parse(bsiToken);
-                if(testToken != null){
-                    return FormValidation.ok();
-                }
-            }
-            catch( Exception ex){
-                return FormValidation.error("Could not parse BSI token.");
-            }
-        }
-        else
-            return FormValidation.error("Please specify BSI Token");
-        return FormValidation.error("Please specify BSI Token");
-    }
-
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    public static FormValidation doTestPersonalAccessTokenConnection(final String username,
-                                                                      final String personalAccessToken,
-                                                                      final String tenantId)
-    {
-        FodApiConnection testApi;
-        String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
-        String apiUrl =  GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-        if (Utils.isNullOrEmpty(baseUrl))
-            return FormValidation.error("Fortify on Demand URL is empty!");
-        if (Utils.isNullOrEmpty(apiUrl))
-            return FormValidation.error("Fortify on Demand API URL is empty!");
-        if (Utils.isNullOrEmpty(username))
-            return FormValidation.error("Username is empty!");
-        if (Utils.isNullOrEmpty(personalAccessToken))
-            return FormValidation.error("Personal Access Token is empty!");
-        if (Utils.isNullOrEmpty(tenantId))
-            return FormValidation.error("Tenant ID is null.");
-        testApi = new FodApiConnection(tenantId + "\\" + username, personalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant");
-        return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
-
-    }
-
-    @SuppressWarnings("unused")
-    public static ListBoxModel doFillEntitlementPreferenceItems() {
-        ListBoxModel items = new ListBoxModel();
-        for (FodEnums.EntitlementPreferenceType preferenceType : FodEnums.EntitlementPreferenceType.values()) {
-            items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
-        }
-
-        return items;
     }
 
     public AuthenticationModel getAuthModel() {

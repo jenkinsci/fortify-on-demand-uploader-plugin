@@ -34,15 +34,11 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String username;
     private String personalAccessToken;
     private String tenantId;
-    private boolean includeAllFiles;
-    private boolean isBundledAssessment;
     private boolean purchaseEntitlements;
-    private int entitlementPreference;
-    private boolean isRemediationPreferred;
-    private boolean runOpenSourceAnalysisOverride;
-    private boolean isExpressScanOverride;
-    private boolean isExpressAuditOverride;
-    private boolean includeThirdPartyOverride;
+    private String entitlementPreference;
+    private String srcLocation;
+    private String remediationScanPreferenceType;
+    private String inProgressScanActionType;
 
     private SharedUploadBuildStep commonBuildStep;
 
@@ -56,18 +52,13 @@ public class FortifyStaticAssessment extends FortifyStep {
         return bsiToken;
     }
 
-    @DataBoundSetter
-    public void setOverrideGlobalConfig(boolean overrideGlobalConfig) {
-        this.overrideGlobalConfig = overrideGlobalConfig;
-    }
-
     public boolean getOverrideGlobalConfig() {
         return overrideGlobalConfig;
     }
 
     @DataBoundSetter
-    public void setUsername(String username) {
-        this.username = username;
+    public void setOverrideGlobalConfig(boolean overrideGlobalConfig) {
+        this.overrideGlobalConfig = overrideGlobalConfig;
     }
 
     public String getUsername() {
@@ -75,8 +66,8 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setPersonalAccessToken(String personalAccessToken) {
-        this.personalAccessToken = personalAccessToken;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPersonalAccessToken() {
@@ -84,8 +75,8 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setPersonalAccessToken(String personalAccessToken) {
+        this.personalAccessToken = personalAccessToken;
     }
 
     public String getTenantId() {
@@ -93,78 +84,53 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setIncludeAllFiles(boolean includeAllFiles) {
-        this.includeAllFiles = includeAllFiles;
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
-    public boolean getIncludeAllFiles() {
-        return includeAllFiles;
-    }
-
-    @DataBoundSetter
-    public void setIsBundledAssessment(boolean isBundledAssessment) {
-        this.isBundledAssessment = isBundledAssessment;
-    }
-    public boolean getIsBundledAssessment() {
-        return isBundledAssessment;
-    }
-
-
-    @DataBoundSetter
-    public void setPurchaseEntitlements(boolean purchaseEntitlements) {
-        this.purchaseEntitlements = purchaseEntitlements;
-    }
     public boolean getPurchaseEntitlements() {
         return purchaseEntitlements;
     }
 
     @DataBoundSetter
-    public void setEntitlementPreference(int entitlementPreference) {
-        this.entitlementPreference = entitlementPreference;
+    public void setPurchaseEntitlements(boolean purchaseEntitlements) {
+        this.purchaseEntitlements = purchaseEntitlements;
     }
-    public int getEntitlementPreference() {
+
+    public String getEntitlementPreference() {
         return entitlementPreference;
     }
 
     @DataBoundSetter
-    public void setIsRemediationPreferred(boolean isRemediationPreferred) {
-        this.isRemediationPreferred = isRemediationPreferred;
+    public void setEntitlementPreference(String entitlementPreference) {
+        this.entitlementPreference = entitlementPreference;
     }
-    public boolean getIsRemediationPreferred() {
-        return isRemediationPreferred;
+
+    public String getSrcLocation() {
+        return srcLocation;
     }
 
     @DataBoundSetter
-    public void setRunOpenSourceAnalysisOverride(boolean runOpenSourceAnalysisOverride) {
-        this.runOpenSourceAnalysisOverride = runOpenSourceAnalysisOverride;
+    public void setSrcLocation(String srcLocation) {
+        this.srcLocation = srcLocation != null ? srcLocation.trim() : "";
     }
 
-    public boolean getRunOpenSourceAnalysisOverride() {
-        return runOpenSourceAnalysisOverride;
-    }
-
-    @DataBoundSetter
-    public void setIsExpressScanOverride(boolean isExpressScanOverride) {
-        this.isExpressScanOverride = isExpressScanOverride;
-    }
-    public boolean getIsExpressScanOverride() {
-        return isExpressScanOverride;
+    public String getRemediationScanPreferenceType() {
+        return remediationScanPreferenceType;
     }
 
     @DataBoundSetter
-    public void setIsExpressAuditOverride(boolean isExpressAuditOverride) {
-        this.isExpressAuditOverride = isExpressAuditOverride;
+    public void setRemediationScanPreferenceType(String remediationScanPreferenceType) {
+        this.remediationScanPreferenceType = remediationScanPreferenceType;
     }
-    public boolean getIsExpressAuditOverride() {
-        return isExpressAuditOverride;
+
+    public String getInProgressScanActionType() {
+        return inProgressScanActionType;
     }
 
     @DataBoundSetter
-    public void setIncludeThirdPartyOverride(boolean includeThirdPartyOverride) {
-        this.includeThirdPartyOverride = includeThirdPartyOverride;
-    }
-    public boolean getIncludeThirdPartyOverride() {
-        return includeThirdPartyOverride;
+    public void setInProgressScanActionType(String inProgressScanActionType) {
+        this.inProgressScanActionType = inProgressScanActionType;
     }
 
     @Override
@@ -176,15 +142,11 @@ public class FortifyStaticAssessment extends FortifyStep {
                 username,
                 personalAccessToken,
                 tenantId,
-                includeAllFiles,
-                isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                runOpenSourceAnalysisOverride,
-                isExpressScanOverride,
-                isExpressAuditOverride,
-                includeThirdPartyOverride);
+                srcLocation,
+                remediationScanPreferenceType,
+                inProgressScanActionType);
 
         return true;
     }
@@ -203,15 +165,11 @@ public class FortifyStaticAssessment extends FortifyStep {
                 username,
                 personalAccessToken,
                 tenantId,
-                includeAllFiles,
-                isBundledAssessment,
                 purchaseEntitlements,
                 entitlementPreference,
-                isRemediationPreferred,
-                runOpenSourceAnalysisOverride,
-                isExpressScanOverride,
-                isExpressAuditOverride,
-                includeThirdPartyOverride);
+                srcLocation,
+                remediationScanPreferenceType,
+                inProgressScanActionType);
 
         commonBuildStep.perform(build, workspace, launcher, listener);
     }
@@ -236,10 +194,9 @@ public class FortifyStaticAssessment extends FortifyStep {
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-        public FormValidation doTestPersonalAccessTokenConnection( @QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
-                                                                   @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId)
-        {
+        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
+                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId) {
             return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
 
         }
@@ -249,9 +206,14 @@ public class FortifyStaticAssessment extends FortifyStep {
             return SharedUploadBuildStep.doFillEntitlementPreferenceItems();
         }
 
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillRemediationScanPreferenceTypeItems() {
+            return SharedUploadBuildStep.doFillRemediationScanPreferenceTypeItems();
+        }
     }
 
     private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
+        private static final long serialVersionUID = 1L;
         private transient FortifyStaticAssessment upload;
 
         protected Execution(FortifyStaticAssessment upload, StepContext context) {
@@ -267,7 +229,5 @@ public class FortifyStaticAssessment extends FortifyStep {
 
             return null;
         }
-
-        private static final long serialVersionUID = 1L;
     }
 }

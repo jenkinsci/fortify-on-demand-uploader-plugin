@@ -30,6 +30,7 @@ public class LookupItemsController extends ControllerBase {
      *
      * @param type enum to look up
      * @return array of enum values and text or null
+     * @throws java.io.IOException in some circumstances
      */
     public List<LookupItemsModel> getLookupItems(FodEnums.APILookupItemTypes type) throws IOException {
 

@@ -29,39 +29,36 @@ import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
- *
  * @author tsotack
  */
 public class ApiConnectionFactory {
-    
+
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public static FodApiConnection createApiConnection(AuthenticationModel model) {
         FodApiConnection apiConnection = null;
-        if(GlobalConfiguration.all() != null && GlobalConfiguration.all().get(FodGlobalDescriptor.class) != null){
-            if(model.getOverrideGlobalConfig())
-            {
+        if (GlobalConfiguration.all() != null && GlobalConfiguration.all().get(FodGlobalDescriptor.class) != null) {
+            if (model.getOverrideGlobalConfig()) {
 
-                    String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
-                    String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-                    if (Utils.isNullOrEmpty(baseUrl))
-                        throw new IllegalArgumentException("Base URL is null.");
-                    if (Utils.isNullOrEmpty(apiUrl))
-                        throw new IllegalArgumentException("Api URL is null.");
-                    apiConnection =  new FodApiConnection(model.getTenantId() + "\\" + model.getUsername(),
-                                                      model.getPersonalAccessToken(), 
-                                                      baseUrl,
-                                                      apiUrl, 
-                                                      FodEnums.GrantType.PASSWORD,
-                                                      "api-tenant");
+                String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
+                String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
+                if (Utils.isNullOrEmpty(baseUrl))
+                    throw new IllegalArgumentException("Base URL is null.");
+                if (Utils.isNullOrEmpty(apiUrl))
+                    throw new IllegalArgumentException("Api URL is null.");
+                apiConnection = new FodApiConnection(model.getTenantId() + "\\" + model.getUsername(),
+                        model.getPersonalAccessToken(),
+                        baseUrl,
+                        apiUrl,
+                        FodEnums.GrantType.PASSWORD,
+                        "api-tenant");
 
-            }
-            else
-            {
+            } else {
                 apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();
             }
         }
         return apiConnection;
     }
-    
+
 }
