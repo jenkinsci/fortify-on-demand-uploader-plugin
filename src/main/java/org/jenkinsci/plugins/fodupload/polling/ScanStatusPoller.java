@@ -165,8 +165,8 @@ public class ScanStatusPoller {
         } else {
             logger.println("-------Scan Paused------- ");
             logger.println();
-            logger.println("Review the last pause entry below");
-            logger.println();
+            // Leaving the for loop because of the data structure.
+            // Should only be one object because a pause cancels the polling.
             for (ScanPauseDetail spd : scanSummary.getPauseDetails()) {
                 logger.println(String.format("Pause reason:         %s", spd.getReason()));
                 logger.println(String.format("Pause reason notes:   %s", spd.getNotes()));
@@ -249,6 +249,7 @@ class StatusPollerThread extends Thread {
         if (statusString.equals(AnalysisStatusTypeEnum.Waiting.name())) {
             try {
                 scanSummaryDTO = scanSummaryController.getReleaseScanSummary(releaseDTO.getReleaseId(), releaseDTO.getCurrentStaticScanId());
+                finished = true;
             } catch (IOException e) {
                 logger.println("Unable to retrieve scan summary data. Error: " + e.toString());
                 fail = true;
