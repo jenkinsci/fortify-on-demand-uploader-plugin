@@ -90,24 +90,27 @@ public class ScanStatusPoller {
                 }
 
                 if (failCount < MAX_FAILS) {
-                    //IMPORTANT
-                    logger.println(pollerThread.getName() + ") Poll Status: " + pollerThread.statusString);
+                    if(!pollerThread.fail)
+                    {
+                        failCount = 0;
+                        logger.println(pollerThread.getName() + ") Poll Status: " + pollerThread.statusString);
 
-                    if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Waiting.name()) && pollerThread.scanSummaryDTO.getPauseDetails() != null)
-                        printPauseMessages(pollerThread.scanSummaryDTO);
-                    if (pollerThread.finished) {
-                        finished = pollerThread.finished;
-                        if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
-                            printCancelMessages(pollerThread.scanSummaryDTO);
-                        } else {
-                            printPassFail(pollerThread.releaseDTO);
+                        if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Waiting.name()) && pollerThread.scanSummaryDTO.getPauseDetails() != null)
+                            printPauseMessages(pollerThread.scanSummaryDTO);
+                        if (pollerThread.finished) {
+                            finished = pollerThread.finished;
+                            if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
+                                printCancelMessages(pollerThread.scanSummaryDTO);
+                            } else {
+                                printPassFail(pollerThread.releaseDTO);
+                            }
                         }
+                        counter++;
                     }
                 } else {
                     logger.println(String.format("Polling Failed %d times.  Terminating", MAX_FAILS));
                     finished = true;
                 }
-                counter++;
             }
         } catch (InterruptedException e) {
             logger.println("Polling was interrupted. Please contact your administrator if the interruption was not intentional.");
@@ -115,8 +118,6 @@ public class ScanStatusPoller {
                 pollerThread.interrupt();
             }
         }
-        
-
         return pollerThread.result;
     }
 
@@ -236,11 +237,12 @@ class StatusPollerThread extends Thread {
                 int analysisStatusInt = Integer.parseInt(o.getValue());
                 if (analysisStatusInt == status) {
                     this.statusString = o.getText().replace("_", " ");
-                    //analysisStatusEnum = statusString;
                 }
                 if (completeStatusList.contains(Integer.toString(status))) {
                     finished = true;
                 }
+            } else {
+                fail = true;
             }
         }
 
@@ -249,6 +251,7 @@ class StatusPollerThread extends Thread {
                 scanSummaryDTO = scanSummaryController.getReleaseScanSummary(releaseDTO.getReleaseId(), releaseDTO.getCurrentStaticScanId());
             } catch (IOException e) {
                 logger.println("Unable to retrieve scan summary data. Error: " + e.toString());
+                fail = true;
             }
         }
         if (finished) {
