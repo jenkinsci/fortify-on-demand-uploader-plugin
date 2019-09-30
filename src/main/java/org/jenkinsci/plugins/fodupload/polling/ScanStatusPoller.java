@@ -75,6 +75,14 @@ public class ScanStatusPoller {
         }
         try{
             while (!finished) {
+                if (analysisStatusTypes == null) {
+                    analysisStatusTypes = lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
+                    complete = new ArrayList<>();
+                    for (LookupItemsModel item : analysisStatusTypes) {
+                        if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
+                            complete.add(item.getValue());
+                    }
+                }
                 if (counter == 1) {
                     //No Thread.sleep() on first round
                     pollerThread = new StatusPollerThread(String.valueOf(counter), releaseId, analysisStatusTypes, apiConnection, complete, logger, 0);
@@ -101,7 +109,7 @@ public class ScanStatusPoller {
                             finished = pollerThread.finished;
                             if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
                                 printCancelMessages(pollerThread.scanSummaryDTO);
-                            } else {
+                            } else if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Completed.name())) {
                                 printPassFail(pollerThread.releaseDTO);
                             }
                         }
@@ -244,6 +252,10 @@ class StatusPollerThread extends Thread {
             } else {
                 fail = true;
             }
+        }
+        if (this.statusString == null || this.statusString == "")
+        {
+            fail = true;
         }
 
         if (statusString.equals(AnalysisStatusTypeEnum.Waiting.name())) {
