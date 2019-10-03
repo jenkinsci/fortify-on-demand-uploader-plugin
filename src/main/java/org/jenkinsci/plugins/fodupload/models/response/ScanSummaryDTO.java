@@ -144,7 +144,7 @@ public class ScanSummaryDTO {
     }
 
     public String getAnalysisStatusReasonNotes() {
-        return analysisStatusReasonNotes != null ? analysisStatusReasonNotes : "Currently unavailable";
+        return analysisStatusReasonNotes != null ? analysisStatusReasonNotes : "";
     }
 
     public int getScanMethodTypeId() {
