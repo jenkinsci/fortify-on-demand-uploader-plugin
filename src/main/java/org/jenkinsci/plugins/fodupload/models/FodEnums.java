@@ -125,4 +125,39 @@ public class FodEnums {
             }
         }
     }
+    
+    public enum ActiveScanActionType {
+        CancelInProgressScan(2),
+        DoNotStartScan(1);
+
+        private final int _val;
+
+        ActiveScanActionType(int val) {
+            this._val = val;
+        }
+
+        public static ActiveScanActionType fromInt(int val) {
+            switch (val) {
+                case 2:
+                    return CancelInProgressScan;
+                case 1:
+                default:
+                    return DoNotStartScan;
+            }
+        }
+
+        public int getValue() {
+            return this._val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case 2:
+                    return "CancelInProgressScan";
+                case 1:
+                default:
+                    return "DoNotStartScan";
+            }
+        }
+    }
 }

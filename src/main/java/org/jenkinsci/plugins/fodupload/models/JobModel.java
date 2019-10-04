@@ -22,6 +22,7 @@ public class JobModel {
     private String entitlementPreference;
     private String srcLocation;
     private String remediationScanPreferenceType;
+    private String activeScanActionType;
     private String inProgressScanActionType;
 
     private File payload;
@@ -30,25 +31,22 @@ public class JobModel {
      * Build model used to pass values around
      *
      * @param bsiToken                      BSI Token
-     * @param purchaseEntitlements          purchaseEntitlements
      * @param entitlementPreference         entitlementPreference
-     * @param srcLocation                   srcLocation
      * @param remediationScanPreferenceType remediationScanPreferenceType
-     * @param inProgressScanActionType      inProgressScanActionType
+     * @param activeScanActionType          activeScanActionType
      */
     public JobModel(String bsiToken,
-                    boolean purchaseEntitlements,
                     String entitlementPreference,
-                    String srcLocation,
                     String remediationScanPreferenceType,
-                    String inProgressScanActionType) {
+                    String activeScanActionType) {
 
         this.bsiTokenOriginal = bsiToken;
         this.entitlementPreference = entitlementPreference;
-        this.purchaseEntitlements = purchaseEntitlements;
-        this.srcLocation = srcLocation;
+        this.purchaseEntitlements = false;
+        this.srcLocation = "Stuff";
         this.remediationScanPreferenceType = remediationScanPreferenceType;
-        this.inProgressScanActionType = inProgressScanActionType;
+        this.activeScanActionType = activeScanActionType;
+        this.inProgressScanActionType = "DoNotStart";
     }
 
     public File getPayload() {
@@ -81,6 +79,10 @@ public class JobModel {
 
     public String getRemediationScanPreferenceType() {
         return remediationScanPreferenceType;
+    }
+
+    public String getActiveScanActionType() {
+        return activeScanActionType;
     }
 
     public String getInProgressScanActionType() {

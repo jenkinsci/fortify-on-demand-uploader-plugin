@@ -54,7 +54,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         sharedBuildStep = new SharedPollingBuildStep(bsiToken,
                 overrideGlobalConfig, pollingInterval,
                 policyFailureBuildResultPreference, clientId, clientSecret,
-                username, personalAccessToken, tenantId);
+                username, personalAccessToken);
     }
 
     @Override

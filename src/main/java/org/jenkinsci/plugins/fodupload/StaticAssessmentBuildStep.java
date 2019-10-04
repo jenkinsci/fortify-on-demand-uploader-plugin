@@ -18,6 +18,7 @@ import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
 
@@ -37,6 +38,8 @@ import org.kohsuke.stapler.verb.POST;
 public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
 
     SharedUploadBuildStep sharedBuildStep;
+    private String activeScanActionType;
+    private String inProgressScanActionType;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
@@ -45,23 +48,16 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      boolean overrideGlobalConfig,
                                      String username,
                                      String personalAccessToken,
-                                     String tenantId,
-                                     boolean purchaseEntitlements,
                                      String entitlementPreference,
-                                     String srcLocation,
-                                     String remediationScanPreferenceType,
-                                     String inProgressScanActionType) {
+                                     String remediationScanPreferenceType) {
 
         sharedBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
                 username,
                 personalAccessToken,
-                tenantId,
-                purchaseEntitlements,
                 entitlementPreference,
-                srcLocation,
                 remediationScanPreferenceType,
-                inProgressScanActionType);
+                activeScanActionType);
 
     }
 
@@ -112,28 +108,18 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public String getTenantId() {
-        return sharedBuildStep.getAuthModel().getTenantId();
-    }
-
-    @SuppressWarnings("unused")
-    public boolean getOverrideGlobalConfig() {
-        return sharedBuildStep.getAuthModel().getOverrideGlobalConfig();
-    }
-
-    @SuppressWarnings("unused")
     public String getEntitlementPreference() {
         return sharedBuildStep.getModel().getEntitlementPreference();
     }
 
     @SuppressWarnings("unused")
-    public boolean getPurchaseEntitlements() {
-        return sharedBuildStep.getModel().isPurchaseEntitlements();
+    public String getActiveScanActionType() {
+        return sharedBuildStep.getModel().getActiveScanActionType();
     }
 
-    @SuppressWarnings("unused")
-    public String getSrcLocation() {
-        return sharedBuildStep.getModel().getSrcLocation();
+    @DataBoundSetter
+    public void setActiveScanActionType(String activeScanActionType) {
+        this.activeScanActionType = activeScanActionType;
     }
 
     @SuppressWarnings("unused")
@@ -144,6 +130,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @SuppressWarnings("unused")
     public String getInProgressScanActionType() {
         return sharedBuildStep.getModel().getInProgressScanActionType();
+    }
+
+    @DataBoundSetter
+    public void setInProgressScanActionType(String inProgressScanActionType) {
+        this.inProgressScanActionType = inProgressScanActionType;
     }
 
     @Extension
@@ -159,6 +150,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             super();
             load();
         }
+
+        public static final String defaultActiveScanActionType = "Default";
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -188,13 +181,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         }
 
         @SuppressWarnings("unused")
-        public ListBoxModel doFillEntitlementPreferenceItems() {
-            return SharedUploadBuildStep.doFillEntitlementPreferenceItems();
-        }
-
-        @SuppressWarnings("unused")
-        public ListBoxModel doFillRemediationScanPreferenceTypeItems() {
-            return SharedUploadBuildStep.doFillRemediationScanPreferenceTypeItems();
+        public ListBoxModel doFillactiveScanActionTypeItems() {
+            return SharedUploadBuildStep.doFillActiveScanActionTypeItems();
         }
     }
 }

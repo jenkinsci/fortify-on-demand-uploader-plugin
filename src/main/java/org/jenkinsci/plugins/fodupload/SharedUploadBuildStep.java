@@ -34,24 +34,18 @@ public class SharedUploadBuildStep {
                                  boolean overrideGlobalConfig,
                                  String username,
                                  String personalAccessToken,
-                                 String tenantId,
-                                 boolean purchaseEntitlements,
                                  String entitlementPreference,
-                                 String srcLocation,
                                  String remediationScanPreferenceType,
-                                 String inProgressScanActionType) {
+                                 String activeScanActionType) {
 
         model = new JobModel(bsiToken,
-                purchaseEntitlements,
                 entitlementPreference,
-                srcLocation,
                 remediationScanPreferenceType,
-                inProgressScanActionType);
+                activeScanActionType);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
-                personalAccessToken,
-                tenantId);
+                personalAccessToken);
     }
 
     public static FormValidation doCheckBsiToken(String bsiToken) {
@@ -108,6 +102,19 @@ public class SharedUploadBuildStep {
         for (FodEnums.RemediationScanPreferenceType remediationType : FodEnums.RemediationScanPreferenceType.values()) {
             items.add(new ListBoxModel.Option(remediationType.toString(), String.valueOf(remediationType.toString())));
         }
+        items.add(new ListBoxModel.Option("name1remediation", "value1remediation"));
+        items.add(new ListBoxModel.Option("name2remediation", "value2remediation"));
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillActiveScanActionTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.ActiveScanActionType scanActionType : FodEnums.ActiveScanActionType.values()) {
+            items.add(new ListBoxModel.Option(scanActionType.toString(), String.valueOf(scanActionType.toString())));
+        }
+        items.add(new ListBoxModel.Option("name1scan", "value2scan"));
+        items.add(new ListBoxModel.Option("name2scan", "value2scan"));
         return items;
     }
 

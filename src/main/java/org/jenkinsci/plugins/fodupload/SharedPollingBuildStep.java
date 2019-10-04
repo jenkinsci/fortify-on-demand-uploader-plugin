@@ -43,16 +43,14 @@ public class SharedPollingBuildStep {
                                   String clientId,
                                   String clientSecret,
                                   String username,
-                                  String personalAccessToken,
-                                  String tenantId) {
+                                  String personalAccessToken) {
 
         this.bsiToken = bsiToken;
         this.pollingInterval = pollingInterval;
         this.policyFailureBuildResultPreference = policyFailureBuildResultPreference;
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
-                personalAccessToken,
-                tenantId);
+                personalAccessToken);
     }
 
     public static FormValidation doCheckBsiToken(String bsiToken) {

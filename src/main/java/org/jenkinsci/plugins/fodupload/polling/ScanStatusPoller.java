@@ -58,22 +58,22 @@ public class ScanStatusPoller {
         boolean finished = false;
         int counter = 1;
         LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection);
-        List<LookupItemsModel> analysisStatusTypes =  lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
+        List<LookupItemsModel> analysisStatusTypes = lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
         //List<StatusPollerThread> pollerThreads = new ArrayList<StatusPollerThread>();
         StatusPollerThread pollerThread = null;
 
         // Create a list of values that will be used to break the loop if found
         // This way if any of this changes we don't need to redo the keys or something
         List<String> complete = new ArrayList<>();
-        
+
         if (analysisStatusTypes != null) {
             for (LookupItemsModel item : analysisStatusTypes) {
                 if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
                     complete.add(item.getValue());
             }
         }
-        
-        try{
+
+        try {
             while (!finished) {
                 if (analysisStatusTypes == null) {
                     analysisStatusTypes = lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
@@ -98,8 +98,7 @@ public class ScanStatusPoller {
                 }
 
                 if (failCount < MAX_FAILS) {
-                    if(!pollerThread.fail)
-                    {
+                    if (!pollerThread.fail) {
                         failCount = 0;
                         logger.println(pollerThread.getName() + ") Poll Status: " + pollerThread.statusString);
 
@@ -122,7 +121,7 @@ public class ScanStatusPoller {
             }
         } catch (InterruptedException e) {
             logger.println("Polling was interrupted. Please contact your administrator if the interruption was not intentional.");
-            if(pollerThread.isAlive()){
+            if (pollerThread.isAlive()) {
                 pollerThread.interrupt();
             }
         }
@@ -253,8 +252,7 @@ class StatusPollerThread extends Thread {
                 fail = true;
             }
         }
-        if (this.statusString == null || this.statusString == "")
-        {
+        if (this.statusString == null || this.statusString == "") {
             fail = true;
         } else {
             if (statusString.equals(AnalysisStatusTypeEnum.Waiting.name())) {

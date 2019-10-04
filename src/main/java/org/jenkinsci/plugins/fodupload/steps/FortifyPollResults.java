@@ -128,8 +128,7 @@ public class FortifyPollResults extends FortifyStep {
                 clientId,
                 clientSecret,
                 username,
-                personalAccessToken,
-                tenantId);
+                personalAccessToken);
 
         return true;
     }
@@ -150,8 +149,7 @@ public class FortifyPollResults extends FortifyStep {
                 clientId,
                 clientSecret,
                 username,
-                personalAccessToken,
-                tenantId);
+                personalAccessToken);
 
         commonBuildStep.perform(build, workspace, launcher, listener);
     }

@@ -38,6 +38,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String entitlementPreference;
     private String srcLocation;
     private String remediationScanPreferenceType;
+    private String activeScanActionType;
     private String inProgressScanActionType;
 
     private SharedUploadBuildStep commonBuildStep;
@@ -124,6 +125,15 @@ public class FortifyStaticAssessment extends FortifyStep {
         this.remediationScanPreferenceType = remediationScanPreferenceType;
     }
 
+    public String getActiveScanActionType() {
+        return activeScanActionType;
+    }
+
+    @DataBoundSetter
+    public void setActiveScanActionType(String activeScanActionType) {
+        this.activeScanActionType = activeScanActionType;
+    }
+
     public String getInProgressScanActionType() {
         return inProgressScanActionType;
     }
@@ -141,12 +151,9 @@ public class FortifyStaticAssessment extends FortifyStep {
                 overrideGlobalConfig,
                 username,
                 personalAccessToken,
-                tenantId,
-                purchaseEntitlements,
                 entitlementPreference,
-                srcLocation,
                 remediationScanPreferenceType,
-                inProgressScanActionType);
+                activeScanActionType);
 
         return true;
     }
@@ -164,12 +171,9 @@ public class FortifyStaticAssessment extends FortifyStep {
                 overrideGlobalConfig,
                 username,
                 personalAccessToken,
-                tenantId,
-                purchaseEntitlements,
                 entitlementPreference,
-                srcLocation,
                 remediationScanPreferenceType,
-                inProgressScanActionType);
+                activeScanActionType);
 
         commonBuildStep.perform(build, workspace, launcher, listener);
     }
@@ -209,6 +213,11 @@ public class FortifyStaticAssessment extends FortifyStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillRemediationScanPreferenceTypeItems() {
             return SharedUploadBuildStep.doFillRemediationScanPreferenceTypeItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillactiveScanActionTypeItems() {
+            return SharedUploadBuildStep.doFillActiveScanActionTypeItems();
         }
     }
 

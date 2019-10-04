@@ -8,12 +8,11 @@ public class AuthenticationModel {
 
     public AuthenticationModel(boolean overrideGlobalConfig,
                                String username,
-                               String personalAccessToken,
-                               String tenantId) {
+                               String personalAccessToken) {
         this.overrideGlobalConfig = overrideGlobalConfig;
         this.username = username;
         this.personalAccessToken = personalAccessToken;
-        this.tenantId = tenantId;
+        this.tenantId = "Stuff";
     }
 
     public boolean getOverrideGlobalConfig() {
