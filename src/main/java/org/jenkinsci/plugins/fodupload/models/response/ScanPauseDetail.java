@@ -10,10 +10,10 @@ public class ScanPauseDetail {
     }
 
     public String getReason() {
-        return reason;
+        return reason != null ? reason : "";
     }
 
     public String getNotes() {
-        return notes;
+        return notes != null ? notes : "";
     }
 }

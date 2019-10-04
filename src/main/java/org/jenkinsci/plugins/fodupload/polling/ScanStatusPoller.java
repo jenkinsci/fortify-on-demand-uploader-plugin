@@ -58,23 +58,31 @@ public class ScanStatusPoller {
         boolean finished = false;
         int counter = 1;
         LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection);
-        List<LookupItemsModel> analysisStatusTypes = null;
+        List<LookupItemsModel> analysisStatusTypes =  lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
         //List<StatusPollerThread> pollerThreads = new ArrayList<StatusPollerThread>();
         StatusPollerThread pollerThread = null;
-
-        if (analysisStatusTypes == null)
-            analysisStatusTypes = lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
 
         // Create a list of values that will be used to break the loop if found
         // This way if any of this changes we don't need to redo the keys or something
         List<String> complete = new ArrayList<>();
-
-        for (LookupItemsModel item : analysisStatusTypes) {
-            if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
-                complete.add(item.getValue());
+        
+        if (analysisStatusTypes != null) {
+            for (LookupItemsModel item : analysisStatusTypes) {
+                if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
+                    complete.add(item.getValue());
+            }
         }
+        
         try{
             while (!finished) {
+                if (analysisStatusTypes == null) {
+                    analysisStatusTypes = lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
+                    complete = new ArrayList<>();
+                    for (LookupItemsModel item : analysisStatusTypes) {
+                        if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
+                            complete.add(item.getValue());
+                    }
+                }
                 if (counter == 1) {
                     //No Thread.sleep() on first round
                     pollerThread = new StatusPollerThread(String.valueOf(counter), releaseId, analysisStatusTypes, apiConnection, complete, logger, 0);
@@ -90,24 +98,27 @@ public class ScanStatusPoller {
                 }
 
                 if (failCount < MAX_FAILS) {
-                    //IMPORTANT
-                    logger.println(pollerThread.getName() + ") Poll Status: " + pollerThread.statusString);
+                    if(!pollerThread.fail)
+                    {
+                        failCount = 0;
+                        logger.println(pollerThread.getName() + ") Poll Status: " + pollerThread.statusString);
 
-                    if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Waiting.name()) && pollerThread.scanSummaryDTO.getPauseDetails() != null)
-                        printPauseMessages(pollerThread.scanSummaryDTO);
-                    if (pollerThread.finished) {
-                        finished = pollerThread.finished;
-                        if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
-                            printCancelMessages(pollerThread.scanSummaryDTO);
-                        } else {
-                            printPassFail(pollerThread.releaseDTO);
+                        if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Waiting.name()) && pollerThread.scanSummaryDTO.getPauseDetails() != null)
+                            printPauseMessages(pollerThread.scanSummaryDTO);
+                        if (pollerThread.finished) {
+                            finished = pollerThread.finished;
+                            if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
+                                printCancelMessages(pollerThread.scanSummaryDTO);
+                            } else if (pollerThread.statusString.equals(AnalysisStatusTypeEnum.Completed.name())) {
+                                printPassFail(pollerThread.releaseDTO);
+                            }
                         }
+                        counter++;
                     }
                 } else {
                     logger.println(String.format("Polling Failed %d times.  Terminating", MAX_FAILS));
                     finished = true;
                 }
-                counter++;
             }
         } catch (InterruptedException e) {
             logger.println("Polling was interrupted. Please contact your administrator if the interruption was not intentional.");
@@ -115,8 +126,6 @@ public class ScanStatusPoller {
                 pollerThread.interrupt();
             }
         }
-        
-
         return pollerThread.result;
     }
 
@@ -164,8 +173,8 @@ public class ScanStatusPoller {
         } else {
             logger.println("-------Scan Paused------- ");
             logger.println();
-            logger.println("Review the last pause entry below");
-            logger.println();
+            // Leaving the for loop because of the data structure.
+            // Should only be one object because a pause cancels the polling.
             for (ScanPauseDetail spd : scanSummary.getPauseDetails()) {
                 logger.println(String.format("Pause reason:         %s", spd.getReason()));
                 logger.println(String.format("Pause reason notes:   %s", spd.getNotes()));
@@ -236,34 +245,41 @@ class StatusPollerThread extends Thread {
                 int analysisStatusInt = Integer.parseInt(o.getValue());
                 if (analysisStatusInt == status) {
                     this.statusString = o.getText().replace("_", " ");
-                    //analysisStatusEnum = statusString;
                 }
                 if (completeStatusList.contains(Integer.toString(status))) {
                     finished = true;
                 }
+            } else {
+                fail = true;
             }
         }
-
-        if (statusString.equals(AnalysisStatusTypeEnum.Waiting.name())) {
-            try {
-                scanSummaryDTO = scanSummaryController.getReleaseScanSummary(releaseDTO.getReleaseId(), releaseDTO.getCurrentStaticScanId());
-            } catch (IOException e) {
-                logger.println("Unable to retrieve scan summary data. Error: " + e.toString());
-            }
-        }
-        if (finished) {
-            result.setPassing(releaseDTO.isPassed());
-            result.setPollingSuccessful(true);
-
-            if (!Utils.isNullOrEmpty(releaseDTO.getPassFailReasonType()))
-                result.setFailReason(releaseDTO.getPassFailReasonType());
-
-            if (statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
+        if (this.statusString == null || this.statusString == "")
+        {
+            fail = true;
+        } else {
+            if (statusString.equals(AnalysisStatusTypeEnum.Waiting.name())) {
                 try {
                     scanSummaryDTO = scanSummaryController.getReleaseScanSummary(releaseDTO.getReleaseId(), releaseDTO.getCurrentStaticScanId());
+                    finished = true;
                 } catch (IOException e) {
                     logger.println("Unable to retrieve scan summary data. Error: " + e.toString());
                     fail = true;
+                }
+            }
+            if (finished) {
+                result.setPassing(releaseDTO.isPassed());
+                result.setPollingSuccessful(true);
+
+                if (!Utils.isNullOrEmpty(releaseDTO.getPassFailReasonType()))
+                    result.setFailReason(releaseDTO.getPassFailReasonType());
+
+                if (statusString.equals(AnalysisStatusTypeEnum.Canceled.name())) {
+                    try {
+                        scanSummaryDTO = scanSummaryController.getReleaseScanSummary(releaseDTO.getReleaseId(), releaseDTO.getCurrentStaticScanId());
+                    } catch (IOException e) {
+                        logger.println("Unable to retrieve scan summary data. Error: " + e.toString());
+                        fail = true;
+                    }
                 }
             }
         }
