@@ -10,5 +10,3 @@ For requirements, usage, and other important details please see the official Jen
 https://wiki.jenkins-ci.org/display/JENKINS/Fortify+On+Demand+Uploader+Plugin
  
 More information about Fortify on Demand: https://ams.fortify.com
-
-Adding a comment to trigger a build
