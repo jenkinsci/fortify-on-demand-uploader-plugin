@@ -11,6 +11,8 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
+
 import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -32,7 +34,7 @@ public class FortifyStaticAssessment extends FortifyStep {
 
     private boolean overrideGlobalConfig;
     private String username;
-    private String personalAccessToken;
+    private Secret personalAccessToken;
     private String tenantId;
     private boolean purchaseEntitlements;
     private String entitlementPreference;
@@ -70,12 +72,12 @@ public class FortifyStaticAssessment extends FortifyStep {
         this.username = username;
     }
 
-    public String getPersonalAccessToken() {
+    public Secret getPersonalAccessToken() {
         return personalAccessToken;
     }
 
     @DataBoundSetter
-    public void setPersonalAccessToken(String personalAccessToken) {
+    public void setPersonalAccessToken(Secret personalAccessToken) {
         this.personalAccessToken = personalAccessToken;
     }
 
@@ -195,7 +197,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
-                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final Secret personalAccessToken,
                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId) {
             return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
 

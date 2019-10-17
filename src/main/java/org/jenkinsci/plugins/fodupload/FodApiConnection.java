@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.fodupload;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import hudson.ProxyConfiguration;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
@@ -30,7 +31,7 @@ public class FodApiConnection {
     private String scope;
 
     private String id;
-    private String secret;
+    private Secret secret;
 
     private ProxyConfiguration proxy = null;
 
@@ -41,7 +42,7 @@ public class FodApiConnection {
      * @param secret  apiConnection secret
      * @param baseUrl apiConnection baseUrl
      */
-    FodApiConnection(final String id, final String secret, final String baseUrl, final String apiUrl, final GrantType grantType, final String scope) {
+    FodApiConnection(final String id, final Secret secret, final String baseUrl, final String apiUrl, final GrantType grantType, final String scope) {
         this.id = id;
         this.secret = secret;
         this.baseUrl = baseUrl;
@@ -69,14 +70,14 @@ public class FodApiConnection {
                     .add("scope", scope)
                     .add("grant_type", "client_credentials")
                     .add("client_id", id)
-                    .add("client_secret", secret)
+                    .add("client_secret", Secret.toString(secret))
                     .build();
         } else if (grantType == GrantType.PASSWORD) {
             formBody = new FormBody.Builder()
                     .add("scope", scope)
                     .add("grant_type", "password")
                     .add("username", id)
-                    .add("password", secret)
+                    .add("password", Secret.toString(secret))
                     .build();
         } else {
             throw new IOException("Invalid Grant Type");
@@ -158,7 +159,7 @@ public class FodApiConnection {
         return id;
     }
 
-    public String getSecret() {
+    public Secret getSecret() {
         return secret;
     }
 
