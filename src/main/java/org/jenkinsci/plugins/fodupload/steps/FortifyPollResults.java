@@ -11,6 +11,8 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
+
 import org.jenkinsci.plugins.fodupload.SharedPollingBuildStep;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -32,9 +34,9 @@ public class FortifyPollResults extends FortifyStep {
     private boolean overrideGlobalConfig;
     private int policyFailureBuildResultPreference;
     private String clientId;
-    private String clientSecret;
+    private Secret clientSecret;
     private String username;
-    private String personalAccessToken;
+    private Secret personalAccessToken;
     private String tenantId;
 
     private SharedPollingBuildStep commonBuildStep;
@@ -81,12 +83,12 @@ public class FortifyPollResults extends FortifyStep {
         this.clientId = clientId;
     }
 
-    public String getClientSecret() {
+    public Secret getClientSecret() {
         return clientSecret;
     }
 
     @DataBoundSetter
-    public void setClientSecret(String clientSecret) {
+    public void setClientSecret(Secret clientSecret) {
         this.clientSecret = clientSecret;
     }
 
@@ -99,12 +101,12 @@ public class FortifyPollResults extends FortifyStep {
         this.username = username;
     }
 
-    public String getPersonalAccessToken() {
+    public Secret getPersonalAccessToken() {
         return personalAccessToken;
     }
 
     @DataBoundSetter
-    public void setPersonalAccessToken(String personalAccessToken) {
+    public void setPersonalAccessToken(Secret personalAccessToken) {
         this.personalAccessToken = personalAccessToken;
     }
 
@@ -177,7 +179,7 @@ public class FortifyPollResults extends FortifyStep {
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedPollingBuildStep.USERNAME) final String username,
-                                                                  @QueryParameter(SharedPollingBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                  @QueryParameter(SharedPollingBuildStep.PERSONAL_ACCESS_TOKEN) final Secret personalAccessToken,
                                                                   @QueryParameter(SharedPollingBuildStep.TENANT_ID) final String tenantId) {
             return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
 

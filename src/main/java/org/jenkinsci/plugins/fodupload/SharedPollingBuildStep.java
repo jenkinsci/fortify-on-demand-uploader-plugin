@@ -10,6 +10,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.model.GlobalConfiguration;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
@@ -41,9 +42,9 @@ public class SharedPollingBuildStep {
                                   int pollingInterval,
                                   int policyFailureBuildResultPreference,
                                   String clientId,
-                                  String clientSecret,
+                                  Secret clientSecret,
                                   String username,
-                                  String personalAccessToken,
+                                  Secret personalAccessToken,
                                   String tenantId) {
 
         this.bsiToken = bsiToken;
@@ -87,7 +88,7 @@ public class SharedPollingBuildStep {
     // Form validation
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public static FormValidation doTestPersonalAccessTokenConnection(final String username,
-                                                                     final String personalAccessToken,
+                                                                     final Secret personalAccessToken,
                                                                      final String tenantId) {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
@@ -98,7 +99,7 @@ public class SharedPollingBuildStep {
             return FormValidation.error("Fortify on Demand API URL is empty!");
         if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
-        if (Utils.isNullOrEmpty(personalAccessToken))
+        if (Utils.isNullOrEmpty(Secret.toString(personalAccessToken)))
             return FormValidation.error("Personal Access Token is empty!");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");

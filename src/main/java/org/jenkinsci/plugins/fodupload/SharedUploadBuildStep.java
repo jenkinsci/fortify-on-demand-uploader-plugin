@@ -8,6 +8,7 @@ import hudson.Launcher;
 import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.model.GlobalConfiguration;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
@@ -22,7 +23,7 @@ public class SharedUploadBuildStep {
 
     public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
     public static final String CLIENT_ID = "clientId";
-    public static final String CLIENT_SECRET = "clientSecret";
+    public static final Secret CLIENT_SECRET = Secret.fromString("clientSecret");
     public static final String USERNAME = "username";
     public static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
     public static final String TENANT_ID = "tenantId";
@@ -33,7 +34,7 @@ public class SharedUploadBuildStep {
     public SharedUploadBuildStep(String bsiToken,
                                  boolean overrideGlobalConfig,
                                  String username,
-                                 String personalAccessToken,
+                                 Secret personalAccessToken,
                                  String tenantId,
                                  boolean purchaseEntitlements,
                                  String entitlementPreference,
@@ -72,7 +73,7 @@ public class SharedUploadBuildStep {
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public static FormValidation doTestPersonalAccessTokenConnection(final String username,
-                                                                     final String personalAccessToken,
+                                                                     final Secret personalAccessToken,
                                                                      final String tenantId) {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
@@ -83,7 +84,7 @@ public class SharedUploadBuildStep {
             return FormValidation.error("Fortify on Demand API URL is empty!");
         if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
-        if (Utils.isNullOrEmpty(personalAccessToken))
+        if (Utils.isNullOrEmpty(Secret.toString(personalAccessToken)))
             return FormValidation.error("Personal Access Token is empty!");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
