@@ -11,6 +11,8 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
+
 import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -62,7 +64,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     public String getUsername() {
-        return username;
+        return Secret.fromString(username).getEncryptedValue().toString();
     }
 
     @DataBoundSetter
@@ -71,7 +73,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     public String getPersonalAccessToken() {
-        return personalAccessToken;
+        return Secret.fromString(personalAccessToken).getEncryptedValue().toString();
     }
 
     @DataBoundSetter
@@ -80,7 +82,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return Secret.fromString(tenantId).getEncryptedValue().toString();
     }
 
     @DataBoundSetter
@@ -139,9 +141,9 @@ public class FortifyStaticAssessment extends FortifyStep {
         log.println("Fortify on Demand Upload PreBuild Running...");
         commonBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
-                username,
-                personalAccessToken,
-                tenantId,
+                Secret.decrypt(username).getPlainText(),
+                Secret.decrypt(personalAccessToken).getPlainText(),
+                Secret.decrypt(tenantId).getPlainText(),
                 purchaseEntitlements,
                 entitlementPreference,
                 srcLocation,
@@ -162,9 +164,9 @@ public class FortifyStaticAssessment extends FortifyStep {
         log.println("Fortify on Demand Upload Running...");
         commonBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
-                username,
-                personalAccessToken,
-                tenantId,
+                Secret.decrypt(username).getPlainText(),
+                Secret.decrypt(personalAccessToken).getPlainText(),
+                Secret.decrypt(tenantId).getPlainText(),
                 purchaseEntitlements,
                 entitlementPreference,
                 srcLocation,
@@ -194,10 +196,10 @@ public class FortifyStaticAssessment extends FortifyStep {
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
-                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId) {
-            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
+        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final Secret username,
+                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final Secret personalAccessToken,
+                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final Secret tenantId) {
+            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(Secret.toString(username), Secret.toString(personalAccessToken), Secret.toString(tenantId));
 
         }
 
