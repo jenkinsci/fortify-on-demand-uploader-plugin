@@ -16,7 +16,6 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.Secret;
 import jenkins.model.GlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
@@ -47,9 +46,9 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                             int pollingInterval,
                             int policyFailureBuildResultPreference,
                             String clientId,
-                            Secret clientSecret,
+                            String clientSecret,
                             String username,
-                            Secret personalAccessToken,
+                            String personalAccessToken,
                             String tenantId) {
 
         sharedBuildStep = new SharedPollingBuildStep(bsiToken,
@@ -94,7 +93,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     }
 
     @SuppressWarnings("unused")
-    public Secret getPersonalAccessToken() {
+    public String getPersonalAccessToken() {
         return sharedBuildStep.getAuthModel().getPersonalAccessToken();
     }
 
@@ -150,7 +149,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
         @POST
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(USERNAME) final String username,
-                                                                  @QueryParameter(PERSONAL_ACCESS_TOKEN) final Secret personalAccessToken,
+                                                                  @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                                   @QueryParameter(TENANT_ID) final String tenantId) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);

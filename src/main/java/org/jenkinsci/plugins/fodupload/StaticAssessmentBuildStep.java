@@ -15,7 +15,6 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.Secret;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -45,7 +44,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public StaticAssessmentBuildStep(String bsiToken,
                                      boolean overrideGlobalConfig,
                                      String username,
-                                     Secret personalAccessToken,
+                                     String personalAccessToken,
                                      String tenantId,
                                      boolean purchaseEntitlements,
                                      String entitlementPreference,
@@ -108,7 +107,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public Secret getPersonalAccessToken() {
+    public String getPersonalAccessToken() {
         return sharedBuildStep.getAuthModel().getPersonalAccessToken();
     }
 
@@ -182,7 +181,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
         @POST
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
-                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final Secret personalAccessToken,
+                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);

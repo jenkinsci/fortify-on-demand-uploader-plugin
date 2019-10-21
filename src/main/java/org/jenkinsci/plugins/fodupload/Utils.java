@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload;
 
 import hudson.FilePath;
+import hudson.util.Secret;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -112,5 +113,22 @@ public class Utils {
         }
         logger.println("End Create Zip.");
         return tempZip;
+    }
+    
+    public static String decrypt(String stringToDecrypt){
+        Secret decryptedSecret = Secret.decrypt(stringToDecrypt);
+        return  decryptedSecret != null ?  decryptedSecret.getPlainText() : stringToDecrypt;
+    }
+    
+    public static String encrypt(String stringToEncrypt){
+        String result = stringToEncrypt;
+        if(Secret.decrypt(stringToEncrypt) == null){
+            result = Secret.fromString(stringToEncrypt).getEncryptedValue();
+        }
+        return result;
+    }
+    
+    public static boolean isEncrypted(String stringToEncrypt){
+        return (Secret.decrypt(stringToEncrypt) != null);
     }
 }

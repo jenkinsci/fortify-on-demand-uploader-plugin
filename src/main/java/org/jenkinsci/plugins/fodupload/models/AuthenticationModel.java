@@ -1,16 +1,14 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-import hudson.util.Secret;
-
 public class AuthenticationModel {
     private boolean overrideGlobalConfig;
     private String username;
-    private Secret personalAccessToken;
+    private String personalAccessToken;
     private String tenantId;
 
     public AuthenticationModel(boolean overrideGlobalConfig,
                                String username,
-                               Secret personalAccessToken,
+                               String personalAccessToken,
                                String tenantId) {
         this.overrideGlobalConfig = overrideGlobalConfig;
         this.username = username;
@@ -26,11 +24,24 @@ public class AuthenticationModel {
         return username;
     }
 
-    public Secret getPersonalAccessToken() {
+    public String getPersonalAccessToken() {
         return personalAccessToken;
     }
 
     public String getTenantId() {
         return tenantId;
     }
+    
+     public void setUsername(String newUsername) {
+       username = newUsername;
+    }
+
+    public void setPersonalAccessToken(String newPersonalAccessToken) {
+        personalAccessToken = newPersonalAccessToken;
+    }
+
+    public void setTenantId(String newTenantId) {
+       tenantId = newTenantId;
+    }
+    
 }

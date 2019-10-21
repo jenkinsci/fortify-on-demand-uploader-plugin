@@ -23,7 +23,7 @@ public class SharedUploadBuildStep {
 
     public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
     public static final String CLIENT_ID = "clientId";
-    public static final Secret CLIENT_SECRET = Secret.fromString("clientSecret");
+    public static final String CLIENT_SECRET = "clientSecret";
     public static final String USERNAME = "username";
     public static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
     public static final String TENANT_ID = "tenantId";
@@ -34,7 +34,7 @@ public class SharedUploadBuildStep {
     public SharedUploadBuildStep(String bsiToken,
                                  boolean overrideGlobalConfig,
                                  String username,
-                                 Secret personalAccessToken,
+                                 String personalAccessToken,
                                  String tenantId,
                                  boolean purchaseEntitlements,
                                  String entitlementPreference,
@@ -49,6 +49,10 @@ public class SharedUploadBuildStep {
                 remediationScanPreferenceType,
                 inProgressScanActionType);
 
+        username = Utils.encrypt(username);
+        personalAccessToken = Utils.encrypt(personalAccessToken);
+        tenantId = Utils.encrypt(tenantId);
+                
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -73,7 +77,7 @@ public class SharedUploadBuildStep {
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public static FormValidation doTestPersonalAccessTokenConnection(final String username,
-                                                                     final Secret personalAccessToken,
+                                                                     final String personalAccessToken,
                                                                      final String tenantId) {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
@@ -84,7 +88,7 @@ public class SharedUploadBuildStep {
             return FormValidation.error("Fortify on Demand API URL is empty!");
         if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
-        if (Utils.isNullOrEmpty(Secret.toString(personalAccessToken)))
+        if (Utils.isNullOrEmpty(personalAccessToken))
             return FormValidation.error("Personal Access Token is empty!");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
@@ -130,9 +134,11 @@ public class SharedUploadBuildStep {
             build.setResult(Result.FAILURE);
             return false;
         }
+        
         return true;
     }
 
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build, FilePath workspace,
                         Launcher launcher, TaskListener listener) {
 
@@ -141,6 +147,45 @@ public class SharedUploadBuildStep {
         try {
             taskListener.set(listener);
 
+            // check to see if sensitive fields are encrypte. If not halt scan and recommend encryption.
+            if(authModel != null)
+            {
+                if(authModel.getOverrideGlobalConfig() == true){
+                    if(!Utils.isEncrypted(authModel.getPersonalAccessToken()) ||
+                       !Utils.isEncrypted(authModel.getUsername()) ||
+                       !Utils.isEncrypted(authModel.getTenantId()))
+                    {
+                        build.setResult(Result.FAILURE);
+                        logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                        return ;
+                    }
+                }
+                else
+                {
+                    if(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey())
+                    {
+                        if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientId()) ||
+                           !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
+                        {
+                            build.setResult(Result.FAILURE);
+                            logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                            return ;
+                        }
+                    }
+                    else
+                    {
+                         if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalTenantId()) ||
+                            !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalUsername()) ||
+                            !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
+                        {
+                            build.setResult(Result.FAILURE);
+                            logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                            return ;
+                        }      
+                    }
+                }
+            }
+            
             Result currentResult = build.getResult();
             if (Result.FAILURE.equals(currentResult)
                     || Result.ABORTED.equals(currentResult)
@@ -173,8 +218,6 @@ public class SharedUploadBuildStep {
 
             model.setPayload(payload);
 
-
-            // Create apiConnection
             apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
             if (apiConnection != null) {
                 apiConnection.authenticate();
@@ -215,7 +258,16 @@ public class SharedUploadBuildStep {
     }
 
     public AuthenticationModel getAuthModel() {
-        return authModel;
+        AuthenticationModel displayModel = new AuthenticationModel(authModel.getOverrideGlobalConfig(),
+                                                                   Utils.decrypt(authModel.getUsername()),
+                                                                   Utils.decrypt(authModel.getPersonalAccessToken()),
+                                                                   Utils.decrypt(authModel.getTenantId()) );
+       
+        return displayModel;
+    }
+    
+    public AuthenticationModel setAuthModel(AuthenticationModel newAuthModel) {
+        return authModel = newAuthModel;
     }
 
     public JobModel getModel() {
