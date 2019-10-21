@@ -10,7 +10,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.Secret;
 import jenkins.model.GlobalConfiguration;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
@@ -42,14 +41,17 @@ public class SharedPollingBuildStep {
                                   int pollingInterval,
                                   int policyFailureBuildResultPreference,
                                   String clientId,
-                                  Secret clientSecret,
+                                  String clientSecret,
                                   String username,
-                                  Secret personalAccessToken,
+                                  String personalAccessToken,
                                   String tenantId) {
 
         this.bsiToken = bsiToken;
         this.pollingInterval = pollingInterval;
         this.policyFailureBuildResultPreference = policyFailureBuildResultPreference;
+        username = Utils.encrypt(username);
+        personalAccessToken = Utils.encrypt(personalAccessToken);
+        tenantId = Utils.encrypt(tenantId);
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -88,7 +90,7 @@ public class SharedPollingBuildStep {
     // Form validation
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public static FormValidation doTestPersonalAccessTokenConnection(final String username,
-                                                                     final Secret personalAccessToken,
+                                                                     final String personalAccessToken,
                                                                      final String tenantId) {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
@@ -99,7 +101,7 @@ public class SharedPollingBuildStep {
             return FormValidation.error("Fortify on Demand API URL is empty!");
         if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
-        if (Utils.isNullOrEmpty(Secret.toString(personalAccessToken)))
+        if (Utils.isNullOrEmpty(personalAccessToken))
             return FormValidation.error("Personal Access Token is empty!");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
@@ -117,6 +119,7 @@ public class SharedPollingBuildStep {
         return items;
     }
 
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> run,
                         FilePath filePath,
                         Launcher launcher,
@@ -124,6 +127,46 @@ public class SharedPollingBuildStep {
 
         final PrintStream logger = taskListener.getLogger();
 
+        
+        // check to see if sensitive fields are encrypte. If not halt scan and recommend encryption.
+        if(authModel != null)
+        {
+            if(authModel.getOverrideGlobalConfig() == true){
+                if(!Utils.isEncrypted(authModel.getPersonalAccessToken()) ||
+                   !Utils.isEncrypted(authModel.getUsername()) ||
+                   !Utils.isEncrypted(authModel.getTenantId()))
+                {
+                    run.setResult(Result.FAILURE);
+                    logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                    return ;
+                }
+            }
+            else
+            {
+                if(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey())
+                {
+                    if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientId()) ||
+                       !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
+                    {
+                        run.setResult(Result.FAILURE);
+                        logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                        return ;
+                    }
+                }
+                else
+                {
+                     if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalTenantId()) ||
+                        !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalUsername()) ||
+                        !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
+                    {
+                        run.setResult(Result.FAILURE);
+                        logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                        return ;
+                    }      
+                }
+            }
+        }
+        
         Result currentResult = run.getResult();
         if (Result.FAILURE.equals(currentResult)
                 || Result.ABORTED.equals(currentResult)
@@ -201,7 +244,12 @@ public class SharedPollingBuildStep {
     }
 
     public AuthenticationModel getAuthModel() {
-        return authModel;
+        AuthenticationModel displayModel = new AuthenticationModel(authModel.getOverrideGlobalConfig(),
+                                                                   Utils.decrypt(authModel.getUsername()),
+                                                                   Utils.decrypt(authModel.getPersonalAccessToken()),
+                                                                   Utils.decrypt(authModel.getTenantId()) );
+       
+        return displayModel;
     }
 
     public enum PolicyFailureBuildResultPreference {
