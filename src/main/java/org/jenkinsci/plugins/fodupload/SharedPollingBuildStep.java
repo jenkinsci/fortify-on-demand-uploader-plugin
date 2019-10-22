@@ -1,7 +1,17 @@
 package org.jenkinsci.plugins.fodupload;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.URISyntaxException;
+
 import com.fortify.fod.parser.BsiToken;
 import com.fortify.fod.parser.BsiTokenParser;
+
+import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
+import org.jenkinsci.plugins.fodupload.polling.ScanStatusPoller;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -11,14 +21,6 @@ import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
-import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
-import org.jenkinsci.plugins.fodupload.models.FodEnums;
-import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
-import org.jenkinsci.plugins.fodupload.polling.ScanStatusPoller;
-
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.URISyntaxException;
 
 public class SharedPollingBuildStep {
 
@@ -49,6 +51,9 @@ public class SharedPollingBuildStep {
         this.bsiToken = bsiToken;
         this.pollingInterval = pollingInterval;
         this.policyFailureBuildResultPreference = policyFailureBuildResultPreference;
+        username = Utils.encrypt(username);
+        personalAccessToken = Utils.encrypt(personalAccessToken);
+        tenantId = Utils.encrypt(tenantId);
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -116,6 +121,7 @@ public class SharedPollingBuildStep {
         return items;
     }
 
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> run,
                         FilePath filePath,
                         Launcher launcher,
@@ -123,6 +129,46 @@ public class SharedPollingBuildStep {
 
         final PrintStream logger = taskListener.getLogger();
 
+        
+        // check to see if sensitive fields are encrypte. If not halt scan and recommend encryption.
+        if(authModel != null)
+        {
+            if(authModel.getOverrideGlobalConfig() == true){
+                if(!Utils.isEncrypted(authModel.getPersonalAccessToken()) ||
+                   !Utils.isEncrypted(authModel.getUsername()) ||
+                   !Utils.isEncrypted(authModel.getTenantId()))
+                {
+                    run.setResult(Result.UNSTABLE);
+                    logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
+                    return ;
+                }
+            }
+            else
+            {
+                if(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey())
+                {
+                    if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientId()) ||
+                       !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
+                    {
+                        run.setResult(Result.UNSTABLE);
+                        logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
+                        return ;
+                    }
+                }
+                else
+                {
+                     if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalTenantId()) ||
+                        !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalUsername()) ||
+                        !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
+                    {
+                        run.setResult(Result.UNSTABLE);
+                        logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
+                        return ;
+                    }      
+                }
+            }
+        }
+        
         Result currentResult = run.getResult();
         if (Result.FAILURE.equals(currentResult)
                 || Result.ABORTED.equals(currentResult)
@@ -200,7 +246,12 @@ public class SharedPollingBuildStep {
     }
 
     public AuthenticationModel getAuthModel() {
-        return authModel;
+        AuthenticationModel displayModel = new AuthenticationModel(authModel.getOverrideGlobalConfig(),
+                                                                   Utils.decrypt(authModel.getUsername()),
+                                                                   Utils.decrypt(authModel.getPersonalAccessToken()),
+                                                                   Utils.decrypt(authModel.getTenantId()) );
+       
+        return displayModel;
     }
 
     public enum PolicyFailureBuildResultPreference {

@@ -1,6 +1,20 @@
 package org.jenkinsci.plugins.fodupload.steps;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
+
+import org.jenkinsci.plugins.fodupload.SharedPollingBuildStep;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
@@ -11,19 +25,9 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import org.jenkinsci.plugins.fodupload.SharedPollingBuildStep;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
+import hudson.util.Secret;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Set;
-
+@SuppressFBWarnings("unused")
 public class FortifyPollResults extends FortifyStep {
 
     private String bsiToken;
@@ -73,7 +77,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     public String getClientId() {
-        return clientId;
+        return Secret.fromString(clientId).getEncryptedValue().toString();
     }
 
     @DataBoundSetter
@@ -82,7 +86,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     public String getClientSecret() {
-        return clientSecret;
+        return Secret.fromString(clientSecret).getEncryptedValue().toString();
     }
 
     @DataBoundSetter
@@ -91,7 +95,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     public String getUsername() {
-        return username;
+        return Secret.fromString(username).getEncryptedValue().toString();
     }
 
     @DataBoundSetter
@@ -100,7 +104,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     public String getPersonalAccessToken() {
-        return personalAccessToken;
+        return Secret.fromString(personalAccessToken).getEncryptedValue().toString();
     }
 
     @DataBoundSetter
@@ -109,7 +113,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return Secret.fromString(tenantId).getEncryptedValue().toString();
     }
 
     @DataBoundSetter
@@ -118,6 +122,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     @Override
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Poll Results PreBuild Running...");
@@ -125,11 +130,11 @@ public class FortifyPollResults extends FortifyStep {
                 overrideGlobalConfig,
                 pollingInterval,
                 policyFailureBuildResultPreference,
-                clientId,
-                clientSecret,
-                username,
-                personalAccessToken,
-                tenantId);
+                Secret.decrypt(clientId).getPlainText(),
+                Secret.decrypt(clientSecret).getPlainText(),
+                Secret.decrypt(username).getPlainText(),
+                Secret.decrypt(personalAccessToken).getPlainText(),
+                Secret.decrypt(tenantId).getPlainText());
 
         return true;
     }
@@ -140,6 +145,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     @Override
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Poll Results Running...");
@@ -147,11 +153,11 @@ public class FortifyPollResults extends FortifyStep {
                 overrideGlobalConfig,
                 pollingInterval,
                 policyFailureBuildResultPreference,
-                clientId,
-                clientSecret,
-                username,
-                personalAccessToken,
-                tenantId);
+                Secret.decrypt(clientId).getPlainText(),
+                Secret.decrypt(clientSecret).getPlainText(),
+                Secret.decrypt(username).getPlainText(),
+                Secret.decrypt(personalAccessToken).getPlainText(),
+                Secret.decrypt(tenantId).getPlainText());
 
         commonBuildStep.perform(build, workspace, launcher, listener);
     }
@@ -176,10 +182,10 @@ public class FortifyPollResults extends FortifyStep {
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedPollingBuildStep.USERNAME) final String username,
-                                                                  @QueryParameter(SharedPollingBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                  @QueryParameter(SharedPollingBuildStep.TENANT_ID) final String tenantId) {
-            return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
+        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedPollingBuildStep.USERNAME) final Secret username,
+                                                                  @QueryParameter(SharedPollingBuildStep.PERSONAL_ACCESS_TOKEN) final Secret personalAccessToken,
+                                                                  @QueryParameter(SharedPollingBuildStep.TENANT_ID) final Secret tenantId) {
+            return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(Secret.toString(username), Secret.toString(personalAccessToken), Secret.toString(tenantId));
 
         }
 

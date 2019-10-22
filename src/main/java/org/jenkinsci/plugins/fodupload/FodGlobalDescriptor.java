@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload;
 
 import hudson.Extension;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import jenkins.model.GlobalConfiguration;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
@@ -44,12 +45,12 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         if (globalAuthTypeObject.size() > 0) {
             globalAuthType = globalAuthTypeObject.getString("value");
             if (globalAuthType.equals("apiKeyType")) {
-                clientId = globalAuthTypeObject.getString(CLIENT_ID);
-                clientSecret = globalAuthTypeObject.getString(CLIENT_SECRET);
+                clientId = Utils.encrypt(globalAuthTypeObject.getString(CLIENT_ID));
+                clientSecret = Utils.encrypt(globalAuthTypeObject.getString(CLIENT_SECRET));
             } else if (globalAuthType.equals("personalAccessTokenType")) {
-                username = globalAuthTypeObject.getString(USERNAME);
-                personalAccessToken = globalAuthTypeObject.getString(PERSONAL_ACCESS_TOKEN);
-                tenantId = globalAuthTypeObject.getString(TENANT_ID);
+                username = Utils.encrypt(globalAuthTypeObject.getString(USERNAME));
+                personalAccessToken = Utils.encrypt(globalAuthTypeObject.getString(PERSONAL_ACCESS_TOKEN));
+                tenantId = Utils.encrypt(globalAuthTypeObject.getString(TENANT_ID));
             }
         }
         baseUrl = formData.getString(BASE_URL);
@@ -74,26 +75,49 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
 
     @SuppressWarnings("unused")
     public String getClientId() {
+        return Utils.decrypt(clientId);
+    }
+
+    public String getOriginalClientId() {
         return clientId;
     }
-
+    
     @SuppressWarnings("unused")
     public String getClientSecret() {
+        return Utils.decrypt(clientSecret);
+    }
+
+    public String getOriginalClientSecret() {
         return clientSecret;
+    }
+    
+    @SuppressWarnings("unused")
+    public String getUsername() {
+        return Utils.decrypt(username);
     }
 
     @SuppressWarnings("unused")
-    public String getUsername() {
+    public String getOriginalUsername() {
         return username;
     }
 
     @SuppressWarnings("unused")
     public String getPersonalAccessToken() {
-        return personalAccessToken;
+        return Utils.decrypt(personalAccessToken);
     }
 
     @SuppressWarnings("unused")
+    public String getOriginalPersonalAccessToken() {
+        return personalAccessToken;
+    }
+    
+    @SuppressWarnings("unused")
     public String getTenantId() {
+        return Utils.decrypt(tenantId);
+    }
+
+    @SuppressWarnings("unused")
+    public String getOriginalTenantId() {
         return tenantId;
     }
 
@@ -174,7 +198,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                     throw new IllegalArgumentException("Client ID is null.");
                 if (Utils.isNullOrEmpty(clientSecret))
                     throw new IllegalArgumentException("Client Secret is null.");
-                return new FodApiConnection(clientId, clientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
+                return new FodApiConnection(Utils.decrypt(clientId), Utils.decrypt(clientSecret), baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
             } else if (globalAuthType.equals("personalAccessTokenType")) {
                 if (Utils.isNullOrEmpty(username))
                     throw new IllegalArgumentException("Username is null.");
@@ -182,7 +206,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                     throw new IllegalArgumentException("Personal Access Token is null.");
                 if (Utils.isNullOrEmpty(tenantId))
                     throw new IllegalArgumentException("Tenant ID is null.");
-                return new FodApiConnection(tenantId + "\\" + username, personalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
+                return new FodApiConnection(Utils.decrypt(tenantId) + "\\" + Utils.decrypt(username), Utils.decrypt(personalAccessToken), baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
             } else {
                 throw new IllegalArgumentException("Invalid authentication type");
             }
@@ -210,4 +234,6 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                 FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
                 FormValidation.error("Invalid connection information. Please check your credentials and try again.");
     }
+    
+    
 }
