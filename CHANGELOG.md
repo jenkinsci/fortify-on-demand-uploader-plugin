@@ -1,5 +1,5 @@
 # Changelog
-## Version 4.?.? (10-22-2019)
+## Version 4.0.1 (10-22-2019)
 - Fixed SECURITY-1433 / CVE-2019-10449.
 
 ## Version 4.0.0 (10-14-2019)
