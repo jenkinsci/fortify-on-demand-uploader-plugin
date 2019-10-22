@@ -1,23 +1,28 @@
 package org.jenkinsci.plugins.fodupload;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+
 import com.fortify.fod.parser.BsiToken;
 import com.fortify.fod.parser.BsiTokenParser;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.*;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-import hudson.util.Secret;
-import jenkins.model.GlobalConfiguration;
+
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import jenkins.model.GlobalConfiguration;
 
 public class SharedUploadBuildStep {
 
@@ -155,8 +160,8 @@ public class SharedUploadBuildStep {
                        !Utils.isEncrypted(authModel.getUsername()) ||
                        !Utils.isEncrypted(authModel.getTenantId()))
                     {
-                        build.setResult(Result.FAILURE);
-                        logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                        build.setResult(Result.UNSTABLE);
+                        logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
                         return ;
                     }
                 }
@@ -167,8 +172,8 @@ public class SharedUploadBuildStep {
                         if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientId()) ||
                            !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
                         {
-                            build.setResult(Result.FAILURE);
-                            logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                            build.setResult(Result.UNSTABLE);
+                            logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
                             return ;
                         }
                     }
@@ -178,8 +183,8 @@ public class SharedUploadBuildStep {
                             !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalUsername()) ||
                             !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
                         {
-                            build.setResult(Result.FAILURE);
-                            logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                            build.setResult(Result.UNSTABLE);
+                            logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
                             return ;
                         }      
                     }
