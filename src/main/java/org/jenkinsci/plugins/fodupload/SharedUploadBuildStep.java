@@ -156,7 +156,7 @@ public class SharedUploadBuildStep {
                        !Utils.isEncrypted(authModel.getTenantId()))
                     {
                         build.setResult(Result.FAILURE);
-                        logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                        logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
                         return ;
                     }
                 }
@@ -168,7 +168,7 @@ public class SharedUploadBuildStep {
                            !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
                         {
                             build.setResult(Result.FAILURE);
-                            logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                            logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
                             return ;
                         }
                     }
@@ -179,7 +179,7 @@ public class SharedUploadBuildStep {
                             !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
                         {
                             build.setResult(Result.FAILURE);
-                            logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                            logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
                             return ;
                         }      
                     }

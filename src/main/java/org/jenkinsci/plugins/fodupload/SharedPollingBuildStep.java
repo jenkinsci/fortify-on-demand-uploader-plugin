@@ -1,7 +1,17 @@
 package org.jenkinsci.plugins.fodupload;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.URISyntaxException;
+
 import com.fortify.fod.parser.BsiToken;
 import com.fortify.fod.parser.BsiTokenParser;
+
+import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
+import org.jenkinsci.plugins.fodupload.polling.ScanStatusPoller;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -11,14 +21,6 @@ import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
-import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
-import org.jenkinsci.plugins.fodupload.models.FodEnums;
-import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
-import org.jenkinsci.plugins.fodupload.polling.ScanStatusPoller;
-
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.URISyntaxException;
 
 public class SharedPollingBuildStep {
 
@@ -137,7 +139,7 @@ public class SharedPollingBuildStep {
                    !Utils.isEncrypted(authModel.getTenantId()))
                 {
                     run.setResult(Result.FAILURE);
-                    logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                    logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
                     return ;
                 }
             }
@@ -149,7 +151,7 @@ public class SharedPollingBuildStep {
                        !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
                     {
                         run.setResult(Result.FAILURE);
-                        logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                        logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
                         return ;
                     }
                 }
@@ -160,7 +162,7 @@ public class SharedPollingBuildStep {
                         !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
                     {
                         run.setResult(Result.FAILURE);
-                        logger.println("Credentials saved in plaintext. Please resave to encrypt before starting scan.");
+                        logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
                         return ;
                     }      
                 }
