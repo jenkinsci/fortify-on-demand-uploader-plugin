@@ -138,7 +138,7 @@ public class SharedPollingBuildStep {
                    !Utils.isEncrypted(authModel.getUsername()) ||
                    !Utils.isEncrypted(authModel.getTenantId()))
                 {
-                    run.setResult(Result.FAILURE);
+                    run.setResult(Result.UNSTABLE);
                     logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
                     return ;
                 }
@@ -150,7 +150,7 @@ public class SharedPollingBuildStep {
                     if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientId()) ||
                        !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
                     {
-                        run.setResult(Result.FAILURE);
+                        run.setResult(Result.UNSTABLE);
                         logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
                         return ;
                     }
@@ -161,7 +161,7 @@ public class SharedPollingBuildStep {
                         !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalUsername()) ||
                         !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
                     {
-                        run.setResult(Result.FAILURE);
+                        run.setResult(Result.UNSTABLE);
                         logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
                         return ;
                     }      
