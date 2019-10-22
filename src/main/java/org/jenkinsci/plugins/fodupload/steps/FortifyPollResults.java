@@ -1,6 +1,20 @@
 package org.jenkinsci.plugins.fodupload.steps;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
+
+import org.jenkinsci.plugins.fodupload.SharedPollingBuildStep;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
@@ -13,19 +27,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 
-import org.jenkinsci.plugins.fodupload.SharedPollingBuildStep;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Set;
-
+@SuppressFBWarnings("unused")
 public class FortifyPollResults extends FortifyStep {
 
     private String bsiToken;
@@ -120,6 +122,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     @Override
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Poll Results PreBuild Running...");
@@ -142,6 +145,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     @Override
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Poll Results Running...");
