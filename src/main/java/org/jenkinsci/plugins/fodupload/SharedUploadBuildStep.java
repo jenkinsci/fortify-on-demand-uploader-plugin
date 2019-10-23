@@ -1,22 +1,28 @@
 package org.jenkinsci.plugins.fodupload;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+
 import com.fortify.fod.parser.BsiToken;
 import com.fortify.fod.parser.BsiTokenParser;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.*;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-import jenkins.model.GlobalConfiguration;
+
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import jenkins.model.GlobalConfiguration;
 
 public class SharedUploadBuildStep {
 
@@ -48,6 +54,10 @@ public class SharedUploadBuildStep {
                 remediationScanPreferenceType,
                 inProgressScanActionType);
 
+        username = Utils.encrypt(username);
+        personalAccessToken = Utils.encrypt(personalAccessToken);
+        tenantId = Utils.encrypt(tenantId);
+                
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -129,9 +139,11 @@ public class SharedUploadBuildStep {
             build.setResult(Result.FAILURE);
             return false;
         }
+        
         return true;
     }
 
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build, FilePath workspace,
                         Launcher launcher, TaskListener listener) {
 
@@ -140,6 +152,45 @@ public class SharedUploadBuildStep {
         try {
             taskListener.set(listener);
 
+            // check to see if sensitive fields are encrypte. If not halt scan and recommend encryption.
+            if(authModel != null)
+            {
+                if(authModel.getOverrideGlobalConfig() == true){
+                    if(!Utils.isEncrypted(authModel.getPersonalAccessToken()) ||
+                       !Utils.isEncrypted(authModel.getUsername()) ||
+                       !Utils.isEncrypted(authModel.getTenantId()))
+                    {
+                        build.setResult(Result.UNSTABLE);
+                        logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
+                        return ;
+                    }
+                }
+                else
+                {
+                    if(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey())
+                    {
+                        if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientId()) ||
+                           !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
+                        {
+                            build.setResult(Result.UNSTABLE);
+                            logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
+                            return ;
+                        }
+                    }
+                    else
+                    {
+                         if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalTenantId()) ||
+                            !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalUsername()) ||
+                            !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
+                        {
+                            build.setResult(Result.UNSTABLE);
+                            logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
+                            return ;
+                        }      
+                    }
+                }
+            }
+            
             Result currentResult = build.getResult();
             if (Result.FAILURE.equals(currentResult)
                     || Result.ABORTED.equals(currentResult)
@@ -172,8 +223,6 @@ public class SharedUploadBuildStep {
 
             model.setPayload(payload);
 
-
-            // Create apiConnection
             apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
             if (apiConnection != null) {
                 apiConnection.authenticate();
@@ -214,7 +263,16 @@ public class SharedUploadBuildStep {
     }
 
     public AuthenticationModel getAuthModel() {
-        return authModel;
+        AuthenticationModel displayModel = new AuthenticationModel(authModel.getOverrideGlobalConfig(),
+                                                                   Utils.decrypt(authModel.getUsername()),
+                                                                   Utils.decrypt(authModel.getPersonalAccessToken()),
+                                                                   Utils.decrypt(authModel.getTenantId()) );
+       
+        return displayModel;
+    }
+    
+    public AuthenticationModel setAuthModel(AuthenticationModel newAuthModel) {
+        return authModel = newAuthModel;
     }
 
     public JobModel getModel() {
