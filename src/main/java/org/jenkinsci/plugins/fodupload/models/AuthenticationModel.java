@@ -31,4 +31,17 @@ public class AuthenticationModel {
     public String getTenantId() {
         return tenantId;
     }
+    
+     public void setUsername(String newUsername) {
+       username = newUsername;
+    }
+
+    public void setPersonalAccessToken(String newPersonalAccessToken) {
+        personalAccessToken = newPersonalAccessToken;
+    }
+
+    public void setTenantId(String newTenantId) {
+       tenantId = newTenantId;
+    }
+    
 }
