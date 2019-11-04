@@ -263,9 +263,9 @@ public class SharedPollingBuildStep {
 
     public AuthenticationModel getAuthModel() {
         AuthenticationModel displayModel = new AuthenticationModel(authModel.getOverrideGlobalConfig(),
-                                                                   Utils.retrieveSecretDecryptedValue(authModel.getUsername()),
-                                                                   Utils.retrieveSecretDecryptedValue(authModel.getPersonalAccessToken()),
-                                                                   Utils.retrieveSecretDecryptedValue(authModel.getTenantId()) );
+                                                                   authModel.getUsername(),
+                                                                   authModel.getPersonalAccessToken(),
+                                                                   authModel.getTenantId() );
        
         return displayModel;
     }
