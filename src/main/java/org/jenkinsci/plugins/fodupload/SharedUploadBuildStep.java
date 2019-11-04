@@ -109,7 +109,7 @@ public class SharedUploadBuildStep {
     public static ListBoxModel doFillEntitlementPreferenceItems() {
         ListBoxModel items = new ListBoxModel();
         for (FodEnums.EntitlementPreferenceType preferenceType : FodEnums.EntitlementPreferenceType.values()) {
-            items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.toString())));
+            items.add(new ListBoxModel.Option(preferenceType.toString(), preferenceType.getValue()));
         }
 
         return items;
@@ -119,7 +119,7 @@ public class SharedUploadBuildStep {
     public static ListBoxModel doFillRemediationScanPreferenceTypeItems() {
         ListBoxModel items = new ListBoxModel();
         for (FodEnums.RemediationScanPreferenceType remediationType : FodEnums.RemediationScanPreferenceType.values()) {
-            items.add(new ListBoxModel.Option(remediationType.toString(), String.valueOf(remediationType.toString())));
+            items.add(new ListBoxModel.Option(remediationType.toString(), remediationType.getValue()));
         }
         return items;
     }
@@ -133,6 +133,15 @@ public class SharedUploadBuildStep {
                 null,
                 null
                 );
+        return items;
+    }
+    
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillInProgressScanActionTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.InProgressScanActionType scanActionType : FodEnums.InProgressScanActionType.values()) {
+            items.add(new ListBoxModel.Option(scanActionType.toString(), scanActionType.getValue()));
+        }
         return items;
     }
 

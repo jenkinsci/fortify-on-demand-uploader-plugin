@@ -231,6 +231,11 @@ public class FortifyStaticAssessment extends FortifyStep {
         public ListBoxModel doFillTenantIdItems() {
             return SharedUploadBuildStep.doFillStringCredentialsItems();
         }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillInProgressScanActionTypeItems() {
+            return SharedUploadBuildStep.doFillInProgressScanActionTypeItems();
+        }
     }
 
     private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
