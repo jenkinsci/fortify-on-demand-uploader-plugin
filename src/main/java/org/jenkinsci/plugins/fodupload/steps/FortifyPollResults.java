@@ -77,7 +77,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     public String getClientId() {
-        return Secret.fromString(clientId).getEncryptedValue().toString();
+        return clientId;
     }
 
     @DataBoundSetter
@@ -86,7 +86,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     public String getClientSecret() {
-        return Secret.fromString(clientSecret).getEncryptedValue().toString();
+        return clientSecret;
     }
 
     @DataBoundSetter
@@ -95,7 +95,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     public String getUsername() {
-        return Secret.fromString(username).getEncryptedValue().toString();
+        return username;
     }
 
     @DataBoundSetter
@@ -104,7 +104,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     public String getPersonalAccessToken() {
-        return Secret.fromString(personalAccessToken).getEncryptedValue().toString();
+        return personalAccessToken;
     }
 
     @DataBoundSetter
@@ -113,7 +113,7 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     public String getTenantId() {
-        return Secret.fromString(tenantId).getEncryptedValue().toString();
+        return tenantId;
     }
 
     @DataBoundSetter
@@ -130,11 +130,11 @@ public class FortifyPollResults extends FortifyStep {
                 overrideGlobalConfig,
                 pollingInterval,
                 policyFailureBuildResultPreference,
-                Secret.decrypt(clientId).getPlainText(),
-                Secret.decrypt(clientSecret).getPlainText(),
-                Secret.decrypt(username).getPlainText(),
-                Secret.decrypt(personalAccessToken).getPlainText(),
-                Secret.decrypt(tenantId).getPlainText());
+                clientId,
+                clientSecret,
+                username,
+                personalAccessToken,
+                tenantId);
 
         return true;
     }
@@ -153,11 +153,11 @@ public class FortifyPollResults extends FortifyStep {
                 overrideGlobalConfig,
                 pollingInterval,
                 policyFailureBuildResultPreference,
-                Secret.decrypt(clientId).getPlainText(),
-                Secret.decrypt(clientSecret).getPlainText(),
-                Secret.decrypt(username).getPlainText(),
-                Secret.decrypt(personalAccessToken).getPlainText(),
-                Secret.decrypt(tenantId).getPlainText());
+                clientId,
+                clientSecret,
+                username,
+                personalAccessToken,
+                tenantId);
 
         commonBuildStep.perform(build, workspace, launcher, listener);
     }
@@ -182,16 +182,31 @@ public class FortifyPollResults extends FortifyStep {
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedPollingBuildStep.USERNAME) final Secret username,
-                                                                  @QueryParameter(SharedPollingBuildStep.PERSONAL_ACCESS_TOKEN) final Secret personalAccessToken,
-                                                                  @QueryParameter(SharedPollingBuildStep.TENANT_ID) final Secret tenantId) {
-            return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(Secret.toString(username), Secret.toString(personalAccessToken), Secret.toString(tenantId));
+        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedPollingBuildStep.USERNAME) final String username,
+                                                                  @QueryParameter(SharedPollingBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                  @QueryParameter(SharedPollingBuildStep.TENANT_ID) final String tenantId) {
+            return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
 
         }
 
         @SuppressWarnings("unused")
         public ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
             return SharedPollingBuildStep.doFillPolicyFailureBuildResultPreferenceItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillUsernameItems() {
+            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillPersonalAccessTokenItems() {
+            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillTenantIdItems() {
+            return SharedPollingBuildStep.doFillStringCredentialsItems();
         }
 
     }

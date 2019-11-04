@@ -66,7 +66,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     public String getUsername() {
-        return Secret.fromString(username).getEncryptedValue().toString();
+        return username;
     }
 
     @DataBoundSetter
@@ -75,7 +75,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     public String getPersonalAccessToken() {
-        return Secret.fromString(personalAccessToken).getEncryptedValue().toString();
+        return personalAccessToken;
     }
 
     @DataBoundSetter
@@ -84,7 +84,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     public String getTenantId() {
-        return Secret.fromString(tenantId).getEncryptedValue().toString();
+        return tenantId;
     }
 
     @DataBoundSetter
@@ -144,9 +144,9 @@ public class FortifyStaticAssessment extends FortifyStep {
         log.println("Fortify on Demand Upload PreBuild Running...");
         commonBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
-                Secret.decrypt(username).getPlainText(),
-                Secret.decrypt(personalAccessToken).getPlainText(),
-                Secret.decrypt(tenantId).getPlainText(),
+                username,
+                personalAccessToken,
+                tenantId,
                 purchaseEntitlements,
                 entitlementPreference,
                 srcLocation,
@@ -168,9 +168,9 @@ public class FortifyStaticAssessment extends FortifyStep {
         log.println("Fortify on Demand Upload Running...");
         commonBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
-                Secret.decrypt(username).getPlainText(),
-                Secret.decrypt(personalAccessToken).getPlainText(),
-                Secret.decrypt(tenantId).getPlainText(),
+                username,
+                personalAccessToken,
+                tenantId,
                 purchaseEntitlements,
                 entitlementPreference,
                 srcLocation,
@@ -200,10 +200,10 @@ public class FortifyStaticAssessment extends FortifyStep {
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final Secret username,
-                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final Secret personalAccessToken,
-                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final Secret tenantId) {
-            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(Secret.toString(username), Secret.toString(personalAccessToken), Secret.toString(tenantId));
+        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
+                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId) {
+            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
 
         }
 
@@ -215,6 +215,21 @@ public class FortifyStaticAssessment extends FortifyStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillRemediationScanPreferenceTypeItems() {
             return SharedUploadBuildStep.doFillRemediationScanPreferenceTypeItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillUsernameItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillPersonalAccessTokenItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillTenantIdItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
         }
     }
 
