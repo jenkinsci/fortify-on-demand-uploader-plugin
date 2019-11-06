@@ -16,6 +16,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.model.GlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
@@ -48,13 +49,13 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                             String clientId,
                             String clientSecret,
                             String username,
-                            String personalAccessToken,
+                            Secret personalAccessToken,
                             String tenantId) {
 
         sharedBuildStep = new SharedPollingBuildStep(bsiToken,
                 overrideGlobalConfig, pollingInterval,
                 policyFailureBuildResultPreference, clientId, clientSecret,
-                username, personalAccessToken, tenantId);
+                username, personalAccessToken.getEncryptedValue(), tenantId);
     }
 
     @Override
@@ -93,8 +94,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     }
 
     @SuppressWarnings("unused")
-    public String getPersonalAccessToken() {
-        return sharedBuildStep.getAuthModel().getPersonalAccessToken();
+    public Secret getPersonalAccessToken() {
+        return Secret.fromString(sharedBuildStep.getAuthModel().getPersonalAccessToken());
     }
 
     @SuppressWarnings("unused")
