@@ -44,10 +44,7 @@
             </select>
         </f:entry>
         <f:entry title="Action when scan is in progress" field="inProgressScanActionType">
-            <select name="inProgressScanActionType">
-                <option value="DoNotStartScan">Do Not Start Scan</option>
-                <option value="CancelInProgressScan">Cancel Scan Then Start</option>
-            </select>
+            <f:select style="width: 160px;"/>
         </f:entry>
     </f:section>
 

@@ -121,6 +121,15 @@ public class SharedUploadBuildStep {
         return items;
     }
 
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillInProgressScanActionTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.InProgressScanActionType scanActionType : FodEnums.InProgressScanActionType.values()) {
+            items.add(new ListBoxModel.Option(scanActionType.toString(), scanActionType.getValue()));
+        }
+        return items;
+    }
+
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         final PrintStream logger = listener.getLogger();
         if (model == null) {
