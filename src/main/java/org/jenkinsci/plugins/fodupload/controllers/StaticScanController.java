@@ -12,8 +12,6 @@ import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
-import sun.applet.Main;
 
 import java.io.File;
 import java.io.FileInputStream;

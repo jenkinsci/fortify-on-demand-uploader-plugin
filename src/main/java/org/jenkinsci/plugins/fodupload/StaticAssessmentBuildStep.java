@@ -15,6 +15,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -44,7 +45,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public StaticAssessmentBuildStep(String bsiToken,
                                      boolean overrideGlobalConfig,
                                      String username,
-                                     String personalAccessToken,
+                                     Secret personalAccessToken,
                                      String tenantId,
                                      boolean purchaseEntitlements,
                                      String entitlementPreference,
@@ -55,7 +56,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         sharedBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
                 username,
-                personalAccessToken,
+                personalAccessToken.getEncryptedValue(),
                 tenantId,
                 purchaseEntitlements,
                 entitlementPreference,
@@ -107,8 +108,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public String getPersonalAccessToken() {
-        return sharedBuildStep.getAuthModel().getPersonalAccessToken();
+    public Secret getPersonalAccessToken() {
+        return Secret.fromString(sharedBuildStep.getAuthModel().getPersonalAccessToken());
     }
 
     @SuppressWarnings("unused")
