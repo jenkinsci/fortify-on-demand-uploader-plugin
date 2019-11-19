@@ -212,10 +212,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @SuppressWarnings("unused")
         public ListBoxModel doFillTenantIdItems() {
             return SharedUploadBuildStep.doFillStringCredentialsItems();
-
-        public ListBoxModel doFillInProgressScanActionTypeItems() {
-            return SharedUploadBuildStep.doFillInProgressScanActionTypeItems();
-
         }
 
         @SuppressWarnings("unused")
