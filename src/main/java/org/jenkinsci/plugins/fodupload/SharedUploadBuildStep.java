@@ -133,6 +133,7 @@ public class SharedUploadBuildStep {
                 null,
                 null
                 );
+
         return items;
     }
 
