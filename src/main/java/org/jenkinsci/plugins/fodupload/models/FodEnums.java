@@ -41,14 +41,14 @@ public class FodEnums {
     ;
 
     public enum EntitlementPreferenceType {
-        SubscriptionFirstThenSingleScan(4),
-        SingleScanFirstThenSubscription(3),
-        SubscriptionOnly(2),
-        SingleScanOnly(1);
+        SubscriptionFirstThenSingleScan("SubscriptionFirstThenSingleScan"),
+        SingleScanFirstThenSubscription("SingleScanFirstThenSubscription"),
+        SubscriptionOnly("SubscriptionOnly"),
+        SingleScanOnly("SingleScanOnly");
 
-        private final int _val;
+        private final String _val;
 
-        EntitlementPreferenceType(int val) {
+        EntitlementPreferenceType(String val) {
             this._val = val;
         }
 
@@ -67,33 +67,33 @@ public class FodEnums {
             }
         }
 
-        public int getValue() {
+        public String getValue() {
             return this._val;
         }
 
         public String toString() {
             switch (this._val) {
-                case 4:
-                    return "SubscriptionFirstThenSingleScan";
-                case 3:
-                    return "SingleScanFirstThenSubscription";
-                case 2:
-                    return "SubscriptionOnly";
-                case 1:
+                case "SubscriptionFirstThenSingleScan":
+                    return "Subscription First Then Single Scan";
+                case "SingleScanFirstThenSubscription":
+                    return "Single Scan First Then Subscription";
+                case "SubscriptionOnly":
+                    return "Subscription Only";
+                case "SingleScanOnly":
                 default:
-                    return "SingleScanOnly";
+                    return "Single Scan Only";
             }
         }
     }
 
     public enum RemediationScanPreferenceType {
-        NonRemediationScanOnly(3),
-        RemediationScanOnly(2),
-        RemediationScanIfAvailable(1);
+        NonRemediationScanOnly("NonRemediationScanOnly"),
+        RemediationScanOnly("RemediationScanOnly"),
+        RemediationScanIfAvailable("RemediationScanIfAvailable");
 
-        private final int _val;
+        private final String _val;
 
-        RemediationScanPreferenceType(int val) {
+        RemediationScanPreferenceType(String val) {
             this._val = val;
         }
 
@@ -109,19 +109,54 @@ public class FodEnums {
             }
         }
 
-        public int getValue() {
+        public String getValue() {
             return this._val;
         }
 
         public String toString() {
             switch (this._val) {
-                case 3:
-                    return "NonRemediationScanOnly";
+                case "NonRemediationScanOnly":
+                    return "Non-Remediation Scan Only";
+                case "RemediationScanOnly":
+                    return "Remediation Scan Only";
+                case "RemediationScanIfAvailable":
+                default:
+                    return "Remediation Scan If Available";
+            }
+        }
+    }
+
+    public enum InProgressScanActionType {
+        CancelInProgressScan("CancelInProgressScan"),
+        DoNotStartScan("DoNotStartScan");
+
+        private final String _val;
+
+        InProgressScanActionType(String val) {
+            this._val = val;
+        }
+
+        public static InProgressScanActionType fromInt(int val) {
+            switch (val) {
                 case 2:
-                    return "RemediationScanOnly";
+                    return CancelInProgressScan;
                 case 1:
                 default:
-                    return "RemediationScanIfAvailable";
+                    return DoNotStartScan;
+            }
+        }
+
+        public String getValue() {
+            return this._val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "CancelInProgressScan":
+                    return "Cancel In-Progress Scan";
+                case "DoNotStartScan":
+                default:
+                    return "Do Not Start Scan";
             }
         }
     }

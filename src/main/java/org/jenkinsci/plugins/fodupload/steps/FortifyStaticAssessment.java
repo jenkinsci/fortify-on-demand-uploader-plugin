@@ -234,6 +234,11 @@ public class FortifyStaticAssessment extends FortifyStep {
             return SharedUploadBuildStep.doFillInProgressScanActionTypeItems();
 
         }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillInProgressScanActionTypeItems() {
+            return SharedUploadBuildStep.doFillInProgressScanActionTypeItems();
+        }
     }
 
     private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
