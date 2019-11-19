@@ -148,7 +148,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                                                  @QueryParameter(API_URL) final String apiUrl) {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
-        String plainTextClientId = Utils.retrieveSecretDecryptedValue(clientId);
+        String plainTextClientId = clientId;
         String plainTextClientSecret= Utils.retrieveSecretDecryptedValue(clientSecret);
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
@@ -172,9 +172,9 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                                                               @QueryParameter(API_URL) final String apiUrl) {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
-        String plainTextUsername = Utils.retrieveSecretDecryptedValue(username);
+        String plainTextUsername = username;
         String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
-        String plainTextTenantId= Utils.retrieveSecretDecryptedValue(tenantId);
+        String plainTextTenantId = tenantId;
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
         if (Utils.isNullOrEmpty(apiUrl))
@@ -229,7 +229,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                     throw new IllegalArgumentException("Client ID is null.");
                 if (Utils.isNullOrEmpty(clientSecret))
                     throw new IllegalArgumentException("Client Secret is null.");
-                return new FodApiConnection(Utils.retrieveSecretDecryptedValue(clientId), Utils.retrieveSecretDecryptedValue(clientSecret), baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
+                return new FodApiConnection(clientId, Utils.retrieveSecretDecryptedValue(clientSecret), baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
             } else if (globalAuthType.equals("personalAccessTokenType")) {
                 if (Utils.isNullOrEmpty(username))
                     throw new IllegalArgumentException("Username is null.");
@@ -237,7 +237,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                     throw new IllegalArgumentException("Personal Access Token is null.");
                 if (Utils.isNullOrEmpty(tenantId))
                     throw new IllegalArgumentException("Tenant ID is null.");
-                return new FodApiConnection(Utils.retrieveSecretDecryptedValue(tenantId) + "\\" + Utils.retrieveSecretDecryptedValue(username), Utils.retrieveSecretDecryptedValue(personalAccessToken), baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
+                return new FodApiConnection(tenantId + "\\" + username, Utils.retrieveSecretDecryptedValue(personalAccessToken), baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
             } else {
                 throw new IllegalArgumentException("Invalid authentication type");
             }

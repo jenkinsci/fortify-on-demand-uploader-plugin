@@ -87,9 +87,9 @@ public class SharedUploadBuildStep {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
         String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-        String plainTextUsername = Utils.retrieveSecretDecryptedValue(username);
+        String plainTextUsername = username;
         String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
-        String plainTextTenantId= Utils.retrieveSecretDecryptedValue(tenantId);
+        String plainTextTenantId = tenantId;
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
         if (Utils.isNullOrEmpty(apiUrl))
@@ -181,9 +181,7 @@ public class SharedUploadBuildStep {
             if(authModel != null)
             {
                 if(authModel.getOverrideGlobalConfig() == true){
-                    if(!Utils.isCredential(authModel.getPersonalAccessToken()) ||
-                       !Utils.isCredential(authModel.getUsername()) ||
-                       !Utils.isCredential(authModel.getTenantId()))
+                    if(!Utils.isCredential(authModel.getPersonalAccessToken()))
                     {
                         build.setResult(Result.UNSTABLE);
                         logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
@@ -194,8 +192,7 @@ public class SharedUploadBuildStep {
                 {
                     if(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey())
                     {
-                        if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientId()) ||
-                           !Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
+                        if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
                         {
                             build.setResult(Result.UNSTABLE);
                             logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
@@ -204,9 +201,7 @@ public class SharedUploadBuildStep {
                     }
                     else
                     {
-                         if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalTenantId()) ||
-                            !Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalUsername()) ||
-                            !Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
+                         if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
                         {
                             build.setResult(Result.UNSTABLE);
                             logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
