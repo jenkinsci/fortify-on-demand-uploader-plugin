@@ -127,8 +127,8 @@ public class FodEnums {
     }
 
     public enum InProgressScanActionType {
-        CancelInProgressScan("CancelInProgressScan"),
-        DoNotStartScan("DoNotStartScan");
+        DoNotStartScan("DoNotStartScan"),
+        CancelInProgressScan("CancelInProgressScan");
 
         private final String _val;
 
