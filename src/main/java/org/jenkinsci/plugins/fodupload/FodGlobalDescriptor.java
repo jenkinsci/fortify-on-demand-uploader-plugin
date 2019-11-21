@@ -148,17 +148,16 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                                                  @QueryParameter(API_URL) final String apiUrl) {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
-        String plainTextClientId = clientId;
         String plainTextClientSecret= Utils.retrieveSecretDecryptedValue(clientSecret);
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
         if (Utils.isNullOrEmpty(apiUrl))
             return FormValidation.error("Fortify on Demand API URL is empty!");
-        if (Utils.isNullOrEmpty(plainTextClientId))
+        if (Utils.isNullOrEmpty(clientId))
             return FormValidation.error("API Key is empty!");
-        if (Utils.isNullOrEmpty(plainTextClientSecret))
-            return FormValidation.error("Secret Key is empty!");
-        testApi = new FodApiConnection(plainTextClientId, plainTextClientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
+        if (!Utils.isCredential(clientSecret))
+            return FormValidation.error("Secret Key is empty! ClientSecret : " + clientSecret + " and plaintextClientSecret: " + plainTextClientSecret);
+        testApi = new FodApiConnection(clientId, plainTextClientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
         return testConnection(testApi);
     }
 
@@ -172,20 +171,18 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                                                               @QueryParameter(API_URL) final String apiUrl) {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
-        String plainTextUsername = username;
         String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
-        String plainTextTenantId = tenantId;
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
         if (Utils.isNullOrEmpty(apiUrl))
             return FormValidation.error("Fortify on Demand API URL is empty!");
-        if (Utils.isNullOrEmpty(plainTextUsername))
+        if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
-        if (Utils.isNullOrEmpty(plainTextPersonalAccessToken))
-            return FormValidation.error("Personal Access Token is empty!");
-        if (Utils.isNullOrEmpty(plainTextTenantId))
+        if (!Utils.isCredential(personalAccessToken))
+            return FormValidation.error("Personal Access Token is empty! Personal accesstoken value: " + plainTextPersonalAccessToken);
+        if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
-        testApi = new FodApiConnection(plainTextTenantId + "\\" + plainTextUsername, plainTextPersonalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
+        testApi = new FodApiConnection(tenantId + "\\" + username, plainTextPersonalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
         return testConnection(testApi);
 
     }
@@ -252,7 +249,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         try {
             testApi.authenticate();
         } catch (IOException e) {
-            return FormValidation.error("Unable to authenticate with Fortify on Demand");
+            return FormValidation.error("Unable to authenticate with Fortify on Demand. Error Message: " + e.getMessage());
         }
 
         String token = testApi.getToken();

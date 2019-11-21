@@ -98,20 +98,18 @@ public class SharedPollingBuildStep {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
         String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-        String plainTextUsername = username;
         String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
-        String plainTextTenantId = tenantId;
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
         if (Utils.isNullOrEmpty(apiUrl))
             return FormValidation.error("Fortify on Demand API URL is empty!");
-        if (Utils.isNullOrEmpty(plainTextUsername))
+        if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
-        if (Utils.isNullOrEmpty(plainTextPersonalAccessToken))
-            return FormValidation.error("Personal Access Token is empty!");
-        if (Utils.isNullOrEmpty(plainTextTenantId))
+        if (!Utils.isCredential(personalAccessToken))
+            return FormValidation.error("Personal Access Token is empty! Personal accesstoken value: " + plainTextPersonalAccessToken);
+        if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
-        testApi = new FodApiConnection(plainTextTenantId + "\\" + plainTextUsername, plainTextPersonalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant");
+        testApi = new FodApiConnection(tenantId + "\\" + username, plainTextPersonalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant");
         return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
 
     }

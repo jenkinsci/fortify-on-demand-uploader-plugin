@@ -49,13 +49,13 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                             String clientId,
                             String clientSecret,
                             String username,
-                            Secret personalAccessToken,
+                            String personalAccessToken,
                             String tenantId) {
 
         sharedBuildStep = new SharedPollingBuildStep(bsiToken,
                 overrideGlobalConfig, pollingInterval,
                 policyFailureBuildResultPreference, clientId, clientSecret,
-                username, personalAccessToken.getEncryptedValue(), tenantId);
+                username, personalAccessToken, tenantId);
     }
 
     @Override
@@ -94,8 +94,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     }
 
     @SuppressWarnings("unused")
-    public Secret getPersonalAccessToken() {
-        return Secret.fromString(sharedBuildStep.getAuthModel().getPersonalAccessToken());
+    public String getPersonalAccessToken() {
+        return sharedBuildStep.getAuthModel().getPersonalAccessToken();
     }
 
     @SuppressWarnings("unused")
