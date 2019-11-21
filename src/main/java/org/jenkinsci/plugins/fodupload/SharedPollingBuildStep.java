@@ -106,7 +106,7 @@ public class SharedPollingBuildStep {
         if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
         if (!Utils.isCredential(personalAccessToken))
-            return FormValidation.error("Personal Access Token is empty! Personal accesstoken value: " + plainTextPersonalAccessToken);
+            return FormValidation.error("Personal Access Token is empty or needs to be resaved!");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
         testApi = new FodApiConnection(tenantId + "\\" + username, plainTextPersonalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant");

@@ -156,7 +156,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         if (Utils.isNullOrEmpty(clientId))
             return FormValidation.error("API Key is empty!");
         if (!Utils.isCredential(clientSecret))
-            return FormValidation.error("Secret Key is empty! ClientSecret : " + clientSecret + " and plaintextClientSecret: " + plainTextClientSecret);
+            return FormValidation.error("Secret Key is empty or needs to be resaved!");
         testApi = new FodApiConnection(clientId, plainTextClientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
         return testConnection(testApi);
     }
@@ -179,7 +179,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
         if (!Utils.isCredential(personalAccessToken))
-            return FormValidation.error("Personal Access Token is empty! Personal accesstoken value: " + plainTextPersonalAccessToken);
+            return FormValidation.error("Personal Access Token is empty! Please update and save credentials.");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
         testApi = new FodApiConnection(tenantId + "\\" + username, plainTextPersonalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
