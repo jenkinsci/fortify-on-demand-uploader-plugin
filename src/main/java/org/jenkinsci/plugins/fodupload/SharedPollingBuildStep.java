@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.fortify.fod.parser.BsiToken;
 import com.fortify.fod.parser.BsiTokenParser;
 
@@ -11,6 +12,7 @@ import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
 import org.jenkinsci.plugins.fodupload.polling.ScanStatusPoller;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
@@ -18,9 +20,11 @@ import hudson.Launcher;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
+import jenkins.model.Jenkins;
 
 public class SharedPollingBuildStep {
 
@@ -51,9 +55,6 @@ public class SharedPollingBuildStep {
         this.bsiToken = bsiToken;
         this.pollingInterval = pollingInterval;
         this.policyFailureBuildResultPreference = policyFailureBuildResultPreference;
-        username = Utils.encrypt(username);
-        personalAccessToken = Utils.encrypt(personalAccessToken);
-        tenantId = Utils.encrypt(tenantId);
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -97,17 +98,18 @@ public class SharedPollingBuildStep {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
         String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
+        String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
         if (Utils.isNullOrEmpty(apiUrl))
             return FormValidation.error("Fortify on Demand API URL is empty!");
         if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
-        if (Utils.isNullOrEmpty(personalAccessToken))
-            return FormValidation.error("Personal Access Token is empty!");
+        if (!Utils.isCredential(personalAccessToken))
+            return FormValidation.error("Personal Access Token is empty or needs to be resaved!");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
-        testApi = new FodApiConnection(tenantId + "\\" + username, personalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant");
+        testApi = new FodApiConnection(tenantId + "\\" + username, plainTextPersonalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant");
         return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
 
     }
@@ -118,6 +120,18 @@ public class SharedPollingBuildStep {
             items.add(new ListBoxModel.Option(preferenceType.toString(), String.valueOf(preferenceType.getValue())));
         }
 
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillStringCredentialsItems() {
+        ListBoxModel items = CredentialsProvider.listCredentials(
+                StringCredentials.class,
+                Jenkins.get(),
+                ACL.SYSTEM,
+                null,
+                null
+                );
         return items;
     }
 
@@ -134,9 +148,7 @@ public class SharedPollingBuildStep {
         if(authModel != null)
         {
             if(authModel.getOverrideGlobalConfig() == true){
-                if(!Utils.isEncrypted(authModel.getPersonalAccessToken()) ||
-                   !Utils.isEncrypted(authModel.getUsername()) ||
-                   !Utils.isEncrypted(authModel.getTenantId()))
+                if(!Utils.isCredential(authModel.getPersonalAccessToken()))
                 {
                     run.setResult(Result.UNSTABLE);
                     logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
@@ -147,8 +159,7 @@ public class SharedPollingBuildStep {
             {
                 if(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey())
                 {
-                    if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientId()) ||
-                       !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
+                    if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
                     {
                         run.setResult(Result.UNSTABLE);
                         logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
@@ -157,9 +168,7 @@ public class SharedPollingBuildStep {
                 }
                 else
                 {
-                     if(!Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalTenantId()) ||
-                        !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalUsername()) ||
-                        !Utils.isEncrypted(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
+                     if( !Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
                     {
                         run.setResult(Result.UNSTABLE);
                         logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
@@ -247,9 +256,9 @@ public class SharedPollingBuildStep {
 
     public AuthenticationModel getAuthModel() {
         AuthenticationModel displayModel = new AuthenticationModel(authModel.getOverrideGlobalConfig(),
-                                                                   Utils.decrypt(authModel.getUsername()),
-                                                                   Utils.decrypt(authModel.getPersonalAccessToken()),
-                                                                   Utils.decrypt(authModel.getTenantId()) );
+                                                                   authModel.getUsername(),
+                                                                   authModel.getPersonalAccessToken(),
+                                                                   authModel.getTenantId() );
        
         return displayModel;
     }

@@ -45,7 +45,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public StaticAssessmentBuildStep(String bsiToken,
                                      boolean overrideGlobalConfig,
                                      String username,
-                                     Secret personalAccessToken,
+                                     String personalAccessToken,
                                      String tenantId,
                                      boolean purchaseEntitlements,
                                      String entitlementPreference,
@@ -56,7 +56,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         sharedBuildStep = new SharedUploadBuildStep(bsiToken,
                 overrideGlobalConfig,
                 username,
-                personalAccessToken.getEncryptedValue(),
+                personalAccessToken,
                 tenantId,
                 purchaseEntitlements,
                 entitlementPreference,
@@ -108,8 +108,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public Secret getPersonalAccessToken() {
-        return Secret.fromString(sharedBuildStep.getAuthModel().getPersonalAccessToken());
+    public String getPersonalAccessToken() {
+        return sharedBuildStep.getAuthModel().getPersonalAccessToken();
     }
 
     @SuppressWarnings("unused")
@@ -196,6 +196,22 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @SuppressWarnings("unused")
         public ListBoxModel doFillRemediationScanPreferenceTypeItems() {
             return SharedUploadBuildStep.doFillRemediationScanPreferenceTypeItems();
+        }
+
+        @SuppressWarnings("unused")
+
+        public ListBoxModel doFillUsernameItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillPersonalAccessTokenItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillTenantIdItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
         }
 
         @SuppressWarnings("unused")
