@@ -23,7 +23,7 @@
 
     <name>Fortify on Demand</name>
     <description>Gathers build artifacts and uploads them to the Fortify on Demand service with user-specified options.</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Fortify+On+Demand+Uploader+Plugin</url>
+    <url>https://github.com/jenkinsci/fortify-on-demand-uploader-plugin</url>
 
     <licenses>
         <license>
