@@ -1,13 +1,18 @@
 # Changelog
+## Version 5.0.0 (12-04-2019)
+- Added support for the Credentials Plugin.
+- Fixed **Action when scan is in progress** field to populate saved data.
+
 ## Version 4.0.1 (10-22-2019)
 - Fixed SECURITY-1433 / CVE-2019-10449.
 
 ## Version 4.0.0 (10-14-2019)
 - Removed obsolete and redundant fields.
 - Added the ability to specify the directory of the files to upload.
-- Updated the Entitlement Preference and Remediation Preference options
+- Updated the **Entitlement Preference** and **Remediation Preference** options.
 - Added the ability to cancel an in-progress scan and start a new scan or not start a new scan and mark the build as unstable.
 - When a Jenkins build polls for scan status, scan pause and scan cancellation updates now include additional details.
+- Polling now stops once a scan is cancelled, completed, or paused. 
 - Details of a scan started through the Fortify on Demand Jenkins Plugin include the scan's method of origination. 
 - Updated marketplace details.
 
