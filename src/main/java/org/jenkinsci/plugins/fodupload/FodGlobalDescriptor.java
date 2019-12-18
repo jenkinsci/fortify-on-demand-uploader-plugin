@@ -25,6 +25,9 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String TENANT_ID = "tenantId";
     private static final String BASE_URL = "baseUrl";
     private static final String API_URL = "apiUrl";
+    private static final String CONNECTION_TIMEOUT = "connectionTimeout";
+    private static final String READ_TIMEOUT = "readTimeout";
+    private static final String WRITE_TIMEOUT = "writeTimeout";
 
     private String globalAuthType;
     private String clientId;
@@ -34,6 +37,11 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private String tenantId;
     private String baseUrl;
     private String apiUrl;
+
+    // timeouts
+    private String connectionTimeout;
+    private String readTimeout;
+    private String writeTimeout;
 
     public FodGlobalDescriptor() {
         load();
@@ -56,7 +64,9 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         }
         baseUrl = formData.getString(BASE_URL);
         apiUrl = formData.getString(API_URL);
-
+        connectionTimeout = formData.getString(CONNECTION_TIMEOUT);
+        readTimeout = formData.getString(READ_TIMEOUT);
+        writeTimeout = formData.getString(WRITE_TIMEOUT);
         save();
 
         return super.configure(req, formData);
@@ -132,6 +142,21 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         return apiUrl;
     }
 
+    @SuppressWarnings("unused")
+    public String getConnectionTimeout() {
+        return connectionTimeout;
+    }
+    
+    @SuppressWarnings("unused")
+    public String getReadTimeout() {
+        return readTimeout;
+    }
+    
+    @SuppressWarnings("unused")
+    public String getWriteTimeout() {
+        return writeTimeout;
+    }
+
     public boolean getAuthTypeIsApiKey() {
         return globalAuthType.equals("apiKeyType");
     }
@@ -145,7 +170,10 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     public FormValidation doTestApiKeyConnection(@QueryParameter(CLIENT_ID) final String clientId,
                                                  @QueryParameter(CLIENT_SECRET) final String clientSecret,
                                                  @QueryParameter(BASE_URL) final String baseUrl,
-                                                 @QueryParameter(API_URL) final String apiUrl) {
+                                                @QueryParameter(API_URL) final String apiUrl,
+                                                @QueryParameter(CONNECTION_TIMEOUT) final String connectionTimeout,
+                                                @QueryParameter(READ_TIMEOUT) final String readTimeout,
+                                                @QueryParameter(WRITE_TIMEOUT) final String writeTimeout) {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
         String plainTextClientSecret= Utils.retrieveSecretDecryptedValue(clientSecret);
@@ -157,7 +185,15 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
             return FormValidation.error("API Key is empty!");
         if (!Utils.isCredential(clientSecret))
             return FormValidation.error("Secret Key is empty or needs to be resaved!");
-        testApi = new FodApiConnection(clientId, plainTextClientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
+        testApi = new FodApiConnection( clientId,
+                                        plainTextClientSecret,
+                                        baseUrl,
+                                        apiUrl,
+                                        GrantType.CLIENT_CREDENTIALS,
+                                        "api-tenant",
+                                        connectionTimeout,
+                                        readTimeout,
+                                        writeTimeout);
         return testConnection(testApi);
     }
 
@@ -168,7 +204,10 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                                                               @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                               @QueryParameter(TENANT_ID) final String tenantId,
                                                               @QueryParameter(BASE_URL) final String baseUrl,
-                                                              @QueryParameter(API_URL) final String apiUrl) {
+                                                              @QueryParameter(API_URL) final String apiUrl,
+                                                              @QueryParameter(CONNECTION_TIMEOUT) final String connectionTimeout,
+                                                              @QueryParameter(READ_TIMEOUT) final String readTimeout,
+                                                              @QueryParameter(WRITE_TIMEOUT) final String writeTimeout) {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
         String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
@@ -182,10 +221,45 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
             return FormValidation.error("Personal Access Token is empty! Please update and save credentials.");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
-        testApi = new FodApiConnection(tenantId + "\\" + username, plainTextPersonalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
+        testApi = new FodApiConnection( tenantId + "\\" + username,
+                                        plainTextPersonalAccessToken,
+                                        baseUrl,
+                                        apiUrl,
+                                        GrantType.PASSWORD,
+                                        "api-tenant",
+                                        connectionTimeout,
+                                        readTimeout,
+                                        writeTimeout);
         return testConnection(testApi);
 
     }
+
+    public FormValidation doCheckConnectionTimeout(@QueryParameter(CONNECTION_TIMEOUT) String value) {
+        try {
+          Integer.parseInt(value);
+          return FormValidation.ok();
+        } catch (NumberFormatException e) {
+          return FormValidation.error("Not a number");
+        }
+    }   
+    
+    public FormValidation doCheckReadTimeout(@QueryParameter(READ_TIMEOUT) String value) {
+        try {
+          Integer.parseInt(value);
+          return FormValidation.ok();
+        } catch (NumberFormatException e) {
+          return FormValidation.error("Not a number");
+        }
+    }   
+    
+    public FormValidation doCheckWriteTimeout(@QueryParameter(WRITE_TIMEOUT) String value) {
+        try {
+          Integer.parseInt(value);
+          return FormValidation.ok();
+        } catch (NumberFormatException e) {
+          return FormValidation.error("Not a number");
+        }
+    }   
 
     @SuppressWarnings("unused")
     public ListBoxModel doFillClientIdItems() {
@@ -226,7 +300,15 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                     throw new IllegalArgumentException("Client ID is null.");
                 if (Utils.isNullOrEmpty(clientSecret))
                     throw new IllegalArgumentException("Client Secret is null.");
-                return new FodApiConnection(clientId, Utils.retrieveSecretDecryptedValue(clientSecret), baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
+                return new FodApiConnection(clientId,
+                                            Utils.retrieveSecretDecryptedValue(clientSecret),
+                                            baseUrl,
+                                            apiUrl,
+                                            GrantType.CLIENT_CREDENTIALS,
+                                            "api-tenant",
+                                            connectionTimeout,
+                                            readTimeout,
+                                            writeTimeout);
             } else if (globalAuthType.equals("personalAccessTokenType")) {
                 if (Utils.isNullOrEmpty(username))
                     throw new IllegalArgumentException("Username is null.");
@@ -234,7 +316,15 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                     throw new IllegalArgumentException("Personal Access Token is null.");
                 if (Utils.isNullOrEmpty(tenantId))
                     throw new IllegalArgumentException("Tenant ID is null.");
-                return new FodApiConnection(tenantId + "\\" + username, Utils.retrieveSecretDecryptedValue(personalAccessToken), baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
+                return new FodApiConnection(tenantId + "\\" + username,
+                                            Utils.retrieveSecretDecryptedValue(personalAccessToken),
+                                            baseUrl,
+                                            apiUrl,
+                                            GrantType.PASSWORD,
+                                            "api-tenant",
+                                            connectionTimeout,
+                                            readTimeout,
+                                            writeTimeout);
             } else {
                 throw new IllegalArgumentException("Invalid authentication type");
             }

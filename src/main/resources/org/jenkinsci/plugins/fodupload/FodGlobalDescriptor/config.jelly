@@ -21,7 +21,7 @@
                     <c:select style="width: 160px;"/>
                 </f:entry>
                 <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
-                          method="testApiKeyConnection" with="clientId,clientSecret,baseUrl,apiUrl"/>
+                          method="testApiKeyConnection" with="clientId,clientSecret,baseUrl,apiUrl,connectionTimeout,readTimeout,writeTimeout"/>
               </f:radioBlock>
                <f:radioBlock name="globalAuthType" title="Use Personal Access Token for authentication" checked="${instance.authTypeIsPersonalToken}" value="personalAccessTokenType" >
                 <f:entry title="Username" field="username">
@@ -34,10 +34,20 @@
                     <f:textbox/>
                 </f:entry>
                 <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
-                          method="testPersonalAccessTokenConnection" with="username,personalAccessToken,tenantId,baseUrl,apiUrl"/>
+                          method="testPersonalAccessTokenConnection" with="username,personalAccessToken,tenantId,baseUrl,apiUrl,connectionTimeout,readTimeout,writeTimeout"/>
               </f:radioBlock>
             </table>
         </f:block>
-    
+        <f:advanced>
+            <f:entry title="Connection Timeout" field="connectionTimeout">
+                <f:textbox default="30"/>
+            </f:entry>
+            <f:entry title="Read Timeout" field="readTimeout">
+                <f:textbox default="30"/>
+            </f:entry>
+            <f:entry title="Write Timeout" field="writeTimeout">
+                <f:textbox default="90"/>
+            </f:entry>
+        </f:advanced>  
 
 </j:jelly>
