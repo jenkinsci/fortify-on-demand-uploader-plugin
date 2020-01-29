@@ -32,10 +32,6 @@ public class FodApiConnection {
     private String id;
     private String secret;
 
-    private String connectionTimeout;
-    private String readTimeout;
-    private String writeTimeout;
-
     private ProxyConfiguration proxy = null;
 
     /**
@@ -45,24 +41,13 @@ public class FodApiConnection {
      * @param secret  apiConnection secret
      * @param baseUrl apiConnection baseUrl
      */
-    FodApiConnection(final String id, 
-                    final String secret, 
-                    final String baseUrl,
-                    final String apiUrl,
-                    final GrantType grantType,
-                    final String scope,
-                    final String connectionTimeout,
-                    final String readTimeout,
-                    final String writeTimeout) {
+    FodApiConnection(final String id, final String secret, final String baseUrl, final String apiUrl, final GrantType grantType, final String scope) {
         this.id = id;
         this.secret = secret;
         this.baseUrl = baseUrl;
         this.apiUrl = apiUrl;
         this.grantType = grantType;
         this.scope = scope;
-        this.connectionTimeout = connectionTimeout;
-        this.readTimeout = readTimeout;
-        this.writeTimeout = writeTimeout;
 
         Jenkins instance = Jenkins.getInstance();
         if (instance != null)
@@ -142,32 +127,10 @@ public class FodApiConnection {
      * @return returns a client object
      */
     private OkHttpClient Create() {
-        
-        int connectionTimeout = CONNECTION_TIMEOUT;
-        try{
-            connectionTimeout = Integer.parseInt(this.connectionTimeout);
-        }catch(NumberFormatException ex)
-        {
-            connectionTimeout = CONNECTION_TIMEOUT;
-        }
-        int writeTimeout = WRITE_TIMEOUT;
-        try{
-            writeTimeout = Integer.parseInt(this.writeTimeout);
-        }catch(NumberFormatException ex)
-        {
-            writeTimeout = WRITE_TIMEOUT;
-        }
-        int readTimeout = READ_TIMEOUT;
-        try{
-            readTimeout = Integer.parseInt(this.readTimeout);
-        }catch(NumberFormatException ex)
-        {
-            readTimeout = READ_TIMEOUT;
-        }
         OkHttpClient.Builder baseClient = new OkHttpClient().newBuilder()
-                .connectTimeout(connectionTimeout, TimeUnit.SECONDS)
-                .writeTimeout(writeTimeout, TimeUnit.SECONDS)
-                .readTimeout(readTimeout, TimeUnit.SECONDS);
+                .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
 
         // If there's no proxy just create a normal client
         if (proxy == null)

@@ -43,9 +43,6 @@ public class ApiConnectionFactory {
 
                 String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
                 String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-                String connectionTimeout = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getConnectionTimeout();
-                String readTimeout = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getReadTimeout();
-                String writeTimeout = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getWriteTimeout();
                 if (Utils.isNullOrEmpty(baseUrl))
                     throw new IllegalArgumentException("Base URL is null.");
                 if (Utils.isNullOrEmpty(apiUrl))
@@ -55,10 +52,7 @@ public class ApiConnectionFactory {
                         baseUrl,
                         apiUrl,
                         FodEnums.GrantType.PASSWORD,
-                        "api-tenant",
-                        connectionTimeout,
-                        readTimeout,
-                        writeTimeout);
+                        "api-tenant");
 
             } else {
                 apiConnection = GlobalConfiguration.all().get(FodGlobalDescriptor.class).createFodApiConnection();

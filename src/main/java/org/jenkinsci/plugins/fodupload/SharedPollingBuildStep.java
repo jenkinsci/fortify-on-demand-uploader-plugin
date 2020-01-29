@@ -98,9 +98,6 @@ public class SharedPollingBuildStep {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
         String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-        String connectionTimeout = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getConnectionTimeout();
-        String readTimeout = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getReadTimeout();
-        String writeTimeout = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getWriteTimeout();
         String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
@@ -112,15 +109,7 @@ public class SharedPollingBuildStep {
             return FormValidation.error("Personal Access Token is empty or needs to be resaved!");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
-        testApi = new FodApiConnection(tenantId + "\\" + username,
-                                        plainTextPersonalAccessToken,
-                                        baseUrl,
-                                        apiUrl,
-                                        FodEnums.GrantType.PASSWORD,
-                                        "api-tenant",
-                                        connectionTimeout,
-                                        readTimeout,
-                                        writeTimeout);
+        testApi = new FodApiConnection(tenantId + "\\" + username, plainTextPersonalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant");
         return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
 
     }
