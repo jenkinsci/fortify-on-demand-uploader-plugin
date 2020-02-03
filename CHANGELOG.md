@@ -1,4 +1,7 @@
 # Changelog
+## Version 5.0.1 (01-30-2020)
+- Increased timeouts.
+
 ## Version 5.0.0 (12-04-2019)
 - Added support for the Credentials Plugin.
 - Fixed **Action when scan is in progress** field to populate saved data.
