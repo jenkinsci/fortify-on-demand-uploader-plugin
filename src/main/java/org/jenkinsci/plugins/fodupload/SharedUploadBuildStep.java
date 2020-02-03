@@ -27,6 +27,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.verb.POST;
 
 public class SharedUploadBuildStep {
 
@@ -81,9 +82,11 @@ public class SharedUploadBuildStep {
     }
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    @POST
     public static FormValidation doTestPersonalAccessTokenConnection(final String username,
                                                                      final String personalAccessToken,
                                                                      final String tenantId) {
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
         String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
