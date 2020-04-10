@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.fodupload;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.Normalizer;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.fortify.fod.parser.BsiToken;
@@ -66,6 +67,46 @@ public class SharedUploadBuildStep {
                 username,
                 personalAccessToken,
                 tenantId);
+    }
+
+    public static FormValidation doCheckReleaseId(String releaseId, String bsiToken) {
+        if (releaseId != null && !releaseId.isEmpty()) {
+            try {
+                Integer testReleaseId = Integer.parseInt(releaseId);
+                return FormValidation.ok();
+            } catch (NumberFormatException ex) {
+                return FormValidation.error("Could not parse Release ID.");
+            }
+        }
+        else {
+            if (bsiToken != null && !bsiToken.isEmpty()) {
+                return FormValidation.ok();
+            }
+
+            return FormValidation.error("Please specify Release ID or BSI Token.");
+        }
+    }
+
+    public static FormValidation doCheckBsiToken(String bsiToken, String releaseId) {
+        if (bsiToken != null && !bsiToken.isEmpty()) {
+            BsiTokenParser tokenParser = new BsiTokenParser();
+            try {
+                BsiToken testToken = tokenParser.parse(bsiToken);
+                if (testToken != null) {
+                    return FormValidation.ok();
+                }
+            } catch (Exception ex) {
+                return FormValidation.error("Could not parse BSI token.");
+            }
+        } else {
+            if (releaseId != null && !releaseId.isEmpty()) {
+                return FormValidation.ok();
+            }
+
+            return FormValidation.error("Please specify Release ID or BSI Token.");
+        }
+
+        return FormValidation.error("Please specify Release ID or BSI Token.");
     }
 
     public static FormValidation doCheckReleaseSettings(String releaseId, String bsiToken) {

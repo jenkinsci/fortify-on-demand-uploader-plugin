@@ -174,9 +174,14 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             return true;
         }
 
-        public FormValidation doCheckReleaseSettings(@QueryParameter String releaseId, @QueryParameter String bsiToken) {
+        public FormValidation doCheckReleaseId(@QueryParameter String releaseId, @QueryParameter String bsiToken) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedUploadBuildStep.doCheckReleaseSettings(releaseId, bsiToken);
+            return SharedUploadBuildStep.doCheckReleaseId(releaseId, bsiToken);
+        }
+
+        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken, @QueryParameter String releaseId) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            return SharedUploadBuildStep.doCheckBsiToken(bsiToken, releaseId);
         }
 
         @Override

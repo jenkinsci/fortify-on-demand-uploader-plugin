@@ -140,11 +140,15 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
             return "Poll Fortify on Demand for Results";
         }
 
-        public FormValidation doCheckReleaseSettings(@QueryParameter String releaseId, @QueryParameter String bsiToken) {
+        public FormValidation doCheckReleaseId(@QueryParameter String releaseId, @QueryParameter String bsiToken) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedUploadBuildStep.doCheckReleaseSettings(releaseId, bsiToken);
+            return SharedPollingBuildStep.doCheckReleaseId(releaseId, bsiToken);
         }
 
+        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken, @QueryParameter String releaseId) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            return SharedPollingBuildStep.doCheckBsiToken(bsiToken, releaseId);
+        }
 
         public FormValidation doCheckPollingInterval(@QueryParameter String pollingInterval) {
             return SharedPollingBuildStep.doCheckPollingInterval(pollingInterval);

@@ -65,33 +65,44 @@ public class SharedPollingBuildStep {
                 tenantId);
     }
 
-    public static FormValidation doCheckReleaseSettings(String releaseId, String bsiToken) {
+    public static FormValidation doCheckReleaseId(String releaseId, String bsiToken) {
         if (releaseId != null && !releaseId.isEmpty()) {
             try {
                 Integer testReleaseId = Integer.parseInt(releaseId);
                 return FormValidation.ok();
-            }
-            catch (NumberFormatException ex) {
-                return FormValidation.error("Could not parse release ID");
+            } catch (NumberFormatException ex) {
+                return FormValidation.error("Could not parse Release ID.");
             }
         }
-        else if (bsiToken != null && !bsiToken.isEmpty()) {
+        else {
+            if (bsiToken != null && !bsiToken.isEmpty()) {
+                return FormValidation.ok();
+            }
+
+            return FormValidation.error("Please specify Release ID or BSI Token.");
+        }
+    }
+
+    public static FormValidation doCheckBsiToken(String bsiToken, String releaseId) {
+        if (bsiToken != null && !bsiToken.isEmpty()) {
             BsiTokenParser tokenParser = new BsiTokenParser();
             try {
                 BsiToken testToken = tokenParser.parse(bsiToken);
                 if (testToken != null) {
                     return FormValidation.ok();
                 }
-                else {
-                    return FormValidation.error("Could not parse BSI token.");
-                }
             } catch (Exception ex) {
                 return FormValidation.error("Could not parse BSI token.");
             }
+        } else {
+            if (releaseId != null && !releaseId.isEmpty()) {
+                return FormValidation.ok();
+            }
+
+            return FormValidation.error("Please specify Release ID or BSI Token.");
         }
-        else {
-            return FormValidation.error("Enter either release ID or BSI token.");
-        }
+
+        return FormValidation.error("Please specify Release ID or BSI Token.");
     }
 
     public static FormValidation doCheckPollingInterval(String pollingInterval) {
