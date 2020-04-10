@@ -109,35 +109,6 @@ public class SharedUploadBuildStep {
         return FormValidation.error("Please specify Release ID or BSI Token.");
     }
 
-    public static FormValidation doCheckReleaseSettings(String releaseId, String bsiToken) {
-        if (releaseId != null && !releaseId.isEmpty()) {
-            try {
-                Integer testReleaseId = Integer.parseInt(releaseId);
-                return FormValidation.ok();
-            }
-            catch (NumberFormatException ex) {
-                return FormValidation.error("Could not parse release ID");
-            }
-        }
-        else if (bsiToken != null && !bsiToken.isEmpty()) {
-                BsiTokenParser tokenParser = new BsiTokenParser();
-                try {
-                    BsiToken testToken = tokenParser.parse(bsiToken);
-                    if (testToken != null) {
-                        return FormValidation.ok();
-                    }
-                    else {
-                        return FormValidation.error("Could not parse BSI token.");
-                    }
-                } catch (Exception ex) {
-                    return FormValidation.error("Could not parse BSI token.");
-                }
-        }
-        else {
-            return FormValidation.error("Enter either release ID or BSI token.");
-        }
-    }
-
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @POST
     public static FormValidation doTestPersonalAccessTokenConnection(final String username,
