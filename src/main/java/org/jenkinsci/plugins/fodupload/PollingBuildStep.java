@@ -42,7 +42,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     SharedPollingBuildStep sharedBuildStep;
 
     @DataBoundConstructor
-    public PollingBuildStep(String bsiToken,
+    public PollingBuildStep(String releaseId,
+                            String bsiToken,
                             boolean overrideGlobalConfig,
                             int pollingInterval,
                             int policyFailureBuildResultPreference,
@@ -52,7 +53,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                             String personalAccessToken,
                             String tenantId) {
 
-        sharedBuildStep = new SharedPollingBuildStep(bsiToken,
+        sharedBuildStep = new SharedPollingBuildStep(releaseId, bsiToken,
                 overrideGlobalConfig, pollingInterval,
                 policyFailureBuildResultPreference, clientId, clientSecret,
                 username, personalAccessToken, tenantId);
@@ -71,6 +72,11 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
+    }
+
+    @SuppressWarnings("unused")
+    public String getReleaseId() {
+        return sharedBuildStep.getReleaseId();
     }
 
     @SuppressWarnings("unused")
@@ -134,10 +140,9 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
             return "Poll Fortify on Demand for Results";
         }
 
-        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken) {
+        public FormValidation doCheckReleaseSettings(@QueryParameter String releaseId, @QueryParameter String bsiToken) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedPollingBuildStep.doCheckBsiToken(bsiToken);
-
+            return SharedUploadBuildStep.doCheckReleaseSettings(releaseId, bsiToken);
         }
 
 
