@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.fortify.fod.parser.BsiToken;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.util.IOUtils;
 import okhttp3.*;
@@ -12,11 +13,10 @@ import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
+import org.jenkinsci.plugins.fodupload.models.response.StaticScanSetupResponse;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -47,7 +47,7 @@ public class StaticScanController extends ControllerBase {
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
-    public boolean startStaticScan(final JobModel uploadRequest, final String notes) {
+    public boolean startStaticScan(final Integer releaseId, final StaticScanSetupResponse staticScanSettings, final JobModel uploadRequest, final String notes) {
 
         PostStartScanResponse scanStartedResponse = null;
 
@@ -64,7 +64,10 @@ public class StaticScanController extends ControllerBase {
 
             logger.println("Getting Assessment");
 
-            BsiToken token = uploadRequest.getBsiToken();
+            BsiToken token = null;
+            if (releaseId == 0) {
+                token = uploadRequest.getBsiToken();
+            }
 
             String projectVersion;
             try (InputStream inputStream = this.getClass().getResourceAsStream("/application.properties")) {
@@ -74,9 +77,8 @@ public class StaticScanController extends ControllerBase {
             }
 
             HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
-                    .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", token.getProjectVersionId()))
-                    .addQueryParameter("bsiToken", uploadRequest.getBsiTokenOriginal())
-                    .addQueryParameter("technologyStack", token.getTechnologyType())
+                    .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", releaseId != 0 ? releaseId : token.getProjectVersionId()))
+                    .addQueryParameter("technologyStack", releaseId == 0 ? token.getTechnologyType() : staticScanSettings.getTechnologyStack())
                     .addQueryParameter("entitlementPreferenceType", uploadRequest.getEntitlementPreference())
                     .addQueryParameter("purchaseEntitlement", Boolean.toString(uploadRequest.isPurchaseEntitlements()))
                     .addQueryParameter("remdiationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType())
@@ -85,14 +87,17 @@ public class StaticScanController extends ControllerBase {
                     .addQueryParameter("scanTool", "Jenkins")
                     .addQueryParameter("scanToolVersion", projectVersion != null ? projectVersion : "NotFound");
 
+            if (releaseId == 0) {
+                builder = builder.addQueryParameter("bsiToken", uploadRequest.getBsiTokenOriginal());
+            }
 
             if (!Utils.isNullOrEmpty(notes)) {
                 String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);
                 builder = builder.addQueryParameter("notes", truncatedNotes);
             }
 
-            if (token.getTechnologyVersion() != null) {
-                builder = builder.addQueryParameter("languageLevel", token.getTechnologyVersion());
+            if ((releaseId == 0 ? token.getTechnologyVersion() : staticScanSettings.getLanguageLevel()) != null) {
+                builder = builder.addQueryParameter("languageLevel", releaseId == 0 ? token.getTechnologyVersion() : staticScanSettings.getLanguageLevel());
             }
 
             // TODO: Come back and fix the request to set fragNo and offset query parameters
@@ -170,5 +175,36 @@ public class StaticScanController extends ControllerBase {
         }
 
         return false;
+    }
+
+    public StaticScanSetupResponse getStaticScanSettings(final Integer releaseId) throws IOException {
+        if (apiConnection.getToken() == null)
+            apiConnection.authenticate();
+
+        HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+                .addPathSegments(String.format("/api/v3/releases/%d/static-scans/scan-setup", releaseId));
+
+        String url = builder.build().toString();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
+                .addHeader("Accept", "application/json")
+                .get()
+                .build();
+        Response response = apiConnection.getClient().newCall(request).execute();
+
+        if (!response.isSuccessful()) {
+            return null;
+        }
+
+        String content = IOUtils.toString(response.body().byteStream(), "utf-8");
+        response.body().close();
+
+        Gson gson = new Gson();
+        Type t = new TypeToken<StaticScanSetupResponse>() {}.getType();
+        StaticScanSetupResponse result = gson.fromJson(content, t);
+
+        return result;
     }
 }

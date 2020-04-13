@@ -16,6 +16,7 @@ public class JobModel {
 
     private static final BsiTokenParser tokenParser = new BsiTokenParser();
 
+    private String releaseId;
     private String bsiTokenOriginal;
     private transient BsiToken bsiTokenCache;
     private boolean purchaseEntitlements;
@@ -28,7 +29,7 @@ public class JobModel {
 
     /**
      * Build model used to pass values around
-     *
+     * @param releaseId                     Releaes ID
      * @param bsiToken                      BSI Token
      * @param purchaseEntitlements          purchaseEntitlements
      * @param entitlementPreference         entitlementPreference
@@ -36,13 +37,15 @@ public class JobModel {
      * @param remediationScanPreferenceType remediationScanPreferenceType
      * @param inProgressScanActionType      inProgressScanActionType
      */
-    public JobModel(String bsiToken,
+    public JobModel(String releaseId,
+                    String bsiToken,
                     boolean purchaseEntitlements,
                     String entitlementPreference,
                     String srcLocation,
                     String remediationScanPreferenceType,
                     String inProgressScanActionType) {
 
+        this.releaseId = releaseId;
         this.bsiTokenOriginal = bsiToken;
         this.entitlementPreference = entitlementPreference;
         this.purchaseEntitlements = purchaseEntitlements;
@@ -58,6 +61,8 @@ public class JobModel {
     public void setPayload(File payload) {
         this.payload = payload;
     }
+
+    public String getReleaseId() { return releaseId; }
 
     public BsiToken getBsiToken() {
         return bsiTokenCache;
@@ -94,24 +99,32 @@ public class JobModel {
 
     @Override
     public String toString() {
-        return String.format(
-                "Release Id:                        %s%n" +
-                        "Assessment Type Id:                %s%n" +
-                        "Technology Stack:                  %s%n" +
-                        "Language Level:                    %s%n" +
-                        "Purchase Entitlements:             %s%n" +
-                        "Entitlement Preference:            %s%n" +
-                        "In Progress Scan Action:           %s%n",
-                bsiTokenCache.getProjectVersionId(),
-                bsiTokenCache.getAssessmentTypeId(),
-                bsiTokenCache.getTechnologyStack(),
-                bsiTokenCache.getLanguageLevel(),
-                purchaseEntitlements,
-                entitlementPreference,
-                inProgressScanActionType);
+        if (bsiTokenCache != null) {
+            return String.format(
+                    "Release Id:                        %s%n" +
+                            "Assessment Type Id:                %s%n" +
+                            "Technology Stack:                  %s%n" +
+                            "Language Level:                    %s%n" +
+                            "Purchase Entitlements:             %s%n" +
+                            "Entitlement Preference:            %s%n" +
+                            "In Progress Scan Action:           %s%n",
+                    bsiTokenCache.getProjectVersionId(),
+                    bsiTokenCache.getAssessmentTypeId(),
+                    bsiTokenCache.getTechnologyStack(),
+                    bsiTokenCache.getLanguageLevel(),
+                    purchaseEntitlements,
+                    entitlementPreference,
+                    inProgressScanActionType);
+        } else {
+            return String.format("Release Id: %s", releaseId);
+        }
     }
 
-    public boolean initializeBuildModel() {
+    public boolean loadBsiToken() {
+        if (this.bsiTokenCache != null) {
+            return true;
+        }
+
         try {
             this.bsiTokenCache = tokenParser.parse(bsiTokenOriginal);
         } catch (Exception ex) {
@@ -125,14 +138,26 @@ public class JobModel {
 
         List<String> errors = new ArrayList<>();
 
-        if (bsiTokenCache.getAssessmentTypeId() == 0)
-            errors.add("Assessment Type");
+        Integer releaseIdNum = 0;
+        if (releaseId != null && !releaseId.isEmpty()) {
+            try {
+                releaseIdNum = Integer.parseInt(releaseId);
+            }
+            catch (NumberFormatException ex) {
+                errors.add("Release Id");
+            }
+        }
 
-        if (bsiTokenCache.getTechnologyType() == null)
-            errors.add("Technology Stack");
+        if (releaseIdNum == 0) {
+            if (bsiTokenCache.getAssessmentTypeId() == 0)
+                errors.add("Assessment Type");
 
-        if (bsiTokenCache.getProjectVersionId() == 0)
-            errors.add("Release Id");
+            if (bsiTokenCache.getTechnologyType() == null)
+                errors.add("Technology Stack");
+
+            if (bsiTokenCache.getProjectVersionId() == 0)
+                errors.add("BSI Token Release Id");
+        }
 
         if (errors.size() > 0) {
             logger.println("Missing the following fields from BSI Token: ");

@@ -32,6 +32,7 @@ import org.kohsuke.stapler.verb.POST;
 @SuppressFBWarnings("unused")
 public class FortifyPollResults extends FortifyStep {
 
+    private String releaseId;
     private String bsiToken;
     private int pollingInterval;
 
@@ -46,11 +47,14 @@ public class FortifyPollResults extends FortifyStep {
     private SharedPollingBuildStep commonBuildStep;
 
     @DataBoundConstructor
-    public FortifyPollResults(String bsiToken, int pollingInterval) {
+    public FortifyPollResults(String releaseId, String bsiToken, int pollingInterval) {
         super();
+        this.releaseId = releaseId != null ? releaseId.trim() : "";
         this.bsiToken = bsiToken != null ? bsiToken.trim() : "";
         this.pollingInterval = pollingInterval;
     }
+
+    public String getReleaseId() { return this.releaseId; }
 
     public String getBsiToken() {
         return this.bsiToken;
@@ -128,7 +132,8 @@ public class FortifyPollResults extends FortifyStep {
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Poll Results PreBuild Running...");
-        commonBuildStep = new SharedPollingBuildStep(bsiToken,
+        commonBuildStep = new SharedPollingBuildStep(releaseId,
+                bsiToken,
                 overrideGlobalConfig,
                 pollingInterval,
                 policyFailureBuildResultPreference,
@@ -151,7 +156,8 @@ public class FortifyPollResults extends FortifyStep {
     public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Poll Results Running...");
-        commonBuildStep = new SharedPollingBuildStep(bsiToken,
+        commonBuildStep = new SharedPollingBuildStep(releaseId,
+                bsiToken,
                 overrideGlobalConfig,
                 pollingInterval,
                 policyFailureBuildResultPreference,
