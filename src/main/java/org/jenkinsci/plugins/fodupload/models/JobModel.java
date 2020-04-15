@@ -29,7 +29,7 @@ public class JobModel {
 
     /**
      * Build model used to pass values around
-     * @param releaseId                     Releaes ID
+     * @param releaseId                     Release ID
      * @param bsiToken                      BSI Token
      * @param purchaseEntitlements          purchaseEntitlements
      * @param entitlementPreference         entitlementPreference
