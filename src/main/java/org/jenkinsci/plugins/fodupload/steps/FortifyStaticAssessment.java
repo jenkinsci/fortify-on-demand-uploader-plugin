@@ -34,6 +34,7 @@ public class FortifyStaticAssessment extends FortifyStep {
 
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
+    private String releaseId;
     private String bsiToken;
 
     private boolean overrideGlobalConfig;
@@ -49,14 +50,17 @@ public class FortifyStaticAssessment extends FortifyStep {
     private SharedUploadBuildStep commonBuildStep;
 
     @DataBoundConstructor
-    public FortifyStaticAssessment(String bsiToken) {
+    public FortifyStaticAssessment(String releaseId, String bsiToken) {
         super();
+        this.releaseId = releaseId != null ? releaseId.trim() : "";
         this.bsiToken = bsiToken != null ? bsiToken.trim() : "";
     }
 
     public String getBsiToken() {
         return bsiToken;
     }
+
+    public String getReleaseId() { return releaseId; }
 
     public boolean getOverrideGlobalConfig() {
         return overrideGlobalConfig;
@@ -144,7 +148,8 @@ public class FortifyStaticAssessment extends FortifyStep {
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Upload PreBuild Running...");
-        commonBuildStep = new SharedUploadBuildStep(bsiToken,
+        commonBuildStep = new SharedUploadBuildStep(releaseId,
+                bsiToken,
                 overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -168,7 +173,8 @@ public class FortifyStaticAssessment extends FortifyStep {
     public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Upload Running...");
-        commonBuildStep = new SharedUploadBuildStep(bsiToken,
+        commonBuildStep = new SharedUploadBuildStep(releaseId,
+                bsiToken,
                 overrideGlobalConfig,
                 username,
                 personalAccessToken,

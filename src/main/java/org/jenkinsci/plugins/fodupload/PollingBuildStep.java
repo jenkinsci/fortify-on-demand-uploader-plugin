@@ -42,7 +42,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     SharedPollingBuildStep sharedBuildStep;
 
     @DataBoundConstructor
-    public PollingBuildStep(String bsiToken,
+    public PollingBuildStep(String releaseId,
+                            String bsiToken,
                             boolean overrideGlobalConfig,
                             int pollingInterval,
                             int policyFailureBuildResultPreference,
@@ -52,7 +53,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                             String personalAccessToken,
                             String tenantId) {
 
-        sharedBuildStep = new SharedPollingBuildStep(bsiToken,
+        sharedBuildStep = new SharedPollingBuildStep(releaseId, bsiToken,
                 overrideGlobalConfig, pollingInterval,
                 policyFailureBuildResultPreference, clientId, clientSecret,
                 username, personalAccessToken, tenantId);
@@ -71,6 +72,11 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
+    }
+
+    @SuppressWarnings("unused")
+    public String getReleaseId() {
+        return sharedBuildStep.getReleaseId();
     }
 
     @SuppressWarnings("unused")
@@ -134,12 +140,15 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
             return "Poll Fortify on Demand for Results";
         }
 
-        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken) {
+        public FormValidation doCheckReleaseId(@QueryParameter String releaseId, @QueryParameter String bsiToken) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedPollingBuildStep.doCheckBsiToken(bsiToken);
-
+            return SharedPollingBuildStep.doCheckReleaseId(releaseId, bsiToken);
         }
 
+        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken, @QueryParameter String releaseId) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            return SharedPollingBuildStep.doCheckBsiToken(bsiToken, releaseId);
+        }
 
         public FormValidation doCheckPollingInterval(@QueryParameter String pollingInterval) {
             return SharedPollingBuildStep.doCheckPollingInterval(pollingInterval);
