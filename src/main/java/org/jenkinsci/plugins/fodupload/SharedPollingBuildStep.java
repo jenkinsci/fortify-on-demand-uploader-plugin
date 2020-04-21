@@ -235,6 +235,10 @@ public class SharedPollingBuildStep {
                 }
             }
 
+            if (releaseIdNum > 0 && this.getBsiToken() != null && !this.getBsiToken().isEmpty()) {
+                logger.println("Warning: The BSI Token will be ignored since Release ID was entered.");
+            }
+
             BsiToken token = releaseIdNum == 0 ? tokenParser.parse(this.getBsiToken()) : null;
             if (apiConnection != null) {
                 apiConnection.authenticate();

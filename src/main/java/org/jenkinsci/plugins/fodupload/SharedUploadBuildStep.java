@@ -257,6 +257,10 @@ public class SharedUploadBuildStep {
             }
             catch (NumberFormatException ex) {}
 
+            if (releaseId > 0 && model.loadBsiToken()) {
+                logger.println("Warning: The BSI Token will be ignored since Release ID was entered.");
+            }
+
             String technologyStack = null;
             StaticScanSetupResponse staticScanSetup = null;
 
