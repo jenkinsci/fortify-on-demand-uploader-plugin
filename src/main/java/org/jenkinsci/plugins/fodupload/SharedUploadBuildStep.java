@@ -257,6 +257,13 @@ public class SharedUploadBuildStep {
             }
             catch (NumberFormatException ex) {}
 
+            if (releaseId == 0 && !model.loadBsiToken()) {
+                build.setResult(Result.FAILURE);
+                logger.println("Invalid release ID or BSI Token");
+                return;
+            }
+
+
             if (releaseId > 0 && model.loadBsiToken()) {
                 logger.println("Warning: The BSI Token will be ignored since Release ID was entered.");
             }

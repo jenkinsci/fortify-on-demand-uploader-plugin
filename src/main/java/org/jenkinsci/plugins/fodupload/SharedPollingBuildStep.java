@@ -235,6 +235,12 @@ public class SharedPollingBuildStep {
                 }
             }
 
+            if (releaseIdNum == 0 && (this.getBsiToken() == null || this.getBsiToken().isEmpty())) {
+                run.setResult(Result.FAILURE);
+                logger.println("Invalid release ID or BSI Token");
+                return;
+            }
+
             if (releaseIdNum > 0 && this.getBsiToken() != null && !this.getBsiToken().isEmpty()) {
                 logger.println("Warning: The BSI Token will be ignored since Release ID was entered.");
             }
