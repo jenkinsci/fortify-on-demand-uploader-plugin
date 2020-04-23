@@ -1,4 +1,8 @@
 # Changelog
+
+## Version 6.0.0 (04-23-2020)
+- Added the ability to provide Release ID
+
 ## Version 5.0.1 (01-30-2020)
 - Increased timeouts.
 
