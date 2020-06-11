@@ -34,6 +34,7 @@ public class Utils {
     private static final String TS_VB6_KEY = "VB6";
     private static final String TS_VB_SCRIPT_KEY = "VBScript";
     private static final String TS_XML_HTML_KEY = "XML/HTML";
+    private static final String TS_JS_TS_HTML = "JS/TS/HTML";
 
     public static int tryParseInt(String value) {
         try {
@@ -52,9 +53,9 @@ public class Utils {
     }
 
     public static String getFileExpressionPatternString(String technologyStack) {
-        String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +
-                "|.*\\.settings|.*\\.cpx|.*\\.xcfg|.*\\.cscfg|.*\\.cscdef|.*\\.wadcfg|.*\\.appxmanifest"
-                + "|.*\\.wsdl|.*\\.plist|.*\\.properties|.*\\.ini|.*\\.sql|.*\\.pks|.*\\.pkh|.*\\.pkb";
+        String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.jsx|.*\\*.ts|.*\\*.tsx|.*\\.xml|.*\\.xsd|.*\\.xmi|.*" +
+                "\\.wsdd|.*\\.config|.*\\.settings|.*\\.cpx|.*\\.xcfg|.*\\.cscfg|.*\\.cscdef|.*\\.wadcfg|.*" +
+                "\\.appxmanifest|.*\\.wsdl|.*\\.plist|.*\\.properties|.*\\.ini|.*\\.sql|.*\\.pks|.*\\.pkh|.*\\.pkb";
 
         switch (technologyStack) {
             case TS_DOT_NET_KEY:
@@ -86,6 +87,8 @@ public class Utils {
                 return ".*\\.abap" + constantFiles;
             case TS_CFML_KEY:
                 return ".*\\.cfm|.*\\.cfml|.*\\.cfc" + constantFiles;
+            case TS_JS_TS_HTML:
+                return ".*\\*.json" + constantFiles;
             default:
                 return ".*";
         }
