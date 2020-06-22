@@ -161,5 +161,40 @@ public class FodEnums {
         }
     }
 
+    public enum InProgressBuildResultType {
+        FailBuild("FailBuild"),
+        WarnBuild("WarnBuild");
+
+        private final String _val;
+
+        InProgressBuildResultType(String val) {
+            this._val = val;
+        }
+
+        public static InProgressBuildResultType fromInt(int val) {
+            switch (val) {
+                case 2:
+                    return WarnBuild;
+                case 1:
+                default:
+                    return FailBuild;
+            }
+        }
+
+        public String getValue() {
+            return this._val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "WarnBuild":
+                    return "Provide Warning";
+                case "FailBuild":
+                default:
+                    return "Fail Build";
+            }
+        }
+    }
+
 
 }

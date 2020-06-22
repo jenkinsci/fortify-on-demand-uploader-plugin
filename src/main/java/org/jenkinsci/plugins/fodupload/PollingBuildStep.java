@@ -29,6 +29,8 @@ import java.io.PrintStream;
 import java.net.URISyntaxException;
 
 import jenkins.model.Jenkins;
+
+import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.kohsuke.stapler.QueryParameter;
@@ -65,8 +67,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                         @Nonnull FilePath filePath,
                         @Nonnull Launcher launcher,
                         @Nonnull TaskListener taskListener) throws InterruptedException, IOException {
-
-        sharedBuildStep.perform(run, filePath, launcher, taskListener);
+        if(run.getAction(CrossBuildAction.class) == null || run.getAction(CrossBuildAction.class).allowPolling())
+            sharedBuildStep.perform(run, filePath, launcher, taskListener);
     }
 
     @Override
