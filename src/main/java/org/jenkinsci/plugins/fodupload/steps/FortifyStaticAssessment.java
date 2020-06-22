@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.fodupload.steps;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Set;
 
@@ -8,7 +7,6 @@ import com.google.common.collect.ImmutableSet;
 
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
-import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -48,7 +46,6 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String srcLocation;
     private String remediationScanPreferenceType;
     private String inProgressScanActionType;
-    private String inProgressBuildResultType;
 
     private SharedUploadBuildStep commonBuildStep;
 
@@ -146,15 +143,6 @@ public class FortifyStaticAssessment extends FortifyStep {
         this.inProgressScanActionType = inProgressScanActionType;
     }
 
-    public String getInProgressBuildResultType() {
-        return inProgressBuildResultType;
-    }
-
-    @DataBoundSetter
-    public void setInProgressBuildResultType(String inProgressBuildResultType) {
-        this.inProgressBuildResultType = inProgressBuildResultType;
-    }
-
     @Override
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -170,8 +158,7 @@ public class FortifyStaticAssessment extends FortifyStep {
                 entitlementPreference,
                 srcLocation,
                 remediationScanPreferenceType,
-                inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressScanActionType);
 
         return true;
     }
@@ -183,12 +170,9 @@ public class FortifyStaticAssessment extends FortifyStep {
 
     @Override
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException {
+    public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Upload Running...");
-        build.addAction(new CrossBuildAction());
-        try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
-
         commonBuildStep = new SharedUploadBuildStep(releaseId,
                 bsiToken,
                 overrideGlobalConfig,
@@ -199,13 +183,9 @@ public class FortifyStaticAssessment extends FortifyStep {
                 entitlementPreference,
                 srcLocation,
                 remediationScanPreferenceType,
-                inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressScanActionType);
 
         commonBuildStep.perform(build, workspace, launcher, listener);
-        CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
-        crossBuildAction.setPreviousStepBuildResult(build.getResult());
-        try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
     }
 
     @Extension
@@ -265,11 +245,6 @@ public class FortifyStaticAssessment extends FortifyStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillInProgressScanActionTypeItems() {
             return SharedUploadBuildStep.doFillInProgressScanActionTypeItems();
-        }
-
-        @SuppressWarnings("unused")
-        public ListBoxModel doFillInProgressBuildResultTypeItems() {
-            return SharedUploadBuildStep.doFillInProgressBuildResultTypeItems();
         }
     }
 
