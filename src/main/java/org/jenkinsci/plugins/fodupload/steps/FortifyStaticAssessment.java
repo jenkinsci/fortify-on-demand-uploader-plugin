@@ -1,6 +1,20 @@
 package org.jenkinsci.plugins.fodupload.steps;
 
+import java.io.PrintStream;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
+
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
@@ -11,23 +25,16 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-
-import java.io.PrintStream;
-import java.util.Set;
+import hudson.util.Secret;
+import org.kohsuke.stapler.verb.POST;
 
 
+@SuppressFBWarnings("unused")
 public class FortifyStaticAssessment extends FortifyStep {
 
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
+    private String releaseId;
     private String bsiToken;
 
     private boolean overrideGlobalConfig;
@@ -43,14 +50,17 @@ public class FortifyStaticAssessment extends FortifyStep {
     private SharedUploadBuildStep commonBuildStep;
 
     @DataBoundConstructor
-    public FortifyStaticAssessment(String bsiToken) {
+    public FortifyStaticAssessment(String releaseId, String bsiToken) {
         super();
+        this.releaseId = releaseId != null ? releaseId.trim() : "";
         this.bsiToken = bsiToken != null ? bsiToken.trim() : "";
     }
 
     public String getBsiToken() {
         return bsiToken;
     }
+
+    public String getReleaseId() { return releaseId; }
 
     public boolean getOverrideGlobalConfig() {
         return overrideGlobalConfig;
@@ -134,10 +144,12 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @Override
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Upload PreBuild Running...");
-        commonBuildStep = new SharedUploadBuildStep(bsiToken,
+        commonBuildStep = new SharedUploadBuildStep(releaseId,
+                bsiToken,
                 overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -157,10 +169,12 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @Override
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Upload Running...");
-        commonBuildStep = new SharedUploadBuildStep(bsiToken,
+        commonBuildStep = new SharedUploadBuildStep(releaseId,
+                bsiToken,
                 overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -194,9 +208,11 @@ public class FortifyStaticAssessment extends FortifyStep {
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+        @POST
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
                                                                   @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
 
         }
@@ -209,6 +225,26 @@ public class FortifyStaticAssessment extends FortifyStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillRemediationScanPreferenceTypeItems() {
             return SharedUploadBuildStep.doFillRemediationScanPreferenceTypeItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillUsernameItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillPersonalAccessTokenItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillTenantIdItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillInProgressScanActionTypeItems() {
+            return SharedUploadBuildStep.doFillInProgressScanActionTypeItems();
         }
     }
 

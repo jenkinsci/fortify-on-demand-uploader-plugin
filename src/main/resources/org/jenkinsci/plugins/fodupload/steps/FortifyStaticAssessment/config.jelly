@@ -1,5 +1,8 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry title="Release ID" field="releaseId" help="/plugin/fortify-on-demand-uploader/help-releaseId.html">
+        <f:textbox />
+    </f:entry>
     <f:entry title="BSI Token" field="bsiToken">
         <f:textbox />
     </f:entry>
@@ -12,13 +15,13 @@
         <f:block>
             <f:optionalBlock name="overrideGlobalConfig" field ="overrideGlobalConfig" title="Configure Personal Access Token"  checked="${instance.overrideGlobalConfig}"  inline="true">
                 <f:entry title="Username" field="username" >
-                    <f:textbox style="width: 160px;"/>
+                    <f:textbox style="width: 160px;" />
                 </f:entry>
                 <f:entry title="Personal Access Token" field="personalAccessToken" help="/plugin/fortify-on-demand-uploader/help-personalAccessToken.html">
-                    <f:password style="width: 160px;"/>
+                     <c:select style="width: 160px;"/>
                 </f:entry>
                 <f:entry title="Tenant ID" field="tenantId" >
-                    <f:textbox style="width: 160px;" />
+                     <f:textbox style="width: 160px;" />
                 </f:entry>
                 <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
                                   method="testPersonalAccessTokenConnection" with="username,personalAccessToken,tenantId"/>
@@ -44,10 +47,7 @@
             </select>
         </f:entry>
         <f:entry title="Action when scan is in progress" field="inProgressScanActionType">
-            <select name="inProgressScanActionType">
-                <option value="DoNotStartScan">Do Not Start Scan</option>
-                <option value="CancelInProgressScan">Cancel Scan Then Start</option>
-            </select>
+            <f:select style="width: 160px;"/>
         </f:entry>
     </f:section>
 

@@ -48,7 +48,7 @@ public class ApiConnectionFactory {
                 if (Utils.isNullOrEmpty(apiUrl))
                     throw new IllegalArgumentException("Api URL is null.");
                 apiConnection = new FodApiConnection(model.getTenantId() + "\\" + model.getUsername(),
-                        model.getPersonalAccessToken(),
+                        Utils.retrieveSecretDecryptedValue(model.getPersonalAccessToken()),
                         baseUrl,
                         apiUrl,
                         FodEnums.GrantType.PASSWORD,

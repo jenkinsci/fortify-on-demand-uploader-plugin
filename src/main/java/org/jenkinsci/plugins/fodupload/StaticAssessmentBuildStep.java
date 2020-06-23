@@ -9,12 +9,14 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -41,7 +43,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
     @DataBoundConstructor
-    public StaticAssessmentBuildStep(String bsiToken,
+    public StaticAssessmentBuildStep(String releaseId,
+                                     String bsiToken,
                                      boolean overrideGlobalConfig,
                                      String username,
                                      String personalAccessToken,
@@ -52,7 +55,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String remediationScanPreferenceType,
                                      String inProgressScanActionType) {
 
-        sharedBuildStep = new SharedUploadBuildStep(bsiToken,
+        sharedBuildStep = new SharedUploadBuildStep(releaseId,
+                bsiToken,
                 overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -91,6 +95,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
+    }
+
+    @SuppressWarnings("unused")
+    public String getReleaseId() {
+        return sharedBuildStep.getModel().getReleaseId();
     }
 
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij
@@ -165,9 +174,14 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             return true;
         }
 
-        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken) {
+        public FormValidation doCheckReleaseId(@QueryParameter String releaseId, @QueryParameter String bsiToken) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedUploadBuildStep.doCheckBsiToken(bsiToken);
+            return SharedUploadBuildStep.doCheckReleaseId(releaseId, bsiToken);
+        }
+
+        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken, @QueryParameter String releaseId) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            return SharedUploadBuildStep.doCheckBsiToken(bsiToken, releaseId);
         }
 
         @Override
@@ -195,6 +209,27 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @SuppressWarnings("unused")
         public ListBoxModel doFillRemediationScanPreferenceTypeItems() {
             return SharedUploadBuildStep.doFillRemediationScanPreferenceTypeItems();
+        }
+
+        @SuppressWarnings("unused")
+
+        public ListBoxModel doFillUsernameItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillPersonalAccessTokenItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillTenantIdItems() {
+            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillInProgressScanActionTypeItems() {
+            return SharedUploadBuildStep.doFillInProgressScanActionTypeItems();
         }
     }
 }

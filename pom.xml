@@ -10,11 +10,11 @@
     </parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>fortify-on-demand-uploader</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>6.0.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <properties>
-        <jenkins.version>2.121.3</jenkins.version>
+        <jenkins.version>2.138.4</jenkins.version>
         <java.level>8</java.level>
         <jenkins-test-harness.version>2.47</jenkins-test-harness.version>
         <disabledTestInjection>true</disabledTestInjection>
@@ -23,7 +23,7 @@
 
     <name>Fortify on Demand</name>
     <description>Gathers build artifacts and uploads them to the Fortify on Demand service with user-specified options.</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Fortify+On+Demand+Uploader+Plugin</url>
+    <url>https://github.com/jenkinsci/fortify-on-demand-uploader-plugin</url>
 
     <licenses>
         <license>
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>2.16</version>
+            <version>2.19</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
         <dependency>
@@ -128,6 +128,21 @@
             <groupId>com.fortify.fod</groupId>
             <artifactId>BSITokenParser</artifactId>
             <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>plain-credentials</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>structs</artifactId>
+            <version>1.19</version>
         </dependency>
     </dependencies>
 

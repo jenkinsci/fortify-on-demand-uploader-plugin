@@ -16,6 +16,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.model.GlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
@@ -41,7 +42,8 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     SharedPollingBuildStep sharedBuildStep;
 
     @DataBoundConstructor
-    public PollingBuildStep(String bsiToken,
+    public PollingBuildStep(String releaseId,
+                            String bsiToken,
                             boolean overrideGlobalConfig,
                             int pollingInterval,
                             int policyFailureBuildResultPreference,
@@ -51,7 +53,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
                             String personalAccessToken,
                             String tenantId) {
 
-        sharedBuildStep = new SharedPollingBuildStep(bsiToken,
+        sharedBuildStep = new SharedPollingBuildStep(releaseId, bsiToken,
                 overrideGlobalConfig, pollingInterval,
                 policyFailureBuildResultPreference, clientId, clientSecret,
                 username, personalAccessToken, tenantId);
@@ -70,6 +72,11 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
+    }
+
+    @SuppressWarnings("unused")
+    public String getReleaseId() {
+        return sharedBuildStep.getReleaseId();
     }
 
     @SuppressWarnings("unused")
@@ -133,12 +140,15 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
             return "Poll Fortify on Demand for Results";
         }
 
-        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken) {
+        public FormValidation doCheckReleaseId(@QueryParameter String releaseId, @QueryParameter String bsiToken) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedPollingBuildStep.doCheckBsiToken(bsiToken);
-
+            return SharedPollingBuildStep.doCheckReleaseId(releaseId, bsiToken);
         }
 
+        public FormValidation doCheckBsiToken(@QueryParameter String bsiToken, @QueryParameter String releaseId) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            return SharedPollingBuildStep.doCheckBsiToken(bsiToken, releaseId);
+        }
 
         public FormValidation doCheckPollingInterval(@QueryParameter String pollingInterval) {
             return SharedPollingBuildStep.doCheckPollingInterval(pollingInterval);
@@ -158,6 +168,21 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
             return SharedPollingBuildStep.doFillPolicyFailureBuildResultPreferenceItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillUsernameItems() {
+            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillPersonalAccessTokenItems() {
+            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillTenantIdItems() {
+            return SharedPollingBuildStep.doFillStringCredentialsItems();
         }
     }
 }

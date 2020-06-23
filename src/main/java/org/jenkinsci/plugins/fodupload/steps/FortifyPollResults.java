@@ -1,6 +1,21 @@
 package org.jenkinsci.plugins.fodupload.steps;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
+
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.fodupload.SharedPollingBuildStep;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
@@ -11,21 +26,13 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import org.jenkinsci.plugins.fodupload.SharedPollingBuildStep;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
+import hudson.util.Secret;
+import org.kohsuke.stapler.verb.POST;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Set;
-
+@SuppressFBWarnings("unused")
 public class FortifyPollResults extends FortifyStep {
 
+    private String releaseId;
     private String bsiToken;
     private int pollingInterval;
 
@@ -40,11 +47,14 @@ public class FortifyPollResults extends FortifyStep {
     private SharedPollingBuildStep commonBuildStep;
 
     @DataBoundConstructor
-    public FortifyPollResults(String bsiToken, int pollingInterval) {
+    public FortifyPollResults(String releaseId, String bsiToken, int pollingInterval) {
         super();
+        this.releaseId = releaseId != null ? releaseId.trim() : "";
         this.bsiToken = bsiToken != null ? bsiToken.trim() : "";
         this.pollingInterval = pollingInterval;
     }
+
+    public String getReleaseId() { return this.releaseId; }
 
     public String getBsiToken() {
         return this.bsiToken;
@@ -118,10 +128,12 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     @Override
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Poll Results PreBuild Running...");
-        commonBuildStep = new SharedPollingBuildStep(bsiToken,
+        commonBuildStep = new SharedPollingBuildStep(releaseId,
+                bsiToken,
                 overrideGlobalConfig,
                 pollingInterval,
                 policyFailureBuildResultPreference,
@@ -140,10 +152,12 @@ public class FortifyPollResults extends FortifyStep {
     }
 
     @Override
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         log.println("Fortify on Demand Poll Results Running...");
-        commonBuildStep = new SharedPollingBuildStep(bsiToken,
+        commonBuildStep = new SharedPollingBuildStep(releaseId,
+                bsiToken,
                 overrideGlobalConfig,
                 pollingInterval,
                 policyFailureBuildResultPreference,
@@ -176,9 +190,11 @@ public class FortifyPollResults extends FortifyStep {
         // Form validation
         @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+        @POST
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedPollingBuildStep.USERNAME) final String username,
                                                                   @QueryParameter(SharedPollingBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                                   @QueryParameter(SharedPollingBuildStep.TENANT_ID) final String tenantId) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
 
         }
@@ -186,6 +202,21 @@ public class FortifyPollResults extends FortifyStep {
         @SuppressWarnings("unused")
         public ListBoxModel doFillPolicyFailureBuildResultPreferenceItems() {
             return SharedPollingBuildStep.doFillPolicyFailureBuildResultPreferenceItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillUsernameItems() {
+            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillPersonalAccessTokenItems() {
+            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillTenantIdItems() {
+            return SharedPollingBuildStep.doFillStringCredentialsItems();
         }
 
     }
