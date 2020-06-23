@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.fodupload;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.Normalizer;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.fortify.fod.parser.BsiToken;
@@ -12,6 +13,7 @@ import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
+import org.jenkinsci.plugins.fodupload.models.response.StaticScanSetupResponse;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -27,6 +29,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.verb.POST;
 
 public class SharedUploadBuildStep {
 
@@ -40,7 +43,8 @@ public class SharedUploadBuildStep {
     private JobModel model;
     private AuthenticationModel authModel;
 
-    public SharedUploadBuildStep(String bsiToken,
+    public SharedUploadBuildStep(String releaseId,
+                                 String bsiToken,
                                  boolean overrideGlobalConfig,
                                  String username,
                                  String personalAccessToken,
@@ -51,20 +55,39 @@ public class SharedUploadBuildStep {
                                  String remediationScanPreferenceType,
                                  String inProgressScanActionType) {
 
-        model = new JobModel(bsiToken,
+        model = new JobModel(releaseId,
+                bsiToken,
                 purchaseEntitlements,
                 entitlementPreference,
                 srcLocation,
                 remediationScanPreferenceType,
                 inProgressScanActionType);
-                
+
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
                 personalAccessToken,
                 tenantId);
     }
 
-    public static FormValidation doCheckBsiToken(String bsiToken) {
+    public static FormValidation doCheckReleaseId(String releaseId, String bsiToken) {
+        if (releaseId != null && !releaseId.isEmpty()) {
+            try {
+                Integer testReleaseId = Integer.parseInt(releaseId);
+                return FormValidation.ok();
+            } catch (NumberFormatException ex) {
+                return FormValidation.error("Could not parse Release ID.");
+            }
+        }
+        else {
+            if (bsiToken != null && !bsiToken.isEmpty()) {
+                return FormValidation.ok();
+            }
+
+            return FormValidation.error("Please specify Release ID or BSI Token.");
+        }
+    }
+
+    public static FormValidation doCheckBsiToken(String bsiToken, String releaseId) {
         if (bsiToken != null && !bsiToken.isEmpty()) {
             BsiTokenParser tokenParser = new BsiTokenParser();
             try {
@@ -75,15 +98,23 @@ public class SharedUploadBuildStep {
             } catch (Exception ex) {
                 return FormValidation.error("Could not parse BSI token.");
             }
-        } else
-            return FormValidation.error("Please specify BSI Token");
-        return FormValidation.error("Please specify BSI Token");
+        } else {
+            if (releaseId != null && !releaseId.isEmpty()) {
+                return FormValidation.ok();
+            }
+
+            return FormValidation.error("Please specify Release ID or BSI Token.");
+        }
+
+        return FormValidation.error("Please specify Release ID or BSI Token.");
     }
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    @POST
     public static FormValidation doTestPersonalAccessTokenConnection(final String username,
                                                                      final String personalAccessToken,
                                                                      final String tenantId) {
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
         String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
@@ -152,8 +183,8 @@ public class SharedUploadBuildStep {
             return false;
         }
 
-        if (model.initializeBuildModel() == false) {
-            logger.println("Invalid BSI Token");
+        if ((model.getReleaseId() == null || model.getReleaseId().isEmpty()) && model.loadBsiToken() == false) {
+            logger.println("Invalid release ID or BSI Token");
             build.setResult(Result.FAILURE);
             return false;
         }
@@ -220,37 +251,68 @@ public class SharedUploadBuildStep {
 
             logger.println("Starting FoD Upload.");
 
-            if (model.getBsiToken() == null) { // Hack because pipeline step doesn't call prebuild
-                model.initializeBuildModel();
+            Integer releaseId = 0;
+            try {
+                releaseId = Integer.parseInt(model.getReleaseId());
             }
+            catch (NumberFormatException ex) {}
 
-            FilePath workspaceModified = new FilePath(workspace, model.getSrcLocation());
-            // zips the file in a temporary location
-            File payload = Utils.createZipFile(model.getBsiToken().getTechnologyStack(), workspaceModified, logger);
-            if (payload.length() == 0) {
-
-                boolean deleteSuccess = payload.delete();
-                if (!deleteSuccess) {
-                    logger.println("Unable to delete empty payload.");
-                }
-
-                logger.println("Source is empty for given Technology Stack and Language Level.");
+            if (releaseId == 0 && !model.loadBsiToken()) {
                 build.setResult(Result.FAILURE);
+                logger.println("Invalid release ID or BSI Token");
                 return;
             }
 
-            model.setPayload(payload);
+
+            if (releaseId > 0 && model.loadBsiToken()) {
+                logger.println("Warning: The BSI Token will be ignored since Release ID was entered.");
+            }
+
+            String technologyStack = null;
+            StaticScanSetupResponse staticScanSetup = null;
 
             apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
             if (apiConnection != null) {
                 apiConnection.authenticate();
 
                 StaticScanController staticScanController = new StaticScanController(apiConnection, logger);
+
+                if (releaseId == 0) {
+                    model.loadBsiToken();
+                    technologyStack = model.getBsiToken().getTechnologyStack();
+                } else {
+                    staticScanSetup = staticScanController.getStaticScanSettings(releaseId);
+                    if (staticScanSetup == null) {
+                        logger.println("No scan settings defined for release " + releaseId.toString());
+                        build.setResult(Result.FAILURE);
+                        return;
+                    }
+
+                    technologyStack = staticScanSetup.getTechnologyStack();
+                }
+
+                FilePath workspaceModified = new FilePath(workspace, model.getSrcLocation());
+                // zips the file in a temporary location
+                File payload = Utils.createZipFile(technologyStack, workspaceModified, logger);
+                if (payload.length() == 0) {
+
+                    boolean deleteSuccess = payload.delete();
+                    if (!deleteSuccess) {
+                        logger.println("Unable to delete empty payload.");
+                    }
+
+                    logger.println("Source is empty for given Technology Stack and Language Level.");
+                    build.setResult(Result.FAILURE);
+                    return;
+                }
+
+                model.setPayload(payload);
+
                 String notes = String.format("[%d] %s - Assessment submitted from Jenkins FoD Plugin",
                         build.getNumber(),
                         build.getDisplayName());
 
-                boolean success = staticScanController.startStaticScan(model, notes);
+                boolean success = staticScanController.startStaticScan(releaseId, staticScanSetup, model, notes);
                 boolean deleted = payload.delete();
 
                 if (success && deleted) {
@@ -288,6 +350,8 @@ public class SharedUploadBuildStep {
        
         return displayModel;
     }
+
+    public JobModel setModel(JobModel newModel) { return model = newModel; }
     
     public AuthenticationModel setAuthModel(AuthenticationModel newAuthModel) {
         return authModel = newAuthModel;
