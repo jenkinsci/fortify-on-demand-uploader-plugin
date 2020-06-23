@@ -68,7 +68,7 @@ public class ScanStatusPoller {
         
         if (analysisStatusTypes != null) {
             for (LookupItemsModel item : analysisStatusTypes) {
-                if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.InProgress.name()))
+                if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
                     complete.add(item.getValue());
             }
         }
@@ -79,7 +79,7 @@ public class ScanStatusPoller {
                     analysisStatusTypes = lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
                     complete = new ArrayList<>();
                     for (LookupItemsModel item : analysisStatusTypes) {
-                        if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.InProgress.name()))
+                        if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
                             complete.add(item.getValue());
                     }
                 }
@@ -257,11 +257,6 @@ class StatusPollerThread extends Thread {
         {
             fail = true;
         } else {
-            if(statusString.equals(AnalysisStatusTypeEnum.InProgress.name())) {
-                result.setScanInProgress(true);
-                result.setPassing(releaseDTO.isPassed());
-                finished = true;
-            }
             if (statusString.equals(AnalysisStatusTypeEnum.Waiting.name())) {
                 try {
                     scanSummaryDTO = scanSummaryController.getReleaseScanSummary(releaseDTO.getReleaseId(), releaseDTO.getCurrentStaticScanId());

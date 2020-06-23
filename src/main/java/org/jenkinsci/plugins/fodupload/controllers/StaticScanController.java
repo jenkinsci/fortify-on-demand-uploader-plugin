@@ -13,7 +13,6 @@ import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
-import org.jenkinsci.plugins.fodupload.models.response.StartScanResponse;
 import org.jenkinsci.plugins.fodupload.models.response.StaticScanSetupResponse;
 
 import java.io.*;
@@ -42,17 +41,15 @@ public class StaticScanController extends ControllerBase {
 
     /**
      * Begin a static scan on FoD
-     * @param releaseId     id of release being targeted
-     * @param staticScanSettings config information for scan
+     *
      * @param uploadRequest zip file to upload
      * @param notes         notes
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
-    public StartScanResponse startStaticScan(final Integer releaseId, final StaticScanSetupResponse staticScanSettings, final JobModel uploadRequest, final String notes) {
+    public boolean startStaticScan(final Integer releaseId, final StaticScanSetupResponse staticScanSettings, final JobModel uploadRequest, final String notes) {
 
         PostStartScanResponse scanStartedResponse = null;
-        StartScanResponse scanResults = new StartScanResponse();
 
         File uploadFile = uploadRequest.getPayload();
         try (FileInputStream fs = new FileInputStream(uploadFile)) {
@@ -157,8 +154,7 @@ public class StaticScanController extends ControllerBase {
 
                         scanStartedResponse = gson.fromJson(responseJsonStr, PostStartScanResponse.class);
                         logger.println("Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
-                        scanResults.uploadSuccessfulScanStarting();
-                        return scanResults;
+                        return true;
 
                     } else if (!response.isSuccessful()) { // There was an error along the lines of 'another scan in progress' or something
 
@@ -166,15 +162,7 @@ public class StaticScanController extends ControllerBase {
                         GenericErrorResponse errors = gson.fromJson(responseJsonStr, GenericErrorResponse.class);
                         if (errors != null)
                             logger.println("Package upload failed for the following reasons: " + errors.toString());
-
-                        if(errors.toString().contains("Can not start scan another scan is in progress")) {
-                            scanResults.uploadSuccessfulScanNotStarted();
-                        }
-                        else {
-                            scanResults.uploadNotSuccessful();
-                        }
-                        
-                        return scanResults; // if there is an error, get out of loop and mark build unstable
+                        return false; // if there is an error, get out of loop and mark build unstable
                     }
                 }
                 response.body().close();
@@ -183,12 +171,10 @@ public class StaticScanController extends ControllerBase {
 
         } catch (Exception e) {
             e.printStackTrace(logger);
-            scanResults.uploadNotSuccessful();
-            return scanResults;
+            return false;
         }
 
-        scanResults.uploadNotSuccessful();
-        return scanResults;
+        return false;
     }
 
     public StaticScanSetupResponse getStaticScanSettings(final Integer releaseId) throws IOException {

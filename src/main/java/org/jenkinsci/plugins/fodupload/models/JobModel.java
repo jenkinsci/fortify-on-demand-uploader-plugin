@@ -24,7 +24,6 @@ public class JobModel {
     private String srcLocation;
     private String remediationScanPreferenceType;
     private String inProgressScanActionType;
-    private String inProgressBuildResultType;
 
     private File payload;
 
@@ -37,7 +36,6 @@ public class JobModel {
      * @param srcLocation                   srcLocation
      * @param remediationScanPreferenceType remediationScanPreferenceType
      * @param inProgressScanActionType      inProgressScanActionType
-     * @param inProgressBuildResultType     inProgressBuildResultType
      */
     public JobModel(String releaseId,
                     String bsiToken,
@@ -45,8 +43,7 @@ public class JobModel {
                     String entitlementPreference,
                     String srcLocation,
                     String remediationScanPreferenceType,
-                    String inProgressScanActionType,
-                    String inProgressBuildResultType) {
+                    String inProgressScanActionType) {
 
         this.releaseId = releaseId;
         this.bsiTokenOriginal = bsiToken;
@@ -55,7 +52,6 @@ public class JobModel {
         this.srcLocation = srcLocation;
         this.remediationScanPreferenceType = remediationScanPreferenceType;
         this.inProgressScanActionType = inProgressScanActionType;
-        this.inProgressBuildResultType = inProgressBuildResultType;
     }
 
     public File getPayload() {
@@ -96,10 +92,6 @@ public class JobModel {
         return inProgressScanActionType;
     }
 
-    public String getInProgressBuildResultType() {
-        return inProgressBuildResultType;
-    }
-
     private Object readResolve() throws URISyntaxException, UnsupportedEncodingException {
         bsiTokenCache = tokenParser.parse(bsiTokenOriginal);
         return this;
@@ -115,16 +107,14 @@ public class JobModel {
                             "Language Level:                    %s%n" +
                             "Purchase Entitlements:             %s%n" +
                             "Entitlement Preference:            %s%n" +
-                            "In Progress Scan Action:           %s%n" +
-                            "In Progress Build Action:          %s%n",
+                            "In Progress Scan Action:           %s%n",
                     bsiTokenCache.getProjectVersionId(),
                     bsiTokenCache.getAssessmentTypeId(),
                     bsiTokenCache.getTechnologyStack(),
                     bsiTokenCache.getLanguageLevel(),
                     purchaseEntitlements,
                     entitlementPreference,
-                    inProgressScanActionType,
-                    inProgressBuildResultType);
+                    inProgressScanActionType);
         } else {
             return String.format("Release Id: %s", releaseId);
         }
