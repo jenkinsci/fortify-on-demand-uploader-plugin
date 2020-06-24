@@ -54,7 +54,9 @@ public class Utils {
     public static String getFileExpressionPatternString(String technologyStack) {
         String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +
                 "|.*\\.settings|.*\\.cpx|.*\\.xcfg|.*\\.cscfg|.*\\.cscdef|.*\\.wadcfg|.*\\.appxmanifest"
-                + "|.*\\.wsdl|.*\\.plist|.*\\.properties|.*\\.ini|.*\\.sql|.*\\.pks|.*\\.pkh|.*\\.pkb";
+                + "|.*\\.wsdl|.*\\.plist|.*\\.properties|.*\\.ini|.*\\.sql|.*\\.pks|.*\\.pkh|.*\\.pkb"
+                + "|.*\\.asl|.*\\.conf|.*\\.inc|.*\\.json|.*\\.jsx|.*\\.phtml|.*\\.tldj|.*\\.ts|.*\\.tsx|.*\\.xaml|.*\\.xhtml|.*\\.yaml|.*\\.yml";
+                
 
         switch (technologyStack) {
             case TS_DOT_NET_KEY:
