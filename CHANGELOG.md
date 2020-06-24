@@ -1,7 +1,8 @@
 # Changelog
 
-## Version 6.0.0 (04-23-2020)
-- Added the ability to provide Release ID
+## Version 6.0.0 (06-24-2020)
+- Added the ability to specify release ID in place of BSI token.
+- Added additional file types to be included in payloads for all technology stacks.
 
 ## Version 5.0.1 (01-30-2020)
 - Increased timeouts.
