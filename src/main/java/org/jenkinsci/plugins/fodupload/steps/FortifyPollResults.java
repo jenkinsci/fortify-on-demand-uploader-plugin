@@ -22,11 +22,15 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Item;
+import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import org.kohsuke.stapler.AncestorInPath;
+
 import org.kohsuke.stapler.verb.POST;
 
 @SuppressFBWarnings("unused")
@@ -193,9 +197,11 @@ public class FortifyPollResults extends FortifyStep {
         @POST
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedPollingBuildStep.USERNAME) final String username,
                                                                   @QueryParameter(SharedPollingBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                  @QueryParameter(SharedPollingBuildStep.TENANT_ID) final String tenantId) {
-            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
+                                                                  @QueryParameter(SharedPollingBuildStep.TENANT_ID) final String tenantId,
+                                                                  @AncestorInPath Job job) {
+            job.checkPermission(Item.CONFIGURE);
+            return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
+
 
         }
 
@@ -205,18 +211,18 @@ public class FortifyPollResults extends FortifyStep {
         }
 
         @SuppressWarnings("unused")
-        public ListBoxModel doFillUsernameItems() {
-            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        public ListBoxModel doFillUsernameItems(@AncestorInPath Job job) {
+            return SharedPollingBuildStep.doFillStringCredentialsItems(job);
         }
 
         @SuppressWarnings("unused")
-        public ListBoxModel doFillPersonalAccessTokenItems() {
-            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        public ListBoxModel doFillPersonalAccessTokenItems(@AncestorInPath Job job) {
+            return SharedPollingBuildStep.doFillStringCredentialsItems(job);
         }
 
         @SuppressWarnings("unused")
-        public ListBoxModel doFillTenantIdItems() {
-            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        public ListBoxModel doFillTenantIdItems(@AncestorInPath Job job) {
+            return SharedPollingBuildStep.doFillStringCredentialsItems(job);
         }
 
     }
