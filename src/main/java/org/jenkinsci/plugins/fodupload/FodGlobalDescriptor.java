@@ -1,6 +1,11 @@
 package org.jenkinsci.plugins.fodupload;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import hudson.Extension;
+import hudson.model.Item;
+import hudson.model.Job;
+import hudson.security.ACL;
+import hudson.security.Permission;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
@@ -13,6 +18,7 @@ import java.io.IOException;
 
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.verb.POST;
 
 @Extension
@@ -189,27 +195,32 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
 
     @SuppressWarnings("unused")
     public ListBoxModel doFillClientIdItems() {
-        return SharedUploadBuildStep.doFillStringCredentialsItems();
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+        return doFillStringCredentialsItems();
     }
 
     @SuppressWarnings("unused")
     public ListBoxModel doFillClientSecretItems() {
-        return SharedUploadBuildStep.doFillStringCredentialsItems();
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+        return doFillStringCredentialsItems();
     }
 
     @SuppressWarnings("unused")
     public ListBoxModel doFillUsernameItems() {
-        return SharedUploadBuildStep.doFillStringCredentialsItems();
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+        return doFillStringCredentialsItems();
     }
 
     @SuppressWarnings("unused")
     public ListBoxModel doFillPersonalAccessTokenItems() {
-        return SharedUploadBuildStep.doFillStringCredentialsItems();
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+        return doFillStringCredentialsItems();
     }
 
     @SuppressWarnings("unused")
     public ListBoxModel doFillTenantIdItems() {
-        return SharedUploadBuildStep.doFillStringCredentialsItems();
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+        return doFillStringCredentialsItems();
     }
 
     FodApiConnection createFodApiConnection() {
@@ -261,6 +272,17 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         return !token.isEmpty() ?
                 FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
                 FormValidation.error("Invalid connection information. Please check your credentials and try again.");
+    }
+
+    private ListBoxModel doFillStringCredentialsItems(){
+        ListBoxModel items = CredentialsProvider.listCredentials(
+                StringCredentials.class,
+                Jenkins.get(),
+                ACL.SYSTEM,
+                null,
+                null
+                );
+        return items;
     }
     
     

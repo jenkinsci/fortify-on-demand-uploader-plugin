@@ -7,6 +7,8 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Item;
+import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.security.Permission;
@@ -31,6 +33,7 @@ import java.net.URISyntaxException;
 
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
@@ -196,9 +199,10 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @POST
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
                                                                   @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId) {
-            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
+                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId,
+                                                                  @AncestorInPath Job job) {
+            job.checkPermission(Item.CONFIGURE);
+            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId,job);
         }
 
         @SuppressWarnings("unused")
@@ -213,18 +217,18 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
         @SuppressWarnings("unused")
 
-        public ListBoxModel doFillUsernameItems() {
-            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        public ListBoxModel doFillUsernameItems(@AncestorInPath Job job) {
+            return SharedUploadBuildStep.doFillStringCredentialsItems(job);
         }
 
         @SuppressWarnings("unused")
-        public ListBoxModel doFillPersonalAccessTokenItems() {
-            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        public ListBoxModel doFillPersonalAccessTokenItems(@AncestorInPath Job job) {
+            return SharedUploadBuildStep.doFillStringCredentialsItems(job);
         }
 
         @SuppressWarnings("unused")
-        public ListBoxModel doFillTenantIdItems() {
-            return SharedUploadBuildStep.doFillStringCredentialsItems();
+        public ListBoxModel doFillTenantIdItems(@AncestorInPath Job job) {
+            return SharedUploadBuildStep.doFillStringCredentialsItems(job);
         }
 
         @SuppressWarnings("unused")

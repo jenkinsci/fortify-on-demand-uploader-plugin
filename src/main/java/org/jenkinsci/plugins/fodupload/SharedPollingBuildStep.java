@@ -17,6 +17,8 @@ import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.Item;
+import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -25,6 +27,8 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.AncestorInPath;
+
 import org.kohsuke.stapler.verb.POST;
 
 public class SharedPollingBuildStep {
@@ -123,8 +127,10 @@ public class SharedPollingBuildStep {
     @POST
     public static FormValidation doTestPersonalAccessTokenConnection(final String username,
                                                                      final String personalAccessToken,
-                                                                     final String tenantId) {
-        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+                                                                     final String tenantId,
+                                                                     @AncestorInPath Job job) {
+        job.checkPermission(Item.CONFIGURE);
+
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
         String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
@@ -154,7 +160,8 @@ public class SharedPollingBuildStep {
     }
 
     @SuppressWarnings("unused")
-    public static ListBoxModel doFillStringCredentialsItems() {
+    public static ListBoxModel doFillStringCredentialsItems(@AncestorInPath Job job) {
+        job.checkPermission(Item.CONFIGURE);
         ListBoxModel items = CredentialsProvider.listCredentials(
                 StringCredentials.class,
                 Jenkins.get(),
