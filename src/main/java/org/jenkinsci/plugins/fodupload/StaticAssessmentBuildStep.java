@@ -32,6 +32,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
 import jenkins.model.Jenkins;
+
+import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
@@ -56,7 +58,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String entitlementPreference,
                                      String srcLocation,
                                      String remediationScanPreferenceType,
-                                     String inProgressScanActionType) {
+                                     String inProgressScanActionType,
+                                     String inProgressBuildResultType) {
 
         sharedBuildStep = new SharedUploadBuildStep(releaseId,
                 bsiToken,
@@ -68,7 +71,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 entitlementPreference,
                 srcLocation,
                 remediationScanPreferenceType,
-                inProgressScanActionType);
+                inProgressScanActionType,
+                inProgressBuildResultType);
 
     }
 
@@ -84,7 +88,14 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
 
+                            PrintStream log = listener.getLogger();
+        build.addAction(new CrossBuildAction());
+        try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
         sharedBuildStep.perform(build, workspace, launcher, listener);
+
+        CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
+        crossBuildAction.setPreviousStepBuildResult(build.getResult());
+        try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
     }
 
     // Overridden for better type safety.
@@ -156,6 +167,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @SuppressWarnings("unused")
     public String getInProgressScanActionType() {
         return sharedBuildStep.getModel().getInProgressScanActionType();
+    }
+
+    @SuppressWarnings("unused")
+    public String getInProgresBuildResultType() {
+        return sharedBuildStep.getModel().getInProgressBuildResultType();
     }
 
     @Extension
@@ -234,6 +250,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @SuppressWarnings("unused")
         public ListBoxModel doFillInProgressScanActionTypeItems() {
             return SharedUploadBuildStep.doFillInProgressScanActionTypeItems();
+        }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillInProgressBuildResultTypeItems() {
+            return SharedUploadBuildStep.doFillInProgressBuildResultTypeItems();
         }
     }
 }

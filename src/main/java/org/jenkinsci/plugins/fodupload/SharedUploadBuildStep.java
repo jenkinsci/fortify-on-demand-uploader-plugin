@@ -13,6 +13,8 @@ import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
+import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressBuildResultType;
+import org.jenkinsci.plugins.fodupload.models.response.StartScanResponse;
 import org.jenkinsci.plugins.fodupload.models.response.StaticScanSetupResponse;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
@@ -56,7 +58,8 @@ public class SharedUploadBuildStep {
                                  String entitlementPreference,
                                  String srcLocation,
                                  String remediationScanPreferenceType,
-                                 String inProgressScanActionType) {
+                                 String inProgressScanActionType,
+                                 String inProgressBuildResultType) {
 
         model = new JobModel(releaseId,
                 bsiToken,
@@ -64,7 +67,8 @@ public class SharedUploadBuildStep {
                 entitlementPreference,
                 srcLocation,
                 remediationScanPreferenceType,
-                inProgressScanActionType);
+                inProgressScanActionType,
+                inProgressBuildResultType);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -179,6 +183,15 @@ public class SharedUploadBuildStep {
         }
         return items;
     }
+    
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillInProgressBuildResultTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.InProgressBuildResultType buildResultType : FodEnums.InProgressBuildResultType.values()) {
+            items.add(new ListBoxModel.Option(buildResultType.toString(), buildResultType.getValue()));
+        }
+        return items;
+    }
 
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         final PrintStream logger = listener.getLogger();
@@ -208,6 +221,8 @@ public class SharedUploadBuildStep {
 
         final PrintStream logger = listener.getLogger();
         FodApiConnection apiConnection = null;
+        boolean isScanInProgress = false;
+
         try {
             taskListener.set(listener);
 
@@ -317,13 +332,42 @@ public class SharedUploadBuildStep {
                         build.getNumber(),
                         build.getDisplayName());
 
-                boolean success = staticScanController.startStaticScan(releaseId, staticScanSetup, model, notes);
+                StartScanResponse scanResponse = staticScanController.startStaticScan(releaseId, staticScanSetup, model, notes);
                 boolean deleted = payload.delete();
 
-                if (success && deleted) {
-                    logger.println("Scan Uploaded Successfully.");
+                boolean isWarningSettingEnabled = model.getInProgressBuildResultType().equalsIgnoreCase(InProgressBuildResultType.WarnBuild.getValue());
+
+                /**
+                 * If(able to contact api) {
+                 *      if(No scan in progress && the uploaded file deleted) {
+                 *          All good
+                 *      }
+                 *      else if (Scan in progress && user selected WarnBuild Build Action) {
+                 *          Say all good
+                 *          Set flag that stops anny additional FOD stuff
+                 *      }
+                 *      else (Scan is in progress && user selected FailBuild Build Action) {
+                 *          Fail Build
+                 *      }
+                 * } else (unable to contact api) {
+                 *      Fail Build
+                 * }
+                 */
+                if (scanResponse.isSuccessful()) {
+                    if(!scanResponse.isScanInProgress() && deleted){
+                        logger.println("Scan Uploaded Successfully.");
+                        build.setResult(Result.SUCCESS);
+                    } else if (isWarningSettingEnabled) {
+                        logger.println("Fortify scan skipped because another scan is in progress.");
+                        isScanInProgress = true;
+                        build.setResult(Result.UNSTABLE);
+                    } else {
+                        logger.println("Build failed because another scan is in progress.");
+                        build.setResult(Result.FAILURE);
+                    }
+                } else {
+                    build.setResult(Result.FAILURE);
                 }
-                build.setResult(success && deleted ? Result.SUCCESS : Result.UNSTABLE);
             } else {
                 logger.println("Failed to authenticate");
                 build.setResult(Result.FAILURE);
@@ -337,7 +381,7 @@ public class SharedUploadBuildStep {
             logger.println(iae.getMessage());
             build.setResult(Result.FAILURE);
         } finally {
-            if (apiConnection != null) {
+            if (apiConnection != null && !isScanInProgress) {
                 try {
                     apiConnection.retireToken();
                 } catch (IOException e) {

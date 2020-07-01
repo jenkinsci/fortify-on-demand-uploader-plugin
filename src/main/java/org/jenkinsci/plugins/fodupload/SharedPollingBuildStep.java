@@ -260,7 +260,12 @@ public class SharedPollingBuildStep {
 
                 // if the polling fails, crash the build
                 if (!result.isPollingSuccessful()) {
-                    run.setResult(Result.FAILURE);
+                    if(result.isScanInProgress()) {
+                        run.setResult(Result.UNSTABLE);
+                    } else {
+                        run.setResult(Result.FAILURE);
+                    }
+                    
                     return;
                 }
 
