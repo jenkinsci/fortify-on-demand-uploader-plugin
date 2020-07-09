@@ -7,6 +7,8 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Item;
+import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -35,6 +37,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
 import static org.jenkinsci.plugins.fodupload.SharedPollingBuildStep.*;
+import org.kohsuke.stapler.AncestorInPath;
 
 @SuppressWarnings("unused")
 public class PollingBuildStep extends Recorder implements SimpleBuildStep {
@@ -160,9 +163,10 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         @POST
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(USERNAME) final String username,
                                                                   @QueryParameter(PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
-                                                                  @QueryParameter(TENANT_ID) final String tenantId) {
-            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
-            return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId);
+                                                                  @QueryParameter(TENANT_ID) final String tenantId,
+                                                                  @AncestorInPath Job job) {
+            job.checkPermission(Item.CONFIGURE);
+            return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
         }
 
         @SuppressWarnings("unused")
@@ -171,18 +175,18 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         }
 
         @SuppressWarnings("unused")
-        public ListBoxModel doFillUsernameItems() {
-            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        public ListBoxModel doFillUsernameItems(@AncestorInPath Job job) {
+            return SharedPollingBuildStep.doFillStringCredentialsItems(job);
         }
 
         @SuppressWarnings("unused")
-        public ListBoxModel doFillPersonalAccessTokenItems() {
-            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        public ListBoxModel doFillPersonalAccessTokenItems(@AncestorInPath Job job) {
+            return SharedPollingBuildStep.doFillStringCredentialsItems(job);
         }
 
         @SuppressWarnings("unused")
-        public ListBoxModel doFillTenantIdItems() {
-            return SharedPollingBuildStep.doFillStringCredentialsItems();
+        public ListBoxModel doFillTenantIdItems(@AncestorInPath Job job) {
+            return SharedPollingBuildStep.doFillStringCredentialsItems(job);
         }
     }
 }
