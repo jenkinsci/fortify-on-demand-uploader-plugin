@@ -43,6 +43,7 @@ public class SharedPollingBuildStep {
     private String releaseId;
     private String bsiToken;
     private int pollingInterval;
+    private int scanId;
 
     private int policyFailureBuildResultPreference;
 
@@ -63,6 +64,7 @@ public class SharedPollingBuildStep {
         this.bsiToken = bsiToken;
         this.pollingInterval = pollingInterval;
         this.policyFailureBuildResultPreference = policyFailureBuildResultPreference;
+        this.scanId = -1;
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -224,6 +226,13 @@ public class SharedPollingBuildStep {
             return;
         }
 
+        // Magic numbers are awful but this eliminates most null errors.
+        if(scanId == -1) {
+            logger.println("Error: Unable to retrieve scan ID. Exiting FOD scan.");
+            run.setResult(Result.UNSTABLE);
+            return;
+        }
+
         if (this.getPollingInterval() <= 0) {
             logger.println("Error: Invalid polling interval (" + this.getPollingInterval() + " minutes)");
             run.setResult(Result.UNSTABLE);
@@ -256,7 +265,7 @@ public class SharedPollingBuildStep {
             if (apiConnection != null) {
                 apiConnection.authenticate();
                 ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.getPollingInterval(), logger);
-                PollReleaseStatusResult result = poller.pollReleaseStatus(releaseIdNum == 0 ? token.getProjectVersionId() : releaseIdNum);
+                PollReleaseStatusResult result = poller.pollReleaseStatus(releaseIdNum == 0 ? token.getProjectVersionId() : releaseIdNum, scanId);
 
                 // if the polling fails, crash the build
                 if (!result.isPollingSuccessful()) {
@@ -316,6 +325,14 @@ public class SharedPollingBuildStep {
 
     public int getPolicyFailureBuildResultPreference() {
         return policyFailureBuildResultPreference;
+    }
+
+    public int getUploadScanId() {
+        return scanId;
+    }
+
+    public void setUploadScanId(int uploadScanId) {
+        this.scanId = uploadScanId;
     }
 
     public AuthenticationModel getAuthModel() {

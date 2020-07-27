@@ -127,6 +127,7 @@ public class FodEnums {
     }
 
     public enum InProgressScanActionType {
+        Queue("Queue"),
         DoNotStartScan("DoNotStartScan"),
         CancelInProgressScan("CancelInProgressScan");
 
@@ -138,6 +139,8 @@ public class FodEnums {
 
         public static InProgressScanActionType fromInt(int val) {
             switch (val) {
+                case 3:
+                    return Queue;
                 case 2:
                     return CancelInProgressScan;
                 case 1:
@@ -152,6 +155,8 @@ public class FodEnums {
 
         public String toString() {
             switch (this._val) {
+                case "Queue":
+                    return "Queue";
                 case "CancelInProgressScan":
                     return "Cancel In-Progress Scan";
                 case "DoNotStartScan":

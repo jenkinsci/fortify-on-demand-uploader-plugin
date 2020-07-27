@@ -157,7 +157,7 @@ public class StaticScanController extends ControllerBase {
 
                         scanStartedResponse = gson.fromJson(responseJsonStr, PostStartScanResponse.class);
                         logger.println("Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
-                        scanResults.uploadSuccessfulScanStarting();
+                        scanResults.uploadSuccessfulScanStarting(scanStartedResponse.getScanId());
                         return scanResults;
 
                     } else if (!response.isSuccessful()) { // There was an error along the lines of 'another scan in progress' or something

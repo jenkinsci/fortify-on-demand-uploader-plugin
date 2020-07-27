@@ -74,6 +74,7 @@ public class StaticScanSummaryController extends ControllerBase {
         } else {
             logger.println("Error retrieving scan summary data from API. Please log into online website to view summary information.");
             logger.println(String.format("API response code: %s", response.code()));
+            logger.println(String.format("API response message: %s", response.message()));
             return null;
         }
     }

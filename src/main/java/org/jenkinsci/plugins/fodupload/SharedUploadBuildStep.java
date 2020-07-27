@@ -14,6 +14,7 @@ import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressBuildResultType;
+import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressScanActionType;
 import org.jenkinsci.plugins.fodupload.models.response.StartScanResponse;
 import org.jenkinsci.plugins.fodupload.models.response.StaticScanSetupResponse;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -47,6 +48,7 @@ public class SharedUploadBuildStep {
 
     private JobModel model;
     private AuthenticationModel authModel;
+    private int scanId;
 
     public SharedUploadBuildStep(String releaseId,
                                  String bsiToken,
@@ -336,7 +338,7 @@ public class SharedUploadBuildStep {
                 boolean deleted = payload.delete();
 
                 boolean isWarningSettingEnabled = model.getInProgressBuildResultType().equalsIgnoreCase(InProgressBuildResultType.WarnBuild.getValue());
-
+                boolean isQueueEnabled = model.getInProgressScanActionType().equalsIgnoreCase(InProgressScanActionType.Queue.getValue());
                 /**
                  * If(able to contact api) {
                  *      if(No scan in progress && the uploaded file deleted) {
@@ -354,15 +356,16 @@ public class SharedUploadBuildStep {
                  * }
                  */
                 if (scanResponse.isSuccessful()) {
-                    if(!scanResponse.isScanInProgress() && deleted){
-                        logger.println("Scan Uploaded Successfully.");
+                    logger.println("Scan Uploaded Successfully.");
+                    if(isQueueEnabled || !scanResponse.isScanInProgress() && deleted){
+                        setScanId(scanResponse.getScanId());
                         build.setResult(Result.SUCCESS);
                     } else if (isWarningSettingEnabled) {
                         logger.println("Fortify scan skipped because another scan is in progress.");
                         isScanInProgress = true;
                         build.setResult(Result.UNSTABLE);
                     } else {
-                        logger.println("Build failed because another scan is in progress.");
+                        logger.println("Build failed because another scan is in progress and queuing not selected as in progress scan action in settings.");
                         build.setResult(Result.FAILURE);
                     }
                 } else {
@@ -408,5 +411,13 @@ public class SharedUploadBuildStep {
 
     public JobModel getModel() {
         return model;
+    }
+
+    public int getScanId() {
+        return scanId;
+    }
+
+    public int setScanId(int newScanId) {
+        return scanId = newScanId;
     }
 }

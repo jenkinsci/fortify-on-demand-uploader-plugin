@@ -7,6 +7,7 @@ public class CrossBuildAction implements Action {
 
     private Result previousStepBuildResult;
     private boolean allowPolling;
+    private int scanId;
 
     public Result getPreviousStepBuildResult() {
         return previousStepBuildResult;
@@ -14,13 +15,23 @@ public class CrossBuildAction implements Action {
 
     public void setPreviousStepBuildResult(Result buildResult) {
         this.previousStepBuildResult = buildResult;
-        if(Result.UNSTABLE.equals(buildResult)){
+        if(Result.SUCCESS.equals(buildResult)){
+            this.allowPolling = true;
+        } else {
             this.allowPolling = false;
         }
     }
 
+    public void setScanId(int uploadScanId) {
+        this.scanId = uploadScanId;
+    }
+
     public boolean allowPolling() {
         return allowPolling;
+    }
+
+    public int currentScanId() {
+        return scanId;
     }
 
     @Override
