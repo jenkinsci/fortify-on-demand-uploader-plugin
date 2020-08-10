@@ -3,7 +3,7 @@ package org.jenkinsci.plugins.fodupload.polling;
 public class PollReleaseStatusResult {
 
     private boolean isPollingSuccessful;
-    private boolean isScanInProgress;
+    private boolean isScanUploadAccepted;
     private boolean isPassing;
     private String failReason;
 
@@ -35,11 +35,11 @@ public class PollReleaseStatusResult {
         isPollingSuccessful = pollingSuccessful;
     }
 
-    public boolean isScanInProgress() {
-        return isScanInProgress;
+    public boolean isScanUploadAccepted() {
+        return isScanUploadAccepted;
     }
 
     public void setScanInProgress(boolean scanInProgress) {
-        isScanInProgress = scanInProgress;
+        isScanUploadAccepted = scanInProgress;
     }
 }

@@ -164,15 +164,17 @@ public class StaticScanController extends ControllerBase {
 
                         logger.println("An error occurred during the upload.");
                         GenericErrorResponse errors = gson.fromJson(responseJsonStr, GenericErrorResponse.class);
-                        if (errors != null)
-                            logger.println("Package upload failed for the following reasons: " + errors.toString());
-
-                        if(errors.toString().contains("Can not start scan another scan is in progress")) {
-                            scanResults.uploadSuccessfulScanNotStarted();
+                        if (errors != null) {
+                            if(errors.toString().contains("Can not start scan another scan is in progress")) {
+                                scanResults.uploadSuccessfulScanNotStarted();
+                            }
+                            else {
+                                logger.println("Package upload failed for the following reasons: ");
+                                logger.println(errors.toString());
+                                scanResults.uploadNotSuccessful();
+                            }
                         }
-                        else {
-                            scanResults.uploadNotSuccessful();
-                        }
+                            
                         
                         return scanResults; // if there is an error, get out of loop and mark build unstable
                     }
