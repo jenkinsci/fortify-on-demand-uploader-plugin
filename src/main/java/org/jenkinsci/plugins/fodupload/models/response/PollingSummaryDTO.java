@@ -14,7 +14,7 @@ public class PollingSummaryDTO {
     private int IssueCountLow;
     private Boolean PassFailStatus;
     private String PassFailReasonType;
-    private ScanPauseDetail[] PauseDetails;
+    private PollingSummaryPauseDetail[] PauseDetails;
 
     
     public int getScanId() {
@@ -69,8 +69,8 @@ public class PollingSummaryDTO {
         return PassFailReasonType;
     };
 
-    public ScanPauseDetail[] getPauseDetails() {
-        ScanPauseDetail[] returnDetails = PauseDetails;
+    public PollingSummaryPauseDetail[] getPauseDetails() {
+        PollingSummaryPauseDetail[] returnDetails = PauseDetails;
         return returnDetails;
     };
 }

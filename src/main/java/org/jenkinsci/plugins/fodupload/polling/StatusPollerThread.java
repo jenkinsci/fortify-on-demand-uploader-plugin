@@ -93,14 +93,12 @@ class StatusPollerThread extends Thread {
                 result.setScanInProgress(true);
                 result.setPassing(true);
             }
-            if (statusString.equals(AnalysisStatusTypeEnum.Waiting.name())) {
-                    finished = true;
-                    fail = true;
-            }
             if (finished) {
                 result.setPassing(true);
                 result.setPollingSuccessful(true);
-                result.setFailReason(pollingSummaryDTO.getPassFailReasonType());
+                if (!statusString.equals(AnalysisStatusTypeEnum.Waiting.name())) {
+                        result.setFailReason(pollingSummaryDTO.getPassFailReasonType());
+                }
                 
             }
         }

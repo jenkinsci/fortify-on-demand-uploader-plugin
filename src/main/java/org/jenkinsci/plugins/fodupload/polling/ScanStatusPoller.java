@@ -7,9 +7,7 @@ import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
 import org.jenkinsci.plugins.fodupload.models.AnalysisStatusTypeEnum;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.PollingSummaryDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ScanPauseDetail;
-import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
+import org.jenkinsci.plugins.fodupload.models.response.PollingSummaryPauseDetail;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -67,7 +65,7 @@ public class ScanStatusPoller {
         
         if (analysisStatusTypes != null) {
             for (LookupItemsModel item : analysisStatusTypes) {
-                if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
+                if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Waiting.name()))
                     complete.add(item.getValue());
             }
         }
@@ -78,7 +76,7 @@ public class ScanStatusPoller {
                     analysisStatusTypes = lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
                     complete = new ArrayList<>();
                     for (LookupItemsModel item : analysisStatusTypes) {
-                        if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()))
+                        if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Waiting.name()))
                             complete.add(item.getValue());
                     }
                 }
@@ -134,29 +132,6 @@ public class ScanStatusPoller {
      *
      * @param release release to print info for
      */
-    private void printPassFail(ReleaseDTO release) {
-
-        boolean isPassed = release.isPassed();
-        logger.println(String.format("Critical: %d", release.getCritical()));
-        logger.println(String.format("High:     %d", release.getHigh()));
-        logger.println(String.format("Medium:   %d", release.getMedium()));
-        logger.println(String.format("Low:      %d", release.getLow()));
-        logger.println("For application status details see the customer portal: ");
-        logger.println(String.format("%s/Redirect/Releases/%d", apiConnection.getBaseUrl(), release.getReleaseId()));
-        logger.println(String.format("Scan %s established policy check", isPassed ? "passed" : "failed"));
-        if (!isPassed) {
-            String passFailReason = release.getPassFailReasonType() == null ?
-                    "Pass/Fail Policy requirements not met " :
-                    release.getPassFailReasonType();
-            logger.println("Failure Reason:         " + passFailReason);
-        }
-    }
-
-    /**
-     * Prints some info about the release including an issue breakdown and pass/fail reason
-     *
-     * @param release release to print info for
-     */
     private void printPassFail(PollingSummaryDTO release, int releaseId) {
 
         boolean isPassed = release.getPassFailStatus();
@@ -198,7 +173,7 @@ public class ScanStatusPoller {
             logger.println();
             // Leaving the for loop because of the data structure.
             // Should only be one object because a pause cancels the polling.
-            for (ScanPauseDetail spd : scanSummary.getPauseDetails()) {
+            for (PollingSummaryPauseDetail spd : scanSummary.getPauseDetails()) {
                 logger.println(String.format("Pause reason:         %s", spd.getReason()));
                 logger.println(String.format("Pause reason notes:   %s", spd.getNotes()));
                 logger.println();
