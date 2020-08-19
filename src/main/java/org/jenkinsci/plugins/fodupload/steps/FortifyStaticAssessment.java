@@ -25,6 +25,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Item;
 import hudson.model.Job;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
@@ -208,6 +209,9 @@ public class FortifyStaticAssessment extends FortifyStep {
         commonBuildStep.perform(build, workspace, launcher, listener);
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
         crossBuildAction.setPreviousStepBuildResult(build.getResult());
+        if(Result.SUCCESS.equals(crossBuildAction.getPreviousStepBuildResult())) {
+            crossBuildAction.setScanId(commonBuildStep.getScanId());
+        }
         try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
     }
 

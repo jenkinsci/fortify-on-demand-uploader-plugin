@@ -30,6 +30,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import org.kohsuke.stapler.AncestorInPath;
+import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 
 import org.kohsuke.stapler.verb.POST;
 
@@ -170,8 +171,11 @@ public class FortifyPollResults extends FortifyStep {
                 username,
                 personalAccessToken,
                 tenantId);
-
-        commonBuildStep.perform(build, workspace, launcher, listener);
+// If the CrossBuildAction fails to save during the upload step, the polling fails semi-gracefully.
+        if(build.getAction(CrossBuildAction.class) != null && build.getAction(CrossBuildAction.class).allowPolling()) {
+            commonBuildStep.setUploadScanId(build.getAction(CrossBuildAction.class).currentScanId());
+            commonBuildStep.perform(build, workspace, launcher, listener);
+        }
     }
 
     @Extension
