@@ -39,7 +39,6 @@ class StatusPollerThread extends Thread {
         this.analysisStatusTypes = analysisStatusTypes;
         this.logger = logger;
         this.releaseController = new ReleaseController(apiConnection);
-        this.scanSummaryController = new StaticScanSummaryController(apiConnection, logger);
         this.completeStatusList = completeStatusList;
         this.pollingInterval = pollingInterval;
         this.scanId = scanId;
