@@ -14,6 +14,9 @@ import org.jenkinsci.plugins.fodupload.models.response.PollingSummaryDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
 import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings("UUF_UNUSED_FIELD") //See line 29 for the reason.
 class StatusPollerThread extends Thread {
     public Boolean fail = false;
     public Boolean finished = false;
@@ -26,7 +29,7 @@ class StatusPollerThread extends Thread {
     private int releaseId;
     private int pollingInterval;
     private ReleaseController releaseController;
-    private StaticScanSummaryController scanSummaryController;
+    private StaticScanSummaryController scanSummaryController; // Will delete after release. Temporarily adding a suppression warning.
     private List<LookupItemsModel> analysisStatusTypes;
     private List<String> completeStatusList;
     private int scanId;
@@ -53,7 +56,7 @@ class StatusPollerThread extends Thread {
             Thread.currentThread().interrupt();
         }
     }
-
+    @SuppressFBWarnings("ES_COMPARING_STRINGS_WITH_EQ") //Need to make string comparisons more concise on next release. See line 90 comments
     private void processScanRelease() {
         int status = -1;
         try {
@@ -84,7 +87,7 @@ class StatusPollerThread extends Thread {
                 return;
             }
         }
-        if (this.statusString == null || this.statusString == "")
+        if (this.statusString == null || this.statusString == "") // Technically works because null objects are always an empty memory address. Need to use string.Equals like line 94
         {
             fail = true;
         } else {
