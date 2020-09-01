@@ -5,31 +5,23 @@ import java.io.PrintStream;
 import java.util.List;
 
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
-import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
-import org.jenkinsci.plugins.fodupload.controllers.StaticScanSummaryController;
 import org.jenkinsci.plugins.fodupload.models.AnalysisStatusTypeEnum;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.PollingSummaryDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-@SuppressFBWarnings("UUF_UNUSED_FIELD") //See line 29 for the reason.
 class StatusPollerThread extends Thread {
     public Boolean fail = false;
     public Boolean finished = false;
     public String statusString;
     public PollReleaseStatusResult result = new PollReleaseStatusResult();
-    //public ScanSummaryDTO scanSummaryDTO = null;
     public PollingSummaryDTO pollingSummaryDTO = null;
-    //public ReleaseDTO releaseDTO = null;
     private PrintStream logger;
     private int releaseId;
     private int pollingInterval;
     private ReleaseController releaseController;
-    private StaticScanSummaryController scanSummaryController; // Will delete after release. Temporarily adding a suppression warning.
     private List<LookupItemsModel> analysisStatusTypes;
     private List<String> completeStatusList;
     private int scanId;
@@ -87,7 +79,7 @@ class StatusPollerThread extends Thread {
                 return;
             }
         }
-        if (this.statusString == null || this.statusString == "") // Technically works because null objects are always an empty memory address. Need to use string.Equals like line 94
+        if (this.statusString == null || this.statusString.equals(""))
         {
             fail = true;
         } else {

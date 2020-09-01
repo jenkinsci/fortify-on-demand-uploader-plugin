@@ -32,7 +32,6 @@ public class ScanStatusPoller {
      * @param pollingInterval the polling interval in minutes
      * @param logger          the PrintStream that will be logged to
      */
-    @SuppressFBWarnings("URF_UNREAD_FIELD")
     public ScanStatusPoller(FodApiConnection apiConnection, int pollingInterval, PrintStream logger) {
         this.apiConnection = apiConnection;
         this.pollingInterval = pollingInterval;
@@ -56,7 +55,6 @@ public class ScanStatusPoller {
         int counter = 1;
         LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection);
         List<LookupItemsModel> analysisStatusTypes =  lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
-        //List<StatusPollerThread> pollerThreads = new ArrayList<StatusPollerThread>();
         StatusPollerThread pollerThread = null;
 
         // Create a list of values that will be used to break the loop if found
