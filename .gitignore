@@ -13,3 +13,8 @@ work/
 pom.xml.releaseBackup
 release.properties
 /.apt_generated/
+.factorypath
+.sts4-cache/classpath-data.json
+.vscode/launch.json
+.vscode/settings.json
+logs/nlog-internal.log

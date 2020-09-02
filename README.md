@@ -1,6 +1,6 @@
 # Fortify on Demand Jenkins Plugin
 
-[![Jenkins Plugins](https://img.shields.io/jenkins/plugin/v/fortify-on-demand-uploader.svg)](https://wiki.jenkins.io/display/JENKINS/Fortify+On+Demand+Uploader+Plugin)
+[![Jenkins Plugins](https://img.shields.io/jenkins/plugin/v/fortify-on-demand-uploader.svg)](https://plugins.jenkins.io/fortify-on-demand-uploader/)
 [![Build Status](https://ci.jenkins.io/buildStatus/icon?job=plugins/fortify-on-demand-uploader-plugin/master)](https://ci.jenkins.io/job/plugins/job/fortify-on-demand-uploader-plugin/job/master)
 
 Fortify on Demand is a Software as a Service (SaaS) solution that enables your organization to easily and quickly build and expand a Software Security Assurance program. The Fortify on Demand Jenkins Plugin enables users to upload code directly from Jenkins for Static Application Security Testing (SAST). This plugin features the following tasks:

@@ -4,5 +4,7 @@ public enum AnalysisStatusTypeEnum {
     Completed,
     InProgress,
     Canceled,
-    Waiting
+    Waiting,
+    Scheduled,
+    Queued
 }

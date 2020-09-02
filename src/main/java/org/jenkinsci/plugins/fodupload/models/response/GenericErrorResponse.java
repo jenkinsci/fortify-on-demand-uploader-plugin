@@ -16,7 +16,7 @@ public class GenericErrorResponse {
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
 
-        int index = 0;
+        int index = 1;
         for (ErrorResponse error : errors) {
 
             sb.append(index);
