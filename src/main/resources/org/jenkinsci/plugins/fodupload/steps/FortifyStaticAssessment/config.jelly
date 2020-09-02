@@ -49,6 +49,9 @@
         <f:entry title="Action when scan is in progress" field="inProgressScanActionType">
             <f:select style="width: 160px;"/>
         </f:entry>
+        <f:entry title="Build result if scan in progress" field="inProgressBuildResultType">
+            <f:select style="width: 160px;"/>
+        </f:entry>
     </f:section>
 
 </j:jelly>
