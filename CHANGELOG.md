@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 6.1.0 (09-02-2020)
+- Added the option to queue a new scan if a scan is in progress.
+- Added the option to fail the build or provide a warning if the task fails.
+
+## Version 6.0.1 (06-20-2020)
+- Fixed SECURITY-1690 / CVE-2020-2202 and SECURITY-1691 / CVE-2020-2203, CVE-2020-2204
+
 ## Version 6.0.0 (06-24-2020)
 - Added the ability to specify release ID in place of BSI token.
 - Added additional file types to be included in payloads for all technology stacks.
