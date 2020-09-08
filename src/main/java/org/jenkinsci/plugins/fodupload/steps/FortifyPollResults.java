@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.SharedPollingBuildStep;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -28,7 +27,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.Secret;
 import org.kohsuke.stapler.AncestorInPath;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 
