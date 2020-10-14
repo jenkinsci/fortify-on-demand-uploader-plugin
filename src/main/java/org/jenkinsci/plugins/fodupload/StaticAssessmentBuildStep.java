@@ -174,7 +174,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
-    public String getInProgresBuildResultType() {
+    public String getInProgressBuildResultType() {
         return sharedBuildStep.getModel().getInProgressBuildResultType();
     }
 
