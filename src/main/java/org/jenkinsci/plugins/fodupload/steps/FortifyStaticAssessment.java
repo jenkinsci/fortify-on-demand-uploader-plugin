@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableSet;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -192,6 +193,11 @@ public class FortifyStaticAssessment extends FortifyStep {
         log.println("Fortify on Demand Upload Running...");
         build.addAction(new CrossBuildAction());
         try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
+
+        
+        remediationScanPreferenceType = remediationScanPreferenceType != null ? remediationScanPreferenceType : FodEnums.RemediationScanPreferenceType.RemediationScanIfAvailable.getValue();
+        inProgressScanActionType = inProgressScanActionType != null ? inProgressScanActionType : FodEnums.InProgressScanActionType.DoNotStartScan.getValue();
+        inProgressBuildResultType = inProgressBuildResultType != null ? inProgressBuildResultType : FodEnums.InProgressBuildResultType.FailBuild.getValue();
 
         commonBuildStep = new SharedUploadBuildStep(releaseId,
                 bsiToken,
