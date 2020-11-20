@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.fodupload;
 
+import com.cloudbees.hudson.plugins.folder.properties.FolderCredentialsProvider;
 import hudson.FilePath;
+import hudson.model.ItemGroup;
 import hudson.security.ACL;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
@@ -13,7 +15,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
 
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
@@ -146,26 +147,30 @@ public class Utils {
     }
 
     public static boolean isCredential(String id) {
+        return isCredential(id, Jenkins.get());
+    }
+
+    public static boolean isCredential(String id, ItemGroup<?> group) {
         StringCredentials s = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(
-                StringCredentials.class, 
-                Jenkins.get(), 
-                ACL.SYSTEM, 
-                null, 
-                null
+                FolderCredentialsProvider.lookupCredentials(
+                        StringCredentials.class,
+                        group,
+                        ACL.SYSTEM,
+                        null,
+                        null
                 ),
                 CredentialsMatchers.allOf(
-                    CredentialsMatchers.withId(id)
+                        CredentialsMatchers.withId(id)
                 )
         );
         return (s != null);
     }
 
-    public static String retrieveSecretDecryptedValue(String id) {
+    public static String retrieveSecretDecryptedValue(String id, ItemGroup<?> group) {
         StringCredentials s = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(
+            FolderCredentialsProvider.lookupCredentials(
                 StringCredentials.class, 
-                Jenkins.get(), 
+                group,
                 ACL.SYSTEM, 
                 null, 
                 null
@@ -175,5 +180,9 @@ public class Utils {
                 )
         );
         return s != null ? decrypt(s.getSecret()) : id;
+    }
+
+    public static String retrieveSecretDecryptedValue(String id) {
+        return retrieveSecretDecryptedValue(id, Jenkins.get());
     }
 }

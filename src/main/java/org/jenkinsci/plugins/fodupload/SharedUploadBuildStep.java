@@ -3,9 +3,9 @@ package org.jenkinsci.plugins.fodupload;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.text.Normalizer;
 
-import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.hudson.plugins.folder.properties.FolderCredentialsProvider;
+
 import com.fortify.fod.parser.BsiToken;
 import com.fortify.fod.parser.BsiTokenParser;
 
@@ -14,7 +14,6 @@ import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressBuildResultType;
-import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressScanActionType;
 import org.jenkinsci.plugins.fodupload.models.response.StartScanResponse;
 import org.jenkinsci.plugins.fodupload.models.response.StaticScanSetupResponse;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -86,8 +85,7 @@ public class SharedUploadBuildStep {
             } catch (NumberFormatException ex) {
                 return FormValidation.error("Could not parse Release ID.");
             }
-        }
-        else {
+        } else {
             if (bsiToken != null && !bsiToken.isEmpty()) {
                 return FormValidation.ok();
             }
@@ -128,14 +126,14 @@ public class SharedUploadBuildStep {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
         String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-        String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
+        String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken, job.getParent());
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
         if (Utils.isNullOrEmpty(apiUrl))
             return FormValidation.error("Fortify on Demand API URL is empty!");
         if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
-        if (!Utils.isCredential(personalAccessToken))
+        if (!Utils.isCredential(personalAccessToken, job.getParent()))
             return FormValidation.error("Personal Access Token is empty!");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
@@ -166,17 +164,16 @@ public class SharedUploadBuildStep {
     @SuppressWarnings("unused")
     public static ListBoxModel doFillStringCredentialsItems(@AncestorInPath Job job) {
         job.checkPermission(Item.CONFIGURE);
-        ListBoxModel items = CredentialsProvider.listCredentials(
+        return FolderCredentialsProvider.listCredentials(
                 StringCredentials.class,
-                Jenkins.get(),
+                job.getParent(),
                 ACL.SYSTEM,
                 null,
                 null
-                );
+        );
 
-        return items;
     }
-    
+
     @SuppressWarnings("unused")
     public static ListBoxModel doFillInProgressScanActionTypeItems() {
         ListBoxModel items = new ListBoxModel();
@@ -185,7 +182,7 @@ public class SharedUploadBuildStep {
         }
         return items;
     }
-    
+
     @SuppressWarnings("unused")
     public static ListBoxModel doFillInProgressBuildResultTypeItems() {
         ListBoxModel items = new ListBoxModel();
@@ -213,7 +210,7 @@ public class SharedUploadBuildStep {
             build.setResult(Result.FAILURE);
             return false;
         }
-        
+
         return true;
     }
 
@@ -228,39 +225,30 @@ public class SharedUploadBuildStep {
             taskListener.set(listener);
 
             // check to see if sensitive fields are encrypte. If not halt scan and recommend encryption.
-            if(authModel != null)
-            {
-                if(authModel.getOverrideGlobalConfig() == true){
-                    if(!Utils.isCredential(authModel.getPersonalAccessToken()))
-                    {
+            if (authModel != null) {
+                if (authModel.getOverrideGlobalConfig() == true) {
+                    if (!Utils.isCredential(authModel.getPersonalAccessToken(), build.getParent().getParent())) {
                         build.setResult(Result.UNSTABLE);
                         logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
-                        return ;
+                        return;
                     }
-                }
-                else
-                {
-                    if(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey())
-                    {
-                        if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
-                        {
+                } else {
+                    if (GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey()) {
+                        if (!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret())) {
                             build.setResult(Result.UNSTABLE);
                             logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
-                            return ;
+                            return;
                         }
-                    }
-                    else
-                    {
-                         if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
-                        {
+                    } else {
+                        if (!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken())) {
                             build.setResult(Result.UNSTABLE);
                             logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
-                            return ;
-                        }      
+                            return;
+                        }
                     }
                 }
             }
-            
+
             Result currentResult = build.getResult();
             if (Result.FAILURE.equals(currentResult)
                     || Result.ABORTED.equals(currentResult)
@@ -275,8 +263,8 @@ public class SharedUploadBuildStep {
             Integer releaseId = 0;
             try {
                 releaseId = Integer.parseInt(model.getReleaseId());
+            } catch (NumberFormatException ex) {
             }
-            catch (NumberFormatException ex) {}
 
             if (releaseId == 0 && !model.loadBsiToken()) {
                 build.setResult(Result.FAILURE);
@@ -292,7 +280,7 @@ public class SharedUploadBuildStep {
             String technologyStack = null;
             StaticScanSetupResponse staticScanSetup = null;
 
-            apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
+            apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel(), build.getParent());
             if (apiConnection != null) {
                 apiConnection.authenticate();
 
@@ -354,11 +342,11 @@ public class SharedUploadBuildStep {
                  * }
                  */
                 if (scanResponse.isSuccessful()) {
-                    if(scanResponse.isScanUploadAccepted()) {
+                    if (scanResponse.isScanUploadAccepted()) {
                         logger.println("Scan Uploaded Successfully.");
                         setScanId(scanResponse.getScanId());
                         build.setResult(Result.SUCCESS);
-                        if(!deleted) {
+                        if (!deleted) {
                             logger.println("Unable to delete temporary zip file. Please manually delete file at location: " + payload.getAbsolutePath());
                         }
                     } else if (isWarningSettingEnabled) {
@@ -396,15 +384,17 @@ public class SharedUploadBuildStep {
 
     public AuthenticationModel getAuthModel() {
         AuthenticationModel displayModel = new AuthenticationModel(authModel.getOverrideGlobalConfig(),
-                                                                   authModel.getUsername(),
-                                                                   authModel.getPersonalAccessToken(),
-                                                                   authModel.getTenantId() );
-       
+                authModel.getUsername(),
+                authModel.getPersonalAccessToken(),
+                authModel.getTenantId());
+
         return displayModel;
     }
 
-    public JobModel setModel(JobModel newModel) { return model = newModel; }
-    
+    public JobModel setModel(JobModel newModel) {
+        return model = newModel;
+    }
+
     public AuthenticationModel setAuthModel(AuthenticationModel newAuthModel) {
         return authModel = newAuthModel;
     }

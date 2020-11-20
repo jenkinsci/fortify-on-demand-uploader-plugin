@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.fodupload;
 
+import hudson.model.Job;
 import jenkins.model.GlobalConfiguration;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
@@ -36,7 +37,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class ApiConnectionFactory {
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    public static FodApiConnection createApiConnection(AuthenticationModel model) {
+    public static FodApiConnection createApiConnection(AuthenticationModel model, Job job) {
         FodApiConnection apiConnection = null;
         if (GlobalConfiguration.all() != null && GlobalConfiguration.all().get(FodGlobalDescriptor.class) != null) {
             if (model.getOverrideGlobalConfig()) {
@@ -48,7 +49,7 @@ public class ApiConnectionFactory {
                 if (Utils.isNullOrEmpty(apiUrl))
                     throw new IllegalArgumentException("Api URL is null.");
                 apiConnection = new FodApiConnection(model.getTenantId() + "\\" + model.getUsername(),
-                        Utils.retrieveSecretDecryptedValue(model.getPersonalAccessToken()),
+                        Utils.retrieveSecretDecryptedValue(model.getPersonalAccessToken(), job.getParent()),
                         baseUrl,
                         apiUrl,
                         FodEnums.GrantType.PASSWORD,
