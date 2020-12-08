@@ -173,5 +173,11 @@ public class FodApiConnection {
     public OkHttpClient getClient() {
         return client;
     }
+
+    public Request reauthenticateRequest(Request request) {
+        return request.newBuilder()
+                .header("Authorization", "Bearer " + getToken())
+                .build();
+    }
 }
 

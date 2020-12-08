@@ -175,10 +175,16 @@ public class ReleaseController extends ControllerBase {
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();
 
-        if (response.code() == HttpStatus.SC_FORBIDDEN) { 
+        if (Utils.isUnauthorizedResponse(response)) {
             // Re-authenticate
             apiConnection.authenticate();
+            request = apiConnection.reauthenticateRequest(request);
             response = apiConnection.getClient().newCall(request).execute();
+
+            // if response is still unauthorized, even after re-authentication, return null to the caller, to signal polling failure.
+            if (Utils.isUnauthorizedResponse(response)) {
+                return null;
+            }
         }
         // Read the results and close the response
         String content = IOUtils.toString(response.body().byteStream(), "utf-8");
