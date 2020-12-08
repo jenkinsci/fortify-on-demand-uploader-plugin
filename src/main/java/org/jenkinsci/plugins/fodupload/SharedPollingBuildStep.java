@@ -44,6 +44,7 @@ public class SharedPollingBuildStep {
     private String bsiToken;
     private int pollingInterval;
     private int scanId;
+    private String correlationId;
 
     private int policyFailureBuildResultPreference;
 
@@ -65,6 +66,7 @@ public class SharedPollingBuildStep {
         this.pollingInterval = pollingInterval;
         this.policyFailureBuildResultPreference = policyFailureBuildResultPreference;
         this.scanId = -1;
+        this.correlationId = "";
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
                 personalAccessToken,
@@ -265,7 +267,7 @@ public class SharedPollingBuildStep {
             if (apiConnection != null) {
                 apiConnection.authenticate();
                 ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.getPollingInterval(), logger);
-                PollReleaseStatusResult result = poller.pollReleaseStatus(releaseIdNum == 0 ? token.getProjectVersionId() : releaseIdNum, scanId);
+                PollReleaseStatusResult result = poller.pollReleaseStatus(releaseIdNum == 0 ? token.getProjectVersionId() : releaseIdNum, scanId, correlationId);
 
                 // if the polling fails, crash the build
                 if (!result.isPollingSuccessful()) {
@@ -333,6 +335,10 @@ public class SharedPollingBuildStep {
 
     public void setUploadScanId(int uploadScanId) {
         this.scanId = uploadScanId;
+    }
+
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
     }
 
     public AuthenticationModel getAuthModel() {

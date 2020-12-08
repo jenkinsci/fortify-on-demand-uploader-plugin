@@ -28,12 +28,12 @@ class StatusPollerThread extends Thread {
 
 
     StatusPollerThread(String name, final int releaseId, List<LookupItemsModel> analysisStatusTypes,
-                       FodApiConnection apiConnection, List<String> completeStatusList, PrintStream logger, int pollingInterval, final int scanId) {
+                       FodApiConnection apiConnection, List<String> completeStatusList, PrintStream logger, int pollingInterval, final int scanId, final String correlationId) {
         super(name);
         this.releaseId = releaseId;
         this.analysisStatusTypes = analysisStatusTypes;
         this.logger = logger;
-        this.releaseController = new ReleaseController(apiConnection);
+        this.releaseController = new ReleaseController(apiConnection, logger, correlationId);
         this.completeStatusList = completeStatusList;
         this.pollingInterval = pollingInterval;
         this.scanId = scanId;

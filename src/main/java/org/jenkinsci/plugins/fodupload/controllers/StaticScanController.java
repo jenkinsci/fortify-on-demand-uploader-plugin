@@ -27,17 +27,16 @@ public class StaticScanController extends ControllerBase {
     private final static int EXPRESS_AUDIT_PREFERENCE_ID = 2;
     private final static int MAX_NOTES_LENGTH = 250;
     private final static int CHUNK_SIZE = 1024 * 1024;
-    private PrintStream logger;
 
     /**
      * Constructor
      *
      * @param apiConnection apiConnection object with client info
      * @param logger        logger object to display to console
+     * @param correlationId correlation id
      */
-    public StaticScanController(final FodApiConnection apiConnection, final PrintStream logger) {
-        super(apiConnection);
-        this.logger = logger;
+    public StaticScanController(final FodApiConnection apiConnection, final PrintStream logger, final String correlationId) {
+        super(apiConnection, logger, correlationId);
     }
 
     /**
@@ -125,6 +124,7 @@ public class StaticScanController extends ControllerBase {
                         .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                         .addHeader("Content-Type", "application/octet-stream")
                         .addHeader("Accept", "application/json")
+                        .addHeader("CorrelationId", getCorrelationId())
                         // Add offsets
                         .url(fragUrl + "&fragNo=" + fragmentNumber++ + "&offset=" + offset)
                         .post(RequestBody.create(byteArray, sendByteArray))
@@ -133,7 +133,7 @@ public class StaticScanController extends ControllerBase {
                 // Get the response
                 Response response = apiConnection.getClient().newCall(request).execute();
 
-                if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
+                if (response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
                     // Re-authenticate
                     apiConnection.authenticate();
 
@@ -206,6 +206,7 @@ public class StaticScanController extends ControllerBase {
                 .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();

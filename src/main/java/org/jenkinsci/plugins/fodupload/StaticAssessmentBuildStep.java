@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.util.UUID;
 
 import jenkins.model.Jenkins;
 
@@ -92,12 +93,16 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                             PrintStream log = listener.getLogger();
         build.addAction(new CrossBuildAction());
         try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
-        sharedBuildStep.perform(build, workspace, launcher, listener);
+
+        String correlationId = UUID.randomUUID().toString();
+
+        sharedBuildStep.perform(build, workspace, launcher, listener, correlationId);
 
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
         crossBuildAction.setPreviousStepBuildResult(build.getResult());
         if(Result.SUCCESS.equals(crossBuildAction.getPreviousStepBuildResult())) {
             crossBuildAction.setScanId(sharedBuildStep.getScanId());
+            crossBuildAction.setCorrelationId(correlationId);
         }
         try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
     }

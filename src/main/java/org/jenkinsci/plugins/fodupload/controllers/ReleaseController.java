@@ -31,9 +31,11 @@ public class ReleaseController extends ControllerBase {
      * Constructor
      *
      * @param apiConnection apiConnection object with client info
+     * @param logger logger object
+     * @param correlationId correlation id
      */
-    public ReleaseController(FodApiConnection apiConnection) {
-        super(apiConnection);
+    public ReleaseController(final FodApiConnection apiConnection, final PrintStream logger, final String correlationId) {
+        super(apiConnection, logger, correlationId);
     }
 
     /**
@@ -67,11 +69,12 @@ public class ReleaseController extends ControllerBase {
                 .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();
 
-        if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
+        if (Utils.isUnauthorizedResponse(response)) {  // got logged out during polling so log back in
             // Re-authenticate
             apiConnection.authenticate();
         }
@@ -118,14 +121,20 @@ public class ReleaseController extends ControllerBase {
                 .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();
 
-        if (response.code() == HttpStatus.SC_FORBIDDEN) { 
+        if (Utils.isUnauthorizedResponse(response)) {
             // Re-authenticate
             apiConnection.authenticate();
+            request = apiConnection.reauthenticateRequest(request);
             response = apiConnection.getClient().newCall(request).execute();
+
+            if (Utils.isUnauthorizedResponse(response)) {
+                return null;
+            }
         }
         // Read the results and close the response
         String content = IOUtils.toString(response.body().byteStream(), "utf-8");
@@ -138,7 +147,7 @@ public class ReleaseController extends ControllerBase {
         GenericListResponse<ScanSummaryDTO> results = gson.fromJson(content, t);
         ScanSummaryDTO resultDto = null;
         if (results.getItems().size() > 0) {
-           for (ScanSummaryDTO sdto : results.getItems())
+            for (ScanSummaryDTO sdto : results.getItems())
             {
                 if(sdto.getScanId() == scanId)
                     resultDto = sdto;
@@ -171,6 +180,7 @@ public class ReleaseController extends ControllerBase {
                 .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();
