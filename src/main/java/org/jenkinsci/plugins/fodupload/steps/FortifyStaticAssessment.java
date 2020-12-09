@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.fodupload.steps;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -199,6 +200,8 @@ public class FortifyStaticAssessment extends FortifyStep {
         inProgressScanActionType = inProgressScanActionType != null ? inProgressScanActionType : FodEnums.InProgressScanActionType.DoNotStartScan.getValue();
         inProgressBuildResultType = inProgressBuildResultType != null ? inProgressBuildResultType : FodEnums.InProgressBuildResultType.FailBuild.getValue();
 
+        String correlationId = UUID.randomUUID().toString();
+
         commonBuildStep = new SharedUploadBuildStep(releaseId,
                 bsiToken,
                 overrideGlobalConfig,
@@ -212,11 +215,12 @@ public class FortifyStaticAssessment extends FortifyStep {
                 inProgressScanActionType,
                 inProgressBuildResultType);
 
-        commonBuildStep.perform(build, workspace, launcher, listener);
+        commonBuildStep.perform(build, workspace, launcher, listener, correlationId);
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
         crossBuildAction.setPreviousStepBuildResult(build.getResult());
         if(Result.SUCCESS.equals(crossBuildAction.getPreviousStepBuildResult())) {
             crossBuildAction.setScanId(commonBuildStep.getScanId());
+            crossBuildAction.setCorrelationId(correlationId);
         }
         try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
     }

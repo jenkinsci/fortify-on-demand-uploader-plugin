@@ -46,14 +46,14 @@ public class ScanStatusPoller {
      * @throws java.io.IOException  in certain cases
      * @throws InterruptedException in certain cases
      */
-    public PollReleaseStatusResult pollReleaseStatus(final int releaseId, final int scanId) throws IOException, InterruptedException {
+    public PollReleaseStatusResult pollReleaseStatus(final int releaseId, final int scanId, final String correlationId) throws IOException, InterruptedException {
 
 
         logger.println("Begin polling Fortify on Demand for results.");
 
         boolean finished = false;
         int counter = 1;
-        LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection);
+        LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection, logger, correlationId);
         List<LookupItemsModel> analysisStatusTypes =  lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
         StatusPollerThread pollerThread = null;
 
@@ -80,9 +80,9 @@ public class ScanStatusPoller {
                 }
                 if (counter == 1) {
                     //No Thread.sleep() on first round
-                    pollerThread = new StatusPollerThread(String.valueOf(counter), releaseId, analysisStatusTypes, apiConnection, complete, logger, 0, scanId);
+                    pollerThread = new StatusPollerThread(String.valueOf(counter), releaseId, analysisStatusTypes, apiConnection, complete, logger, 0, scanId, correlationId);
                 } else {
-                    pollerThread = new StatusPollerThread(String.valueOf(counter), releaseId, analysisStatusTypes, apiConnection, complete, logger, pollingInterval, scanId);
+                    pollerThread = new StatusPollerThread(String.valueOf(counter), releaseId, analysisStatusTypes, apiConnection, complete, logger, pollingInterval, scanId, correlationId);
                 }
 
                 pollerThread.start();

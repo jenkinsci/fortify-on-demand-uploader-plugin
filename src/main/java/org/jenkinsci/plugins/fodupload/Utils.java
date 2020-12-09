@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 
+import okhttp3.Response;
+import org.apache.http.HttpStatus;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 public class Utils {
@@ -175,5 +177,9 @@ public class Utils {
                 )
         );
         return s != null ? decrypt(s.getSecret()) : id;
+    }
+
+    public static Boolean isUnauthorizedResponse(Response response) {
+        return response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED;
     }
 }

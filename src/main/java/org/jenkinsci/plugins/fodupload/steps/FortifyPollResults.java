@@ -172,6 +172,7 @@ public class FortifyPollResults extends FortifyStep {
 // If the CrossBuildAction fails to save during the upload step, the polling fails semi-gracefully.
         if(build.getAction(CrossBuildAction.class) != null && build.getAction(CrossBuildAction.class).allowPolling()) {
             commonBuildStep.setUploadScanId(build.getAction(CrossBuildAction.class).currentScanId());
+            commonBuildStep.setCorrelationId(build.getAction(CrossBuildAction.class).currentCorrelationId());
             commonBuildStep.perform(build, workspace, launcher, listener);
         }
     }

@@ -9,6 +9,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 // import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
+import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
 
 import java.io.IOException;
@@ -16,12 +17,9 @@ import java.io.PrintStream;
 import java.lang.reflect.Type;
 
 public class StaticScanSummaryController extends ControllerBase {
-    private PrintStream logger;
 
-
-    public StaticScanSummaryController(FodApiConnection apiConnection, PrintStream logger) {
-        super(apiConnection);
-        this.logger = logger;
+    public StaticScanSummaryController(final FodApiConnection apiConnection, final PrintStream logger, final String correlationId) {
+        super(apiConnection, logger, correlationId);
     }
 
     /**
@@ -48,14 +46,20 @@ public class StaticScanSummaryController extends ControllerBase {
                 .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();
 
-        if (response.code() == HttpStatus.SC_FORBIDDEN) {
+        if (Utils.isUnauthorizedResponse(response)) {
             // Re-authenticate
             apiConnection.authenticate();
+            request = apiConnection.reauthenticateRequest(request);
             response = apiConnection.getClient().newCall(request).execute();
+
+            if (Utils.isUnauthorizedResponse(response)) {
+                return null;
+            }
         }
 
         // Read the results and close the response
