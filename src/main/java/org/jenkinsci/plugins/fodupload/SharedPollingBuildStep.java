@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 
-import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.hudson.plugins.folder.properties.FolderCredentialsProvider;
 import com.fortify.fod.parser.BsiToken;
 import com.fortify.fod.parser.BsiTokenParser;
 
@@ -18,6 +18,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Item;
+import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -136,14 +137,14 @@ public class SharedPollingBuildStep {
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
         String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-        String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
+        String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken, job.getParent());
         if (Utils.isNullOrEmpty(baseUrl))
             return FormValidation.error("Fortify on Demand URL is empty!");
         if (Utils.isNullOrEmpty(apiUrl))
             return FormValidation.error("Fortify on Demand API URL is empty!");
         if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
-        if (!Utils.isCredential(personalAccessToken))
+        if (!Utils.isCredential(personalAccessToken, job.getParent()))
             return FormValidation.error("Personal Access Token is empty or needs to be resaved!");
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
@@ -164,14 +165,14 @@ public class SharedPollingBuildStep {
     @SuppressWarnings("unused")
     public static ListBoxModel doFillStringCredentialsItems(@AncestorInPath Job job) {
         job.checkPermission(Item.CONFIGURE);
-        ListBoxModel items = CredentialsProvider.listCredentials(
+        job.checkPermission(Item.CONFIGURE);
+        return FolderCredentialsProvider.listCredentials(
                 StringCredentials.class,
-                Jenkins.get(),
+                job.getParent(),
                 ACL.SYSTEM,
                 null,
                 null
-                );
-        return items;
+        );
     }
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
@@ -182,12 +183,11 @@ public class SharedPollingBuildStep {
 
         final PrintStream logger = taskListener.getLogger();
 
-        
         // check to see if sensitive fields are encrypte. If not halt scan and recommend encryption.
         if(authModel != null)
         {
             if(authModel.getOverrideGlobalConfig() == true){
-                if(!Utils.isCredential(authModel.getPersonalAccessToken()))
+                if(!Utils.isCredential(authModel.getPersonalAccessToken(), run.getParent().getParent()))
                 {
                     run.setResult(Result.UNSTABLE);
                     logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
@@ -239,7 +239,7 @@ public class SharedPollingBuildStep {
             return;
         }
 
-        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel(), run.getParent());
 
         try {
 

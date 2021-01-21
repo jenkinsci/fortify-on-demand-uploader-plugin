@@ -9,7 +9,7 @@ work/
 .project
 .classpath
 .settings/
-
+.DS_STORE
 pom.xml.releaseBackup
 release.properties
 /.apt_generated/
