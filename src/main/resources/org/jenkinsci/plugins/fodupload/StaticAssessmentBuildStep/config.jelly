@@ -3,6 +3,9 @@
     <f:entry title="Release ID" field="releaseId" help="/plugin/fortify-on-demand-uploader/help-releaseId.html">
         <f:textbox />
     </f:entry>
+    <f:entry title="Scan Notes (e.g. commit hash)" field="scanNote">
+            <f:textbox />
+    </f:entry>
     <f:entry title="BSI Token" field="bsiToken">
         <f:textbox />
     </f:entry>
