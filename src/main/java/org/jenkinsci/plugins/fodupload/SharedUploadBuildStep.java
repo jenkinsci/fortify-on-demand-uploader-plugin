@@ -331,7 +331,7 @@ public class SharedUploadBuildStep {
                 model.setPayload(payload);
 
                 
-                String notes = model.getScanNote() == "" ? 
+                String notes = model.getScanNote().isEmpty() ? 
                 String.format("[%d] %s - Assessment submitted from Jenkins FoD Plugin",
                         build.getNumber(),
                         build.getDisplayName()) : model.getScanNote();

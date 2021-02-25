@@ -123,7 +123,7 @@ public class JobModel {
                             "Purchase Entitlements:             %s%n" +
                             "Entitlement Preference:            %s%n" +
                             "In Progress Scan Action:           %s%n" +
-                            "In Progress Build Action:          %s%n",
+                            "In Progress Build Action:          %s%n" +
                             "scanNote:          %s%n",
                     bsiTokenCache.getProjectVersionId(),
                     bsiTokenCache.getAssessmentTypeId(),
