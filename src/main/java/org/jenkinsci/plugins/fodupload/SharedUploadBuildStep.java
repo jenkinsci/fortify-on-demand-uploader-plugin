@@ -61,7 +61,8 @@ public class SharedUploadBuildStep {
                                  String srcLocation,
                                  String remediationScanPreferenceType,
                                  String inProgressScanActionType,
-                                 String inProgressBuildResultType) {
+                                 String inProgressBuildResultType,
+                                 String scanNote) {
 
         model = new JobModel(releaseId,
                 bsiToken,
@@ -70,7 +71,7 @@ public class SharedUploadBuildStep {
                 srcLocation,
                 remediationScanPreferenceType,
                 inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressBuildResultType, scanNote);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -329,9 +330,11 @@ public class SharedUploadBuildStep {
 
                 model.setPayload(payload);
 
-                String notes = String.format("[%d] %s - Assessment submitted from Jenkins FoD Plugin",
+                
+                String notes = model.getScanNote().isEmpty() ? 
+                String.format("[%d] %s - Assessment submitted from Jenkins FoD Plugin",
                         build.getNumber(),
-                        build.getDisplayName());
+                        build.getDisplayName()) : model.getScanNote();
 
                 StartScanResponse scanResponse = staticScanController.startStaticScan(releaseId, staticScanSetup, model, notes);
                 boolean deleted = payload.delete();

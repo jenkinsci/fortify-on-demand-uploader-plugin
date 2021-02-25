@@ -60,7 +60,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String srcLocation,
                                      String remediationScanPreferenceType,
                                      String inProgressScanActionType,
-                                     String inProgressBuildResultType) {
+                                     String inProgressBuildResultType, 
+                                     String scanNote) {
 
         sharedBuildStep = new SharedUploadBuildStep(releaseId,
                 bsiToken,
@@ -73,7 +74,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 srcLocation,
                 remediationScanPreferenceType,
                 inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressBuildResultType,
+                scanNote);
 
     }
 
@@ -118,6 +120,10 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @SuppressWarnings("unused")
     public String getReleaseId() {
         return sharedBuildStep.getModel().getReleaseId();
+    }
+    @SuppressWarnings("unused")
+    public String getScanNote() {
+        return sharedBuildStep.getModel().getScanNote();
     }
 
     // NOTE: The following Getters are used to return saved values in the config.jelly. Intellij

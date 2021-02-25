@@ -53,14 +53,16 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String remediationScanPreferenceType;
     private String inProgressScanActionType;
     private String inProgressBuildResultType;
+    private String scanNote;
 
     private SharedUploadBuildStep commonBuildStep;
-
+  
     @DataBoundConstructor
     public FortifyStaticAssessment(String releaseId, String bsiToken) {
         super();
         this.releaseId = releaseId != null ? releaseId.trim() : "";
         this.bsiToken = bsiToken != null ? bsiToken.trim() : "";
+        this.scanNote = "";
     }
 
     public String getBsiToken() {
@@ -68,6 +70,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     public String getReleaseId() { return releaseId; }
+    public String getScanNote() { return scanNote; }
 
     public boolean getOverrideGlobalConfig() {
         return overrideGlobalConfig;
@@ -85,6 +88,11 @@ public class FortifyStaticAssessment extends FortifyStep {
     @DataBoundSetter
     public void setUsername(String username) {
         this.username = username;
+    }
+    
+    @DataBoundSetter
+    public void setScanNote(String scanNote) {
+        this.scanNote = scanNote;
     }
 
     public String getPersonalAccessToken() {
@@ -175,7 +183,8 @@ public class FortifyStaticAssessment extends FortifyStep {
                 srcLocation,
                 remediationScanPreferenceType,
                 inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressBuildResultType,
+                scanNote);
 
         return true;
     }
@@ -204,7 +213,8 @@ public class FortifyStaticAssessment extends FortifyStep {
                 srcLocation,
                 remediationScanPreferenceType,
                 inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressBuildResultType,
+                scanNote);
 
         commonBuildStep.perform(build, workspace, launcher, listener);
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
