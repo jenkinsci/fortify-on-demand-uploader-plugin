@@ -56,13 +56,13 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String scanNote;
 
     private SharedUploadBuildStep commonBuildStep;
-
+  
     @DataBoundConstructor
-    public FortifyStaticAssessment(String releaseId, String bsiToken, String scanNote) {
+    public FortifyStaticAssessment(String releaseId, String bsiToken) {
         super();
         this.releaseId = releaseId != null ? releaseId.trim() : "";
         this.bsiToken = bsiToken != null ? bsiToken.trim() : "";
-        this.scanNote = scanNote != null ? scanNote.trim() : "";
+        this.scanNote = "";
     }
 
     public String getBsiToken() {
@@ -88,6 +88,11 @@ public class FortifyStaticAssessment extends FortifyStep {
     @DataBoundSetter
     public void setUsername(String username) {
         this.username = username;
+    }
+    
+    @DataBoundSetter
+    public void setScanNote(String scanNote) {
+        this.scanNote = scanNote;
     }
 
     public String getPersonalAccessToken() {
