@@ -100,11 +100,6 @@ public class JobModel {
         return inProgressBuildResultType;
     }
 
-    private Object readResolve() throws URISyntaxException, UnsupportedEncodingException {
-        bsiTokenCache = tokenParser.parse(bsiTokenOriginal);
-        return this;
-    }
-
     @Override
     public String toString() {
         if (bsiTokenCache != null) {

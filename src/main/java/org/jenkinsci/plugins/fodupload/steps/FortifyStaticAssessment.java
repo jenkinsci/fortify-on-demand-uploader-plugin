@@ -3,12 +3,14 @@ package org.jenkinsci.plugins.fodupload.steps;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.common.collect.ImmutableSet;
 
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -193,6 +195,13 @@ public class FortifyStaticAssessment extends FortifyStep {
         build.addAction(new CrossBuildAction());
         try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
 
+        
+        remediationScanPreferenceType = remediationScanPreferenceType != null ? remediationScanPreferenceType : FodEnums.RemediationScanPreferenceType.RemediationScanIfAvailable.getValue();
+        inProgressScanActionType = inProgressScanActionType != null ? inProgressScanActionType : FodEnums.InProgressScanActionType.DoNotStartScan.getValue();
+        inProgressBuildResultType = inProgressBuildResultType != null ? inProgressBuildResultType : FodEnums.InProgressBuildResultType.FailBuild.getValue();
+
+        String correlationId = UUID.randomUUID().toString();
+
         commonBuildStep = new SharedUploadBuildStep(releaseId,
                 bsiToken,
                 overrideGlobalConfig,
@@ -206,11 +215,12 @@ public class FortifyStaticAssessment extends FortifyStep {
                 inProgressScanActionType,
                 inProgressBuildResultType);
 
-        commonBuildStep.perform(build, workspace, launcher, listener);
+        commonBuildStep.perform(build, workspace, launcher, listener, correlationId);
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
         crossBuildAction.setPreviousStepBuildResult(build.getResult());
         if(Result.SUCCESS.equals(crossBuildAction.getPreviousStepBuildResult())) {
             crossBuildAction.setScanId(commonBuildStep.getScanId());
+            crossBuildAction.setCorrelationId(correlationId);
         }
         try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
     }
