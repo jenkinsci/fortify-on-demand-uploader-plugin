@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-import com.fortify.fod.parser.BsiToken;
-import com.fortify.fod.parser.BsiTokenParser;
+import org.jenkinsci.plugins.fodupload.BsiTokenParser;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -25,6 +24,10 @@ public class JobModel {
     private String remediationScanPreferenceType;
     private String inProgressScanActionType;
     private String inProgressBuildResultType;
+    private String selectedReleaseType;
+    private String userSelectedApplication;
+    private String userSelectedMicroservice;
+    private String userSelectedRelease;
 
     private File payload;
 
@@ -38,6 +41,7 @@ public class JobModel {
      * @param remediationScanPreferenceType remediationScanPreferenceType
      * @param inProgressScanActionType      inProgressScanActionType
      * @param inProgressBuildResultType     inProgressBuildResultType
+     * @param selectedReleaseType           selectedReleaseType
      */
     public JobModel(String releaseId,
                     String bsiToken,
@@ -46,7 +50,11 @@ public class JobModel {
                     String srcLocation,
                     String remediationScanPreferenceType,
                     String inProgressScanActionType,
-                    String inProgressBuildResultType) {
+                    String inProgressBuildResultType,
+                    String selectedReleaseType,
+                    String userSelectedApplication,
+                    String userSelectedMicroservice,
+                    String userSelectedRelease) {
 
         this.releaseId = releaseId;
         this.bsiTokenOriginal = bsiToken;
@@ -56,6 +64,10 @@ public class JobModel {
         this.remediationScanPreferenceType = remediationScanPreferenceType;
         this.inProgressScanActionType = inProgressScanActionType;
         this.inProgressBuildResultType = inProgressBuildResultType;
+        this.selectedReleaseType = selectedReleaseType;
+        this.userSelectedApplication = userSelectedApplication;
+        this.userSelectedMicroservice = userSelectedMicroservice;
+        this.userSelectedRelease = userSelectedRelease;
     }
 
     public File getPayload() {
@@ -100,9 +112,25 @@ public class JobModel {
         return inProgressBuildResultType;
     }
 
+    public String getSelectedReleaseType() {
+        return selectedReleaseType;
+    }
+
+    public String getUserSelectedApplication() {
+        return userSelectedApplication;
+    }
+
+    public String getUserSelectedMicroservice() {
+        return userSelectedMicroservice;
+    }
+
+    public String getUserSelectedRelease() {
+        return userSelectedRelease;
+    }
+
     @Override
     public String toString() {
-        if (bsiTokenCache != null) {
+       if (bsiTokenCache != null) {
             return String.format(
                     "Release Id:                        %s%n" +
                             "Assessment Type Id:                %s%n" +
@@ -111,7 +139,8 @@ public class JobModel {
                             "Purchase Entitlements:             %s%n" +
                             "Entitlement Preference:            %s%n" +
                             "In Progress Scan Action:           %s%n" +
-                            "In Progress Build Action:          %s%n",
+                            "In Progress Build Action:          %s%n" +
+                            "Selected Release Type:             %s%n",
                     bsiTokenCache.getProjectVersionId(),
                     bsiTokenCache.getAssessmentTypeId(),
                     bsiTokenCache.getTechnologyStack(),
@@ -119,7 +148,8 @@ public class JobModel {
                     purchaseEntitlements,
                     entitlementPreference,
                     inProgressScanActionType,
-                    inProgressBuildResultType);
+                    inProgressBuildResultType,
+                    selectedReleaseType);
         } else {
             return String.format("Release Id: %s", releaseId);
         }
@@ -131,7 +161,7 @@ public class JobModel {
         }
 
         try {
-            this.bsiTokenCache = tokenParser.parse(bsiTokenOriginal);
+            this.bsiTokenCache = tokenParser.parseBsiToken(bsiTokenOriginal);
         } catch (Exception ex) {
             return false;
         }
@@ -150,6 +180,7 @@ public class JobModel {
             }
             catch (NumberFormatException ex) {
                 errors.add("Release Id");
+                logger.println(errors.toString());
             }
         }
 

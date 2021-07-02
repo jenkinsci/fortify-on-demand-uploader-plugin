@@ -55,6 +55,10 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String remediationScanPreferenceType;
     private String inProgressScanActionType;
     private String inProgressBuildResultType;
+    private String selectedReleaseType;
+    private String userSelectedApplication;
+    private String userSelectedMicroservice;
+    private String userSelectedRelease;
 
     private SharedUploadBuildStep commonBuildStep;
 
@@ -161,6 +165,46 @@ public class FortifyStaticAssessment extends FortifyStep {
         this.inProgressBuildResultType = inProgressBuildResultType;
     }
 
+    @SuppressWarnings("unused")
+    public String getSelectedReleaseType() {
+        return selectedReleaseType;
+    }
+
+    @DataBoundSetter
+    public void setSelectedReleaseType(String selectedReleaseType) {
+        this.selectedReleaseType = selectedReleaseType;
+    }
+
+    @SuppressWarnings("unused")
+    public String getUserSelectedApplication() {
+        return userSelectedApplication;
+    }
+
+    @DataBoundSetter
+    public void setUserSelectedApplication(String userSelectedApplication) {
+        this.userSelectedApplication = userSelectedApplication;
+    }
+
+    @SuppressWarnings("unused")
+    public String getUserSelectedMicroservice() {
+        return userSelectedMicroservice;
+    }
+
+    @DataBoundSetter
+    public void setUserSelectedMicroservice(String userSelectedMicroservice) {
+        this.userSelectedMicroservice = userSelectedMicroservice;
+    }
+
+    @SuppressWarnings("unused")
+    public String getUserSelectedRelease() {
+        return userSelectedRelease;
+    }
+
+    @DataBoundSetter
+    public void setUserSelectedRelease(String userSelectedRelease) {
+        this.userSelectedRelease = userSelectedRelease;
+    }
+
     @Override
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -177,7 +221,11 @@ public class FortifyStaticAssessment extends FortifyStep {
                 srcLocation,
                 remediationScanPreferenceType,
                 inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressBuildResultType,
+                selectedReleaseType,
+                userSelectedApplication,
+                userSelectedMicroservice,
+                userSelectedRelease);
 
         return true;
     }
@@ -199,6 +247,9 @@ public class FortifyStaticAssessment extends FortifyStep {
         remediationScanPreferenceType = remediationScanPreferenceType != null ? remediationScanPreferenceType : FodEnums.RemediationScanPreferenceType.RemediationScanIfAvailable.getValue();
         inProgressScanActionType = inProgressScanActionType != null ? inProgressScanActionType : FodEnums.InProgressScanActionType.DoNotStartScan.getValue();
         inProgressBuildResultType = inProgressBuildResultType != null ? inProgressBuildResultType : FodEnums.InProgressBuildResultType.FailBuild.getValue();
+        userSelectedApplication = "";
+        userSelectedMicroservice = "";
+        userSelectedRelease = "";
 
         String correlationId = UUID.randomUUID().toString();
 
@@ -213,7 +264,11 @@ public class FortifyStaticAssessment extends FortifyStep {
                 srcLocation,
                 remediationScanPreferenceType,
                 inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressBuildResultType,
+                selectedReleaseType,
+                userSelectedApplication,
+                userSelectedMicroservice,
+                userSelectedRelease);
 
         commonBuildStep.perform(build, workspace, launcher, listener, correlationId);
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);

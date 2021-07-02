@@ -21,17 +21,23 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import jenkins.tasks.SimpleBuildStep;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import javax.annotation.Nonnull;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import java.util.HashMap;
 
 import jenkins.model.Jenkins;
 
@@ -39,13 +45,19 @@ import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.verb.POST;
+import com.google.gson.Gson;
 
 
 @SuppressWarnings("unused")
 public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
 
     SharedUploadBuildStep sharedBuildStep;
+
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     // Entry point when building
@@ -61,7 +73,15 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String srcLocation,
                                      String remediationScanPreferenceType,
                                      String inProgressScanActionType,
-                                     String inProgressBuildResultType) {
+                                     String inProgressBuildResultType,
+                                     String selectedReleaseType,
+                                     String userSelectedApplication,
+                                     String userSelectedMicroservice,
+                                     String userSelectedRelease) {
+                                         
+        if(selectedReleaseType != null && selectedReleaseType.equals(FodEnums.SelectedReleaseType.UseAppAndReleaseName.getValue()) && !userSelectedRelease.isEmpty()) {
+                releaseId = userSelectedRelease;
+        }
 
         sharedBuildStep = new SharedUploadBuildStep(releaseId,
                 bsiToken,
@@ -74,7 +94,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 srcLocation,
                 remediationScanPreferenceType,
                 inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressBuildResultType,
+                selectedReleaseType,
+                userSelectedApplication,
+                userSelectedMicroservice,
+                userSelectedRelease);
 
     }
 
@@ -183,8 +207,30 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         return sharedBuildStep.getModel().getInProgressBuildResultType();
     }
 
-    @Extension
+    @SuppressWarnings("unused")
+    @JavaScriptMethod
+    public String getUserSelectedApplication() {
+        return sharedBuildStep.getModel().getUserSelectedApplication();
+    }
+    
+    @SuppressWarnings("unused")
+    @JavaScriptMethod
+    public String getUserSelectedMicroservice() {
+        return sharedBuildStep.getModel().getUserSelectedMicroservice();
+    }
 
+    @SuppressWarnings("unused")
+    @JavaScriptMethod
+    public String getUserSelectedRelease() {
+        return sharedBuildStep.getModel().getUserSelectedRelease();
+    }
+
+    @SuppressWarnings("unused")
+    public String getSelectedReleaseType() {
+        return sharedBuildStep.getModel().getSelectedReleaseType();
+    }
+
+    @Extension
     public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {
 
         /**
@@ -241,7 +287,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         }
 
         @SuppressWarnings("unused")
-
         public ListBoxModel doFillUsernameItems(@AncestorInPath Job job) {
             return SharedUploadBuildStep.doFillStringCredentialsItems(job);
         }
@@ -265,5 +310,26 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         public ListBoxModel doFillInProgressBuildResultTypeItems() {
             return SharedUploadBuildStep.doFillInProgressBuildResultTypeItems();
         }
+
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillSelectedReleaseTypeItems() {
+            return SharedUploadBuildStep.doFillSelectedReleaseTypeItems();
+        }
+
+        @JavaScriptMethod
+        public String retrieveApplicationList() {
+            return SharedUploadBuildStep.customFillUserSelectedApplicationList();
+        }
+
+        @JavaScriptMethod
+        public String retrieveMicroserviceList(int selectedApplicationId) {
+            return SharedUploadBuildStep.customFillUserSelectedMicroserviceList(selectedApplicationId);
+        }
+
+        @JavaScriptMethod
+        public String retrieveReleaseList(int selectedApplicationId, int microserviceId) {
+            return SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId);
+        }
     }
+
 }

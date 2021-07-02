@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.fodupload;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import hudson.FilePath;
 import hudson.security.ACL;
 import hudson.util.Secret;
@@ -9,6 +11,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -17,6 +21,9 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 
 import okhttp3.Response;
 import org.apache.http.HttpStatus;
+import org.jenkinsci.plugins.fodupload.models.response.ApplicationApiResponse;
+import org.jenkinsci.plugins.fodupload.models.response.MicroserviceApiResponse;
+import org.jenkinsci.plugins.fodupload.models.response.ReleaseApiResponse;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 public class Utils {
@@ -181,5 +188,11 @@ public class Utils {
 
     public static Boolean isUnauthorizedResponse(Response response) {
         return response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED;
+    }
+
+    public static <T> String createResponseViewModel(List<T> responseList) {
+        Gson gson = new Gson();
+        Type typeOfSrc = new TypeToken<List<T>>(){}.getType();
+        return gson.toJson(responseList, typeOfSrc);
     }
 }

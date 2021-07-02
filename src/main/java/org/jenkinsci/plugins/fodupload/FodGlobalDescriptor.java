@@ -139,10 +139,12 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     }
 
     public boolean getAuthTypeIsApiKey() {
-        return globalAuthType.equals("apiKeyType");
+        if(globalAuthType == null) return false;
+        return globalAuthType.equals("apiKeyType") ;
     }
 
     public boolean getAuthTypeIsPersonalToken() {
+        if(globalAuthType == null) return false;
         return globalAuthType.equals("personalAccessTokenType");
     }
 
@@ -269,7 +271,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
             return FormValidation.error("Unable to retrieve authentication token.");
         }
 
-        return !token.isEmpty() ?
+            return !token.isEmpty() ?
                 FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
                 FormValidation.error("Invalid connection information. Please check your credentials and try again.");
     }

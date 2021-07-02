@@ -41,7 +41,9 @@ public class ScanStatusPoller {
     /**
      * Polls the release status
      *
-     * @param releaseId release to poll
+     * @param releaseId release id
+     * @param scanId scan id of the release
+     * @param correlationId correlation id related to scan id
      * @return true if status is completed | cancelled.
      * @throws java.io.IOException  in certain cases
      * @throws InterruptedException in certain cases

@@ -1,22 +1,26 @@
 package org.jenkinsci.plugins.fodupload;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
+import java.util.List;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.fortify.fod.parser.BsiToken;
-import com.fortify.fod.parser.BsiTokenParser;
 
+import org.apache.commons.lang.CharEncoding;
+import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
+import org.jenkinsci.plugins.fodupload.models.BsiToken;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressBuildResultType;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressScanActionType;
-import org.jenkinsci.plugins.fodupload.models.response.StartScanResponse;
-import org.jenkinsci.plugins.fodupload.models.response.StaticScanSetupResponse;
+import org.jenkinsci.plugins.fodupload.models.FodEnums.SelectedReleaseType;
+import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -61,7 +65,11 @@ public class SharedUploadBuildStep {
                                  String srcLocation,
                                  String remediationScanPreferenceType,
                                  String inProgressScanActionType,
-                                 String inProgressBuildResultType) {
+                                 String inProgressBuildResultType,
+                                 String selectedReleaseType,
+                                 String userSelectedApplication,
+                                 String userSelectedMicroservice,
+                                 String userSelectedRelease) {
 
         model = new JobModel(releaseId,
                 bsiToken,
@@ -70,7 +78,11 @@ public class SharedUploadBuildStep {
                 srcLocation,
                 remediationScanPreferenceType,
                 inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressBuildResultType,
+                selectedReleaseType,
+                userSelectedApplication,
+                userSelectedMicroservice,
+                userSelectedRelease);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -100,7 +112,7 @@ public class SharedUploadBuildStep {
         if (bsiToken != null && !bsiToken.isEmpty()) {
             BsiTokenParser tokenParser = new BsiTokenParser();
             try {
-                BsiToken testToken = tokenParser.parse(bsiToken);
+                BsiToken testToken = tokenParser.parseBsiToken(bsiToken);
                 if (testToken != null) {
                     return FormValidation.ok();
                 }
@@ -111,10 +123,8 @@ public class SharedUploadBuildStep {
             if (releaseId != null && !releaseId.isEmpty()) {
                 return FormValidation.ok();
             }
-
             return FormValidation.error("Please specify Release ID or BSI Token.");
         }
-
         return FormValidation.error("Please specify Release ID or BSI Token.");
     }
 
@@ -193,6 +203,67 @@ public class SharedUploadBuildStep {
             items.add(new ListBoxModel.Option(buildResultType.toString(), buildResultType.getValue()));
         }
         return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillSelectedReleaseTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.SelectedReleaseType selectedReleaseType : FodEnums.SelectedReleaseType.values()) {
+            items.add(new ListBoxModel.Option(selectedReleaseType.toString(), selectedReleaseType.getValue()));
+        }
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static String customFillUserSelectedApplicationList() {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(createStaticAuthModel());
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        PrintStream logger;
+        List<ApplicationApiResponse> applicationList = null;
+        String correlationId = "appListRequest";
+        try {
+            logger = new PrintStream(os, true, CharEncoding.UTF_8);
+            ApplicationsController applicationController = new ApplicationsController(apiConnection, logger, correlationId);
+            applicationList = applicationController.getApplicationList();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } 
+
+        return Utils.createResponseViewModel(applicationList);
+    }
+
+    public static String customFillUserSelectedMicroserviceList(int applicationId) {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(createStaticAuthModel());
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        PrintStream logger;
+        List<MicroserviceApiResponse> microserviceList = null;
+        String correlationId = "microListRequest";
+        try {
+            logger = new PrintStream(os, true, CharEncoding.UTF_8);
+            ApplicationsController applicationController = new ApplicationsController(apiConnection, logger, correlationId);
+            microserviceList = applicationController.getMicroserviceListByApplication(applicationId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return Utils.createResponseViewModel(microserviceList);
+    }
+
+    public static String customFillUserSelectedReleaseList(int applicationId, int microserviceId) {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(createStaticAuthModel());
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        PrintStream logger;
+        String correlationId = "releaseListRequest";
+        List<ReleaseApiResponse> releaseList = null;
+        try {
+            logger = new PrintStream(os, true, CharEncoding.UTF_8);
+            ApplicationsController applicationController = new ApplicationsController(apiConnection, logger, correlationId);
+            releaseList = applicationController.getReleaseListByApplication(applicationId, microserviceId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return Utils.createResponseViewModel(releaseList);
     }
 
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -284,7 +355,6 @@ public class SharedUploadBuildStep {
                 logger.println("Invalid release ID or BSI Token");
                 return;
             }
-
 
             if (releaseId > 0 && model.loadBsiToken()) {
                 logger.println("Warning: The BSI Token will be ignored since Release ID was entered.");
@@ -402,6 +472,23 @@ public class SharedUploadBuildStep {
                                                                    authModel.getTenantId() );
        
         return displayModel;
+    }
+
+    public static AuthenticationModel createStaticAuthModel() {
+        AuthenticationModel staticAuthModel = null;
+
+        FodGlobalDescriptor globalSettings = GlobalConfiguration.all().get(FodGlobalDescriptor.class);
+        String userName = "";
+        String tenantId = "";
+        String personalAccessToken = "";
+        
+        if(globalSettings != null) {
+            userName = globalSettings.getUsername();
+            tenantId = globalSettings.getTenantId();
+            personalAccessToken = globalSettings.getPersonalAccessToken();
+        }
+        staticAuthModel = new AuthenticationModel(false, userName, personalAccessToken, tenantId);
+        return staticAuthModel;
     }
 
     public JobModel setModel(JobModel newModel) { return model = newModel; }

@@ -38,8 +38,6 @@ public class FodEnums {
 
     public enum GrantType {CLIENT_CREDENTIALS, PASSWORD}
 
-    ;
-
     public enum EntitlementPreferenceType {
         SubscriptionFirstThenSingleScan("SubscriptionFirstThenSingleScan"),
         SingleScanFirstThenSubscription("SingleScanFirstThenSubscription"),
@@ -201,5 +199,57 @@ public class FodEnums {
         }
     }
 
+
+    public enum SelectedReleaseType {
+        UseBsiToken("UseBsiToken"),
+        UseReleaseId("UseReleaseId"),
+        UseAppAndReleaseName("UseAppAndReleaseName");
+
+        private final String _val;
+
+        SelectedReleaseType(String val) {
+            this._val = val;
+        }
+
+        public static SelectedReleaseType fromInt(int val) {
+            switch (val) {
+                case 3: 
+                    return UseAppAndReleaseName;
+                case 2:
+                    return UseReleaseId;
+                case 1:
+                default:
+                    return UseBsiToken;
+            }
+        }
+
+        public String getValue() {
+            return this._val;
+        }
+
+        public int getInteger() {
+            switch (this._val) {
+                case "UseAppAndReleaseName":
+                    return 3;
+                case "UseReleaseId":
+                    return 2;
+                case "UseBsiToken":
+                default:
+                    return 1;
+            }
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "UseAppAndReleaseName":
+                    return "Application and Release Options";
+                case "UseReleaseId":
+                    return "Release ID";
+                case "UseBsiToken":
+                default:
+                    return "BSI Token";
+            }
+        }
+    }
 
 }
