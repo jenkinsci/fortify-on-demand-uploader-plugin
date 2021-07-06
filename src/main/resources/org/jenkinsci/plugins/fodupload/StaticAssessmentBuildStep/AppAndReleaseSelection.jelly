@@ -1,8 +1,6 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <f:block>
-        <st:adjunct includes="io.jenkins.plugins.jquery3"/>
-
 
         <div>
             <f:section title="Application and Release Options">
@@ -11,59 +9,57 @@
                         <f:entry id="releaseTypeSelectList" title="Pick a Release" field="selectedReleaseType" help="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html">
                             <f:select id="releaseTypeSelectList" style="width: 160px;"/>
                         </f:entry>
+
                         <f:block>
-                            <div id="allPickReleaseViews">
-                                <div id="releaseIdView">
-                                    <div>
-                                        <label for="releaseIdField">Release ID: </label>
-                                        <input type="text" id="releaseIdMainWindow" name="releaseIdField"></input>
+                            <div id="releaseIdView">
+                                <div class="row">
+                                    <div class="col-md-6">Release ID</div>
+                                    <div class="col-md-6"><input type="text" id="releaseIdField" name="releaseId"></input></div>
+                                </div>
+                            </div>
+
+                            <div id="bsiTokenView">
+                                <div class="row">
+                                    <div class="col-md-6">BSI Token</div>
+                                    <div class="col-md-6"><input type="text" id="bsiTokenField" name="bsiToken"></input></div>
+                                </div>
+                            </div>
+
+                            <div id="appAndReleaseNameView">
+                                <div class="row" id="applicationSelectForm">
+                                    <div class="col-md-6">Application</div>
+                                    <div class="col-md-6 spinner-container">
+                                        <select name="userSelectedApplication" id="applicationSelectList" style="width: 160px;">
+                                            <option value="">Select an application</option>
+                                        </select>
                                     </div>
                                 </div>
-                                <div id="bsiTokenView">
-                                    <div>
-                                        <label for="bsiTokenField">BSI Token: </label>
-                                        <input type="text" id="bsiTokenMainWindow" name="bsiTokenField"></input>
+
+                                <div class="row" id="microserviceSelectForm">
+                                    <div class="col-md-6">Microservice</div>
+                                    <div class="col-md-6 spinner-container">
+                                        <select name="userSelectedMicroservice" id="microserviceSelectList" style="width: 160px;">
+                                            <option value="">Select a microservice</option>
+                                        </select>
                                     </div>
                                 </div>
-                                <div id="appAndReleaseNameView">
-                                    <div id="applicationSelectForm">
-                                        <label for="applicationSelectEntry">    Application:    </label>
-                                        <span class="spinner-container">
-                                            <select name="userSelectedApplication" id="applicationSelectList" style="width: 160px;">
-                                                <option value="">Select an application</option>
-                                            </select>
-                                        </span>
-                                    </div>
-                                    <div id="microserviceSelectForm">
-                                        <label for="microserviceSelectEntry">    Microservice:    </label>
-                                        <span class="spinner-container">
-                                            <select name="userSelectedMicroservice" id="microserviceSelectList" style="width: 160px;">
-                                                <option value="">Select a microservice</option>
-                                            </select>
-                                        </span>
-                                    </div>
-                                    <div id="releaseSelectForm">
-                                        <label for="releaseSelectList">    Release:    </label>
-                                        <span class="spinner-container">
-                                            <select name="userSelectedRelease" id="releaseSelectList" style="width: 160px;">
-                                                <option value="">Select an release</option>
-                                            </select>
-                                        </span>
+
+                                <div class="row" id="releaseSelectForm">
+                                    <div class="col-md-6">Release</div>
+                                    <div class="col-md-6 spinner-container">
+                                        <select name="userSelectedRelease" id="releaseSelectList" style="width: 160px;">
+                                            <option value="">Select an release</option>
+                                        </select>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div id="appAndReleaseNameErrorView" style="color: red;">
+                                Failed to retrieve applications/releases/microservices from the FoD API
                             </div>
                         </f:block>
                 </f:block>
             </f:section>
         </div>
-
-        <script>
-            var descriptor = <st:bind value="${descriptor}"/>
-            var instance = <st:bind value="${instance}"/>
-            
-        </script>
-        <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Styling.js" />
-        <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/JobSettings.js" />
-        <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelection.js"/>
     </f:block>
 </j:jelly>

@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
@@ -12,45 +13,30 @@ import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.Secret;
 import jenkins.tasks.SimpleBuildStep;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
-import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.kohsuke.stapler.DataBoundConstructor;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import javax.annotation.Nonnull;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.util.UUID;
-import java.util.HashMap;
 
 import jenkins.model.Jenkins;
 
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
-import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.verb.POST;
-import com.google.gson.Gson;
 
 
 @SuppressWarnings("unused")
@@ -81,6 +67,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                          
         if(selectedReleaseType != null && selectedReleaseType.equals(FodEnums.SelectedReleaseType.UseAppAndReleaseName.getValue()) && !userSelectedRelease.isEmpty()) {
                 releaseId = userSelectedRelease;
+        }
+        else {
+            userSelectedApplication = "";
+            userSelectedMicroservice = "";
+            userSelectedRelease = "";
         }
 
         sharedBuildStep = new SharedUploadBuildStep(releaseId,
@@ -145,6 +136,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     }
 
     @SuppressWarnings("unused")
+    @JavaScriptMethod
     public String getReleaseId() {
         return sharedBuildStep.getModel().getReleaseId();
     }
@@ -153,6 +145,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     // marks them unused, but they actually are used.
     // These getters are also named in the following format: Get<JellyField>.
     @SuppressWarnings("unused")
+    @JavaScriptMethod
     public String getBsiToken() {
         return sharedBuildStep.getModel().getBsiTokenOriginal();
     }
@@ -317,18 +310,32 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         }
 
         @JavaScriptMethod
-        public String retrieveApplicationList() {
-            return SharedUploadBuildStep.customFillUserSelectedApplicationList();
+        public String retrieveApplicationList(JSONObject authModelObject) {
+            AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+            return SharedUploadBuildStep.customFillUserSelectedApplicationList(authModel);
         }
 
         @JavaScriptMethod
-        public String retrieveMicroserviceList(int selectedApplicationId) {
-            return SharedUploadBuildStep.customFillUserSelectedMicroserviceList(selectedApplicationId);
+        public String retrieveMicroserviceList(int selectedApplicationId, JSONObject authModelObject) {
+            AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+            return SharedUploadBuildStep.customFillUserSelectedMicroserviceList(selectedApplicationId, authModel);
         }
 
         @JavaScriptMethod
-        public String retrieveReleaseList(int selectedApplicationId, int microserviceId) {
-            return SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId);
+        public String retrieveReleaseList(int selectedApplicationId, int microserviceId, JSONObject authModelObject) {
+            AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+            return SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId, authModel);
+        }
+
+        private AuthenticationModel getAuthModelFromObject(JSONObject authModelObject) {
+            AuthenticationModel authModel = new AuthenticationModel(false, null, null, null);
+            if (authModelObject.getBoolean("overrideGlobalAuth")) {
+                authModel = AuthenticationModel.fromPersonalAccessToken(
+                        authModelObject.getString("username"),
+                        authModelObject.getString("accessTokenKey"),
+                        authModelObject.getString("tenantId"));
+            }
+            return authModel;
         }
     }
 

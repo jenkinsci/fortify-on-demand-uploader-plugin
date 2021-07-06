@@ -4,40 +4,35 @@ class JobSettings {
         this.instance = instance;
     }
 
-    getSavedApplicationId() {
-        return new Promise((res, rej) => {
-            if (!instance) {
-                return res(null);
-            }
-            instance.getUserSelectedApplication(t => {
-                const appId = t.responseObject();
-                res(appId);
-            });
-        });
+    getSavedSelectedApplicationId() {
+        return this._getSavedEntity(i => i.getUserSelectedApplication);
+    }
+
+    getSavedSelectedReleaseId() {
+        return this._getSavedEntity(i => i.getUserSelectedRelease);
+    }
+
+    getSavedSelectedMicroserviceId() {
+        return this._getSavedEntity(i => i.getUserSelectedMicroservice);
     }
 
     getSavedReleaseId() {
-        return new Promise((res, rej) => {
-            if (!instance) {
-                return res(null);
-            }
-
-            instance.getUserSelectedRelease(t => {
-                const releaseId = t.responseObject();
-                res(releaseId);
-            });
-        });
+        return this._getSavedEntity(i => i.getReleaseId);
     }
 
-    getSavedMicroserviceId() {
+    getSavedBsiToken() {
+        return this._getSavedEntity(i => i.getBsiToken);
+    }
+
+    _getSavedEntity(instanceOperation) {
         return new Promise((res, rej) => {
             if (!instance) {
                 return res(null);
             }
 
-            instance.getUserSelectedMicroservice(t => {
-                const msId = t.responseObject();
-                res(msId);
+            instanceOperation(instance)(t => {
+                const val = t.responseObject();
+                res(val);
             });
         });
     }

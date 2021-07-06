@@ -6,7 +6,17 @@ function hideAll() {
     jq('#releaseIdView').hide();
     jq('#bsiTokenView').hide();
     jq('#appAndReleaseNameView').hide();
+    jq('#appAndReleaseNameErrorView').hide();
 }
+
+function onCredsChanged() {
+    const viewChoice = jq('#releaseTypeSelectList').val();
+
+    if (viewChoice == "UseAppAndReleaseName") {
+        initAppSelection(true);
+    }
+}
+
 
 function onReleaseMethodSelection() {
     hideAll();
@@ -14,64 +24,87 @@ function onReleaseMethodSelection() {
 
     switch (viewChoice) {
         case "UseBsiToken":
-            jq('#bsiTokenView').show();
+            initBsiToken();
             break;
         case "UseReleaseId":
-            jq('#releaseIdView').show();
+            initReleaseId();
             break;
         case "UseAppAndReleaseName":
-            initAppSelection();
+            initAppSelection(true);
             break;
     }
 }
 
-function initAppSelection() {
+async function initBsiToken() {
+    const savedBsiToken = await jobSettings.getSavedBsiToken();
+    if (savedBsiToken) {
+        jq('#bsiTokenField').val(savedBsiToken);
+    }
+    jq('#bsiTokenView').show();
+}
+
+async function initReleaseId() {
+    const savedReleaseId = await jobSettings.getSavedReleaseId();
+    if (savedReleaseId) {
+        jq('#releaseIdField').val(savedReleaseId);
+    }
+    jq('#releaseIdView').show();
+}
+
+function initAppSelection(isInit) {
     jq('#appAndReleaseNameView').show();
+    jq('#appAndReleaseNameErrorView').hide();
     jq('#microserviceSelectForm').hide();
     jq('#releaseSelectForm').hide();
 
     showWithSpinner('#applicationSelectForm');
 
-
-    descriptor.retrieveApplicationList(async t => {
+    descriptor.retrieveApplicationList(getAuthInfo(), async t => {
         const applicationSelection = jq('#applicationSelectList');
         const responseJson = JSON.parse(t.responseJSON);
+        if (responseJson === null) {
+            return showApiRetrievalError();
+        }
+
         applicationSelection.empty();
 
         for(const app of responseJson) {
             applicationSelection.append('<option hasMicroServices="' + app.hasMicroservices + '" value="' + app.applicationId + '">' + app.applicationName + '</option>');
         }
 
-        const savedAppId = await jobSettings.getSavedApplicationId();
-        if (savedAppId) {
-            jq('#applicationSelectList').val(savedAppId);
+        if (isInit) {
+            const savedAppId = await jobSettings.getSavedSelectedApplicationId();
+            if (savedAppId) {
+                jq('#applicationSelectList').val(savedAppId);
+            }
         }
 
-        onAppSelection();
+        onAppSelection(isInit);
         hideSpinner('#applicationSelectForm');
-        jq('#applicationSelectList').off('change').change(() => onAppSelection());
+        jq('#applicationSelectList').off('change').change(() => onAppSelection(false));
     });
 }
 
-function onAppSelection() {
+function onAppSelection(isInit) {
+    console.log(getAuthInfo());
     jq('#microserviceSelectForm').hide();
     jq('#releaseSelectForm').hide();
 
     const hasMicroservices = jq('#applicationSelectList option:selected').attr('hasMicroServices') === 'true';
     if (hasMicroservices) {
-        initMicroserviceSelection();
+        initMicroserviceSelection(isInit);
     }
     else {
-        initReleaseSelection();
+        initReleaseSelection(isInit);
     }
 }
 
-function initMicroserviceSelection() {
+function initMicroserviceSelection(isInit) {
     jq('#releaseSelectForm').hide();
     showWithSpinner('#microserviceSelectForm');
 
     const appId = jq('#applicationSelectList').val();
-    descriptor.retrieveMicroserviceList(appId, async t => {
+    descriptor.retrieveMicroserviceList(appId, getAuthInfo(), async t => {
         const microserviceSelection = jq('#microserviceSelectList');
         const responseJson = JSON.parse(t.responseJSON);
         microserviceSelection.empty();
@@ -80,23 +113,25 @@ function initMicroserviceSelection() {
             microserviceSelection.append('<option value="' + ms.microserviceId + '">' + ms.microserviceName + '</option>');
         }
 
-        const savedMicroserviceId = await jobSettings.getSavedMicroserviceId();
-        if (savedMicroserviceId) {
-            jq('#microserviceSelectList').val(savedMicroserviceId);
+        if (isInit) {
+            const savedMicroserviceId = await jobSettings.getSavedSelectedMicroserviceId();
+            if (savedMicroserviceId) {
+                jq('#microserviceSelectList').val(savedMicroserviceId);
+            }
         }
 
         hideSpinner('#microserviceSelectForm');
 
-        onMicroserviceSelection();
-        jq('#microserviceSelectList').off('change').change(onMicroserviceSelection);
+        onMicroserviceSelection(isInit);
+        jq('#microserviceSelectList').off('change').change(() => onMicroserviceSelection(false));
     });
 }
 
-function onMicroserviceSelection() {
-    initReleaseSelection();
+function onMicroserviceSelection(isInit) {
+    initReleaseSelection(isInit);
 }
 
-function initReleaseSelection() {
+function initReleaseSelection(isInit) {
     showWithSpinner('#releaseSelectForm');
 
     const appId = jq('#applicationSelectList').val();
@@ -104,7 +139,7 @@ function initReleaseSelection() {
 
     const microserviceId = !hasMicroservices ? -1 : jq('#microserviceSelectList').val();
 
-    descriptor.retrieveReleaseList(appId, microserviceId, async t => {
+    descriptor.retrieveReleaseList(appId, microserviceId, getAuthInfo(), async t => {
         const releaseSelection = jq('#releaseSelectList');
         const responseJson = JSON.parse(t.responseJSON);
         releaseSelection.empty();
@@ -113,31 +148,26 @@ function initReleaseSelection() {
             releaseSelection.append('<option value="' + release.releaseId + '">' + release.releaseName + '</option>');
         }
 
-        const savedReleaseId = await jobSettings.getSavedReleaseId();
-        if (savedReleaseId) {
-            jq('#releaseSelectList').val(savedReleaseId);
+        if (isInit) {
+            const savedReleaseId = await jobSettings.getSavedSelectedReleaseId();
+            if (savedReleaseId) {
+                jq('#releaseSelectList').val(savedReleaseId);
+            }
         }
 
         hideSpinner('#releaseSelectForm');
     });
 }
 
+function showApiRetrievalError() {
+    hideAll();
+    jq('#appAndReleaseNameErrorView').show();
+}
+
 function init() {
     onReleaseMethodSelection();
     jq('#releaseTypeSelectList').off('change').change(onReleaseMethodSelection);
+    onAuthInfoChanged(() => onCredsChanged());
 }
 
-function waitForReleaseMethodToInit() {
-    return new Promise((res, rej) => {
-        let elementsLoaded;
-
-        elementsLoaded = () => {
-            if(jq('#releaseTypeSelectList').val()) res();
-            else setTimeout(elementsLoaded, 50);
-        };
-
-        elementsLoaded();
-    });
-}
-
-waitForReleaseMethodToInit().then(init);
+spinAndWait(() => jq('#releaseTypeSelectList').val()).then(init);

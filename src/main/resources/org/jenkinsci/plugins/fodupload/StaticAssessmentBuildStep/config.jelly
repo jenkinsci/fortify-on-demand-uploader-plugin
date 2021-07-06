@@ -1,6 +1,8 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
+    <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+
     <style>
         .spinner select {
             display: none;
@@ -11,13 +13,13 @@
         <f:textbox field="srcLocation"/>
     </f:entry>
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/AppAndReleaseSelection.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
-
     <f:section title="Authentication - Select to override global authentication settings">
         <f:optionalBlock name="overrideGlobalConfig" field ="overrideGlobalConfig" title="Configure Personal Access Token" inline="true">
             <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/AuthenticationOverride.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
         </f:optionalBlock>
     </f:section>
+
+    <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/AppAndReleaseSelection.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
 
     <f:section title="Entitlement Options">
         <f:entry title="Entitlement Preference" field="entitlementPreference">
@@ -39,4 +41,15 @@
             <f:select style="width: 160px;"/>
         </f:entry>
     </f:section>
+
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Common.js" />
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Styling.js" />
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Auth.js" />
+    <script>
+        var descriptor = <st:bind value="${descriptor}"/>
+        var instance = <st:bind value="${instance}"/>
+
+    </script>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/JobSettings.js" />
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelection.js"/>
 </j:jelly>

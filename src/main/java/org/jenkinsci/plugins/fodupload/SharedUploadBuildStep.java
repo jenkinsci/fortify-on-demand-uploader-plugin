@@ -215,8 +215,8 @@ public class SharedUploadBuildStep {
     }
 
     @SuppressWarnings("unused")
-    public static String customFillUserSelectedApplicationList() {
-        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(createStaticAuthModel());
+    public static String customFillUserSelectedApplicationList(AuthenticationModel authModel) {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         PrintStream logger;
         List<ApplicationApiResponse> applicationList = null;
@@ -232,8 +232,8 @@ public class SharedUploadBuildStep {
         return Utils.createResponseViewModel(applicationList);
     }
 
-    public static String customFillUserSelectedMicroserviceList(int applicationId) {
-        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(createStaticAuthModel());
+    public static String customFillUserSelectedMicroserviceList(int applicationId, AuthenticationModel authModel) {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         PrintStream logger;
         List<MicroserviceApiResponse> microserviceList = null;
@@ -249,8 +249,8 @@ public class SharedUploadBuildStep {
         return Utils.createResponseViewModel(microserviceList);
     }
 
-    public static String customFillUserSelectedReleaseList(int applicationId, int microserviceId) {
-        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(createStaticAuthModel());
+    public static String customFillUserSelectedReleaseList(int applicationId, int microserviceId, AuthenticationModel authModel) {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         PrintStream logger;
         String correlationId = "releaseListRequest";
@@ -472,23 +472,6 @@ public class SharedUploadBuildStep {
                                                                    authModel.getTenantId() );
        
         return displayModel;
-    }
-
-    public static AuthenticationModel createStaticAuthModel() {
-        AuthenticationModel staticAuthModel = null;
-
-        FodGlobalDescriptor globalSettings = GlobalConfiguration.all().get(FodGlobalDescriptor.class);
-        String userName = "";
-        String tenantId = "";
-        String personalAccessToken = "";
-        
-        if(globalSettings != null) {
-            userName = globalSettings.getUsername();
-            tenantId = globalSettings.getTenantId();
-            personalAccessToken = globalSettings.getPersonalAccessToken();
-        }
-        staticAuthModel = new AuthenticationModel(false, userName, personalAccessToken, tenantId);
-        return staticAuthModel;
     }
 
     public JobModel setModel(JobModel newModel) { return model = newModel; }
