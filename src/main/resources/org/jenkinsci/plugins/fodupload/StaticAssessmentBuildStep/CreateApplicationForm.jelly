@@ -1,0 +1,86 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:block>
+        <div id="applicationCreationForm">
+            <div class="hd">Create New Application</div>
+            <div class="bd container-fluid" style="width:800px;">
+                <table style="width: 100%">
+                    <tbody>
+                        <tr class="config-table-top-row" id="applicationNameRow">
+                            <td class="setting-name">Application Name</td>
+                            <td class="setting-main"><input type="text" class="setting-input" id="applicationNameField" /></td>
+                        </tr>
+
+                        <tr class="config-table-top-row" id="businessCriticalityRow">
+                            <td class="setting-name">Business Criticality</td>
+                            <td class="setting-main">
+                                <select class="setting-input" id="businessCriticalityField">
+                                    <option value="1">High</option>
+                                    <option value="2">Medium</option>
+                                    <option value="3">Low</option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <tr class="config-table-top-row" id="applicationTypeRow">
+                            <td class="setting-name">Application Type</td>
+                            <td class="setting-main">
+                                <select class="setting-input" id="applicationTypeField">
+                                    <option value="1">Web / Thick-Client</option>
+                                    <option value="2">Mobile</option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <tr class="config-table-top-row" id="applicationAttributesRow">
+                            <td class="setting-name">Application Attributes</td>
+                            <td class="setting-main"><input type="text" class="setting-input" id="applicationAttributesField" /></td>
+                        </tr>
+
+                        <tr class="config-table-top-row" id="microserviceApplicationRow">
+                            <td class="setting-name">Microservice Application</td>
+                            <td class="setting-main"><input type="checkbox" id="microserviceApplicationField" /></td>
+                        </tr>
+
+                        <tr class="config-table-top-row microservice-fields" id="microserviceNameRow">
+                            <td class="setting-name">Microservice Name</td>
+                            <td class="setting-main"><input type="text" class="setting-input" id="microserviceNameField" /></td>
+                        </tr>
+
+                        <tr class="config-table-top-row microservice-fields" id="microserviceAttributesRow">
+                            <td class="setting-name">Microservice Attributes</td>
+                            <td class="setting-main"><input type="text" class="setting-input" id="microserviceAttributesField" /></td>
+                        </tr>
+
+                        <tr class="config-table-top-row" id="releaseNameRow">
+                            <td class="setting-name">Release Name</td>
+                            <td class="setting-main"><input type="text" class="setting-input" id="releaseNameField" /></td>
+                        </tr>
+
+                        <tr class="config-table-top-row" id="sdlcStatusRow">
+                            <td class="setting-name">SDLC Status</td>
+                            <td class="setting-main">
+                                <select class="setting-input" id="sdlcStatusField">
+                                    <option value="3">Development</option>
+                                    <option value="2">QA/Test</option>
+                                    <option value="1">Production</option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="4">
+                                <span class="yui-button yui-push-button">
+                                    <button type="button" id="submitBtn">Add</button>
+                                </span>
+                                <span class="yui-button yui-push-button">
+                                    <button type="button" id="cancelBtn">Cancel</button>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </f:block>
+</j:jelly>

@@ -6,58 +6,73 @@
             <f:section title="Application and Release Options">
                 <f:block>
 
-                        <f:entry id="releaseTypeSelectList" title="Pick a Release" field="selectedReleaseType" help="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html">
-                            <f:select id="releaseTypeSelectList" style="width: 160px;"/>
-                        </f:entry>
+                    <f:entry id="releaseTypeSelectList" title="Pick a Release" field="selectedReleaseType" help="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html">
+                        <f:select id="releaseTypeSelectList" style="width: 160px;"/>
+                    </f:entry>
 
-                        <f:block>
-                            <div id="releaseIdView">
-                                <div class="row">
-                                    <div class="col-md-6">Release ID</div>
-                                    <div class="col-md-6"><input type="text" id="releaseIdField" name="releaseId"></input></div>
-                                </div>
-                            </div>
+                    <f:block>
+                        <tr class="config-table-top-row releaseIdView">
+                            <td class="setting-leftspace"> </td>
+                            <td class="setting-name">Release ID</td>
+                            <td class="setting-main">
+                                <input type="text" id="releaseIdField" name="releaseId" class="setting-input" style="width: 160px;" />
+                            </td>
+                        </tr>
 
-                            <div id="bsiTokenView">
-                                <div class="row">
-                                    <div class="col-md-6">BSI Token</div>
-                                    <div class="col-md-6"><input type="text" id="bsiTokenField" name="bsiToken"></input></div>
-                                </div>
-                            </div>
+                        <tr class="config-table-top-row bsiTokenView">
+                            <td class="setting-leftspace"> </td>
+                            <td class="setting-name">BSI Token</td>
+                            <td class="setting-main">
+                                <input type="text" id="bsiTokenField" name="bsiToken" class="setting-input" style="width: 160px;" />
+                            </td>
+                        </tr>
 
-                            <div id="appAndReleaseNameView">
-                                <div class="row" id="applicationSelectForm">
-                                    <div class="col-md-6">Application</div>
-                                    <div class="col-md-6 spinner-container">
-                                        <select name="userSelectedApplication" id="applicationSelectList" style="width: 160px;">
-                                            <option value="">Select an application</option>
-                                        </select>
-                                    </div>
-                                </div>
+                        <tr class="config-table-top-row appAndReleaseNameView" id="applicationSelectForm">
+                            <td class="setting-leftspace"> </td>
+                            <td class="setting-name">Application</td>
+                            <td class="setting-main spinner-container">
+                                <select name="userSelectedApplication" id="applicationSelectList" style="width: 160px;">
+                                    <option value="">Select an application</option>
+                                </select>
 
-                                <div class="row" id="microserviceSelectForm">
-                                    <div class="col-md-6">Microservice</div>
-                                    <div class="col-md-6 spinner-container">
-                                        <select name="userSelectedMicroservice" id="microserviceSelectList" style="width: 160px;">
-                                            <option value="">Select a microservice</option>
-                                        </select>
-                                    </div>
-                                </div>
+                            </td>
+                            <td>
+                                <span tooltip="Create a new application" class="yui-button">
+                                        <span class="first-child">
+                                            <button type="button" id="createAppBtn">Create</button>
+                                        </span>
+                                    </span>
+                            </td>
+                        </tr>
 
-                                <div class="row" id="releaseSelectForm">
-                                    <div class="col-md-6">Release</div>
-                                    <div class="col-md-6 spinner-container">
-                                        <select name="userSelectedRelease" id="releaseSelectList" style="width: 160px;">
-                                            <option value="">Select an release</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+                        <tr class="config-table-top-row appAndReleaseNameView" id="microserviceSelectForm">
+                            <td class="setting-leftspace"> </td>
+                            <td class="setting-name">Microservice</td>
+                            <td class="setting-main spinner-container">
+                                <select name="userSelectedMicroservice" id="microserviceSelectList" style="width: 160px;">
+                                    <option value="">Select a microservice</option>
+                                </select>
+                            </td>
+                        </tr>
 
-                            <div id="appAndReleaseNameErrorView" style="color: red;">
-                                Failed to retrieve applications/releases/microservices from the FoD API
-                            </div>
-                        </f:block>
+                        <tr class="config-table-top-row appAndReleaseNameView" id="releaseSelectForm">
+                            <td class="setting-leftspace"> </td>
+                            <td class="setting-name">Release</td>
+                            <td class="setting-main spinner-container">
+                                <select name="userSelectedRelease" id="releaseSelectList" style="width: 160px;">
+                                    <option value="">Select a release</option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <tr id="appAndReleaseNameErrorView">
+                            <td> </td>
+                            <td colspan="4">
+                                <div style="color: red;">Failed to retrieve applications/releases/microservices from the FoD API</div>
+                            </td>
+                        </tr>
+
+                    </f:block>
                 </f:block>
             </f:section>
         </div>

@@ -7,6 +7,10 @@
         .spinner select {
             display: none;
         }
+
+        .spinner button {
+            display: none;
+        }
     </style>
 
      <f:entry title="Source Location" help="/plugin/fortify-on-demand-uploader/help-srcLocation.html">
@@ -20,6 +24,7 @@
     </f:section>
 
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/AppAndReleaseSelection.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
+    <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/CreateApplicationForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
 
     <f:section title="Entitlement Options">
         <f:entry title="Entitlement Preference" field="entitlementPreference">
@@ -52,4 +57,5 @@
     </script>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/JobSettings.js" />
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelection.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreation.js"/>
 </j:jelly>

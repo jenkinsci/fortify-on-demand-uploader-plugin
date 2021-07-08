@@ -3,10 +3,10 @@ jq = jQuery;
 const jobSettings = new JobSettings(instance);
 
 function hideAll() {
-    jq('#releaseIdView').hide();
-    jq('#bsiTokenView').hide();
-    jq('#appAndReleaseNameView').hide();
-    jq('#appAndReleaseNameErrorView').hide();
+    jq('.releaseIdView').hide();
+    jq('.bsiTokenView').hide();
+    jq('.appAndReleaseNameView').hide();
+    jq('.appAndReleaseNameErrorView').hide();
 }
 
 function onCredsChanged() {
@@ -40,7 +40,7 @@ async function initBsiToken() {
     if (savedBsiToken) {
         jq('#bsiTokenField').val(savedBsiToken);
     }
-    jq('#bsiTokenView').show();
+    jq('.bsiTokenView').show();
 }
 
 async function initReleaseId() {
@@ -48,11 +48,11 @@ async function initReleaseId() {
     if (savedReleaseId) {
         jq('#releaseIdField').val(savedReleaseId);
     }
-    jq('#releaseIdView').show();
+    jq('.releaseIdView').show();
 }
 
 function initAppSelection(isInit) {
-    jq('#appAndReleaseNameView').show();
+    jq('.appAndReleaseNameView').show();
     jq('#appAndReleaseNameErrorView').hide();
     jq('#microserviceSelectForm').hide();
     jq('#releaseSelectForm').hide();
@@ -165,6 +165,7 @@ function showApiRetrievalError() {
 }
 
 function init() {
+    console.log(YAHOO);
     onReleaseMethodSelection();
     jq('#releaseTypeSelectList').off('change').change(onReleaseMethodSelection);
     onAuthInfoChanged(() => onCredsChanged());
