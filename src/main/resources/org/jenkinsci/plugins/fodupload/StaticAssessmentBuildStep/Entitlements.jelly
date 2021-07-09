@@ -1,0 +1,82 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+         xmlns:f="/lib/form">
+    <f:block>
+
+        <style>
+
+
+        </style>
+
+        <f:section title="Entitlement Options">
+            <f:block>
+                <div class="row" id="assessmentTypeForm">
+                    <div class="col-md-6">Assessment Type</div>
+                    <div class="col-md-6 spinner-container">
+                        <select name="userSelectedAssessmentType" id="assessmentTypeSelectList">
+                            <option value="">Select an Assessment Type</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row" id="entitlementForm">
+                    <div class="col-md-6">Entitlement</div>
+                    <div class="col-md-6 spinner-container">
+                        <select name="userSelectedEntitlement" id="entitlementSelectList">
+                            <option value="">Select an Entitlement</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row" id="scanCentralBuildTypeForm">
+                    <div class="col-md-6">Scan Central Build Type</div>
+                    <div class="col-md-6">
+                        <select name="userSelectedScanCentralBuildType" id="scanCentralBuildTypeSelectList">
+                            <option value="0">None</option>
+                            <option value="1">Gradle</option>
+                            <option value="2">Maven</option>
+                            <option value="3">MSBuild</option>
+                            <option value="4">PHP</option>
+                            <option value="5">Python</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row" id="technologyStackForm">
+                    <div class="col-md-6">Technology Stack</div>
+                    <div class="col-md-6 spinner-container">
+                        <select name="userSelectedTechnologyStack" id="technologyStackSelectList">
+                            <option value="">Select a Technology Stack</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row" id="languageLevelForm">
+                    <div class="col-md-6">Language Level</div>
+                    <div class="col-md-6 spinner-container">
+                        <select name="userSelectedLanguageLevel" id="languageLevelSelectList">
+                            <option value="">Select a Language Level</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row" id="auditPreferenceForm">
+                    <div class="col-md-6">Audit Preference</div>
+                    <div class="col-md-6 spinner-container">
+                        <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">
+                            <option value="">Select an Audit Preference</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row" id="sonatypeForm">
+                        <div class="col-md-6">Open Source Component Analysis by Sonatype</div>
+                        <div class="col-md-6">
+                            <input type="checkbox" value="false"  style="margin-top: 20px"/>
+                        </div>
+                </div>
+
+            </f:block>
+        </f:section>
+    </f:block>
+</j:jelly>
