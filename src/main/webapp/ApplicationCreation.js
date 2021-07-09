@@ -55,7 +55,9 @@ function subscribeToFormEvents() {
     });
 
     jqDialog('#submitBtn').off('click').click(() => {
-
+        descriptor.retrieveFoo(r => {
+            console.log(r);
+        });
     });
 
     jqDialog('#cancelBtn').off('click').click(() => {

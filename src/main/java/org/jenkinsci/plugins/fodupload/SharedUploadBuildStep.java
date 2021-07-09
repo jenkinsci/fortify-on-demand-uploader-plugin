@@ -215,55 +215,46 @@ public class SharedUploadBuildStep {
     }
 
     @SuppressWarnings("unused")
-    public static String customFillUserSelectedApplicationList(AuthenticationModel authModel) {
+    public static List<ApplicationApiResponse> customFillUserSelectedApplicationList(AuthenticationModel authModel) {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        PrintStream logger;
         List<ApplicationApiResponse> applicationList = null;
-        String correlationId = "appListRequest";
         try {
-            logger = new PrintStream(os, true, CharEncoding.UTF_8);
-            ApplicationsController applicationController = new ApplicationsController(apiConnection, logger, correlationId);
+            ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
             applicationList = applicationController.getApplicationList();
         } catch (IOException e) {
             e.printStackTrace();
         } 
 
-        return Utils.createResponseViewModel(applicationList);
+        return applicationList;
     }
 
-    public static String customFillUserSelectedMicroserviceList(int applicationId, AuthenticationModel authModel) {
+    public static List<MicroserviceApiResponse> customFillUserSelectedMicroserviceList(int applicationId, AuthenticationModel authModel) {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        PrintStream logger;
         List<MicroserviceApiResponse> microserviceList = null;
-        String correlationId = "microListRequest";
         try {
-            logger = new PrintStream(os, true, CharEncoding.UTF_8);
-            ApplicationsController applicationController = new ApplicationsController(apiConnection, logger, correlationId);
+            ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
             microserviceList = applicationController.getMicroserviceListByApplication(applicationId);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        finally {
 
-        return Utils.createResponseViewModel(microserviceList);
+        }
+
+        return microserviceList;
     }
 
-    public static String customFillUserSelectedReleaseList(int applicationId, int microserviceId, AuthenticationModel authModel) {
+    public static List<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, AuthenticationModel authModel) {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        PrintStream logger;
-        String correlationId = "releaseListRequest";
         List<ReleaseApiResponse> releaseList = null;
         try {
-            logger = new PrintStream(os, true, CharEncoding.UTF_8);
-            ApplicationsController applicationController = new ApplicationsController(apiConnection, logger, correlationId);
+            ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
             releaseList = applicationController.getReleaseListByApplication(applicationId, microserviceId);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return Utils.createResponseViewModel(releaseList);
+        return releaseList;
     }
 
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {

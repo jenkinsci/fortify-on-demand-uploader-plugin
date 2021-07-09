@@ -64,7 +64,7 @@ public class StaticScanController extends ControllerBase {
             if (apiConnection.getToken() == null)
                 apiConnection.authenticate();
 
-            logger.println("Getting Assessment");
+            println("Getting Assessment");
 
             BsiToken token = null;
             if (releaseId == 0) {
@@ -107,8 +107,8 @@ public class StaticScanController extends ControllerBase {
 
             // Loop through chunks
 
-            logger.println("TOTAL FILE SIZE = " + uploadFile.length());
-            logger.println("CHUNK_SIZE = " + CHUNK_SIZE);
+            println("TOTAL FILE SIZE = " + uploadFile.length());
+            println("CHUNK_SIZE = " + CHUNK_SIZE);
 
             while ((byteCount = fs.read(readByteArray)) != -1) {
 
@@ -144,7 +144,7 @@ public class StaticScanController extends ControllerBase {
                 offset += byteCount;
 
                 if (fragmentNumber % 5 == 0) {
-                    logger.println("Upload Status - Fragment No: " + fragmentNumber + ", Bytes sent: " + offset
+                    println("Upload Status - Fragment No: " + fragmentNumber + ", Bytes sent: " + offset
                             + " (Response: " + response.code() + ")");
                 }
 
@@ -156,21 +156,21 @@ public class StaticScanController extends ControllerBase {
                     if (response.code() == 200) {
 
                         scanStartedResponse = gson.fromJson(responseJsonStr, PostStartScanResponse.class);
-                        logger.println("Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
+                        println("Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
                         scanResults.uploadSuccessfulScanStarting(scanStartedResponse.getScanId());
                         return scanResults;
 
                     } else if (!response.isSuccessful()) { // There was an error along the lines of 'another scan in progress' or something
 
-                        logger.println("An error occurred during the upload.");
+                        println("An error occurred during the upload.");
                         GenericErrorResponse errors = gson.fromJson(responseJsonStr, GenericErrorResponse.class);
                         if (errors != null) {
                             if(errors.toString().contains("Can not start scan another scan is in progress")) {
                                 scanResults.uploadSuccessfulScanNotStarted();
                             }
                             else {
-                                logger.println("Package upload failed for the following reasons: ");
-                                logger.println(errors.toString());
+                                println("Package upload failed for the following reasons: ");
+                                println(errors.toString());
                                 scanResults.uploadNotSuccessful();
                             }
                         }
@@ -184,7 +184,7 @@ public class StaticScanController extends ControllerBase {
             } // end while
 
         } catch (Exception e) {
-            e.printStackTrace(logger);
+            printStackTrace(e);
             scanResults.uploadNotSuccessful();
             return scanResults;
         }

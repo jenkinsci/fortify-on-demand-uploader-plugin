@@ -7,8 +7,9 @@ import java.io.PrintStream;
 abstract class ControllerBase {
 
     protected FodApiConnection apiConnection;
-    protected PrintStream logger;
-    protected String correlationId;
+
+    private String correlationId;
+    private PrintStream logger;
 
     /**
      * Base constructor for all apiConnection controllers
@@ -29,5 +30,23 @@ abstract class ControllerBase {
         }
 
         return this.correlationId;
+    }
+
+    protected void println(String log) {
+        if (this.logger != null) {
+            this.logger.println(log);
+        }
+        else {
+            System.out.println(log);
+        }
+    }
+
+    protected void printStackTrace(Exception e) {
+        if (this.logger != null) {
+            e.printStackTrace(this.logger);
+        }
+        else {
+            e.printStackTrace();
+        }
     }
 }

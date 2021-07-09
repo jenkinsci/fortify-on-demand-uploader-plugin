@@ -310,21 +310,27 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         }
 
         @JavaScriptMethod
+        public String submitCreateApplication(JSONObject authModelObject, JSONObject formObject) {
+            AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+            return Utils.createResponseViewModel(SharedCreateApplicationForm.submitCreateApplication(authModel, formObject));
+        }
+
+        @JavaScriptMethod
         public String retrieveApplicationList(JSONObject authModelObject) {
             AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
-            return SharedUploadBuildStep.customFillUserSelectedApplicationList(authModel);
+            return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedApplicationList(authModel));
         }
 
         @JavaScriptMethod
         public String retrieveMicroserviceList(int selectedApplicationId, JSONObject authModelObject) {
             AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
-            return SharedUploadBuildStep.customFillUserSelectedMicroserviceList(selectedApplicationId, authModel);
+            return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedMicroserviceList(selectedApplicationId, authModel));
         }
 
         @JavaScriptMethod
         public String retrieveReleaseList(int selectedApplicationId, int microserviceId, JSONObject authModelObject) {
             AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
-            return SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId, authModel);
+            return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId, authModel));
         }
 
         private AuthenticationModel getAuthModelFromObject(JSONObject authModelObject) {

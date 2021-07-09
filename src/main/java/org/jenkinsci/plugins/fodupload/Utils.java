@@ -14,6 +14,7 @@ import java.io.PrintStream;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
@@ -190,9 +191,13 @@ public class Utils {
         return response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED;
     }
 
-    public static <T> String createResponseViewModel(List<T> responseList) {
+    public static <T> String createResponseViewModel(T response) {
         Gson gson = new Gson();
-        Type typeOfSrc = new TypeToken<List<T>>(){}.getType();
-        return gson.toJson(responseList, typeOfSrc);
+        Type typeOfSrc = new TypeToken<T>(){}.getType();
+        return gson.toJson(response, typeOfSrc);
+    }
+
+    public static String createCorrelationId() {
+        return UUID.randomUUID().toString();
     }
 }
