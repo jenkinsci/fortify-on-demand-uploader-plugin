@@ -1,52 +1,58 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+         xmlns:f="/lib/form">
     <f:block>
+
+        <style>
+
+        </style>
 
         <div>
             <f:section title="Application and Release Options">
                 <f:block>
 
-                    <f:entry id="releaseTypeSelectList" title="Pick a Release" field="selectedReleaseType" help="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html">
+                    <f:entry id="releaseTypeSelectList" title="Pick a Release" field="selectedReleaseType"
+                             help="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html">
                         <f:select id="releaseTypeSelectList" style="width: 160px;"/>
                     </f:entry>
 
                     <f:block>
                         <tr class="config-table-top-row releaseIdView">
-                            <td class="setting-leftspace"> </td>
+                            <td class="setting-leftspace"></td>
                             <td class="setting-name">Release ID</td>
                             <td class="setting-main">
-                                <input type="text" id="releaseIdField" name="releaseId" class="setting-input" style="width: 160px;" />
+                                <input type="text" id="releaseIdField" name="releaseId" class="setting-input" style="width: 160px;"/>
                             </td>
                         </tr>
 
                         <tr class="config-table-top-row bsiTokenView">
-                            <td class="setting-leftspace"> </td>
+                            <td class="setting-leftspace"></td>
                             <td class="setting-name">BSI Token</td>
                             <td class="setting-main">
-                                <input type="text" id="bsiTokenField" name="bsiToken" class="setting-input" style="width: 160px;" />
+                                <input type="text" id="bsiTokenField" name="bsiToken" class="setting-input" style="width: 160px;"/>
                             </td>
                         </tr>
 
                         <tr class="config-table-top-row appAndReleaseNameView" id="applicationSelectForm">
-                            <td class="setting-leftspace"> </td>
+                            <td class="setting-leftspace"></td>
                             <td class="setting-name">Application</td>
-                            <td class="setting-main spinner-container">
+                            <td class="setting-main spinner-container ">
                                 <select name="userSelectedApplication" id="applicationSelectList" style="width: 160px;">
                                     <option value="">Select an application</option>
                                 </select>
 
+                                <span tooltip="Create a new application" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                    <span class="first-child">
+                                        <button type="button" id="createAppBtn">Create</button>
+                                    </span>
+                                </span>
                             </td>
                             <td>
-                                <span tooltip="Create a new application" class="yui-button">
-                                        <span class="first-child">
-                                            <button type="button" id="createAppBtn">Create</button>
-                                        </span>
-                                    </span>
                             </td>
                         </tr>
 
                         <tr class="config-table-top-row appAndReleaseNameView" id="microserviceSelectForm">
-                            <td class="setting-leftspace"> </td>
+                            <td class="setting-leftspace"></td>
                             <td class="setting-name">Microservice</td>
                             <td class="setting-main spinner-container">
                                 <select name="userSelectedMicroservice" id="microserviceSelectList" style="width: 160px;">
@@ -56,7 +62,7 @@
                         </tr>
 
                         <tr class="config-table-top-row appAndReleaseNameView" id="releaseSelectForm">
-                            <td class="setting-leftspace"> </td>
+                            <td class="setting-leftspace"></td>
                             <td class="setting-name">Release</td>
                             <td class="setting-main spinner-container">
                                 <select name="userSelectedRelease" id="releaseSelectList" style="width: 160px;">
@@ -66,7 +72,7 @@
                         </tr>
 
                         <tr id="appAndReleaseNameErrorView">
-                            <td> </td>
+                            <td></td>
                             <td colspan="4">
                                 <div style="color: red;">Failed to retrieve applications/releases/microservices from the FoD API</div>
                             </td>
