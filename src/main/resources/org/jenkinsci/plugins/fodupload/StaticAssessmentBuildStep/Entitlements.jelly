@@ -10,27 +10,35 @@
 
         <f:section title="Entitlement Options">
             <f:block>
-                <div class="row" id="assessmentTypeForm">
-                    <div class="col-md-6">Assessment Type</div>
-                    <div class="col-md-6 spinner-container">
+
+                <tr class="config-table-top-row" id="assessmentTypeForm">
+                    <td class="setting-leftspace"></td>
+                    <td class="setting-name">Assessment Type</td>
+                    <td class="setting-main spinner-container">
                         <select name="userSelectedAssessmentType" id="assessmentTypeSelectList">
                             <option value="">Select an Assessment Type</option>
                         </select>
-                    </div>
-                </div>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
 
-                <div class="row" id="entitlementForm">
-                    <div class="col-md-6">Entitlement</div>
-                    <div class="col-md-6 spinner-container">
+                <tr class="config-table-top-row" id="entitlementForm">
+                    <td class="setting-leftspace"></td>
+                    <td class="setting-name">Entitlement</td>
+                    <td class="setting-main spinner-container">
                         <select name="userSelectedEntitlement" id="entitlementSelectList">
                             <option value="">Select an Entitlement</option>
                         </select>
-                    </div>
-                </div>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
 
-                <div class="row" id="scanCentralBuildTypeForm">
-                    <div class="col-md-6">Scan Central Build Type</div>
-                    <div class="col-md-6">
+                <tr class="config-table-top-row" id="scanCentralBuildTypeForm">
+                    <td class="setting-leftspace"></td>
+                    <td class="setting-name">Scan Central Build Type</td>
+                    <td class="setting-main">
                         <select name="userSelectedScanCentralBuildType" id="scanCentralBuildTypeSelectList">
                             <option value="0">None</option>
                             <option value="1">Gradle</option>
@@ -39,42 +47,74 @@
                             <option value="4">PHP</option>
                             <option value="5">Python</option>
                         </select>
-                    </div>
-                </div>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
 
-                <div class="row" id="technologyStackForm">
-                    <div class="col-md-6">Technology Stack</div>
-                    <div class="col-md-6 spinner-container">
+                <tr class="config-table-top-row" id="technologyStackForm">
+                    <td class="setting-leftspace"></td>
+                    <td class="setting-name">Technology Stack</td>
+                    <td class="setting-main spinner-container">
                         <select name="userSelectedTechnologyStack" id="technologyStackSelectList">
                             <option value="">Select a Technology Stack</option>
                         </select>
-                    </div>
-                </div>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
 
-                <div class="row" id="languageLevelForm">
-                    <div class="col-md-6">Language Level</div>
-                    <div class="col-md-6 spinner-container">
+                <tr class="config-table-top-row" id="languageLevelForm">
+                    <td class="setting-leftspace"></td>
+                    <td class="setting-name">Language Level</td>
+                    <td class="setting-main spinner-container">
                         <select name="userSelectedLanguageLevel" id="languageLevelSelectList">
                             <option value="">Select a Language Level</option>
                         </select>
-                    </div>
-                </div>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
 
-                <div class="row" id="auditPreferenceForm">
-                    <div class="col-md-6">Audit Preference</div>
-                    <div class="col-md-6 spinner-container">
+                <!--                <tr class="config-table-top-row" id="auditPreferenceForm">-->
+                <!--                    <td class="setting-leftspace"></td>-->
+                <!--                    <td class="setting-name">Audit Preference</td>-->
+                <!--                    <td class="setting-main spinner-container">-->
+                <!--                        <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">-->
+                <!--                            <option value="">Select an Audit Preference</option>-->
+                <!--                        </select>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                    </td>-->
+                <!--                </tr>-->
+
+                <f:entry id="auditPreferenceForm" title="Audit Preference" >
+                    <div class="spinner-container">
                         <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">
                             <option value="">Select an Audit Preference</option>
                         </select>
                     </div>
-                </div>
+                </f:entry>
 
-                <div class="row" id="sonatypeForm">
-                        <div class="col-md-6">Open Source Component Analysis by Sonatype</div>
-                        <div class="col-md-6">
-                            <input type="checkbox" value="false"  style="margin-top: 20px"/>
-                        </div>
-                </div>
+                <!--                <tr class="config-table-top-row" id="sonatypeForm" title="Sonatype">-->
+                <!--                    <td class="setting-leftspace"></td>-->
+                <!--                    <td class="setting-main" colspan="2">-->
+                <!--                        <label>-->
+                <!--                            <input type="checkbox" value="false"/>-->
+                <!--                            Open Source Component Analysis by Sonatype-->
+                <!--                        </label>-->
+                <!--                    </td>-->
+                <!--                    <td class="setting-help">-->
+                <!--                        <f:helpLink featureName="Sonatype" url="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html" ></f:helpLink>-->
+                <!--                    </td>-->
+                <!--                </tr>-->
+
+                <f:entry id="sonatypeForm" help="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html">
+                    <label>
+                        <input type="checkbox" value="false" name="sonatypeEnabled" id="cbSonatypeEnabled"/>
+                        Open Source Component Analysis by Sonatype
+                    </label>
+                </f:entry>
 
             </f:block>
         </f:section>
