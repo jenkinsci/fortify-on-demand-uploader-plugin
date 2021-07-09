@@ -32,17 +32,7 @@
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/CreateMicroserviceForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/CreateReleaseForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
 
-    <f:section title="Entitlement Options">
-        <f:entry title="Entitlement Preference" field="entitlementPreference">
-            <f:select />
-        </f:entry>
-        <f:entry title="Purchase Entitlements" field="purchaseEntitlements">
-            <f:checkbox/>
-        </f:entry>
-        <f:entry title="Remediation Preference" field="remediationScanPreferenceType">
-            <f:select />
-        </f:entry>
-    </f:section>
+    <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/Entitlements.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
 
     <f:section title="Scan Options">
         <f:entry title="Action when scan is in progress" field="inProgressScanActionType">
