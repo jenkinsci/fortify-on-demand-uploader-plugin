@@ -231,7 +231,7 @@ public class SharedUploadBuildStep {
     }
 
     @SuppressWarnings("unused")
-    public static List<ApplicationApiResponse> customFillUserSelectedApplicationList(AuthenticationModel authModel) throws IOException {
+    public static List<ApplicationApiResponse> customFillUserSelectedApplicationList(AuthenticationModel authModel) throws IOException { 
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         List<ApplicationApiResponse> applicationList = null;
         ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
