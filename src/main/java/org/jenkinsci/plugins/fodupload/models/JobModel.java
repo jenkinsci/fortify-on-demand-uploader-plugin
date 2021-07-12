@@ -28,11 +28,13 @@ public class JobModel {
     private String userSelectedApplication;
     private String userSelectedMicroservice;
     private String userSelectedRelease;
+    private String selectedScanCentralBuildType;
 
     private File payload;
 
     /**
      * Build model used to pass values around
+     *
      * @param releaseId                     Release ID
      * @param bsiToken                      BSI Token
      * @param purchaseEntitlements          purchaseEntitlements
@@ -42,6 +44,7 @@ public class JobModel {
      * @param inProgressScanActionType      inProgressScanActionType
      * @param inProgressBuildResultType     inProgressBuildResultType
      * @param selectedReleaseType           selectedReleaseType
+     * @param selectedScanCentralBuildType  selectedScanCentralBuildType
      */
     public JobModel(String releaseId,
                     String bsiToken,
@@ -54,7 +57,8 @@ public class JobModel {
                     String selectedReleaseType,
                     String userSelectedApplication,
                     String userSelectedMicroservice,
-                    String userSelectedRelease) {
+                    String userSelectedRelease,
+                    String selectedScanCentralBuildType) {
 
         this.releaseId = releaseId;
         this.bsiTokenOriginal = bsiToken;
@@ -68,6 +72,7 @@ public class JobModel {
         this.userSelectedApplication = userSelectedApplication;
         this.userSelectedMicroservice = userSelectedMicroservice;
         this.userSelectedRelease = userSelectedRelease;
+        this.selectedScanCentralBuildType = selectedScanCentralBuildType;
     }
 
     public File getPayload() {
@@ -78,7 +83,9 @@ public class JobModel {
         this.payload = payload;
     }
 
-    public String getReleaseId() { return releaseId; }
+    public String getReleaseId() {
+        return releaseId;
+    }
 
     public BsiToken getBsiToken() {
         return bsiTokenCache;
@@ -128,9 +135,13 @@ public class JobModel {
         return userSelectedRelease;
     }
 
+    public String getSelectedScanCentralBuildType() {
+        return selectedScanCentralBuildType;
+    }
+
     @Override
     public String toString() {
-       if (bsiTokenCache != null) {
+        if (bsiTokenCache != null) {
             return String.format(
                     "Release Id:                        %s%n" +
                             "Assessment Type Id:                %s%n" +
@@ -177,8 +188,7 @@ public class JobModel {
         if (releaseId != null && !releaseId.isEmpty()) {
             try {
                 releaseIdNum = Integer.parseInt(releaseId);
-            }
-            catch (NumberFormatException ex) {
+            } catch (NumberFormatException ex) {
                 errors.add("Release Id");
                 logger.println(errors.toString());
             }

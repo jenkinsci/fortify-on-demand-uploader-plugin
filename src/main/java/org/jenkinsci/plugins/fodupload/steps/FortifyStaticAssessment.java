@@ -59,6 +59,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String userSelectedApplication;
     private String userSelectedMicroservice;
     private String userSelectedRelease;
+    private String selectedScanCentralBuildType;
 
     private SharedUploadBuildStep commonBuildStep;
 
@@ -205,6 +206,16 @@ public class FortifyStaticAssessment extends FortifyStep {
         this.userSelectedRelease = userSelectedRelease;
     }
 
+    @SuppressWarnings("unused")
+    public String getSelectedScanCentralBuildType() {
+        return selectedScanCentralBuildType;
+    }
+
+    @DataBoundSetter
+    public void setSelectedScanCentralBuildType(String selectedScanCentralBuildType) {
+        this.selectedScanCentralBuildType = selectedScanCentralBuildType;
+    }
+
     @Override
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -225,7 +236,8 @@ public class FortifyStaticAssessment extends FortifyStep {
                 selectedReleaseType,
                 userSelectedApplication,
                 userSelectedMicroservice,
-                userSelectedRelease);
+                userSelectedRelease,
+                selectedScanCentralBuildType);
 
         return true;
     }
@@ -268,7 +280,8 @@ public class FortifyStaticAssessment extends FortifyStep {
                 selectedReleaseType,
                 userSelectedApplication,
                 userSelectedMicroservice,
-                userSelectedRelease);
+                userSelectedRelease,
+                selectedScanCentralBuildType);
 
         commonBuildStep.perform(build, workspace, launcher, listener, correlationId);
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
