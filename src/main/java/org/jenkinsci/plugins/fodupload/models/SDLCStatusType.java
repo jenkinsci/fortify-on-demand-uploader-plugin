@@ -11,4 +11,17 @@ public enum SDLCStatusType {
     private SDLCStatusType(int type) {
         this.type = type;
     }
+
+    public static SDLCStatusType fromInteger(Integer type) {
+        switch (type) {
+            case 1:
+                return SDLCStatusType.PRODUCTION;
+            case 2:
+                return SDLCStatusType.QA;
+            case 3:
+                return SDLCStatusType.DEVELOPMENT;
+        }
+
+        return null;
+    }
 }

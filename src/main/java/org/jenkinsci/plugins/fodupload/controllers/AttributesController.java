@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.AttributeDefinition;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
+import org.jenkinsci.plugins.fodupload.models.response.ReleaseApiResponse;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -23,30 +24,17 @@ public class AttributesController extends ControllerBase {
 
     public List<AttributeDefinition> getAttributeDefinitions() throws IOException {
 
-        if (apiConnection.getToken() == null)
-            apiConnection.authenticate();
-
-        String url = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
-                .addPathSegments("/api/v3/attributes")
-                .build()
-                .toString();
-
+        // TODO: check want happens when no permissions -- Arik
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/attributes");
         Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
+                .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        Response response = apiConnection.getClient().newCall(request).execute();
+        GenericListResponse<AttributeDefinition> response = apiConnection.requestTyped(request, new TypeToken<GenericListResponse<AttributeDefinition>>(){}.getType());
 
-        String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
-        // TODO: check want happens when no permissions -- Arik
-        Gson gson = new Gson();
-        Type t = new TypeToken<GenericListResponse<AttributeDefinition>>(){}.getType();
-        GenericListResponse<AttributeDefinition> results = gson.fromJson(content, t);
-
-        return results.getItems();
+        return response.getItems();
     }
 }

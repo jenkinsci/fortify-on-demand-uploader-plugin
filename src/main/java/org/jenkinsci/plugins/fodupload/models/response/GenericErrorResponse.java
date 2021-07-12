@@ -27,18 +27,18 @@ public class GenericErrorResponse {
         }
         return sb.toString();
     }
-}
 
-class ErrorResponse {
-    private int errorCode;
-    private String message;
+    public class ErrorResponse {
+        private int errorCode;
+        private String message;
 
-    public int getErrorCode() {
-        return errorCode;
-    }
+        public int getErrorCode() {
+            return errorCode;
+        }
 
-    @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
-    public String getMessage() {
-        return message;
+        @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
+        public String getMessage() {
+            return message;
+        }
     }
 }

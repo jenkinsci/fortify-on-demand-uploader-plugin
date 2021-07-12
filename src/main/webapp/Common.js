@@ -1,3 +1,12 @@
+function dispatchEvent(type, payload) {
+    document.dispatchEvent(new CustomEvent(type, { detail: payload }));
+}
+
+function subscribeToEvent(type, cb) {
+    document.removeEventListener(type, cb);
+    document.addEventListener(type, cb);
+}
+
 function debounce(func, wait, immediate) {
     var timeout;
     return function() {

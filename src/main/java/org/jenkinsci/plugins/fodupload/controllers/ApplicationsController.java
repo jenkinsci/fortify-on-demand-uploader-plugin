@@ -2,20 +2,29 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import okhttp3.HttpUrl;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.Json;
+import org.jenkinsci.plugins.fodupload.models.CreateApplicationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ApplicationsController extends ControllerBase {
+
+    private static final HashMap<String, String> errorCodesMap;
+    static {
+        errorCodesMap = new HashMap<>();
+        errorCodesMap.put("InvalidOwnerId", "Invalid Owner Id");
+    }
+
     /**
      * Constructor
      *
@@ -35,31 +44,17 @@ public class ApplicationsController extends ControllerBase {
      */
     public List<ApplicationApiResponse> getApplicationList() throws IOException {
 
-        if (apiConnection.getToken() == null)
-            apiConnection.authenticate();
-
-        String url = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
-                .addPathSegments("/api/v3/applications")
-                .build().toString();
-
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/applications");
         Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
+                .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        Response response = apiConnection.getClient().newCall(request).execute();
+        GenericListResponse<ApplicationApiResponse> response = apiConnection.requestTyped(request, new TypeToken<GenericListResponse<ApplicationApiResponse>>(){}.getType());
 
-        // Read the results and close the response
-        String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
-
-        Gson gson = new Gson();
-        Type t = new TypeToken<GenericListResponse<ApplicationApiResponse>>() {
-        }.getType();
-        GenericListResponse<ApplicationApiResponse> results = gson.fromJson(content, t);
-        return results.getItems();
+        return response.getItems();
     }
 
     /**
@@ -72,10 +67,7 @@ public class ApplicationsController extends ControllerBase {
      */
     public List<ReleaseApiResponse> getReleaseListByApplication(int releaseListApplicationId, int microserviceId) throws IOException {
 
-        if (apiConnection.getToken() == null)
-            apiConnection.authenticate();
-
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments("/api/v3/applications/" + releaseListApplicationId + "/releases");
 
         if (microserviceId > 0) {
@@ -86,23 +78,14 @@ public class ApplicationsController extends ControllerBase {
                 .build().toString();
 
         Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
+                .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        Response response = apiConnection.getClient().newCall(request).execute();
+        GenericListResponse<ReleaseApiResponse> response = apiConnection.requestTyped(request, new TypeToken<GenericListResponse<ReleaseApiResponse>>(){}.getType());
 
-        // Read the results and close the response
-        String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
-
-        Gson gson = new Gson();
-        Type t = new TypeToken<GenericListResponse<ReleaseApiResponse>>() {
-        }.getType();
-        GenericListResponse<ReleaseApiResponse> results = gson.fromJson(content, t);
-        return results.getItems();
+        return response.getItems();
     }
 
     /**
@@ -113,31 +96,47 @@ public class ApplicationsController extends ControllerBase {
      * @throws java.io.IOException in some circumstances
      */
     public List<MicroserviceApiResponse> getMicroserviceListByApplication(int microserviceListApplicationId) throws IOException {
-
-        if (apiConnection.getToken() == null)
-            apiConnection.authenticate();
-
-        String url = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
-                .addPathSegments("/api/v3/applications/" + microserviceListApplicationId + "/microservices")
-                .build().toString();
-
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/applications/" + microserviceListApplicationId + "/microservices");
         Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
+                .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        Response response = apiConnection.getClient().newCall(request).execute();
+        GenericListResponse<MicroserviceApiResponse> response = apiConnection.requestTyped(request, new TypeToken<GenericListResponse<MicroserviceApiResponse>>(){}.getType());
 
-        // Read the results and close the response
-        String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
+        return response.getItems();
+    }
 
-        Gson gson = new Gson();
-        Type t = new TypeToken<GenericListResponse<MicroserviceApiResponse>>() {
-        }.getType();
-        GenericListResponse<MicroserviceApiResponse> results = gson.fromJson(content, t);
-        return results.getItems();
+    public CreateApplicationResponse createApplication(CreateApplicationModel applicationModel) throws IOException {
+        String requestContent = Json.getInstance().toJson(applicationModel);
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/applications");
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .post(RequestBody.create(MediaType.parse("application/json"), requestContent))
+                .build();
+        Response response = apiConnection.request(request);
+
+        if (response.isSuccessful()) {
+            return apiConnection.parseResponse(response, new TypeToken<CreateApplicationResponse>(){}.getType());
+        }
+        else {
+            GenericErrorResponse genericErrorResponse = apiConnection.parseResponse(response, new TypeToken<GenericErrorResponse>(){}.getType());
+            List<String> errors = new ArrayList<>();
+
+            genericErrorResponse.getErrors().forEach(x -> {
+                String message = x.getMessage();
+                if (errorCodesMap.containsKey(message)) {
+                    message = errorCodesMap.get(message);
+                }
+                errors.add(message);
+            });
+
+            return new CreateApplicationResponse(0, false, errors);
+        }
     }
 }

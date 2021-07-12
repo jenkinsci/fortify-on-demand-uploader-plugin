@@ -9,9 +9,10 @@ public class CreateApplicationModel {
     private BusinessCriticalityType businessCriticalityType;
     private SDLCStatusType sdlcStatusType;
     private Boolean hasMicroservices;
-    private String microserviceName;
+    private String[] microservices;
+    private String releaseMicroserviceName;
 
-    public CreateApplicationModel(String applicationName, ApplicationType applicationType, String releaseName, Integer ownerId, ApplicationAttribute[] attributes, BusinessCriticalityType businessCriticalityType, SDLCStatusType sdlcStatusType, Boolean hasMicroservices, String microserviceName) {
+    public CreateApplicationModel(String applicationName, ApplicationType applicationType, String releaseName, Integer ownerId, ApplicationAttribute[] attributes, BusinessCriticalityType businessCriticalityType, SDLCStatusType sdlcStatusType, Boolean hasMicroservices, String[] microservices, String releaseMicroserviceName) {
         this.applicationName = applicationName;
         this.applicationType = applicationType;
         this.releaseName = releaseName;
@@ -20,7 +21,9 @@ public class CreateApplicationModel {
         this.businessCriticalityType = businessCriticalityType;
         this.sdlcStatusType = sdlcStatusType;
         this.hasMicroservices = hasMicroservices;
-        this.microserviceName = microserviceName;
+        this.microservices = microservices;
+        this.ownerId = ownerId;
+        this.releaseMicroserviceName = releaseMicroserviceName;
     }
 
 
@@ -56,7 +59,11 @@ public class CreateApplicationModel {
         return hasMicroservices;
     }
 
-    public String getMicroserviceName() {
-        return microserviceName;
+    public String[] getMicroservices() {
+        return microservices;
+    }
+
+    public String getReleaseMicroserviceName() {
+        return releaseMicroserviceName;
     }
 }

@@ -215,44 +215,29 @@ public class SharedUploadBuildStep {
     }
 
     @SuppressWarnings("unused")
-    public static List<ApplicationApiResponse> customFillUserSelectedApplicationList(AuthenticationModel authModel) {
+    public static List<ApplicationApiResponse> customFillUserSelectedApplicationList(AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         List<ApplicationApiResponse> applicationList = null;
-        try {
-            ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
-            applicationList = applicationController.getApplicationList();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } 
+        ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
+        applicationList = applicationController.getApplicationList();
 
         return applicationList;
     }
 
-    public static List<MicroserviceApiResponse> customFillUserSelectedMicroserviceList(int applicationId, AuthenticationModel authModel) {
+    public static List<MicroserviceApiResponse> customFillUserSelectedMicroserviceList(int applicationId, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         List<MicroserviceApiResponse> microserviceList = null;
-        try {
-            ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
-            microserviceList = applicationController.getMicroserviceListByApplication(applicationId);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        finally {
-
-        }
+        ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
+        microserviceList = applicationController.getMicroserviceListByApplication(applicationId);
 
         return microserviceList;
     }
 
-    public static List<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, AuthenticationModel authModel) {
+    public static List<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         List<ReleaseApiResponse> releaseList = null;
-        try {
             ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
             releaseList = applicationController.getReleaseListByApplication(applicationId, microserviceId);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         return releaseList;
     }

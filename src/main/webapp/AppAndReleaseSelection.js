@@ -17,6 +17,15 @@ function onCredsChanged() {
     }
 }
 
+function onApplicationCreated(applicationId) {
+    const viewChoice = jq('#releaseTypeSelectList').val();
+
+    if (viewChoice == "UseAppAndReleaseName") {
+        initAppSelection(false, {
+            applicationId
+        });
+    }
+}
 
 function onReleaseMethodSelection() {
     hideAll();
@@ -51,7 +60,7 @@ async function initReleaseId() {
     jq('.releaseIdView').show();
 }
 
-function initAppSelection(isInit) {
+function initAppSelection(isInit, selectedValues) {
     jq('.appAndReleaseNameView').show();
     jq('#appAndReleaseNameErrorView').hide();
     jq('#microserviceSelectForm').hide();
@@ -78,6 +87,11 @@ function initAppSelection(isInit) {
                 jq('#applicationSelectList').val(savedAppId);
             }
         }
+        else {
+            if (selectedValues && selectedValues.applicationId) {
+                jq('#applicationSelectList').val(selectedValues.applicationId);
+            }
+        }
 
         onAppSelection(isInit);
         hideSpinner('#applicationSelectForm');
@@ -85,21 +99,20 @@ function initAppSelection(isInit) {
     });
 }
 
-function onAppSelection(isInit) {
-    console.log(getAuthInfo());
+function onAppSelection(isInit, selectedValues) {
     jq('#microserviceSelectForm').hide();
     jq('#releaseSelectForm').hide();
 
     const hasMicroservices = jq('#applicationSelectList option:selected').attr('hasMicroServices') === 'true';
     if (hasMicroservices) {
-        initMicroserviceSelection(isInit);
+        initMicroserviceSelection(isInit, selectedValues);
     }
     else {
-        initReleaseSelection(isInit);
+        initReleaseSelection(isInit, selectedValues);
     }
 }
 
-function initMicroserviceSelection(isInit) {
+function initMicroserviceSelection(isInit, selectedValues) {
     jq('#releaseSelectForm').hide();
     showWithSpinner('#microserviceSelectForm');
 
@@ -122,16 +135,16 @@ function initMicroserviceSelection(isInit) {
 
         hideSpinner('#microserviceSelectForm');
 
-        onMicroserviceSelection(isInit);
-        jq('#microserviceSelectList').off('change').change(() => onMicroserviceSelection(false));
+        onMicroserviceSelection(isInit, selectedValues);
+        jq('#microserviceSelectList').off('change').change(() => onMicroserviceSelection(false, selectedValues));
     });
 }
 
-function onMicroserviceSelection(isInit) {
-    initReleaseSelection(isInit);
+function onMicroserviceSelection(isInit, selectedValues) {
+    initReleaseSelection(isInit, selectedValues);
 }
 
-function initReleaseSelection(isInit) {
+function initReleaseSelection(isInit, selectedValues) {
     showWithSpinner('#releaseSelectForm');
 
     const appId = jq('#applicationSelectList').val();
@@ -165,10 +178,10 @@ function showApiRetrievalError() {
 }
 
 function init() {
-    console.log(YAHOO);
     onReleaseMethodSelection();
     jq('#releaseTypeSelectList').off('change').change(onReleaseMethodSelection);
-    onAuthInfoChanged(() => onCredsChanged());
+    subscribeToEvent('authInfoChanged', () => onCredsChanged());
+    subscribeToEvent('applicationCreated', x => onApplicationCreated(x.detail.applicationId));
 }
 
 spinAndWait(() => jq('#releaseTypeSelectList').val()).then(init);

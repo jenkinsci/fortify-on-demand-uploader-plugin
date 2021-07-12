@@ -1,7 +1,5 @@
 jq = jQuery;
 
-const AuthInfoChangedEvent = new CustomEvent('AuthInfoChanged');
-
 function getAuthInfo() {
     return {
         overrideGlobalAuth: jq('[name="overrideGlobalConfig"]').is(':checked'),
@@ -11,13 +9,8 @@ function getAuthInfo() {
     };
 }
 
-function onAuthInfoChanged(cb) {
-    document.removeEventListener('AuthInfoChanged', cb);
-    document.addEventListener('AuthInfoChanged', cb);
-}
-
 function sendChangedEvent() {
-    debounce(() => document.dispatchEvent(AuthInfoChangedEvent), 500)();
+    debounce(() => dispatchEvent('authInfoChanged'), 500)();
 }
 
 function init() {

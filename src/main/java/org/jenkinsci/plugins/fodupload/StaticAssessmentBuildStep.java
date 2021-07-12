@@ -310,27 +310,51 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         }
 
         @JavaScriptMethod
-        public String submitCreateApplication(JSONObject authModelObject, JSONObject formObject) {
-            AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
-            return Utils.createResponseViewModel(SharedCreateApplicationForm.submitCreateApplication(authModel, formObject));
+        public String submitCreateApplication(JSONObject formObject, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedCreateApplicationForm.submitCreateApplication(authModel, formObject));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
         @JavaScriptMethod
         public String retrieveApplicationList(JSONObject authModelObject) {
-            AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
-            return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedApplicationList(authModel));
+            try {
+                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedApplicationList(authModel));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
         @JavaScriptMethod
         public String retrieveMicroserviceList(int selectedApplicationId, JSONObject authModelObject) {
-            AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
-            return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedMicroserviceList(selectedApplicationId, authModel));
+            try {
+                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedMicroserviceList(selectedApplicationId, authModel));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
         @JavaScriptMethod
         public String retrieveReleaseList(int selectedApplicationId, int microserviceId, JSONObject authModelObject) {
-            AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
-            return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId, authModel));
+            try {
+                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId, authModel));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
         private AuthenticationModel getAuthModelFromObject(JSONObject authModelObject) {
