@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
+import java.util.EnumSet;
 import java.util.List;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -69,7 +70,8 @@ public class SharedUploadBuildStep {
                                  String selectedReleaseType,
                                  String userSelectedApplication,
                                  String userSelectedMicroservice,
-                                 String userSelectedRelease) {
+                                 String userSelectedRelease,
+                                 String selectedScanCentralBuildType) {
 
         model = new JobModel(releaseId,
                 bsiToken,
@@ -82,7 +84,8 @@ public class SharedUploadBuildStep {
                 selectedReleaseType,
                 userSelectedApplication,
                 userSelectedMicroservice,
-                userSelectedRelease);
+                userSelectedRelease,
+                selectedScanCentralBuildType);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -215,6 +218,19 @@ public class SharedUploadBuildStep {
     }
 
     @SuppressWarnings("unused")
+    public static ListBoxModel doFillSelectedScanCentralBuildTypeItems() {
+        return doFillFromEnum(FodEnums.SelectedScanCentralBuildType.class);
+    }
+
+    private static <T extends Enum<T>> ListBoxModel doFillFromEnum(Class<T> enumClass) {
+        ListBoxModel items = new ListBoxModel();
+        for (T selected : EnumSet.allOf(enumClass)) {
+            items.add(new ListBoxModel.Option(selected.toString(), selected.name()));
+        }
+        return items;
+    }
+
+    @SuppressWarnings("unused")
     public static List<ApplicationApiResponse> customFillUserSelectedApplicationList(AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         List<ApplicationApiResponse> applicationList = null;
@@ -282,7 +298,7 @@ public class SharedUploadBuildStep {
         try {
             taskListener.set(listener);
 
-            // check to see if sensitive fields are encrypte. If not halt scan and recommend encryption.
+            // check to see if sensitive fields are encrypted. If not halt scan and recommend encryption.
             if(authModel != null)
             {
                 if(authModel.getOverrideGlobalConfig() == true){
