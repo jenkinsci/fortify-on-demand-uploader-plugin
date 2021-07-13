@@ -1,35 +1,13 @@
 jq = jQuery;
 
-window.createApplication = window.createApplication || {'dialog': null, 'body': null};
-window.createApplication.init = function () {
-    if (!(window.createApplication.dialog)) {
-        var div = document.createElement("DIV");
-        document.body.appendChild(div);
-        div.innerHTML = "<div id='createApplicationDialog'><div class='bd'></div></div>";
-        window.createApplication.body = $('createApplicationDialog');
-        window.createApplication.body.innerHTML = $('applicationCreationForm').innerHTML;
-        window.createApplication.dialog = new YAHOO.widget.Panel(window.createApplication.body, {
-            fixedcenter: true,
-            close: true,
-            draggable: true,
-            zindex: 1000,
-            modal: true,
-            visible: false,
-            keylisteners: [
-                new YAHOO.util.KeyListener(document, {keys:27}, {
-                    fn:(function() {window.createApplication.dialog.hide();}),
-                    scope:document,
-                    correctScope:false
-                })
-            ]
-        });
-        window.createApplication.dialog.render();
-    }
-};
+class CreateApplicationForm extends Dialog {
 
-class CreateApplicationForm {
+    constructor() {
+        super('createApplicationDialog', 'applicationCreationForm');
+    }
 
     clearForm() {
+        this.hideSpinner();
         this.jqDialog('#errors').html('');
         this.jqDialog('#applicationNameField').val('');
         this.jqDialog('#businessCriticalityField').val('1');
@@ -37,7 +15,6 @@ class CreateApplicationForm {
         this.jqDialog('#applicationAttributesField').val('');
         this.jqDialog('#microserviceApplicationField').val(false);
         this.jqDialog('#microserviceNameField').val('');
-        this.jqDialog('#microserviceAttributesField').val('');
         this.jqDialog('.microservice-fields').hide();
         this.jqDialog('#releaseNameField').val('');
         this.jqDialog('#sdlcStatusField').val('3');
@@ -49,6 +26,7 @@ class CreateApplicationForm {
             applicationName: this.jqDialog('#applicationNameField').val(),
             businessCriticality: Number(this.jqDialog('#businessCriticalityField').val()),
             applicationType: Number(this.jqDialog('#applicationTypeField').val()),
+            applicationAttributes: this.jqDialog('#applicationAttributesField').val(),
             hasMicroservices: this.jqDialog('#microserviceApplicationField').is(':checked'),
             microserviceName: this.jqDialog('#microserviceNameField').val(),
             releaseName: this.jqDialog('#releaseNameField').val(),
@@ -71,7 +49,12 @@ class CreateApplicationForm {
 
         this.jqDialog('#submitBtn').off('click').click(() => {
             this.jqDialog('#errors').html('');
+            this.putMask();
+            this.showSpinner();
             descriptor.submitCreateApplication(this.getFormObject(), getAuthInfo(), t => {
+                this.hideSpinner();
+                this.removeMask();
+
                 const responseJson = JSON.parse(t.responseJSON);
                 if (!responseJson.success) {
                     let errorsHTML = '';
@@ -83,29 +66,33 @@ class CreateApplicationForm {
                 }
 
                 dispatchEvent('applicationCreated', { applicationId: responseJson.value });
-                window.createApplication.dialog.close.click();
+                this.closeDialog();
             });
         });
 
         this.jqDialog('#cancelBtn').off('click').click(() => {
-            window.createApplication.dialog.close.click();
+            this.closeDialog();
         });
     }
 
-    jqDialog(selector) {
-        return jq('#createApplicationDialog ' + selector);
+    showSpinner() {
+        this.jqDialog('#spinner-container').addClass('spinner');
     }
 
-    init() {
-        jq('#applicationCreationForm').hide();
+    hideSpinner() {
+        this.jqDialog('#spinner-container').removeClass('spinner');
+    }
 
+    onInit() {
         jq('#createAppBtn').off('click').click(() => {
-            window.createApplication.init();
-            window.createApplication.dialog.show();
-            this.clearForm();
-            this.subscribeToFormEvents();
+            this.spawnDialog();
         });
+    }
+
+    onDialogSpawn() {
+        this.clearForm();
+        this.subscribeToFormEvents();
     }
 }
 
-new CreateApplicationForm().init();
+createDialog(new CreateApplicationForm());

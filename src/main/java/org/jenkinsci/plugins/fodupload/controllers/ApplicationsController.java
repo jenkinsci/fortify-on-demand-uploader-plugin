@@ -6,6 +6,7 @@ import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.Json;
+import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.CreateApplicationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.response.*;
@@ -123,6 +124,9 @@ public class ApplicationsController extends ControllerBase {
 
         if (response.isSuccessful()) {
             return apiConnection.parseResponse(response, new TypeToken<CreateApplicationResponse>(){}.getType());
+        }
+        else if (response.code() >= 500) {
+            return new CreateApplicationResponse(0, false, Utils.unexpectedServerResponseErrors());
         }
         else {
             GenericErrorResponse genericErrorResponse = apiConnection.parseResponse(response, new TypeToken<GenericErrorResponse>(){}.getType());

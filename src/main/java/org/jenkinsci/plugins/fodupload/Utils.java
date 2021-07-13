@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -199,5 +200,14 @@ public class Utils {
 
     public static String createCorrelationId() {
         return UUID.randomUUID().toString();
+    }
+
+    private static List<String> unexpectedErrorResponseErrors;
+    static {
+        unexpectedErrorResponseErrors = new ArrayList<>();
+        unexpectedErrorResponseErrors.add("Unexpected response from server");
+    }
+    public static List<String> unexpectedServerResponseErrors() {
+        return unexpectedErrorResponseErrors;
     }
 }
