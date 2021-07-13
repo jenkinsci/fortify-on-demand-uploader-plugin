@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -164,10 +166,6 @@ public class FodApiConnection {
         return tokenCacheManager.getToken(client, apiUrl, grantType, scope, id, secret);
     }
 
-    private void invalidateToken() {
-        tokenCacheManager.invalidateToken(apiUrl, grantType, scope, id, secret);
-    }
-
     /**
      * @deprecated
      * Use the {@link FodApiConnection#request(Request)} method instead
@@ -213,18 +211,7 @@ public class FodApiConnection {
                 .addHeader("Authorization", "Bearer " + getTokenFromCache())
                 .build();
 
-        Response response = client.newCall(request).execute();
-
-        if (response.code() == HttpStatus.SC_UNAUTHORIZED) {
-            invalidateToken();
-            request = request.newBuilder()
-                    .header("Authorization", "Bearer " + getTokenFromCache())
-                    .build();
-
-            response = client.newCall(request).execute();
-        }
-
-        return response;
+        return client.newCall(request).execute();
     }
 
     public <T> T requestTyped(Request request, Type t) throws IOException {
@@ -234,11 +221,16 @@ public class FodApiConnection {
 
     public <T> T parseResponse(Response response, Type t) throws IOException {
         ResponseBody body = response.body();
+        if (body == null)
+            throw new IOException("Unexpected body to be null");
+
+        InputStream stream = body.byteStream();
         try {
-            String content = IOUtils.toString(body.byteStream(), "utf-8");
+            String content = IOUtils.toString(stream, "utf-8");
             return Json.getInstance().fromJson(content, t);
         }
         finally {
+            stream.close();
             body.close();
         }
     }

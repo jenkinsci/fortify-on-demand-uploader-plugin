@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class TokenCacheManager {
     }
 
     public synchronized String getToken(OkHttpClient client, String apiUrl, FodEnums.GrantType grantType, String scope, String id, String secret) throws IOException {
-        String key = apiUrl + "$" + grantType + "$" + scope + "$" + id + "$" + secret;
+        String key = buildCacheKey(apiUrl, grantType, scope, id, secret);
         clearCache();
 
         if (!tokens.containsKey(key)) {
@@ -35,8 +36,8 @@ public class TokenCacheManager {
         return tokens.get(key).value;
     }
 
-    public synchronized void invalidateToken(String apiUrl, FodEnums.GrantType grantType, String scope, String id, String secret) {
-
+    private String buildCacheKey(String apiUrl, FodEnums.GrantType grantType, String scope, String id, String secret) {
+        return apiUrl + "$" + grantType + "$" + scope + "$" + id + "$" + secret;
     }
 
     private void clearCache() {
@@ -76,16 +77,24 @@ public class TokenCacheManager {
         if (!response.isSuccessful())
             throw new IOException("Unexpected code " + response);
 
-        String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
+        ResponseBody body = response.body();
+        if (body == null)
+            throw new IOException("Unexpected body to be null");
 
-        // Parse the Response
-        JsonParser parser = new JsonParser();
-        JsonObject obj = parser.parse(content).getAsJsonObject();
+        InputStream stream = body.byteStream();
+        try {
+            String content = IOUtils.toString(stream, "utf-8");
+            JsonParser parser = new JsonParser();
+            JsonObject obj = parser.parse(content).getAsJsonObject();
 
-        Calendar expiryTime = Calendar.getInstance();
-        expiryTime.add(Calendar.SECOND, obj.get("expires_in").getAsInt());
-        return new Token(obj.get("access_token").getAsString(), expiryTime);
+            Calendar expiryTime = Calendar.getInstance();
+            expiryTime.add(Calendar.SECOND, obj.get("expires_in").getAsInt());
+            return new Token(obj.get("access_token").getAsString(), expiryTime);
+        }
+        finally {
+            stream.close();
+            body.close();
+        }
     }
 
     private Boolean isCloseToExpiry(Token token) {
