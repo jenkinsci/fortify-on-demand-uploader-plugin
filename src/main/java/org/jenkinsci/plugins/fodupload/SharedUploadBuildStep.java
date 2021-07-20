@@ -224,6 +224,14 @@ public class SharedUploadBuildStep {
         return applicationList;
     }
 
+    public static org.jenkinsci.plugins.fodupload.models.Result<ApplicationApiResponse> customFillUserApplicationById(int applicationId, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+        ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, null);
+        org.jenkinsci.plugins.fodupload.models.Result<ApplicationApiResponse> result = applicationsController.getApplicationById(applicationId);
+
+        return result;
+    }
+
     public static List<MicroserviceApiResponse> customFillUserSelectedMicroserviceList(int applicationId, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         List<MicroserviceApiResponse> microserviceList = null;

@@ -86,7 +86,4 @@
             </div>
         </div>
     </f:block>
-    <script>
-        var createAppDescriptor = <st:bind value="${descriptor}"/>
-    </script>
 </j:jelly>

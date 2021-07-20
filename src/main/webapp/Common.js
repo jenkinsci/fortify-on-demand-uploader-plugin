@@ -91,14 +91,14 @@ class Dialog {
         }
     }
 
-    spawnDialog() {
+    spawnDialog(data) {
         window[this._dialogId].init.bind(this)();
         window[this._dialogId].dialog.show();
 
         this.jqDialog('#modal_mask').hide();
 
         if (this.onDialogSpawn) {
-            this.onDialogSpawn();
+            this.onDialogSpawn(data);
         }
     }
 

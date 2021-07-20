@@ -53,6 +53,12 @@
                                 <select name="userSelectedMicroservice" id="microserviceSelectList" >
                                     <option value="">Select a microservice</option>
                                 </select>
+
+                                <span tooltip="Create a new microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                    <span class="first-child">
+                                        <button type="button" id="createMicroserviceBtn">Create</button>
+                                    </span>
+                                </span>
                             </td>
                         </tr>
 
@@ -63,6 +69,12 @@
                                 <select name="userSelectedRelease" id="releaseSelectList" >
                                     <option value="">Select a release</option>
                                 </select>
+
+                                <span tooltip="Create a new release" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                    <span class="first-child">
+                                        <button type="button" id="createReleaseBtn">Create</button>
+                                    </span>
+                                </span>
                             </td>
                         </tr>
 

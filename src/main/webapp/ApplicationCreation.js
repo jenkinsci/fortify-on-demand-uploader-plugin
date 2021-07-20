@@ -51,11 +51,14 @@ class CreateApplicationForm extends Dialog {
             this.jqDialog('#errors').html('');
             this.putMask();
             this.showSpinner();
-            descriptor.submitCreateApplication(this.getFormObject(), getAuthInfo(), t => {
+
+            const formObject = this.getFormObject();
+            descriptor.submitCreateApplication(formObject, getAuthInfo(), t => {
                 this.hideSpinner();
                 this.removeMask();
 
                 const responseJson = JSON.parse(t.responseJSON);
+                if (!responseJson) return;
                 if (!responseJson.success) {
                     let errorsHTML = '';
                     for (const error of responseJson.errors) {
@@ -65,7 +68,8 @@ class CreateApplicationForm extends Dialog {
                     return;
                 }
 
-                dispatchEvent('applicationCreated', { applicationId: responseJson.value });
+                const payload = { applicationId: responseJson.value, ...formObject };
+                dispatchEvent('applicationCreated', payload);
                 this.closeDialog();
             });
         });

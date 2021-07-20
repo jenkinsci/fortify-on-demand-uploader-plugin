@@ -29,6 +29,8 @@
 
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/AppAndReleaseSelection.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/CreateApplicationForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
+    <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/CreateMicroserviceForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
+    <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/CreateReleaseForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
 
     <f:section title="Entitlement Options">
         <f:entry title="Entitlement Preference" field="entitlementPreference">
@@ -62,4 +64,6 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/JobSettings.js" />
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelection.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreation.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/MicroserviceCreation.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreation.js"/>
 </j:jelly>

@@ -2,13 +2,13 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import net.sf.json.JSONObject;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.Utils;
-import org.jenkinsci.plugins.fodupload.models.CreateApplicationModel;
-import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 
 import java.io.IOException;
@@ -56,6 +56,24 @@ public class ApplicationsController extends ControllerBase {
         GenericListResponse<ApplicationApiResponse> response = apiConnection.requestTyped(request, new TypeToken<GenericListResponse<ApplicationApiResponse>>(){}.getType());
 
         return response.getItems();
+    }
+
+    public Result<ApplicationApiResponse> getApplicationById(Integer applicationId) throws IOException {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/applications/" + applicationId);
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .get()
+                .build();
+        Response res = apiConnection.request(request);
+        if (!res.isSuccessful()) {
+            return new Result<>(false, new ArrayList<String>(){ { add("HTTP Error " + res.code()); } }, null);
+        }
+
+        ApplicationApiResponse application = apiConnection.parseResponse(res, new TypeToken<ApplicationApiResponse>(){}.getType());
+        return new Result<>(true, null, application);
     }
 
     /**
@@ -141,6 +159,74 @@ public class ApplicationsController extends ControllerBase {
             });
 
             return new CreateApplicationResponse(0, false, errors);
+        }
+    }
+
+    public CreateMicroserviceResponse createMicroservice(CreateMicroserviceModel microserviceModel) throws IOException {
+        String requestContent = Json.getInstance().toJson(microserviceModel);
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/applications/" + microserviceModel.getApplicationId() + "/microservices");
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .post(RequestBody.create(MediaType.parse("application/json"), requestContent))
+                .build();
+        Response response = apiConnection.request(request);
+
+        if (response.isSuccessful()) {
+            return apiConnection.parseResponse(response, new TypeToken<CreateMicroserviceResponse>(){}.getType());
+        }
+        else if (response.code() >= 500) {
+            return new CreateMicroserviceResponse(0, false, Utils.unexpectedServerResponseErrors());
+        }
+        else {
+            GenericErrorResponse genericErrorResponse = apiConnection.parseResponse(response, new TypeToken<GenericErrorResponse>(){}.getType());
+            List<String> errors = new ArrayList<>();
+
+            genericErrorResponse.getErrors().forEach(x -> {
+                String message = x.getMessage();
+                if (errorCodesMap.containsKey(message)) {
+                    message = errorCodesMap.get(message);
+                }
+                errors.add(message);
+            });
+
+            return new CreateMicroserviceResponse(0, false, errors);
+        }
+    }
+
+    public CreateReleaseResponse createRelease(CreateReleaseModel releaseModel) throws IOException {
+        String requestContent = Json.getInstance().toJson(releaseModel);
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/releases");
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .post(RequestBody.create(MediaType.parse("application/json"), requestContent))
+                .build();
+        Response response = apiConnection.request(request);
+
+        if (response.isSuccessful()) {
+            return apiConnection.parseResponse(response, new TypeToken<CreateReleaseResponse>(){}.getType());
+        }
+        else if (response.code() >= 500) {
+            return new CreateReleaseResponse(0, false, Utils.unexpectedServerResponseErrors());
+        }
+        else {
+            GenericErrorResponse genericErrorResponse = apiConnection.parseResponse(response, new TypeToken<GenericErrorResponse>(){}.getType());
+            List<String> errors = new ArrayList<>();
+
+            genericErrorResponse.getErrors().forEach(x -> {
+                String message = x.getMessage();
+                if (errorCodesMap.containsKey(message)) {
+                    message = errorCodesMap.get(message);
+                }
+                errors.add(message);
+            });
+
+            return new CreateReleaseResponse(0, false, errors);
         }
     }
 }

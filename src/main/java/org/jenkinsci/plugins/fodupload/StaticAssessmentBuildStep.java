@@ -322,10 +322,46 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         }
 
         @JavaScriptMethod
+        public String submitCreateMicroservice(JSONObject formObject, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedCreateApplicationForm.submitCreateMicroservice(authModel, formObject));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @JavaScriptMethod
+        public String submitCreateRelease(JSONObject formObject, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedCreateApplicationForm.submitCreateRelease(authModel, formObject));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @JavaScriptMethod
         public String retrieveApplicationList(JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedApplicationList(authModel));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @JavaScriptMethod
+        public String retrieveApplicationById(int applicationId, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserApplicationById(applicationId, authModel));
             }
             catch (Exception e) {
                 e.printStackTrace();

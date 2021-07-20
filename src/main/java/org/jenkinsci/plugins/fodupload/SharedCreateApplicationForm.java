@@ -1,21 +1,27 @@
 package org.jenkinsci.plugins.fodupload;
 
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
 import org.jenkinsci.plugins.fodupload.controllers.AttributesController;
 import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.CreateApplicationResponse;
+import org.jenkinsci.plugins.fodupload.models.response.CreateMicroserviceResponse;
+import org.jenkinsci.plugins.fodupload.models.response.CreateReleaseResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class SharedCreateApplicationForm {
 
+    //<editor-fold desc="Create Application">
+
     public static Result<Integer> submitCreateApplication(AuthenticationModel authModel, JSONObject formObject) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         String correlationId = Utils.createCorrelationId();
+
+        System.out.println("Creating an application with FOD API. [CorrelationId = " + correlationId + "]");
 
         AttributesController attributesController = new AttributesController(apiConnection, null, correlationId);
         ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, correlationId);
@@ -28,7 +34,7 @@ public class SharedCreateApplicationForm {
             return new Result<>(false, null, 0);
         }
 
-        Result<CreateApplicationModel> model = parseModelFromObjectAndValidate(formObject, attributes);
+        Result<CreateApplicationModel> model = parseCreateApplicationModelFromObjectAndValidate(formObject, attributes);
         if (!model.getSuccess()) {
             return new Result<>(false, model.getErrors(), 0);
         }
@@ -41,7 +47,7 @@ public class SharedCreateApplicationForm {
         return new Result<>(true, null, response.getApplicationId());
     }
 
-    private static Result<CreateApplicationModel> parseModelFromObjectAndValidate(JSONObject formObject, List<AttributeDefinition> attributeDefinitions) {
+    private static Result<CreateApplicationModel> parseCreateApplicationModelFromObjectAndValidate(JSONObject formObject, List<AttributeDefinition> attributeDefinitions) {
         List<String> errors = new ArrayList<>();
 
         if (!formObject.containsKey("applicationName") || formObject.getString("applicationName").length() == 0) {
@@ -60,7 +66,7 @@ public class SharedCreateApplicationForm {
             errors.add("Owner Id must be a positive integer that represents a user id");
         }
 
-        Result<ApplicationAttribute[]> attributes = parseAttributes(formObject.getString("applicationAttributes"), attributeDefinitions);
+        Result<ApplicationAttribute[]> attributes = AttributesHelper.parseAttributes(formObject.getString("applicationAttributes"), attributeDefinitions);
         if (!attributes.getSuccess()) {
             errors.addAll(attributes.getErrors());
         }
@@ -84,82 +90,105 @@ public class SharedCreateApplicationForm {
         return new Result<>(true, null, model);
     }
 
-    private static Result<ApplicationAttribute[]> parseAttributes(String attributesInput, List<AttributeDefinition> attributeDefinitions) {
-        Result<HashMap<String, String>> userAttributes = parseAttributes(attributesInput);
-        if (!userAttributes.getSuccess()) {
-            return new Result<>(false, userAttributes.getErrors(), null);
+    //</editor-fold>
+
+    //<editor-fold desc="Create Microservice">
+
+    public static Result<Integer> submitCreateMicroservice(AuthenticationModel authModel, JSONObject formObject) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+        String correlationId = Utils.createCorrelationId();
+
+        System.out.println("Creating a microservice with FOD API. [CorrelationId = " + correlationId + "]");
+
+        ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, correlationId);
+
+        Result<CreateMicroserviceModel> model = parseCreateMicroserviceModelFromObjectAndValidate(formObject);
+        if (!model.getSuccess()) {
+            return new Result<>(false, model.getErrors(), 0);
         }
 
-        HashMap<String, AttributeDefinition> attributeDefsMap = getApplicationAttributeDefinitionsMap(attributeDefinitions);
+        CreateMicroserviceResponse response = applicationsController.createMicroservice(model.getValue());
+        if (!response.getSuccess()) {
+            return new Result<>(false, response.getErrors(), 0);
+        }
+
+        return new Result<>(true, null, response.getMicroserviceId());
+    }
+
+    private static Result<CreateMicroserviceModel> parseCreateMicroserviceModelFromObjectAndValidate(JSONObject formObject) {
         List<String> errors = new ArrayList<>();
 
-        for (String userAttributeKey : userAttributes.getValue().keySet()) {
-            if (!attributeDefsMap.containsKey(userAttributeKey)) {
-                errors.add("Attribute '" + userAttributeKey + "' does not exist");
-            }
+        if (!formObject.containsKey("applicationId") || !(formObject.get("applicationId") instanceof Integer)) {
+            errors.add("Application id must be provided to create a microservice");
         }
-        for (String defAttributeKey : attributeDefsMap.keySet()) {
-            if (attributeDefsMap.get(defAttributeKey).getRequired() && !userAttributes.getValue().containsKey(defAttributeKey)) {
-                errors.add("Attribute '" + defAttributeKey + "' was not provided");
-            }
+
+        if (!formObject.containsKey("microserviceName") || formObject.getString("microserviceName").length() == 0) {
+            errors.add("Microservice name cannot be empty");
         }
 
         if (errors.size() > 0) {
             return new Result<>(false, errors, null);
         }
 
-        List<ApplicationAttribute> attributes = new ArrayList<>();
+        CreateMicroserviceModel model = new CreateMicroserviceModel(
+                formObject.getInt("applicationId"),
+                formObject.getString("microserviceName"));
 
-        for (String userAttribute : userAttributes.getValue().keySet()) {
-            attributes.add(new ApplicationAttribute(attributeDefsMap.get(userAttribute).getId(), userAttributes.getValue().get(userAttribute)));
-        }
-
-        ApplicationAttribute[] attributesArray = new ApplicationAttribute[attributes.size()];
-        attributes.toArray(attributesArray);
-
-        return new Result<>(true, null, attributesArray);
+        return new Result<>(true, null, model);
     }
 
-    private static Result<HashMap<String, String>> parseAttributes(String attributesInput) {
-        HashMap<String, String> map = new HashMap<>();
-        if (attributesInput == null || attributesInput.trim().equals("")) {
-            return new Result<>(true, null, map);
+    //</editor-fold>
+
+    //<editor-fold desc="Create Release">
+
+    public static Result<Integer> submitCreateRelease(AuthenticationModel authModel, JSONObject formObject) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+        String correlationId = Utils.createCorrelationId();
+
+        System.out.println("Creating a release with FOD API. [CorrelationId = " + correlationId + "]");
+
+        ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, correlationId);
+
+        Result<CreateReleaseModel> model = parseCreateReleaseModelFromObjectAndValidate(formObject);
+        if (!model.getSuccess()) {
+            return new Result<>(false, model.getErrors(), 0);
         }
 
+        CreateReleaseResponse response = applicationsController.createRelease(model.getValue());
+        if (!response.getSuccess()) {
+            return new Result<>(false, response.getErrors(), 0);
+        }
+
+        return new Result<>(true, null, response.getReleaseId());
+    }
+
+    private static Result<CreateReleaseModel> parseCreateReleaseModelFromObjectAndValidate(JSONObject formObject) {
         List<String> errors = new ArrayList<>();
-        for (String attributeInput : attributesInput.split(",")) {
-            String[] keyValue = attributeInput.split(":");
-            if (keyValue.length != 2) {
-                errors.add("All attributes must have a key and a value");
-                break;
-            }
-            else {
-                String key = keyValue[0].trim();
-                if (map.containsKey(key)) {
-                    errors.add("Attribute cannot appear more than once");
-                    break;
-                }
-                map.put(key, keyValue[1].trim());
-            }
+
+        if (!formObject.containsKey("applicationId") || !(formObject.get("applicationId") instanceof Integer)) {
+            errors.add("Application id must be provided to create a release");
+        }
+
+        if (!formObject.containsKey("releaseName") || formObject.getString("releaseName").length() == 0) {
+            errors.add("Release name cannot be empty");
+        }
+
+        if (formObject.containsKey("microserviceId") && !(formObject.get("microserviceId") instanceof JSONNull) && !(formObject.get("microserviceId") instanceof Integer)) {
+            errors.add("If Microservice id is provided, it must be a positive integer");
         }
 
         if (errors.size() > 0) {
             return new Result<>(false, errors, null);
         }
 
-        return new Result<>(true, null, map);
+        CreateReleaseModel model = new CreateReleaseModel(
+                formObject.getInt("applicationId"),
+                formObject.getString("releaseName"),
+                (formObject.containsKey("microserviceId") && formObject.get("microserviceId") instanceof Integer) ? formObject.getInt("microserviceId") : null,
+                SDLCStatusType.fromInteger(formObject.getInt("sdlcStatus")));
+
+        return new Result<>(true, null, model);
     }
 
-    private static HashMap<String, AttributeDefinition> getApplicationAttributeDefinitionsMap(List<AttributeDefinition> attributeDefinitions) {
-        HashMap<String, AttributeDefinition> map = new HashMap<>();
-        for (AttributeDefinition def : attributeDefinitions) {
-            if (def.getAttributeType().equals("Application"))
-                map.put(def.getName(), def);
-        }
-        return map;
-    }
-
-    private class AttributeDef {
-
-    }
+    //</editor-fold>
 }

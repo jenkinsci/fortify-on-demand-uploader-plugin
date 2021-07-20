@@ -17,13 +17,35 @@ function onCredsChanged() {
     }
 }
 
-function onApplicationCreated(applicationId) {
+function onApplicationCreated(applicationId, applicationName, hasMicroservices) {
     const viewChoice = jq('#releaseTypeSelectList').val();
 
     if (viewChoice == "UseAppAndReleaseName") {
-        initAppSelection(false, {
-            applicationId
-        });
+        const applicationSelection = jq('#applicationSelectList');
+        applicationSelection.append('<option hasMicroServices="' + hasMicroservices + '" value="' + applicationId + '">' + applicationName + '</option>');
+        applicationSelection.val(applicationId);
+        onAppSelection(false);
+    }
+}
+
+function onMicroserviceCreated(microserviceId, microserviceName) {
+    const viewChoice = jq('#releaseTypeSelectList').val();
+
+    if (viewChoice == "UseAppAndReleaseName") {
+        const microserviceSelection = jq('#microserviceSelectList');
+        microserviceSelection.append('<option value="' + microserviceId + '">' + microserviceName + '</option>');
+        microserviceSelection.val(microserviceId);
+        onMicroserviceSelection(false);
+    }
+}
+
+function onReleaseCreated(releaseId, releaseName) {
+    const viewChoice = jq('#releaseTypeSelectList').val();
+
+    if (viewChoice == "UseAppAndReleaseName") {
+        const microserviceSelection = jq('#releaseSelectList');
+        microserviceSelection.append('<option value="' + releaseId + '">' + releaseName + '</option>');
+        microserviceSelection.val(releaseId);
     }
 }
 
@@ -181,7 +203,9 @@ function init() {
     onReleaseMethodSelection();
     jq('#releaseTypeSelectList').off('change').change(onReleaseMethodSelection);
     subscribeToEvent('authInfoChanged', () => onCredsChanged());
-    subscribeToEvent('applicationCreated', x => onApplicationCreated(x.detail.applicationId));
+    subscribeToEvent('applicationCreated', x => onApplicationCreated(x.detail.applicationId, x.detail.applicationName, x.detail.hasMicroservices));
+    subscribeToEvent('microserviceCreated', x => onMicroserviceCreated(x.detail.microserviceId, x.detail.microserviceName));
+    subscribeToEvent('releaseCreated', x => onReleaseCreated(x.detail.releaseId, x.detail.releaseName));
 }
 
 spinAndWait(() => jq('#releaseTypeSelectList').val()).then(init);
