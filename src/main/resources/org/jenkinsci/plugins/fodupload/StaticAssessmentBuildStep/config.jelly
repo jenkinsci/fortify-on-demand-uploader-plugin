@@ -57,4 +57,5 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/MicroserviceCreation.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreation.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Entitlements.js"/>
+    
 </j:jelly>
