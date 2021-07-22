@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -70,7 +72,8 @@ public class SharedUploadBuildStep {
                                  String selectedReleaseType,
                                  String userSelectedApplication,
                                  String userSelectedMicroservice,
-                                 String userSelectedRelease) {
+                                 String userSelectedRelease,
+                                 String selectedScanCentralBuildType) {
 
         model = new JobModel(releaseId,
                 bsiToken,
@@ -83,7 +86,8 @@ public class SharedUploadBuildStep {
                 selectedReleaseType,
                 userSelectedApplication,
                 userSelectedMicroservice,
-                userSelectedRelease);
+                userSelectedRelease,
+                selectedScanCentralBuildType);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -99,8 +103,7 @@ public class SharedUploadBuildStep {
             } catch (NumberFormatException ex) {
                 return FormValidation.error("Could not parse Release ID.");
             }
-        }
-        else {
+        } else {
             if (bsiToken != null && !bsiToken.isEmpty()) {
                 return FormValidation.ok();
             }
@@ -183,11 +186,11 @@ public class SharedUploadBuildStep {
                 ACL.SYSTEM,
                 null,
                 null
-                );
+        );
 
         return items;
     }
-    
+
     @SuppressWarnings("unused")
     public static ListBoxModel doFillInProgressScanActionTypeItems() {
         ListBoxModel items = new ListBoxModel();
@@ -196,7 +199,7 @@ public class SharedUploadBuildStep {
         }
         return items;
     }
-    
+
     @SuppressWarnings("unused")
     public static ListBoxModel doFillInProgressBuildResultTypeItems() {
         ListBoxModel items = new ListBoxModel();
@@ -211,6 +214,19 @@ public class SharedUploadBuildStep {
         ListBoxModel items = new ListBoxModel();
         for (FodEnums.SelectedReleaseType selectedReleaseType : FodEnums.SelectedReleaseType.values()) {
             items.add(new ListBoxModel.Option(selectedReleaseType.toString(), selectedReleaseType.getValue()));
+        }
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillSelectedScanCentralBuildTypeItems() {
+        return doFillFromEnum(FodEnums.SelectedScanCentralBuildType.class);
+    }
+
+    private static <T extends Enum<T>> ListBoxModel doFillFromEnum(Class<T> enumClass) {
+        ListBoxModel items = new ListBoxModel();
+        for (T selected : EnumSet.allOf(enumClass)) {
+            items.add(new ListBoxModel.Option(selected.toString(), selected.name()));
         }
         return items;
     }
@@ -245,8 +261,8 @@ public class SharedUploadBuildStep {
     public static List<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         List<ReleaseApiResponse> releaseList = null;
-            ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
-            releaseList = applicationController.getReleaseListByApplication(applicationId, microserviceId);
+        ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
+        releaseList = applicationController.getReleaseListByApplication(applicationId, microserviceId);
 
         return releaseList;
     }
@@ -257,6 +273,14 @@ public class SharedUploadBuildStep {
         org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> result = applicationsController.getReleaseById(releaseId);
 
         return result;
+    }
+    
+    public static EntitlementSettings customFillEntitlementSettings(int releaseId, AuthenticationModel authModel) throws IOException {
+        return new EntitlementSettings(
+                1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
+                1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
+                1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
+                1, 1, false);
     }
 
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -277,7 +301,7 @@ public class SharedUploadBuildStep {
             build.setResult(Result.FAILURE);
             return false;
         }
-        
+
         return true;
     }
 
@@ -291,40 +315,31 @@ public class SharedUploadBuildStep {
         try {
             taskListener.set(listener);
 
-            // check to see if sensitive fields are encrypte. If not halt scan and recommend encryption.
-            if(authModel != null)
-            {
-                if(authModel.getOverrideGlobalConfig() == true){
-                    if(!Utils.isCredential(authModel.getPersonalAccessToken()))
-                    {
+            // check to see if sensitive fields are encrypted. If not halt scan and recommend encryption.
+            if (authModel != null) {
+                if (authModel.getOverrideGlobalConfig() == true) {
+                    if (!Utils.isCredential(authModel.getPersonalAccessToken())) {
                         build.setResult(Result.UNSTABLE);
                         logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
-                        return ;
+                        return;
                     }
-                }
-                else
-                {
-                    if(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey())
-                    {
-                        if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
-                        {
+                } else {
+                    if (GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey()) {
+                        if (!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret())) {
                             build.setResult(Result.UNSTABLE);
                             logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
-                            return ;
+                            return;
                         }
-                    }
-                    else
-                    {
-                         if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
-                        {
+                    } else {
+                        if (!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken())) {
                             build.setResult(Result.UNSTABLE);
                             logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
-                            return ;
-                        }      
+                            return;
+                        }
                     }
                 }
             }
-            
+
             Result currentResult = build.getResult();
             if (Result.FAILURE.equals(currentResult)
                     || Result.ABORTED.equals(currentResult)
@@ -340,8 +355,8 @@ public class SharedUploadBuildStep {
             Integer releaseId = 0;
             try {
                 releaseId = Integer.parseInt(model.getReleaseId());
+            } catch (NumberFormatException ex) {
             }
-            catch (NumberFormatException ex) {}
 
             if (releaseId == 0 && !model.loadBsiToken()) {
                 build.setResult(Result.FAILURE);
@@ -418,11 +433,11 @@ public class SharedUploadBuildStep {
                  * }
                  */
                 if (scanResponse.isSuccessful()) {
-                    if(scanResponse.isScanUploadAccepted()) {
+                    if (scanResponse.isScanUploadAccepted()) {
                         logger.println("Scan Uploaded Successfully.");
                         setScanId(scanResponse.getScanId());
                         build.setResult(Result.SUCCESS);
-                        if(!deleted) {
+                        if (!deleted) {
                             logger.println("Unable to delete temporary zip file. Please manually delete file at location: " + payload.getAbsolutePath());
                         }
                     } else if (isWarningSettingEnabled) {
@@ -460,15 +475,17 @@ public class SharedUploadBuildStep {
 
     public AuthenticationModel getAuthModel() {
         AuthenticationModel displayModel = new AuthenticationModel(authModel.getOverrideGlobalConfig(),
-                                                                   authModel.getUsername(),
-                                                                   authModel.getPersonalAccessToken(),
-                                                                   authModel.getTenantId() );
-       
+                authModel.getUsername(),
+                authModel.getPersonalAccessToken(),
+                authModel.getTenantId());
+
         return displayModel;
     }
 
-    public JobModel setModel(JobModel newModel) { return model = newModel; }
-    
+    public JobModel setModel(JobModel newModel) {
+        return model = newModel;
+    }
+
     public AuthenticationModel setAuthModel(AuthenticationModel newAuthModel) {
         return authModel = newAuthModel;
     }

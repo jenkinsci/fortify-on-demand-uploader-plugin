@@ -4,10 +4,17 @@ public class LookupItemsModel {
     private String value;
     private String text;
     private String group;
+
     public LookupItemsModel(String value, String text, String group) {
         this.value = value;
         this.text = text;
         this.group = group;
+    }
+
+    public LookupItemsModel(String value, String text) {
+        this.value = value;
+        this.text = text;
+        this.group = "";
     }
 
     public String getValue() {
