@@ -52,4 +52,5 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/JobSettings.js" />
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelection.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreation.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Entitlements.js"/>
 </j:jelly>

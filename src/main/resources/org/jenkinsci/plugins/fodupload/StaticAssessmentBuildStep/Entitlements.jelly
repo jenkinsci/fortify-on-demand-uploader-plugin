@@ -4,168 +4,110 @@
     <f:block>
 
         <style>
+            .fode-edit {
+            display: none;
+            }
 
+            .fode-view {
+            display: none;
+            }
 
+            .fode-checkbox {
+            display: none;
+            }
         </style>
 
         <f:section title="Entitlement Options">
             <f:block>
 
-                <!--                <tr class="config-table-top-row" id="scanCentralBuildTypeForm">-->
-                <!--                    <td class="setting-leftspace"></td>-->
-                <!--                    <td class="setting-name">Scan Central Build Type</td>-->
-                <!--                    <td class="setting-main">-->
-                <!--                        <select name="userSelectedScanCentralBuildType" id="scanCentralBuildTypeSelectList">-->
-                <!--                            <option value="0">None</option>-->
-                <!--                            <option value="1">Gradle</option>-->
-                <!--                            <option value="2">Maven</option>-->
-                <!--                            <option value="3">MSBuild</option>-->
-                <!--                            <option value="4">PHP</option>-->
-                <!--                            <option value="5">Python</option>-->
-                <!--                        </select>-->
-                <!--                    </td>-->
-                <!--                    <td>-->
-                <!--                    </td>-->
-                <!--                </tr>-->
+                <div id="releaseNotSelected">Select a release</div>
 
-                <f:entry id="scanCentralBuildTypeSelectList" title="Scan Central Build Type" field="selectedScanCentralBuildType">
+                <!--  Move to other section? -->
+                <f:entry title="Scan Central Build Type" field="selectedScanCentralBuildType">
                     <f:select id="scanCentralBuildTypeSelectList"/>
                 </f:entry>
 
-                <!--                <tr class="config-table-top-row" id="assessmentTypeForm">-->
-                <!--                    <td class="setting-leftspace"></td>-->
-                <!--                    <td class="setting-name">Assessment Type</td>-->
-                <!--                    <td class="setting-main spinner-container">-->
-                <!--                        <select name="userSelectedAssessmentType" id="assessmentTypeSelectList">-->
-                <!--                            <option value="">Select an Assessment Type</option>-->
-                <!--                        </select>-->
-                <!--                    </td>-->
-                <!--                    <td>-->
-                <!--                    </td>-->
-                <!--                </tr>-->
-
-                <f:entry id="assessmentTypeForm" title="Assessment Type">
-                    <div class="spinner-container fode-edit">
-                        <select name="userSelectedAssessmentType" id="assessmentTypeSelectList">
-                            <option value="">Select an Assessment Type</option>
-                        </select>
-                    </div>
-                    <div class="spinner-container fode-view fode-required">
-                        <div></div>
-                    </div>
-                </f:entry>
-
-                <!--                <tr class="config-table-top-row" id="entitlementForm">-->
-                <!--                    <td class="setting-leftspace"></td>-->
-                <!--                    <td class="setting-name">Entitlement</td>-->
-                <!--                    <td class="setting-main spinner-container">-->
-                <!--                        <select name="userSelectedEntitlement" id="entitlementSelectList">-->
-                <!--                            <option value="">Select an Entitlement</option>-->
-                <!--                        </select>-->
-                <!--                    </td>-->
-                <!--                    <td>-->
-                <!--                    </td>-->
-                <!--                </tr>-->
-
-                <f:entry id="entitlementForm" title="Entitlement">
-                    <div class="spinner-container fode-edit">
-                        <select name="userSelectedEntitlement" id="entitlementSelectList">
-                            <option value="">Select an Entitlement</option>
-                        </select>
-                    </div>
-                    <div class="spinner-container fode-view fode-required">
-                        <div></div>
-                    </div>
-                </f:entry>
-
-                <!--                <tr class="config-table-top-row" id="technologyStackForm">-->
-                <!--                    <td class="setting-leftspace"></td>-->
-                <!--                    <td class="setting-name">Technology Stack</td>-->
-                <!--                    <td class="setting-main spinner-container">-->
-                <!--                        <select name="userSelectedTechnologyStack" id="technologyStackSelectList">-->
-                <!--                            <option value="">Select a Technology Stack</option>-->
-                <!--                        </select>-->
-                <!--                    </td>-->
-                <!--                    <td>-->
-                <!--                    </td>-->
-                <!--                </tr>-->
-
-                <f:entry id="technologyStackForm" title="Technology Stack">
-                    <div class="spinner-container fode-edit">
-                        <select name="userSelectedTechnologyStack" id="technologyStackSelectList">
-                            <option value="">Select a Technology Stack</option>
-                        </select>
-                    </div>
-                    <div class="spinner-container fode-view fode-required">
-                        <div></div>
-                    </div>
-                </f:entry>
-
-                <!--                <tr class="config-table-top-row" id="languageLevelForm">-->
-                <!--                    <td class="setting-leftspace"></td>-->
-                <!--                    <td class="setting-name">Language Level</td>-->
-                <!--                    <td class="setting-main spinner-container">-->
-                <!--                        <select name="userSelectedLanguageLevel" id="languageLevelSelectList">-->
-                <!--                            <option value="">Select a Language Level</option>-->
-                <!--                        </select>-->
-                <!--                    </td>-->
-                <!--                    <td>-->
-                <!--                    </td>-->
-                <!--                </tr>-->
-
-                <f:entry id="languageLevelForm" title="Language Level">
-                    <div class="spinner-container fode-edit">
-                        <select name="userSelectedLanguageLevel" id="languageLevelSelectList">
-                            <option value="">Select a Language Level</option>
-                        </select>
-                    </div>
-                    <div class="spinner-container fode-view fode-required">
-                        <div></div>
-                    </div>
-                </f:entry>
-
-                <!--                <tr class="config-table-top-row" id="auditPreferenceForm">-->
-                <!--                    <td class="setting-leftspace"></td>-->
-                <!--                    <td class="setting-name">Audit Preference</td>-->
-                <!--                    <td class="setting-main spinner-container">-->
-                <!--                        <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">-->
-                <!--                            <option value="">Select an Audit Preference</option>-->
-                <!--                        </select>-->
-                <!--                    </td>-->
-                <!--                    <td>-->
-                <!--                    </td>-->
-                <!--                </tr>-->
-
-                <f:entry id="auditPreferenceForm" title="Audit Preference">
-                    <div class="spinner-container fode-edit">
-                        <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">
-                            <option value="">Select an Audit Preference</option>
-                        </select>
-<!--                        <f:helpLink url="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html" />-->
-                    </div>
-                    <div class="spinner-container fode-view fode-required">
-                        <div></div>
-                    </div>
-                </f:entry>
-
-                <!--                <tr class="config-table-top-row" id="sonatypeForm" title="Sonatype">-->
-                <!--                    <td class="setting-leftspace"></td>-->
-                <!--                    <td class="setting-main" colspan="2">-->
-                <!--                        <label>-->
-                <!--                            <input type="checkbox" value="false"/>-->
-                <!--                            Open Source Component Analysis by Sonatype-->
-                <!--                        </label>-->
-                <!--                    </td>-->
-                <!--                    <td class="setting-help">-->
-                <!--                        <f:helpLink featureName="Sonatype" url="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html" ></f:helpLink>-->
-                <!--                    </td>-->
-                <!--                </tr>-->
-
-                <f:entry id="sonatypeForm" help="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html">
+                <f:entry>
                     <label class="fode-enable-on-override">
-                        <input type="checkbox" value="false" name="sonatypeEnabled" id="cbSonatypeEnabled"/>
-                        Open Source Component Analysis by Sonatype
+                        <input type="checkbox" value="false" name="overrideRelease" id="cbOverrideRelease"/>
+                        Override Release Settings
                     </label>
+                </f:entry>
+
+                <f:entry title="Assessment Type">
+                    <div id="assessmentTypeForm" class="fode-field spinner-container fode-required">
+                        <div class="fode-edit">
+                            <select name="userSelectedAssessmentType" id="ddAssessmentType">
+                                <option value="">Select an Assessment Type</option>
+                            </select>
+                        </div>
+                        <div class="fode-view">
+                            <div></div>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Entitlement">
+                    <div id="entitlementForm" class="fode-field spinner-container fode-required">
+                        <div class="fode-edit">
+                            <select name="userSelectedEntitlement" id="entitlementSelectList">
+                                <option value="">Select an Entitlement</option>
+                            </select>
+                        </div>
+                        <div class="fode-view">
+                            <div></div>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Technology Stack">
+                    <div id="technologyStackForm" class="fode-field spinner-container fode-required">
+                        <div class="fode-edit">
+                            <select name="userSelectedTechnologyStack" id="technologyStackSelectList">
+                                <option value="">Select a Technology Stack</option>
+                                <option value="1">Placeholder</option>
+                            </select>
+                        </div>
+                        <div class="fode-view">
+                            <div></div>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Language Level">
+                    <div id="languageLevelForm" class="fode-field spinner-container fode-required">
+                        <div class="fode-edit">
+                            <select name="userSelectedLanguageLevel" id="languageLevelSelectList">
+                                <option value="">Select a Language Level</option>
+                                <option value="1">Placeholder</option>
+                            </select>
+                        </div>
+                        <div class="fode-view">
+                            <div></div>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Audit Preference">
+                    <div id="auditPreferenceForm" class="fode-field spinner-container fode-required">
+                        <div class="fode-edit">
+                            <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">
+                                <option value="">Select an Audit Preference</option>
+                            </select>
+                        </div>
+                        <div class="fode-view">
+                            <div></div>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry>
+                    <div id="sonatypeForm" class="fode-field fode-checkbox spinner-container">
+                        <label>
+                            <input type="checkbox" value="false" name="sonatypeEnabled" id="cbSonatypeEnabled"/>
+                            Open Source Component Analysis by Sonatype
+                        </label>
+                    </div>
                 </f:entry>
 
                 <!--                ToDo: remove these from backend and deal with adapting from existing config-->

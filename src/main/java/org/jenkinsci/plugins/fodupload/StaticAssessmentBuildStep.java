@@ -369,6 +369,18 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             }
         }
 
+        @JavaScriptMethod
+        public String getReleaseEntitlementSettings(int selectedReleaseId, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillEntitlementSettings(selectedReleaseId, authModel));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
         private AuthenticationModel getAuthModelFromObject(JSONObject authModelObject) {
             AuthenticationModel authModel = new AuthenticationModel(false, null, null, null);
             if (authModelObject.getBoolean("overrideGlobalAuth")) {
