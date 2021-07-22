@@ -1,6 +1,6 @@
 jq = jQuery;
 
-const api = new Api(instance);
+const api = new Api(instance, descriptor);
 
 function hideAll() {
     jq('.releaseIdView').hide();

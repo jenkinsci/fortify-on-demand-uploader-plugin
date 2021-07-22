@@ -4,6 +4,7 @@ class Api {
 
     constructor (instance, descriptor) {
         this.instance = instance;
+        this.descriptor = descriptor;
         this.failedToAuthMessage = 'Failed to authenticate';
     }
 
@@ -46,7 +47,7 @@ class Api {
 
     getReleaseById(releaseId, customAuth) {
         return new Promise((res, rej) => {
-            descriptor.retrieveReleaseById(releaseId, customAuth, async t => {
+            this.descriptor.retrieveReleaseById(releaseId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
                 if (responseJSON === null) {
                     return rej(this.failedToAuthMessage);

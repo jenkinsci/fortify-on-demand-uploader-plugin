@@ -1,6 +1,6 @@
 jq = jQuery;
 
-const _jobSettings = new JobSettings(instance);
+const api = new Api(instance, descriptor);
 
 // let _lastRequestId = null;
 
