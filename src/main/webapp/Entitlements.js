@@ -24,16 +24,17 @@ function setSelectValues(id, selected, options) {
 }
 
 function loadEntitlementSettings(releaseId) {
+    let rows = jq('tr.fode-field-row');
     let fields = jq('.fode-field.spinner-container');
 
     releaseId = Number(releaseId);
 
     // _lastRequestId = newGuid();
 
-    if (Number.isInteger(releaseId)) {
+    if (Number.isInteger(releaseId) && releaseId > 0) {
         jq('#releaseNotSelected').hide();
 
-        fields.show();
+        rows.show();
         fields.addClass('spinner');
 
         descriptor.getReleaseEntitlementSettings(releaseId, getAuthInfo(), async t => {
@@ -53,9 +54,40 @@ function loadEntitlementSettings(releaseId) {
         });
     } else {
         fields.removeClass('spinner');
-        fields.hide();
+        rows.hide();
         jq('#releaseNotSelected').show();
     }
+}
+
+function getReleaseFromBsi() {
+
+}
+
+function releaseSelectorChanged() {
+    let releaseId = -1;
+
+    jq('tr.fode-field-row').hide();
+    jq('#releaseNotSelected').show();
+
+    switch (jq('#releaseTypeSelectList').val()) {
+        case 'UseAppAndReleaseName':
+            let dd = jq('#releaseSelectList');
+
+            if (dd.is(':visible')) releaseId = dd.val();
+            else setTimeout(releaseSelectorChanged, 500);
+            break;
+        case 'UseBsiToken':
+            getReleaseFromBsi();
+            return;
+        case 'UseReleaseId':
+            let tb = jq('#releaseIdField');
+
+            if (tb.is(':visible')) releaseId = tb.val();
+            else setTimeout(releaseSelectorChanged, 500);
+            break;
+    }
+
+    loadEntitlementSettings(releaseId);
 }
 
 function initEntitlements() {
@@ -68,11 +100,17 @@ function initEntitlements() {
     jq('#releaseIdField')
         .change(e => loadEntitlementSettings(jq(e.target).val()));
 
+    jq('#releaseTypeSelectList')
+        .change(releaseSelectorChanged)
+
+    jq('.fode-field').parent().parent().addClass('fode-field-row');
+    jq('#cbOverrideRelease').parent().parent().parent().addClass('fode-field-row');
 
     let viewDivs = jq('.fode-field .fode-view');
     let editDivs = jq('.fode-field .fode-edit');
     let checkboxes = jq('.fode-checkbox input');
 
+    jq('tr.fode-field-row').hide();
     viewDivs.show();
     editDivs.hide();
     checkboxes.prop('disabled', true);
@@ -92,21 +130,7 @@ function initEntitlements() {
             }
         });
 
-    let releaseId = -1;
-
-    switch (jq('#releaseTypeSelectList').val()) {
-        case 'UseAppAndReleaseName':
-            releaseId = jq('#releaseSelectList').val();
-            break;
-        case 'UseBsiToken':
-            // jq('#bsiTokenField');
-            break;
-        case 'UseReleaseId':
-            releaseId = jq('#releaseIdField').val();
-            break;
-    }
-
-    loadEntitlementSettings(releaseId);
+    releaseSelectorChanged();
 }
 
 function elementLoaded(id) {
