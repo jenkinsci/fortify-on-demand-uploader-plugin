@@ -63,7 +63,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String selectedReleaseType,
                                      String userSelectedApplication,
                                      String userSelectedMicroservice,
-                                     String userSelectedRelease) {
+                                     String userSelectedRelease,
+                                     String selectedScanCentralBuildType) {
                                          
         if(selectedReleaseType != null && selectedReleaseType.equals(FodEnums.SelectedReleaseType.UseAppAndReleaseName.getValue()) && !userSelectedRelease.isEmpty()) {
                 releaseId = userSelectedRelease;
@@ -89,7 +90,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 selectedReleaseType,
                 userSelectedApplication,
                 userSelectedMicroservice,
-                userSelectedRelease);
+                userSelectedRelease,
+                selectedScanCentralBuildType);
 
     }
 
@@ -223,6 +225,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         return sharedBuildStep.getModel().getSelectedReleaseType();
     }
 
+    @SuppressWarnings("unused")
+    public String getSelectedScanCentralBuildType() {
+        return sharedBuildStep.getModel().getSelectedScanCentralBuildType();
+    }
+
     @Extension
     public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {
 
@@ -309,6 +316,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             return SharedUploadBuildStep.doFillSelectedReleaseTypeItems();
         }
 
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillSelectedScanCentralBuildTypeItems() {
+            return SharedUploadBuildStep.doFillSelectedScanCentralBuildTypeItems();
+        }
+
         @JavaScriptMethod
         public String submitCreateApplication(JSONObject formObject, JSONObject authModelObject) {
             try {
@@ -386,6 +398,18 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             try {
                 AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId, authModel));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @JavaScriptMethod
+        public String getReleaseEntitlementSettings(int selectedReleaseId, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillEntitlementSettings(selectedReleaseId, authModel));
             }
             catch (Exception e) {
                 e.printStackTrace();

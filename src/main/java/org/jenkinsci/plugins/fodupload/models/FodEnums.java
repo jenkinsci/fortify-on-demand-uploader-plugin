@@ -1,5 +1,9 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import org.apache.commons.lang.enums.EnumUtils;
+
+import java.util.Arrays;
+
 public class FodEnums {
 
     public enum APILookupItemTypes {
@@ -213,7 +217,7 @@ public class FodEnums {
 
         public static SelectedReleaseType fromInt(int val) {
             switch (val) {
-                case 3: 
+                case 3:
                     return UseAppAndReleaseName;
                 case 2:
                     return UseReleaseId;
@@ -250,6 +254,59 @@ public class FodEnums {
                     return "BSI Token";
             }
         }
+    }
+
+    public enum SelectedScanCentralBuildType {
+
+        None,
+        Gradle,
+        Maven,
+        MSBuild,
+        PHP,
+        Python;
+
+//        SelectedScanCentralBuildType(String val) {
+//            if(Arrays.stream(SelectedScanCentralBuildType.class.getEnumConstants()).anyMatch(e->e.name().equals(val))){
+//                this._val = val;
+//            }
+//            else this._val = "None";
+//        }
+
+        public static SelectedScanCentralBuildType fromInt(int val) {
+            switch (val) {
+                case 1:
+                    return Gradle;
+                case 2:
+                    return Maven;
+                case 3:
+                    return MSBuild;
+                case 4:
+                    return PHP;
+                case 5:
+                    return Python;
+                case 0:
+                default:
+                    return None;
+            }
+        }
+
+        public int getInteger() {
+            switch (this.name()) {
+                case "Gradle":
+                    return 1;
+                case "Maven":
+                    return 2;
+                case "MSBuild":
+                    return 3;
+                case "PHP":
+                    return 4;
+                case "Python":
+                    return 5;
+                default:
+                    return 0;
+            }
+        }
+
     }
 
 }
