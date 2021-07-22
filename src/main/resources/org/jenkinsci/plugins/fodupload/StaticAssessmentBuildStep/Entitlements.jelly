@@ -28,8 +28,8 @@
                 </f:entry>
 
                 <f:entry>
-                    <label class="fode-enable-on-override">
-                        <input type="checkbox" value="false" name="overrideRelease" id="cbOverrideRelease"/>
+                    <label>
+                        <input type="checkbox" name="overrideRelease" id="cbOverrideRelease"/>
                         Override Release Settings
                     </label>
                 </f:entry>

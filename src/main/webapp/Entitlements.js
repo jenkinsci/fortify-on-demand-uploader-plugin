@@ -4,12 +4,21 @@ const _jobSettings = new JobSettings(instance);
 
 // let _lastRequestId = null;
 
-function setFieldValue(id, value) {
+function setSelectValues(id, selected, options) {
+    let select = jq(`#${id} .fode-edit > select`);
+
+    if (options) {
+        select.find('option[value]:not([value=""])').remove();
+        for (let o of options) {
+            select.append(`<option value="${o.value}">${o.text}</option>`);
+        }
+    }
+
     let selText = '';
 
-    jq(`#${id} .fode-edit > select`).val(value);
+    select.val(selected);
 
-    if (value > 0) selText = jq(`#${id} .fode-edit > select > option:selected`).text();
+    if (selected > 0) selText = jq(`#${id} .fode-edit > select > option:selected`).text();
 
     jq(`#${id} .fode-view > div`).text(selText);
 }
@@ -31,11 +40,11 @@ function loadEntitlementSettings(releaseId) {
             let r = JSON.parse(t.responseJSON);
 
             // if (_lastRequestId === r.requestId) {
-            setFieldValue('assessmentTypeForm', r.assessmentTypeForm);
-            setFieldValue('entitlementForm', r.entitlementForm);
-            setFieldValue('technologyStackForm', r.technologyStackForm);
-            setFieldValue('languageLevelForm', r.languageLevelForm);
-            setFieldValue('auditPreferenceForm', r.auditPreferenceForm);
+            setSelectValues('assessmentTypeForm', r.assessmentType, r.assessmentTypes);
+            setSelectValues('entitlementForm', r.entitlement, r.entitlements);
+            setSelectValues('technologyStackForm', r.technologyStack, null);
+            setSelectValues('languageLevelForm', r.languageLevel, null);
+            setSelectValues('auditPreferenceForm', r.auditPreference, r.auditPreferences);
             jq('#sonatypeForm').prop('checked', r.sonatypeScan === true);
 
             jq('.fode-field.spinner-container').removeClass('spinner');
@@ -62,28 +71,51 @@ function initEntitlements() {
 
     let viewDivs = jq('.fode-field .fode-view');
     let editDivs = jq('.fode-field .fode-edit');
-    let checkboxes = jq('.fode-checkbox');
+    let checkboxes = jq('.fode-checkbox input');
+
+    viewDivs.show();
+    editDivs.hide();
+    checkboxes.prop('disabled', true);
 
     jq('#cbOverrideRelease')
-        .change(e => {
-            let override = jq(e.target).val() === 'true';
+        .click(e => {
+            debugger;
 
-            if (override) {
+            if (jq(e.target).prop('checked')) {
                 viewDivs.hide();
                 editDivs.show();
-                checkboxes.prop('disable', false);
+                checkboxes.prop('disabled', false);
             } else {
                 viewDivs.show();
                 editDivs.hide();
-                checkboxes.prop('disable', true);
+                checkboxes.prop('disabled', true);
             }
         });
 
+    let releaseId = -1;
+
+    switch (jq('#releaseTypeSelectList').val()) {
+        case 'UseAppAndReleaseName':
+            releaseId = jq('#releaseSelectList').val();
+            break;
+        case 'UseBsiToken':
+            // jq('#bsiTokenField');
+            break;
+        case 'UseReleaseId':
+            releaseId = jq('#releaseIdField').val();
+            break;
+    }
+
+    loadEntitlementSettings(releaseId);
+}
+
+function elementLoaded(id) {
+    return jq('#' + id).val() !== undefined;
 }
 
 spinAndWait(() => {
-    return jq('#cbOverrideRelease').val() && // override checkbox
-        jq('#releaseSelectList').val() && // AppAndReleaseSelection
-        jq('#bsiTokenField').val() && // BSI Token
-        jq('#releaseIdField').val() // Release Id
+    return elementLoaded('cbOverrideRelease') && // override checkbox
+        elementLoaded('releaseSelectList') && // AppAndReleaseSelection
+        elementLoaded('bsiTokenField') && // BSI Token
+        elementLoaded('releaseIdField') // Release Id
 }).then(initEntitlements);
