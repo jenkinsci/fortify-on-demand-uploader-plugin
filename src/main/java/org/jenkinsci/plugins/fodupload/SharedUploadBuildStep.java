@@ -12,6 +12,7 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 
 import org.apache.commons.lang.CharEncoding;
 import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
+import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.BsiToken;
@@ -248,6 +249,14 @@ public class SharedUploadBuildStep {
             releaseList = applicationController.getReleaseListByApplication(applicationId, microserviceId);
 
         return releaseList;
+    }
+
+    public static org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> customFillUserReleaseById(int releaseId, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+        ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, null);
+        org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> result = applicationsController.getReleaseById(releaseId);
+
+        return result;
     }
 
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {

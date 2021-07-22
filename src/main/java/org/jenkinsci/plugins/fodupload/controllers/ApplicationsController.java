@@ -76,6 +76,24 @@ public class ApplicationsController extends ControllerBase {
         return new Result<>(true, null, application);
     }
 
+    public Result<ReleaseApiResponse> getReleaseById(Integer releaseId) throws IOException {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/releases/" + releaseId);
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .get()
+                .build();
+        Response res = apiConnection.request(request);
+        if (!res.isSuccessful()) {
+            return new Result<>(false, new ArrayList<String>(){ { add("HTTP Error " + res.code()); } }, null);
+        }
+
+        ReleaseApiResponse release = apiConnection.parseResponse(res, new TypeToken<ReleaseApiResponse>(){}.getType());
+        return new Result<>(true, null, release);
+    }
+
     /**
      * GET given enum
      *

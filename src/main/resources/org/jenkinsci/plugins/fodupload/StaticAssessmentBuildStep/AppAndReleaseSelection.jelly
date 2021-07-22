@@ -28,53 +28,72 @@
                             </td>
                         </tr>
 
-                        <tr class="config-table-top-row appAndReleaseNameView" id="applicationSelectForm">
+                        <tr class="config-table-top-row appAndReleaseNameView" id="applicationSelectView">
                             <td class="setting-leftspace"></td>
                             <td class="setting-name">Application</td>
                             <td class="setting-main spinner-container ">
-                                <select name="userSelectedApplication" id="applicationSelectList" >
-                                    <option value="">Select an application</option>
-                                </select>
-
-                                <span tooltip="Create a new application" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                    <span class="first-child">
-                                        <button type="button" id="createAppBtn">Create</button>
+                                <div class="col-md-4">
+                                    <span tooltip="Select an application" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                        <span class="first-child">
+                                            <a href="#" id="selectedApp"></a>
+                                        </span>
                                     </span>
-                                </span>
-                            </td>
-                            <td>
+                                    <input type="hidden" name="userSelectedApplication" />
+                                </div>
+
+                                <div class="col-md-8">
+                                    <span tooltip="Create a new application" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                        <span class="first-child">
+                                            <a href="#" id="createAppBtn">Create</a>
+                                        </span>
+                                    </span>
+                                </div>
                             </td>
                         </tr>
 
-                        <tr class="config-table-top-row appAndReleaseNameView" id="microserviceSelectForm">
+                        <tr class="config-table-top-row appAndReleaseNameView" id="microserviceSelectView">
                             <td class="setting-leftspace"></td>
                             <td class="setting-name">Microservice</td>
                             <td class="setting-main spinner-container">
-                                <select name="userSelectedMicroservice" id="microserviceSelectList" >
-                                    <option value="">Select a microservice</option>
-                                </select>
-
-                                <span tooltip="Create a new microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                    <span class="first-child">
-                                        <button type="button" id="createMicroserviceBtn">Create</button>
+                                <div class="col-md-4">
+                                    <span tooltip="Select a microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                        <span class="first-child">
+                                            <a href="#" id="selectedMicroservice"></a>
+                                        </span>
                                     </span>
-                                </span>
+                                    <input type="hidden" name="userSelectedMicroservice" />
+                                </div>
+
+                                <div class="col-md-8">
+                                    <span tooltip="Create a new microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                        <span class="first-child">
+                                            <a href="#" id="createMicroserviceBtn">Create</a>
+                                        </span>
+                                    </span>
+                                </div>
                             </td>
                         </tr>
 
-                        <tr class="config-table-top-row appAndReleaseNameView" id="releaseSelectForm">
+                        <tr class="config-table-top-row appAndReleaseNameView" id="releaseSelectView">
                             <td class="setting-leftspace"></td>
                             <td class="setting-name">Release</td>
                             <td class="setting-main spinner-container">
-                                <select name="userSelectedRelease" id="releaseSelectList" >
-                                    <option value="">Select a release</option>
-                                </select>
-
-                                <span tooltip="Create a new release" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                    <span class="first-child">
-                                        <button type="button" id="createReleaseBtn">Create</button>
+                                <div class="col-md-4">
+                                    <span tooltip="Select a microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                        <span class="first-child">
+                                            <a href="#" id="selectedRelease"></a>
+                                        </span>
                                     </span>
-                                </span>
+                                    <input type="hidden" name="userSelectedRelease" />
+                                </div>
+
+                                <div class="col-md-8">
+                                    <span tooltip="Create a new microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                        <span class="first-child">
+                                            <a href="#" id="createReleaseBtn">Create</a>
+                                        </span>
+                                    </span>
+                                </div>
                             </td>
                         </tr>
 

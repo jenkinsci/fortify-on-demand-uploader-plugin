@@ -12,6 +12,10 @@
             display: none;
         }
 
+        .spinner a {
+            display: none;
+        }
+
         div[descriptorid="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep"] select {
             width: 240px;
         }
@@ -61,7 +65,7 @@
         var instance = <st:bind value="${instance}"/>
 
     </script>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/JobSettings.js" />
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js" />
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelection.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreation.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/MicroserviceCreation.js"/>

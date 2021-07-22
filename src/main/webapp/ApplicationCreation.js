@@ -88,7 +88,8 @@ class CreateApplicationForm extends Dialog {
     }
 
     onInit() {
-        jq('#createAppBtn').off('click').click(() => {
+        jq('#createAppBtn').off('click').click((ev) => {
+            ev.preventDefault();
             this.spawnDialog();
         });
     }
