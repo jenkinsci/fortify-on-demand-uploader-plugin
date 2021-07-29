@@ -43,7 +43,7 @@ public class ApplicationsController extends ControllerBase {
      * @return array of enum values and text or null
      * @throws java.io.IOException in some circumstances
      */
-    public List<ApplicationApiResponse> getApplicationList() throws IOException {
+    public List<ApplicationApiResponse> getApplicationList(String searchTerm, Integer offset, Integer limit) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments("/api/v3/applications");
@@ -102,7 +102,7 @@ public class ApplicationsController extends ControllerBase {
      * @return list of Releases
      * @throws java.io.IOException in some circumstances
      */
-    public List<ReleaseApiResponse> getReleaseListByApplication(int releaseListApplicationId, int microserviceId) throws IOException {
+    public List<ReleaseApiResponse> getReleaseListByApplication(int releaseListApplicationId, int microserviceId, String searchTerm, Integer offset, Integer limit) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments("/api/v3/applications/" + releaseListApplicationId + "/releases");
@@ -135,6 +135,8 @@ public class ApplicationsController extends ControllerBase {
     public List<MicroserviceApiResponse> getMicroserviceListByApplication(int microserviceListApplicationId) throws IOException {
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments("/api/v3/applications/" + microserviceListApplicationId + "/microservices");
+        urlBuilder = urlBuilder.addQueryParameter("includeReleases", "false");
+
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")

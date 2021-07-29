@@ -56,9 +56,10 @@ class Dialog {
             if (!(window[this._dialogId].dialog)) {
                 var div = document.createElement("DIV");
                 document.body.appendChild(div);
-                div.innerHTML = "<div id='" + this._dialogId + "'><div class='bd'></div></div>";
+                div.innerHTML = "<div id='" + this._dialogId + "'><div id='abc' class='bd'></div></div>";
                 window[this._dialogId].body = $(this._dialogId);
                 window[this._dialogId].body.innerHTML = $(this._formId).innerHTML;
+                jq('#' + this._dialogId).prepend('<div class="hd"><span id="dialogTitle"></span> <span class="spinner" id="dialogSpinner" style="display: none;"></span></div>');
                 jq('#' + this._dialogId).prepend('<div class="mask" id="modal_mask" style="z-index: 1000; height: 100%; width: 100%; display: none;"> </div>');
                 window[this._dialogId].dialog = new YAHOO.widget.Panel(window[this._dialogId].body, {
                     fixedcenter: true,
@@ -91,11 +92,12 @@ class Dialog {
         }
     }
 
-    spawnDialog(data) {
+    spawnDialog(title, data) {
         window[this._dialogId].init.bind(this)();
         window[this._dialogId].dialog.show();
 
-        this.jqDialog('#modal_mask').hide();
+        this.jqDialog('#dialogTitle')[0].innerHTML = title;
+        this.stopSpinning();
 
         if (this.onDialogSpawn) {
             this.onDialogSpawn(data);
@@ -110,11 +112,13 @@ class Dialog {
         }
     }
 
-    putMask() {
+    startSpinning() {
         this.jqDialog('#modal_mask').show();
+        this.jqDialog('#dialogSpinner').show();
     }
 
-    removeMask() {
+    stopSpinning() {
+        this.jqDialog('#dialogSpinner').hide();
         this.jqDialog('#modal_mask').hide();
     }
 }
@@ -140,4 +144,13 @@ function newGuid() {
 
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
+}
+
+function partitionArray(arr, elementsPerPartition) {
+    const partitions = [];
+    for (let i = 0; i * elementsPerPartition < arr.length; i++) {
+        partitions.push(arr.slice(i * elementsPerPartition, i * elementsPerPartition + elementsPerPartition));
+    }
+
+    return partitions;
 }

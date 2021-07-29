@@ -1,21 +1,24 @@
 jq = jQuery;
 
-class CreateMicroserviceForm extends Dialog {
+class ReleaseCreationDialog extends Dialog {
 
     constructor() {
-        super('createMicroserviceDialog', 'microserviceCreationForm');
+        super('createReleaseDialog', 'releaseCreationForm');
     }
 
     clearForm() {
         this.hideSpinner();
         this.jqDialog('#errors').html('');
-        this.jqDialog('#microserviceNameField').val('');
+        this.jqDialog('#releaseNameField').val('');
+        this.jqDialog('#sdlcStatusField').val('3');
     }
 
     getFormObject(data) {
         return {
             applicationId: data.applicationId,
-            microserviceName: this.jqDialog('#microserviceNameField').val()
+            microserviceId: data.microserviceId,
+            releaseName: this.jqDialog('#releaseNameField').val(),
+            sdlcStatus: Number(this.jqDialog('#sdlcStatusField').val())
         };
     }
 
@@ -26,7 +29,7 @@ class CreateMicroserviceForm extends Dialog {
             this.showSpinner();
 
             const formObject = this.getFormObject(data);
-            descriptor.submitCreateMicroservice(formObject, getAuthInfo(), t => {
+            descriptor.submitCreateRelease(formObject, getAuthInfo(), t => {
                 this.hideSpinner();
                 this.removeMask();
 
@@ -41,8 +44,8 @@ class CreateMicroserviceForm extends Dialog {
                     return;
                 }
 
-                const payload = { microserviceId: responseJson.value, ...formObject };
-                dispatchEvent('microserviceCreated', payload);
+                const payload = { releaseId: responseJson.value, ...formObject };
+                dispatchEvent('releaseCreated', payload);
                 this.closeDialog();
             });
         });
@@ -61,9 +64,10 @@ class CreateMicroserviceForm extends Dialog {
     }
 
     onInit() {
-        jq('#createMicroserviceBtn').off('click').click(() => {
+        jq('#createReleaseBtn').off('click').click(() => {
             this.spawnDialog({
-                applicationId: Number(jq('#applicationSelectList').val())
+                applicationId: Number(jq('#applicationSelectList').val()),
+                microserviceId: jq('#microserviceSelectList').is(':visible') ? Number(jq('#microserviceSelectList').val()) : null
             });
         });
     }
@@ -74,4 +78,4 @@ class CreateMicroserviceForm extends Dialog {
     }
 }
 
-createDialog(new CreateMicroserviceForm());
+createDialog(new ReleaseCreationDialog());

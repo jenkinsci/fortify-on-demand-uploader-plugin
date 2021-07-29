@@ -358,10 +358,10 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         }
 
         @JavaScriptMethod
-        public String retrieveApplicationList(JSONObject authModelObject) {
+        public String retrieveApplicationList(String searchTerm, int offset, int limit, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
-                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedApplicationList(authModel));
+                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedApplicationList(searchTerm, offset, limit, authModel));
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -394,10 +394,10 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         }
 
         @JavaScriptMethod
-        public String retrieveReleaseList(int selectedApplicationId, int microserviceId, JSONObject authModelObject) {
+        public String retrieveReleaseList(int selectedApplicationId, int microserviceId, String searchTerm, int offset, int limit, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
-                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId, authModel));
+                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId, searchTerm, offset, limit, authModel));
             }
             catch (Exception e) {
                 e.printStackTrace();

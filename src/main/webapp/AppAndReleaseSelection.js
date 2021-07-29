@@ -1,138 +1,201 @@
 jq = jQuery;
 
-const api = new Api(instance, descriptor);
+class AppAndReleaseSelection {
 
-function hideAll() {
-    jq('.releaseIdView').hide();
-    jq('.bsiTokenView').hide();
-    jq('.appAndReleaseNameView').hide();
-    jq('.appAndReleaseNameErrorView').hide();
-}
-
-function onCredsChanged() {
-    const viewChoice = jq('#releaseTypeSelectList').val();
-
-    if (viewChoice == "UseAppAndReleaseName") {
-        catchAuthError(() => initAppAndReleaseSelection(true));
+    constructor() {
+        this.api = new Api(instance, descriptor);
     }
-}
 
-function onReleaseMethodSelection() {
-    hideAll();
-    const viewChoice = jq('#releaseTypeSelectList').val();
+    //<editor-fold desc="Init">
 
-    switch (viewChoice) {
-        case "UseBsiToken":
-            initBsiToken();
-            break;
-        case "UseReleaseId":
-            initReleaseId();
-            break;
-        case "UseAppAndReleaseName":
-            catchAuthError(() => initAppAndReleaseSelection(true));
-            break;
+    hideAll() {
+        jq('.releaseIdView').hide();
+        jq('.bsiTokenView').hide();
+        jq('.appAndReleaseNameView').hide();
+        jq('#appAndReleaseNameErrorView').hide();
     }
-}
 
-async function initBsiToken() {
-    const savedBsiToken = await api.getSavedBsiToken();
-    if (savedBsiToken) {
-        jq('#bsiTokenField').val(savedBsiToken);
-    }
-    jq('.bsiTokenView').show();
-}
+    onReleaseMethodSelection() {
+        this.hideAll();
+        const viewChoice = jq('#releaseTypeSelectList').val();
 
-async function initReleaseId() {
-    const savedReleaseId = await api.getSavedReleaseId();
-    if (savedReleaseId) {
-        jq('#releaseIdField').val(savedReleaseId);
-    }
-    jq('.releaseIdView').show();
-}
-
-function resetSelectApplication() {
-    jq('#selectedApp')[0].innerText = 'Select an application';
-    jq('[name="userSelectedApplication"]').val(null);
-}
-
-function selectApplication(appId, appName) {
-    jq('#selectedApp')[0].innerText = appName;
-    jq('[name="userSelectedApplication"]').val(appId);
-}
-
-function resetSelectMicroservice() {
-    jq('#selectedMicroservice')[0].innerText = 'Select a microservice';
-    jq('[name="userSelectedMicroservice"]').val(null);
-}
-
-function selectMicroservice(microserviceId, microserviceName) {
-    jq('#selectedMicroservice')[0].innerText = microserviceName;
-    jq('[name="userSelectedMicroservice"]').val(microserviceId);
-}
-
-function resetSelectRelease() {
-    jq('#selectedRelease')[0].innerText = 'Select a release';
-    jq('[name="userSelectedRelease"]').val(null);
-}
-
-function selectRelease(releaseId, releaseName) {
-    jq('#selectedRelease')[0].innerText = releaseName;
-    jq('[name="userSelectedRelease"]').val(releaseId);
-}
-
-async function initAppAndReleaseSelection() {
-    jq('.appAndReleaseNameView').show();
-    jq('#appAndReleaseNameErrorView').hide();
-    jq('#microserviceSelectView').hide();
-    jq('#releaseSelectView').hide();
-
-    showWithSpinner('#applicationSelectView');
-
-    const savedReleaseId = await api.getSavedReleaseId();
-    const [success, release] = await api.getReleaseById(savedReleaseId, getAuthInfo());
-
-    hideSpinner('#applicationSelectView');
-
-    if (success) {
-        jq('#selectedApp')[0].innerText = release.applicationName;
-        selectApplication(release.applicationId, release.applicationName);
-        if (release.microserviceId) {
-            jq('#microserviceSelectView').show();
-            selectMicroservice(release.microserviceId, release.microserviceName);
+        switch (viewChoice) {
+            case "UseBsiToken":
+                this.initBsiToken();
+                break;
+            case "UseReleaseId":
+                this.initReleaseId();
+                break;
+            case "UseAppAndReleaseName":
+                this.catchAuthError(() => this.initAppAndReleaseSelection(true));
+                break;
         }
-        jq('#releaseSelectView').show();
-        selectRelease(release.releaseId, release.releaseName);
-    }
-    else {
-        resetSelectApplication();
     }
 
-}
-
-async function catchAuthError(op) {
-    try {
-        await op();
+    async initBsiToken() {
+        const savedBsiToken = await this.api.getSavedBsiToken();
+        if (savedBsiToken) {
+            jq('#bsiTokenField').val(savedBsiToken);
+        }
+        jq('.bsiTokenView').show();
     }
-    catch(err) {
-        if (api.isAuthError(err)) {
-            showApiRetrievalError();
+
+    async initReleaseId() {
+        const savedReleaseId = await this.api.getSavedReleaseId();
+        if (savedReleaseId) {
+            jq('#releaseIdField').val(savedReleaseId);
+        }
+        jq('.releaseIdView').show();
+    }
+
+    async initAppAndReleaseSelection() {
+        jq('.appAndReleaseNameView').show();
+        jq('#appAndReleaseNameErrorView').hide();
+        jq('#microserviceSelectView').hide();
+        jq('#releaseSelectView').hide();
+
+        showWithSpinner('#applicationSelectView');
+
+        const savedReleaseId = await this.api.getSavedReleaseId();
+        const [success, release] = savedReleaseId ? await this.api.getReleaseById(savedReleaseId, getAuthInfo()) : [false, null];
+
+        hideSpinner('#applicationSelectView');
+
+        if (success) {
+            jq('#selectedApp')[0].innerText = release.applicationName;
+            this.selectApplication(release.applicationId, release.applicationName);
+            if (release.microserviceId) {
+                jq('#microserviceSelectView').show();
+                this.selectMicroservice(release.microserviceId, release.microserviceName);
+            }
+            jq('#releaseSelectView').show();
+            this.selectRelease(release.releaseId, release.releaseName);
+            dispatchEvent('releaseChanged', { releaseId: release.releaseId, releaseName: release.releaseName });
         }
         else {
-            throw ex;
+            this.resetSelectApplication();
+            this.resetSelectRelease();
+            dispatchEvent('releaseChanged', {});
         }
+    }
+
+    //</editor-fold>
+
+    //<editor-fold desc="Helpers">
+
+    resetSelectApplication() {
+        jq('#selectedApp')[0].innerText = 'Select an application';
+        jq('[name="userSelectedApplication"]').val(null);
+    }
+
+    selectApplication(appId, appName) {
+        jq('#selectedApp')[0].innerText = appName;
+        jq('[name="userSelectedApplication"]').val(appId);
+    }
+
+    resetSelectMicroservice() {
+        jq('#selectedMicroservice')[0].innerText = 'Select a microservice';
+        jq('[name="userSelectedMicroservice"]').val(null);
+    }
+
+    showApiRetrievalError() {
+        this.hideAll();
+        jq('#appAndReleaseNameErrorView').show();
+    }
+
+    selectMicroservice(microserviceId, microserviceName) {
+        jq('#selectedMicroservice')[0].innerText = microserviceName;
+        jq('[name="userSelectedMicroservice"]').val(microserviceId);
+    }
+
+    resetSelectRelease() {
+        jq('#selectedRelease')[0].innerText = 'Select a release';
+        const prevReleaseId = Number(jq('[name="userSelectedRelease"]').val());
+        jq('[name="userSelectedRelease"]').val(null);
+        return prevReleaseId;
+    }
+
+    selectRelease(releaseId, releaseName) {
+        jq('#selectedRelease')[0].innerText = releaseName;
+        const prevReleaseId = Number(jq('[name="userSelectedRelease"]').val());
+        jq('[name="userSelectedRelease"]').val(releaseId);
+        return prevReleaseId;
+    }
+
+    async catchAuthError(op) {
+        try {
+            await op();
+        }
+        catch(err) {
+            if (api.isAuthError(err)) {
+                this.showApiRetrievalError();
+            }
+            else {
+                throw ex;
+            }
+        }
+    }
+
+    //</editor-fold>
+
+    //<editor-fold desc="Event Handles">
+
+    onCredsChanged() {
+        const viewChoice = jq('#releaseTypeSelectList').val();
+
+        if (viewChoice == "UseAppAndReleaseName") {
+            this.catchAuthError(() => this.initAppAndReleaseSelection(true));
+        }
+    }
+
+    onAppSelectedFromDialog(applicationId, applicationName, hasMicroservices) {
+        jq('#microserviceSelectView').hide();
+        jq('#releaseSelectView').hide();
+
+        this.selectApplication(applicationId, applicationName);
+        this.resetSelectMicroservice();
+
+        if (this.resetSelectRelease()) {
+            // send empty releaseChanged event if release was selected before
+            dispatchEvent('releaseChanged', {});
+        }
+
+        if (hasMicroservices) {
+            jq('#microserviceSelectView').show();
+        }
+        else {
+            jq('#releaseSelectView').show();
+        }
+    }
+
+    onMicroserviceSelectedFromDialog(microserviceId, microserviceName) {
+        jq('#releaseSelectView').hide();
+
+        this.selectMicroservice(microserviceId, microserviceName);
+        if (this.resetSelectRelease()) {
+            dispatchEvent('releaseChanged', {});
+        }
+
+        jq('#releaseSelectView').show();
+    }
+
+    onReleaseSelectedFromDialog(releaseId, releaseName) {
+        this.selectRelease(releaseId, releaseName);
+        dispatchEvent('releaseChanged', { releaseId, releaseName });
+    }
+
+    //</editor-fold>
+
+    init() {
+        this.onReleaseMethodSelection();
+        jq('#releaseTypeSelectList').off('change').change(() => this.onReleaseMethodSelection());
+
+        subscribeToEvent('authInfoChanged', () => this.onCredsChanged());
+        subscribeToEvent('dialogSelectedApplication', e => this.onAppSelectedFromDialog(e.detail.applicationId, e.detail.applicationName, e.detail.hasMicroservices));
+        subscribeToEvent('dialogSelectedMicroservice', e => this.onMicroserviceSelectedFromDialog(e.detail.microserviceId, e.detail.microserviceName));
+        subscribeToEvent('dialogSelectedRelease', e => this.onReleaseSelectedFromDialog(e.detail.releaseId, e.detail.releaseName));
     }
 }
 
-function showApiRetrievalError() {
-    hideAll();
-    jq('#appAndReleaseNameErrorView').show();
-}
-
-function init() {
-    onReleaseMethodSelection();
-    jq('#releaseTypeSelectList').off('change').change(onReleaseMethodSelection);
-
-    subscribeToEvent('authInfoChanged', () => onCredsChanged());
-}
-
-spinAndWait(() => jq('#releaseTypeSelectList').val()).then(init);
+const appAndReleaseSelectionInstance = new AppAndReleaseSelection();
+spinAndWait(() => jq('#releaseTypeSelectList').val()).then(appAndReleaseSelectionInstance.init.bind(appAndReleaseSelectionInstance));

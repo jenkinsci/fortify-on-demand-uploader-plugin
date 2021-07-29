@@ -45,6 +45,53 @@ class Api {
 
     //<editor-fold desc="Descriptor operations">
 
+    getApplications(searchArgs, customAuth) {
+        let searchTerm = searchArgs?.keyword ?? null;
+        if (searchTerm == "")
+            searchTerm = null;
+
+        return new Promise((res, rej) => {
+            this.descriptor.retrieveApplicationList(searchTerm, searchArgs?.offset ?? 0, searchArgs?.limit ?? 25, customAuth, async t => {
+                const responseJSON = JSON.parse(t.responseJSON);
+                if (responseJSON == null) {
+                    return rej(this.failedToAuthMessage);
+                }
+
+                res(responseJSON);
+            });
+        });
+    }
+
+    getMicroservices(appId, searchArgs, customAuth) {
+        return new Promise((res, rej) => {
+            this.descriptor.retrieveMicroserviceList(appId, customAuth, async t => {
+                const responseJSON = JSON.parse(t.responseJSON);
+                if (responseJSON == null) {
+                    return rej(this.failedToAuthMessage);
+                }
+
+                res(responseJSON);
+            });
+        });
+    }
+
+    getReleases(appId, microserviceId, searchArgs, customAuth) {
+        let searchTerm = searchArgs?.keyword ?? null;
+        if (searchTerm == "")
+            searchTerm = null;
+
+        return new Promise((res, rej) => {
+            this.descriptor.retrieveReleaseList(appId, microserviceId ?? 0, searchTerm, searchArgs?.offset ?? 0, searchArgs.limit ?? 25, customAuth, async t => {
+               const responseJSON = JSON.parse(t.responseJSON);
+               if (responseJSON == null) {
+                   return rej(this.failedToAuthMessage);
+               }
+
+               res(responseJSON);
+            });
+        });
+    }
+
     getReleaseById(releaseId, customAuth) {
         return new Promise((res, rej) => {
             this.descriptor.retrieveReleaseById(releaseId, customAuth, async t => {
@@ -53,7 +100,7 @@ class Api {
                     return rej(this.failedToAuthMessage);
                 }
 
-                res([responseJSON.success, responseJSON.value]);
+                res([responseJSON.success, responseJSON.value, responseJSON.errors]);
             });
         });
     }

@@ -232,11 +232,11 @@ public class SharedUploadBuildStep {
     }
 
     @SuppressWarnings("unused")
-    public static List<ApplicationApiResponse> customFillUserSelectedApplicationList(AuthenticationModel authModel) throws IOException {
+    public static List<ApplicationApiResponse> customFillUserSelectedApplicationList(String searchTerm, int offset, int limit, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         List<ApplicationApiResponse> applicationList = null;
         ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
-        applicationList = applicationController.getApplicationList();
+        applicationList = applicationController.getApplicationList(searchTerm, offset, limit);
 
         return applicationList;
     }
@@ -258,11 +258,11 @@ public class SharedUploadBuildStep {
         return microserviceList;
     }
 
-    public static List<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, AuthenticationModel authModel) throws IOException {
+    public static List<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, String searchTerm, Integer offset, Integer limit, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         List<ReleaseApiResponse> releaseList = null;
         ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
-        releaseList = applicationController.getReleaseListByApplication(applicationId, microserviceId);
+        releaseList = applicationController.getReleaseListByApplication(applicationId, microserviceId, searchTerm, offset, limit);
 
         return releaseList;
     }

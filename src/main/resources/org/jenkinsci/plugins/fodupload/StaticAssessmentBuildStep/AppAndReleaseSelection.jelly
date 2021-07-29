@@ -32,22 +32,18 @@
                             <td class="setting-leftspace"></td>
                             <td class="setting-name">Application</td>
                             <td class="setting-main spinner-container ">
-                                <div class="col-md-4">
-                                    <span tooltip="Select an application" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                        <span class="first-child">
-                                            <a href="#" id="selectedApp"></a>
-                                        </span>
+                                <span tooltip="Select an application" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                    <span class="first-child">
+                                        <a href="#" id="selectedApp"></a>
                                     </span>
-                                    <input type="hidden" name="userSelectedApplication" />
-                                </div>
+                                </span>
+                                <input type="hidden" name="userSelectedApplication" />
 
-                                <div class="col-md-8">
-                                    <span tooltip="Create a new application" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                        <span class="first-child">
-                                            <a href="#" id="createAppBtn">Create</a>
-                                        </span>
+                                <span tooltip="Create a new application" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                    <span class="first-child createLink">
+                                        (<a href="#" id="createAppBtn">Create</a>)
                                     </span>
-                                </div>
+                                </span>
                             </td>
                         </tr>
 
@@ -55,22 +51,18 @@
                             <td class="setting-leftspace"></td>
                             <td class="setting-name">Microservice</td>
                             <td class="setting-main spinner-container">
-                                <div class="col-md-4">
-                                    <span tooltip="Select a microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                        <span class="first-child">
-                                            <a href="#" id="selectedMicroservice"></a>
-                                        </span>
+                                <span tooltip="Select a microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                    <span class="first-child">
+                                        <a href="#" id="selectedMicroservice"></a>
                                     </span>
-                                    <input type="hidden" name="userSelectedMicroservice" />
-                                </div>
+                                </span>
+                                <input type="hidden" name="userSelectedMicroservice" />
 
-                                <div class="col-md-8">
-                                    <span tooltip="Create a new microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                        <span class="first-child">
-                                            <a href="#" id="createMicroserviceBtn">Create</a>
-                                        </span>
+                                <span tooltip="Create a new microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                    <span class="first-child createLink">
+                                        (<a href="#" id="createMicroserviceBtn">Create</a>)
                                     </span>
-                                </div>
+                                </span>
                             </td>
                         </tr>
 
@@ -78,22 +70,18 @@
                             <td class="setting-leftspace"></td>
                             <td class="setting-name">Release</td>
                             <td class="setting-main spinner-container">
-                                <div class="col-md-4">
-                                    <span tooltip="Select a microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                        <span class="first-child">
-                                            <a href="#" id="selectedRelease"></a>
-                                        </span>
+                                <span tooltip="Select a release" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                    <span class="first-child">
+                                        <a href="#" id="selectedRelease"></a>
                                     </span>
-                                    <input type="hidden" name="userSelectedRelease" />
-                                </div>
+                                </span>
+                                <input type="hidden" name="userSelectedRelease" />
 
-                                <div class="col-md-8">
-                                    <span tooltip="Create a new microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                        <span class="first-child">
-                                            <a href="#" id="createReleaseBtn">Create</a>
-                                        </span>
+                                <span tooltip="Create a new release" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                    <span class="first-child createLink">
+                                        (<a href="#" id="createReleaseBtn">Create</a>)
                                     </span>
-                                </div>
+                                </span>
                             </td>
                         </tr>
 

@@ -1,13 +1,12 @@
 jq = jQuery;
 
-class CreateApplicationForm extends Dialog {
+class ApplicationCreationDialog extends Dialog {
 
     constructor() {
         super('createApplicationDialog', 'applicationCreationForm');
     }
 
     clearForm() {
-        this.hideSpinner();
         this.jqDialog('#errors').html('');
         this.jqDialog('#applicationNameField').val('');
         this.jqDialog('#businessCriticalityField').val('1');
@@ -49,13 +48,11 @@ class CreateApplicationForm extends Dialog {
 
         this.jqDialog('#submitBtn').off('click').click(() => {
             this.jqDialog('#errors').html('');
-            this.putMask();
-            this.showSpinner();
+            this.startSpinning();
 
             const formObject = this.getFormObject();
             descriptor.submitCreateApplication(formObject, getAuthInfo(), t => {
-                this.hideSpinner();
-                this.removeMask();
+                this.stopSpinning();
 
                 const responseJson = JSON.parse(t.responseJSON);
                 if (!responseJson) return;
@@ -79,18 +76,10 @@ class CreateApplicationForm extends Dialog {
         });
     }
 
-    showSpinner() {
-        this.jqDialog('#spinner-container').addClass('spinner');
-    }
-
-    hideSpinner() {
-        this.jqDialog('#spinner-container').removeClass('spinner');
-    }
-
     onInit() {
         jq('#createAppBtn').off('click').click((ev) => {
             ev.preventDefault();
-            this.spawnDialog();
+            this.spawnDialog('Create New Application');
         });
     }
 
@@ -100,4 +89,4 @@ class CreateApplicationForm extends Dialog {
     }
 }
 
-createDialog(new CreateApplicationForm());
+createDialog(new ApplicationCreationDialog());

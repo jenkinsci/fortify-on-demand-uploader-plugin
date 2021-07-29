@@ -16,8 +16,25 @@
             display: none;
         }
 
+        .spinner .createLink {
+            display: none;
+        }
+
         div[descriptorid="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep"] select {
             width: 240px;
+        }
+
+        .createLink {
+            padding-left: 10px;
+        }
+
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .flex-item {
+            margin: 10px;
         }
     </style>
 
@@ -35,6 +52,7 @@
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/CreateApplicationForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/CreateMicroserviceForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/CreateReleaseForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
+    <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/AppAndReleaseSelectionForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
 
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/Entitlements.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
 
@@ -57,9 +75,10 @@
     </script>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js" />
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelection.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreation.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/MicroserviceCreation.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreation.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreationDialog.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/MicroserviceCreationDialog.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreationDialog.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelectionDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Entitlements.js"/>
     
 </j:jelly>
