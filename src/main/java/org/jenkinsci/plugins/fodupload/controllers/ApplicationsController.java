@@ -43,19 +43,28 @@ public class ApplicationsController extends ControllerBase {
      * @return array of enum values and text or null
      * @throws java.io.IOException in some circumstances
      */
-    public List<ApplicationApiResponse> getApplicationList(String searchTerm, Integer offset, Integer limit) throws IOException {
+    public GenericListResponse<ApplicationApiResponse> getApplicationList(String searchTerm, Integer offset, Integer limit) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments("/api/v3/applications");
+
+        if (searchTerm != null && !searchTerm.trim().equals("")) {
+            urlBuilder = urlBuilder.addQueryParameter("filters", "applicationname:" + searchTerm.trim());
+        }
+        if (offset != null) {
+            urlBuilder = urlBuilder.addQueryParameter("offset", offset.toString());
+        }
+        if (limit != null) {
+            urlBuilder = urlBuilder.addQueryParameter("limit", limit.toString());
+        }
+
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        GenericListResponse<ApplicationApiResponse> response = apiConnection.requestTyped(request, new TypeToken<GenericListResponse<ApplicationApiResponse>>(){}.getType());
-
-        return response.getItems();
+        return apiConnection.requestTyped(request, new TypeToken<GenericListResponse<ApplicationApiResponse>>(){}.getType());
     }
 
     public Result<ApplicationApiResponse> getApplicationById(Integer applicationId) throws IOException {
@@ -102,10 +111,28 @@ public class ApplicationsController extends ControllerBase {
      * @return list of Releases
      * @throws java.io.IOException in some circumstances
      */
-    public List<ReleaseApiResponse> getReleaseListByApplication(int releaseListApplicationId, int microserviceId, String searchTerm, Integer offset, Integer limit) throws IOException {
+    public GenericListResponse<ReleaseApiResponse> getReleaseListByApplication(int releaseListApplicationId, int microserviceId, String searchTerm, Integer offset, Integer limit) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments("/api/v3/applications/" + releaseListApplicationId + "/releases");
+
+        List<String> filters = new ArrayList<>();
+        if (microserviceId > 0) {
+            filters.add("microserviceId:" + microserviceId);
+        }
+        if (searchTerm != null && !searchTerm.trim().equals("")) {
+            filters.add("releasename:" + searchTerm.trim());
+        }
+
+        if (filters.size() > 0) {
+            urlBuilder = urlBuilder.addQueryParameter("filters", String.join("+", filters));
+        }
+        if (offset != null) {
+            urlBuilder = urlBuilder.addQueryParameter("offset", offset.toString());
+        }
+        if (limit != null) {
+            urlBuilder = urlBuilder.addQueryParameter("limit", limit.toString());
+        }
 
         if (microserviceId > 0) {
             urlBuilder = urlBuilder.addQueryParameter("filters", "microserviceId:" + microserviceId);
@@ -120,9 +147,7 @@ public class ApplicationsController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        GenericListResponse<ReleaseApiResponse> response = apiConnection.requestTyped(request, new TypeToken<GenericListResponse<ReleaseApiResponse>>(){}.getType());
-
-        return response.getItems();
+        return apiConnection.requestTyped(request, new TypeToken<GenericListResponse<ReleaseApiResponse>>(){}.getType());
     }
 
     /**
@@ -164,7 +189,7 @@ public class ApplicationsController extends ControllerBase {
             return apiConnection.parseResponse(response, new TypeToken<CreateApplicationResponse>(){}.getType());
         }
         else if (response.code() >= 500) {
-            return new CreateApplicationResponse(0, false, Utils.unexpectedServerResponseErrors());
+            return new CreateApplicationResponse(0, 0, 0, false, Utils.unexpectedServerResponseErrors());
         }
         else {
             GenericErrorResponse genericErrorResponse = apiConnection.parseResponse(response, new TypeToken<GenericErrorResponse>(){}.getType());
@@ -178,7 +203,7 @@ public class ApplicationsController extends ControllerBase {
                 errors.add(message);
             });
 
-            return new CreateApplicationResponse(0, false, errors);
+            return new CreateApplicationResponse(0, 0, 0, false, errors);
         }
     }
 

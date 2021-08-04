@@ -15,6 +15,17 @@
                     <div class="flex-container" id="list-container">
 
                     </div>
+                    <div class="row" id="errors-container" style="color: red; text-align: center;">
+                        Unexpected error. Please reload the page and try again
+                    </div>
+                    <div class="row" id="empty-container" style="text-align: center;">
+                        No results found
+                    </div>
+                    <div class="row" id="paging-container" style="text-align: center; margin-top: 10px">
+                        <a href="#" id="prevPageLink">&lt; </a>
+                        <span id="pageNumber">1</span>
+                        <a href="#" id="nextPageLink"> &gt;</a>
+                    </div>
                 </div>
             </div>
         </div>

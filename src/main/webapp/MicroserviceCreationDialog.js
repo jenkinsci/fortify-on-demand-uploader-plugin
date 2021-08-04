@@ -7,7 +7,6 @@ class MicroserviceCreationDialog extends Dialog {
     }
 
     clearForm() {
-        this.hideSpinner();
         this.jqDialog('#errors').html('');
         this.jqDialog('#microserviceNameField').val('');
     }
@@ -19,27 +18,28 @@ class MicroserviceCreationDialog extends Dialog {
         };
     }
 
+    showErrors(errors) {
+        let errorsHTML = '';
+        for (const error of errors) {
+            errorsHTML += '<li>' + error + '</li>';
+        }
+        this.jqDialog('#errors').html('<ul>' + errorsHTML + '</ul>');
+    }
+
     subscribeToFormEvents(data) {
         this.jqDialog('#submitBtn').off('click').click(() => {
             this.jqDialog('#errors').html('');
-            this.putMask();
-            this.showSpinner();
+            this.startSpinning();
 
             const formObject = this.getFormObject(data);
             descriptor.submitCreateMicroservice(formObject, getAuthInfo(), t => {
-                this.hideSpinner();
-                this.removeMask();
+                this.stopSpinning();
 
                 const responseJson = JSON.parse(t.responseJSON);
-                if (!responseJson) return;
-                if (!responseJson.success) {
-                    let errorsHTML = '';
-                    for (const error of responseJson.errors) {
-                        errorsHTML += '<li>' + error + '</li>';
-                    }
-                    this.jqDialog('#errors').html('<ul>' + errorsHTML + '</ul>');
-                    return;
-                }
+                if (!responseJson || (!responseJson.success && !responseJson.errors))
+                    return this.showErrors(['Unexpected error. Please reload the page and try again']);
+                if (!responseJson.success && responseJson.errors)
+                    return this.showErrors(responseJson.errors);
 
                 const payload = { microserviceId: responseJson.value, ...formObject };
                 dispatchEvent('microserviceCreated', payload);
@@ -52,18 +52,11 @@ class MicroserviceCreationDialog extends Dialog {
         });
     }
 
-    showSpinner() {
-        this.jqDialog('#spinner-container').addClass('spinner');
-    }
-
-    hideSpinner() {
-        this.jqDialog('#spinner-container').removeClass('spinner');
-    }
-
     onInit() {
-        jq('#createMicroserviceBtn').off('click').click(() => {
-            this.spawnDialog({
-                applicationId: Number(jq('#applicationSelectList').val())
+        jq('#createMicroserviceBtn').off('click').click((ev) => {
+            ev.preventDefault();
+            this.spawnDialog('Create New Microservice', {
+                applicationId: Number(jq('[name="userSelectedApplication"]').val())
             });
         });
     }

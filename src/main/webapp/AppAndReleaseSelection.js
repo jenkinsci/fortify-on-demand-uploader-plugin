@@ -56,6 +56,34 @@ class AppAndReleaseSelection {
 
         showWithSpinner('#applicationSelectView');
 
+        const currentSession = await this.api.getCurrentUserSession(getAuthInfo());
+        if (currentSession !== null) {
+            if (currentSession.permissions.indexOf('CreateApplications') !== -1) {
+                jq('#createAppSection').show();
+            }
+            else {
+                jq('#createAppSection').hide();
+            }
+
+            if (currentSession.permissions.indexOf('ManageApplications') !== -1) {
+                jq('#createMicroserviceSection').show();
+                jq('#createReleaseSection').show();
+            }
+            else {
+                jq('#createMicroserviceSection').hide();
+                jq('#createReleaseSection').hide();
+            }
+
+            dispatchEvent('userDetected', { userId: currentSession.userId, username: currentSession.username });
+        }
+        else {
+            jq('#createAppSection').show();
+            jq('#createMicroserviceSection').show();
+            jq('#createReleaseSection').show();
+
+            dispatchEvent('userDetected', { userId: null, username: null });
+        }
+
         const savedReleaseId = await this.api.getSavedReleaseId();
         const [success, release] = savedReleaseId ? await this.api.getReleaseById(savedReleaseId, getAuthInfo()) : [false, null];
 
@@ -127,11 +155,11 @@ class AppAndReleaseSelection {
             await op();
         }
         catch(err) {
-            if (api.isAuthError(err)) {
+            if (this.api.isAuthError(err)) {
                 this.showApiRetrievalError();
             }
             else {
-                throw ex;
+                throw err;
             }
         }
     }
@@ -184,6 +212,37 @@ class AppAndReleaseSelection {
         dispatchEvent('releaseChanged', { releaseId, releaseName });
     }
 
+    async onApplicationCreated(applicationId, applicationName, hasMicroservices, microserviceId, microserviceName, releaseId, releaseName) {
+        jq('#microserviceSelectView').hide();
+        jq('#releaseSelectView').hide();
+
+        this.selectApplication(applicationId, applicationName);
+        if (hasMicroservices) {
+            jq('#microserviceSelectView').show();
+            this.selectMicroservice(microserviceId, microserviceName);
+        }
+        else {
+            this.resetSelectMicroservice();
+        }
+
+        jq('#releaseSelectView').show();
+
+        this.selectRelease(releaseId, releaseName);
+        dispatchEvent('releaseChanged', { releaseId, releaseName });
+    }
+
+    onMicroserviceCreated(microserviceId, microserviceName) {
+        this.selectMicroservice(microserviceId, microserviceName);
+        this.resetSelectRelease();
+        jq('#releaseSelectView').show();
+        dispatchEvent('releaseChanged', {});
+    }
+
+    onReleaseCreated(releaseId, releaseName) {
+        this.selectRelease(releaseId, releaseName);
+        dispatchEvent('releaseChanged', { releaseId, releaseName });
+    }
+
     //</editor-fold>
 
     init() {
@@ -194,6 +253,9 @@ class AppAndReleaseSelection {
         subscribeToEvent('dialogSelectedApplication', e => this.onAppSelectedFromDialog(e.detail.applicationId, e.detail.applicationName, e.detail.hasMicroservices));
         subscribeToEvent('dialogSelectedMicroservice', e => this.onMicroserviceSelectedFromDialog(e.detail.microserviceId, e.detail.microserviceName));
         subscribeToEvent('dialogSelectedRelease', e => this.onReleaseSelectedFromDialog(e.detail.releaseId, e.detail.releaseName));
+        subscribeToEvent('applicationCreated', e => this.onApplicationCreated(e.detail.applicationId, e.detail.applicationName, e.detail.hasMicroservices, e.detail.microserviceId, e.detail.microserviceName, e.detail.releaseId, e.detail.releaseName));
+        subscribeToEvent('microserviceCreated', e => this.onMicroserviceCreated(e.detail.microserviceId, e.detail.microserviceName));
+        subscribeToEvent('releaseCreated', e => this.onReleaseCreated(e.detail.releaseId, e.detail.releaseName));
     }
 }
 

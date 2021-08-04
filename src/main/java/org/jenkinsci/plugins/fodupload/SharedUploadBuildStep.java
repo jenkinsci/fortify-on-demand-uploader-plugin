@@ -232,13 +232,10 @@ public class SharedUploadBuildStep {
     }
 
     @SuppressWarnings("unused")
-    public static List<ApplicationApiResponse> customFillUserSelectedApplicationList(String searchTerm, int offset, int limit, AuthenticationModel authModel) throws IOException {
+    public static GenericListResponse<ApplicationApiResponse> customFillUserSelectedApplicationList(String searchTerm, int offset, int limit, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
-        List<ApplicationApiResponse> applicationList = null;
         ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
-        applicationList = applicationController.getApplicationList(searchTerm, offset, limit);
-
-        return applicationList;
+        return applicationController.getApplicationList(searchTerm, offset, limit);
     }
 
     public static org.jenkinsci.plugins.fodupload.models.Result<ApplicationApiResponse> customFillUserApplicationById(int applicationId, AuthenticationModel authModel) throws IOException {
@@ -251,20 +248,14 @@ public class SharedUploadBuildStep {
 
     public static List<MicroserviceApiResponse> customFillUserSelectedMicroserviceList(int applicationId, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
-        List<MicroserviceApiResponse> microserviceList = null;
         ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
-        microserviceList = applicationController.getMicroserviceListByApplication(applicationId);
-
-        return microserviceList;
+        return applicationController.getMicroserviceListByApplication(applicationId);
     }
 
-    public static List<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, String searchTerm, Integer offset, Integer limit, AuthenticationModel authModel) throws IOException {
+    public static GenericListResponse<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, String searchTerm, Integer offset, Integer limit, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
-        List<ReleaseApiResponse> releaseList = null;
         ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
-        releaseList = applicationController.getReleaseListByApplication(applicationId, microserviceId, searchTerm, offset, limit);
-
-        return releaseList;
+        return applicationController.getReleaseListByApplication(applicationId, microserviceId, searchTerm, offset, limit);
     }
 
     public static org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> customFillUserReleaseById(int releaseId, AuthenticationModel authModel) throws IOException {

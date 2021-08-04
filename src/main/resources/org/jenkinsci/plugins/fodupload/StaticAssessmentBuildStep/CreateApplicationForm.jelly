@@ -65,7 +65,7 @@
                         </tr>
 
                         <tr class="config-table-top-row" id="ownerIdRow">
-                            <td class="setting-name">Owner Id</td>
+                            <td class="setting-name">Owner Id <span id="assignCurrentUserSection">(<a href="#" id="assignCurrentUserLink">Assign Me</a>)</span></td>
                             <td class="setting-main"><input type="text" class="setting-input" id="ownerIdField" /></td>
                         </tr>
 

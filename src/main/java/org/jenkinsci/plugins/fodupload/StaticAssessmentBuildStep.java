@@ -20,6 +20,7 @@ import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
+import org.jenkinsci.plugins.fodupload.controllers.UsersController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -410,6 +411,21 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             try {
                 AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserReleaseById(releaseId, authModel));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @JavaScriptMethod
+        public String retrieveCurrentUserSession(JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                UsersController usersController = new UsersController(apiConnection, null, Utils.createCorrelationId());
+
+                return Utils.createResponseViewModel(usersController.getCurrentUserSession());
             }
             catch (Exception e) {
                 e.printStackTrace();

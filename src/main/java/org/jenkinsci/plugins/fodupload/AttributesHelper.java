@@ -72,7 +72,7 @@ public class AttributesHelper {
         }
 
         List<String> errors = new ArrayList<>();
-        for (String attributeInput : attributesInput.split(",")) {
+        for (String attributeInput : attributesInput.split(";")) {
             String[] keyValue = attributeInput.split(":");
             if (keyValue.length != 2) {
                 errors.add("All attributes must have a key and a value");

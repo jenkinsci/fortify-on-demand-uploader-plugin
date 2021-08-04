@@ -17,7 +17,7 @@ public class SharedCreateApplicationForm {
 
     //<editor-fold desc="Create Application">
 
-    public static Result<Integer> submitCreateApplication(AuthenticationModel authModel, JSONObject formObject) throws IOException {
+    public static Result<CreateApplicationResponse> submitCreateApplication(AuthenticationModel authModel, JSONObject formObject) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
         String correlationId = Utils.createCorrelationId();
 
@@ -31,20 +31,20 @@ public class SharedCreateApplicationForm {
             attributes = attributesController.getAttributeDefinitions();
         }
         catch (IOException ex) {
-            return new Result<>(false, null, 0);
+            return new Result<>(false, null, null);
         }
 
         Result<CreateApplicationModel> model = parseCreateApplicationModelFromObjectAndValidate(formObject, attributes);
         if (!model.getSuccess()) {
-            return new Result<>(false, model.getErrors(), 0);
+            return new Result<>(false, model.getErrors(), null);
         }
 
         CreateApplicationResponse response = applicationsController.createApplication(model.getValue());
         if (!response.getSuccess()) {
-            return new Result<>(false, response.getErrors(), 0);
+            return new Result<>(false, response.getErrors(), null);
         }
 
-        return new Result<>(true, null, response.getApplicationId());
+        return new Result<>(true, null, response);
     }
 
     private static Result<CreateApplicationModel> parseCreateApplicationModelFromObjectAndValidate(JSONObject formObject, List<AttributeDefinition> attributeDefinitions) {

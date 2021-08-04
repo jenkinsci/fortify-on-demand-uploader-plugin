@@ -62,7 +62,7 @@ class Api {
         });
     }
 
-    getMicroservices(appId, searchArgs, customAuth) {
+    getMicroservices(appId, customAuth) {
         return new Promise((res, rej) => {
             this.descriptor.retrieveMicroserviceList(appId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
@@ -101,6 +101,24 @@ class Api {
                 }
 
                 res([responseJSON.success, responseJSON.value, responseJSON.errors]);
+            });
+        });
+    }
+
+    getCurrentUserSession(customAuth) {
+        return new Promise((res, rej) => {
+            this.descriptor.retrieveCurrentUserSession(customAuth, async t => {
+                const responseJSON = JSON.parse(t.responseJSON);
+                console.log(responseJSON);
+                if (responseJSON === null || (!responseJSON.success && responseJSON.reason === 'no_auth')) {
+                    return rej(this.failedToAuthMessage);
+                }
+
+                if (!responseJSON.success) {
+                    return res(null);
+                }
+
+                return res(responseJSON.value);
             });
         });
     }

@@ -39,7 +39,7 @@
                                 </span>
                                 <input type="hidden" name="userSelectedApplication" />
 
-                                <span tooltip="Create a new application" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span tooltip="Create a new application" id="createAppSection" class="yui-button" style="float: unset;vertical-align: bottom;">
                                     <span class="first-child createLink">
                                         (<a href="#" id="createAppBtn">Create</a>)
                                     </span>
@@ -58,7 +58,7 @@
                                 </span>
                                 <input type="hidden" name="userSelectedMicroservice" />
 
-                                <span tooltip="Create a new microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span tooltip="Create a new microservice" id="createMicroserviceSection" class="yui-button" style="float: unset;vertical-align: bottom;">
                                     <span class="first-child createLink">
                                         (<a href="#" id="createMicroserviceBtn">Create</a>)
                                     </span>
@@ -77,7 +77,7 @@
                                 </span>
                                 <input type="hidden" name="userSelectedRelease" />
 
-                                <span tooltip="Create a new release" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span tooltip="Create a new release" id="createReleaseSection" class="yui-button" style="float: unset;vertical-align: bottom;">
                                     <span class="first-child createLink">
                                         (<a href="#" id="createReleaseBtn">Create</a>)
                                     </span>
