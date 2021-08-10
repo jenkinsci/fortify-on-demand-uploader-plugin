@@ -37,6 +37,15 @@ function spinAndWait(fn) {
     });
 }
 
+function closestRow(selector) {
+    let tr = jq(selector).closest('tr');
+    if (tr.length == 0) {
+        tr = jq(selector).closest('.tr');
+    }
+
+    return tr;
+}
+
 function createDialog(dialog) {
     spinAndWait(() => jq('#' + dialog._formId).html())
         .then(() => dialog.init());

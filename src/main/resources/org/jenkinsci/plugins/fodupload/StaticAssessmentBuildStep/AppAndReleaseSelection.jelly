@@ -11,87 +11,73 @@
                         <f:select id="releaseTypeSelectList" />
                     </f:entry>
 
+                    <f:entry title="Release ID">
+                        <div id="releaseIdSection-entry">
+                            <input type="text" id="releaseIdField" name="releaseId" class="setting-input" style="width: 160px" />
+                        </div>
+                    </f:entry>
+
+                    <f:entry title="BSI Token">
+                        <div id="bsiTokenSection-entry">
+                            <input type="text" id="bsiTokenField" name="bsiToken" class="setting-input" />
+                        </div>
+                    </f:entry>
+
+                    <f:entry title="Application">
+                        <div id="application-entry">
+                            <span tooltip="Select an application" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span class="first-child">
+                                    <a href="#" id="selectedApp"></a>
+                                </span>
+                            </span>
+                            <input type="hidden" name="userSelectedApplication" />
+
+                            <span tooltip="Create a new application" id="createAppSection" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span class="first-child createLink">
+                                    (<a href="#" id="createAppBtn">Create</a>)
+                                </span>
+                            </span>
+                        </div>
+                    </f:entry>
+
+                    <f:entry title="Microservice">
+                        <div id="microservice-entry">
+                            <span tooltip="Select a microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span class="first-child">
+                                    <a href="#" id="selectedMicroservice"></a>
+                                </span>
+                            </span>
+                            <input type="hidden" name="userSelectedMicroservice" />
+
+                            <span tooltip="Create a new microservice" id="createMicroserviceSection" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span class="first-child createLink">
+                                    (<a href="#" id="createMicroserviceBtn">Create</a>)
+                                </span>
+                            </span>
+                        </div>
+                    </f:entry>
+
+                    <f:entry title="Release">
+                        <div id="release-entry">
+                            <span tooltip="Select a release" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span class="first-child">
+                                    <a href="#" id="selectedRelease"></a>
+                                </span>
+                            </span>
+                            <input type="hidden" name="userSelectedRelease" />
+
+                            <span tooltip="Create a new release" id="createReleaseSection" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span class="first-child createLink">
+                                    (<a href="#" id="createReleaseBtn">Create</a>)
+                                </span>
+                            </span>
+                        </div>
+                    </f:entry>
+
                     <f:block>
-                        <tr class="config-table-top-row releaseIdView">
-                            <td class="setting-leftspace"></td>
-                            <td class="setting-name">Release ID</td>
-                            <td class="setting-main">
-                                <input type="text" id="releaseIdField" name="releaseId" class="setting-input" />
-                            </td>
-                        </tr>
-
-                        <tr class="config-table-top-row bsiTokenView">
-                            <td class="setting-leftspace"></td>
-                            <td class="setting-name">BSI Token</td>
-                            <td class="setting-main">
-                                <input type="text" id="bsiTokenField" name="bsiToken" class="setting-input" />
-                            </td>
-                        </tr>
-
-                        <tr class="config-table-top-row appAndReleaseNameView" id="applicationSelectView">
-                            <td class="setting-leftspace"></td>
-                            <td class="setting-name">Application</td>
-                            <td class="setting-main spinner-container ">
-                                <span tooltip="Select an application" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                    <span class="first-child">
-                                        <a href="#" id="selectedApp"></a>
-                                    </span>
-                                </span>
-                                <input type="hidden" name="userSelectedApplication" />
-
-                                <span tooltip="Create a new application" id="createAppSection" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                    <span class="first-child createLink">
-                                        (<a href="#" id="createAppBtn">Create</a>)
-                                    </span>
-                                </span>
-                            </td>
-                        </tr>
-
-                        <tr class="config-table-top-row appAndReleaseNameView" id="microserviceSelectView">
-                            <td class="setting-leftspace"></td>
-                            <td class="setting-name">Microservice</td>
-                            <td class="setting-main spinner-container">
-                                <span tooltip="Select a microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                    <span class="first-child">
-                                        <a href="#" id="selectedMicroservice"></a>
-                                    </span>
-                                </span>
-                                <input type="hidden" name="userSelectedMicroservice" />
-
-                                <span tooltip="Create a new microservice" id="createMicroserviceSection" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                    <span class="first-child createLink">
-                                        (<a href="#" id="createMicroserviceBtn">Create</a>)
-                                    </span>
-                                </span>
-                            </td>
-                        </tr>
-
-                        <tr class="config-table-top-row appAndReleaseNameView" id="releaseSelectView">
-                            <td class="setting-leftspace"></td>
-                            <td class="setting-name">Release</td>
-                            <td class="setting-main spinner-container">
-                                <span tooltip="Select a release" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                    <span class="first-child">
-                                        <a href="#" id="selectedRelease"></a>
-                                    </span>
-                                </span>
-                                <input type="hidden" name="userSelectedRelease" />
-
-                                <span tooltip="Create a new release" id="createReleaseSection" class="yui-button" style="float: unset;vertical-align: bottom;">
-                                    <span class="first-child createLink">
-                                        (<a href="#" id="createReleaseBtn">Create</a>)
-                                    </span>
-                                </span>
-                            </td>
-                        </tr>
-
-                        <tr id="appAndReleaseNameErrorView">
-                            <td></td>
-                            <td colspan="4">
-                                <div style="color: red;">Failed to retrieve applications/releases/microservices from the FoD API</div>
-                            </td>
-                        </tr>
-
+                        <div id="appAndReleaseNameErrorView">
+                            <div style="color: red;">Failed to retrieve applications/releases/microservices from the FoD API</div>
+                        </div>
                     </f:block>
                 </f:block>
             </f:section>

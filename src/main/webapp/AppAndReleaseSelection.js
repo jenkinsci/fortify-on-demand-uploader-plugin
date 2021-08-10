@@ -246,6 +246,7 @@ class AppAndReleaseSelection {
     //</editor-fold>
 
     init() {
+        this.fEntriesIdPlacement();
         this.onReleaseMethodSelection();
         jq('#releaseTypeSelectList').off('change').change(() => this.onReleaseMethodSelection());
 
@@ -256,6 +257,24 @@ class AppAndReleaseSelection {
         subscribeToEvent('applicationCreated', e => this.onApplicationCreated(e.detail.applicationId, e.detail.applicationName, e.detail.hasMicroservices, e.detail.microserviceId, e.detail.microserviceName, e.detail.releaseId, e.detail.releaseName));
         subscribeToEvent('microserviceCreated', e => this.onMicroserviceCreated(e.detail.microserviceId, e.detail.microserviceName));
         subscribeToEvent('releaseCreated', e => this.onReleaseCreated(e.detail.releaseId, e.detail.releaseName));
+    }
+
+    fEntriesIdPlacement() {
+        const releaseIdRow = closestRow('#releaseIdSection-entry');
+        const bsiTokenRow = closestRow('#bsiTokenSection-entry');
+        const applicationSelectRow = closestRow('#application-entry');
+        const microserviceSelectRow = closestRow('#microservice-entry');
+        const releaseSelectRow = closestRow('#release-entry');
+
+        releaseIdRow.addClass('releaseIdView');
+        bsiTokenRow.addClass('bsiTokenView');
+        applicationSelectRow.addClass('appAndReleaseNameView');
+        microserviceSelectRow.addClass('appAndReleaseNameView');
+        releaseSelectRow.addClass('appAndReleaseNameView');
+
+        applicationSelectRow.prop('id', 'applicationSelectView');
+        microserviceSelectRow.prop('id', 'microserviceSelectView');
+        releaseSelectRow.prop('id', 'releaseSelectView');
     }
 }
 
