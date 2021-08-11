@@ -24,7 +24,7 @@
                     </f:entry>
 
                     <f:entry title="Application">
-                        <div id="application-entry">
+                        <div id="application-entry" class="spinner-container">
                             <span tooltip="Select an application" class="yui-button" style="float: unset;vertical-align: bottom;">
                                 <span class="first-child">
                                     <a href="#" id="selectedApp"></a>
@@ -41,7 +41,7 @@
                     </f:entry>
 
                     <f:entry title="Microservice">
-                        <div id="microservice-entry">
+                        <div id="microservice-entry" class="spinner-container">
                             <span tooltip="Select a microservice" class="yui-button" style="float: unset;vertical-align: bottom;">
                                 <span class="first-child">
                                     <a href="#" id="selectedMicroservice"></a>
@@ -58,7 +58,7 @@
                     </f:entry>
 
                     <f:entry title="Release">
-                        <div id="release-entry">
+                        <div id="release-entry" class="spinner-container">
                             <span tooltip="Select a release" class="yui-button" style="float: unset;vertical-align: bottom;">
                                 <span class="first-child">
                                     <a href="#" id="selectedRelease"></a>

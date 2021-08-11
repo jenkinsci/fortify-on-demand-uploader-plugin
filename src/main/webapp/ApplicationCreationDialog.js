@@ -92,18 +92,21 @@ class ApplicationCreationDialog extends Dialog {
 
                 try {
                     if (formObject.hasMicroservices && (!microserviceId || microserviceId <= 0)) {
-                        const microservices = await this.api.getMicroservices(applicationId, {}, getAuthInfo());
+                        const microservices = await this.api.getMicroservices(applicationId, getAuthInfo());
                         microserviceId = microservices[0].microserviceId;
                     }
 
                     if (!releaseId || releaseId <= 0) {
                         const releases = await this.api.getReleases(applicationId, microserviceId > 0 ? microserviceId : null, {}, getAuthInfo());
-                        releaseId = releases[0].releaseId;
+                        releaseId = releases.items[0].releaseId;
                     }
                 }
                 catch (e) {
                     console.error(e);
                     return this.showErrors(['Application was created, but encountered an error. Please refresh']);
+                }
+                finally {
+                    this.stopSpinning();
                 }
 
                 const payload = { applicationId, microserviceId, releaseId, ...formObject };

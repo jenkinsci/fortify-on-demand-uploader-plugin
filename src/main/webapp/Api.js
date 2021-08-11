@@ -109,7 +109,6 @@ class Api {
         return new Promise((res, rej) => {
             this.descriptor.retrieveCurrentUserSession(customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
-                console.log(responseJSON);
                 if (responseJSON === null || (!responseJSON.success && responseJSON.reason === 'no_auth')) {
                     return rej(this.failedToAuthMessage);
                 }
