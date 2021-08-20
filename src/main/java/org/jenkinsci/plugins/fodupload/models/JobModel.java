@@ -29,6 +29,13 @@ public class JobModel {
     private String userSelectedMicroservice;
     private String userSelectedRelease;
     private String selectedScanCentralBuildType;
+    private boolean scanCentralIncludeTests;
+    private boolean scanCentralSkipBuild;
+    private String scanCentralBuildCommand;
+    private String scanCentralBuildFile;
+    private String scanCentralBuildToolVersion;
+    private String scanCentralVirtualEnv;
+    private String scanCentralRequirementFile;
 
     private File payload;
 
@@ -45,6 +52,13 @@ public class JobModel {
      * @param inProgressBuildResultType     inProgressBuildResultType
      * @param selectedReleaseType           selectedReleaseType
      * @param selectedScanCentralBuildType  selectedScanCentralBuildType
+     * @param scanCentralIncludeTests       Scan Central IncludeTests option for Maven and Gradle
+     * @param scanCentralSkipBuild			Desc
+     * @param scanCentralBuildCommand		Desc
+     * @param scanCentralBuildFile			Desc
+     * @param scanCentralBuildToolVersion	Desc
+     * @param scanCentralVirtualEnv			Desc
+     * @param scanCentralRequirementFile	Desc
      */
     public JobModel(String releaseId,
                     String bsiToken,
@@ -58,7 +72,14 @@ public class JobModel {
                     String userSelectedApplication,
                     String userSelectedMicroservice,
                     String userSelectedRelease,
-                    String selectedScanCentralBuildType) {
+                    String selectedScanCentralBuildType,
+                    boolean scanCentralIncludeTests,
+                    boolean scanCentralSkipBuild,
+                    String scanCentralBuildCommand,
+                    String scanCentralBuildFile,
+                    String scanCentralBuildToolVersion,
+                    String scanCentralVirtualEnv,
+                    String scanCentralRequirementFile) {
 
         this.releaseId = releaseId;
         this.bsiTokenOriginal = bsiToken;
@@ -73,6 +94,13 @@ public class JobModel {
         this.userSelectedMicroservice = userSelectedMicroservice;
         this.userSelectedRelease = userSelectedRelease;
         this.selectedScanCentralBuildType = selectedScanCentralBuildType;
+        this.scanCentralIncludeTests = scanCentralIncludeTests;
+        this.scanCentralSkipBuild = scanCentralSkipBuild;
+        this.scanCentralBuildCommand = scanCentralBuildCommand;
+        this.scanCentralBuildFile = scanCentralBuildFile;
+        this.scanCentralBuildToolVersion = scanCentralBuildToolVersion;
+        this.scanCentralVirtualEnv = scanCentralVirtualEnv;
+        this.scanCentralRequirementFile = scanCentralRequirementFile;
     }
 
     public File getPayload() {
@@ -135,10 +163,23 @@ public class JobModel {
         return userSelectedRelease;
     }
 
-    public String getSelectedScanCentralBuildType() {
-        return selectedScanCentralBuildType;
-    }
+    public String getSelectedScanCentralBuildType() { return selectedScanCentralBuildType; }
 
+    public boolean getScanCentralIncludeTests() { return scanCentralIncludeTests; }
+
+    public boolean getScanCentralSkipBuild() { return scanCentralSkipBuild; }
+
+    public String getScanCentralBuildCommand() { return scanCentralBuildCommand; }
+
+    public String getScanCentralBuildFile() { return scanCentralBuildFile; }
+
+    public String getScanCentralBuildToolVersion() { return scanCentralBuildToolVersion; }
+
+    public String getScanCentralVirtualEnv() { return scanCentralVirtualEnv; }
+
+    public String getScanCentralRequirementFile() { return scanCentralRequirementFile; }
+
+    // ToDo: This is outdated
     @Override
     public String toString() {
         if (bsiTokenCache != null) {

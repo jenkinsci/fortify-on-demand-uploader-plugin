@@ -38,12 +38,18 @@ function spinAndWait(fn) {
 }
 
 function closestRow(selector) {
-    let tr = jq(selector).closest('tr');
+    let jqe = selector instanceof jQuery ? selector : jq(selector);
+    let tr =  jqe.closest('tr');
+
     if (tr.length == 0) {
-        tr = jq(selector).closest('.tr');
+        tr = jqe.closest('.tr');
     }
 
     return tr;
+}
+
+function nextRow(elem) {
+    return elem.is('tr') ? elem.next('tr') : elem.next('.tr') ;
 }
 
 function createDialog(dialog) {

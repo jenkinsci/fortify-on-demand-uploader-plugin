@@ -73,7 +73,14 @@ public class SharedUploadBuildStep {
                                  String userSelectedApplication,
                                  String userSelectedMicroservice,
                                  String userSelectedRelease,
-                                 String selectedScanCentralBuildType) {
+                                 String selectedScanCentralBuildType,
+                                 boolean scanCentralIncludeTests,
+                                 boolean scanCentralSkipBuild,
+                                 String scanCentralBuildCommand,
+                                 String scanCentralBuildFile,
+                                 String scanCentralBuildToolVersion,
+                                 String scanCentralVirtualEnv,
+                                 String scanCentralRequirementFile) {
 
         model = new JobModel(releaseId,
                 bsiToken,
@@ -87,7 +94,14 @@ public class SharedUploadBuildStep {
                 userSelectedApplication,
                 userSelectedMicroservice,
                 userSelectedRelease,
-                selectedScanCentralBuildType);
+                selectedScanCentralBuildType,
+                scanCentralIncludeTests,
+                scanCentralSkipBuild,
+                scanCentralBuildCommand,
+                scanCentralBuildFile,
+                scanCentralBuildToolVersion,
+                scanCentralVirtualEnv,
+                scanCentralRequirementFile);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,

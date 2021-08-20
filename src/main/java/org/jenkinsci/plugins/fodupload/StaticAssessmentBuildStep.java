@@ -75,7 +75,14 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String userSelectedApplication,
                                      String userSelectedMicroservice,
                                      String userSelectedRelease,
-                                     String selectedScanCentralBuildType) {
+                                     String selectedScanCentralBuildType,
+                                     boolean scanCentralIncludeTests,
+                                     boolean scanCentralSkipBuild,
+                                     String scanCentralBuildCommand,
+                                     String scanCentralBuildFile,
+                                     String scanCentralBuildToolVersion,
+                                     String scanCentralVirtualEnv,
+                                     String scanCentralRequirementFile) {
 
         FodApiConnection apiConnection = getApiConnection(overrideGlobalConfig, username, personalAccessToken, tenantId);
         saveReleaseSettings(apiConnection, purchaseEntitlements, entitlementPreference, assessmentTypeId, entitlementFrequencyType, technologyStackId, languageLevelId, performOpenSourceAnalysis, auditPreferenceType);
@@ -105,7 +112,14 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 userSelectedApplication,
                 userSelectedMicroservice,
                 userSelectedRelease,
-                selectedScanCentralBuildType);
+                selectedScanCentralBuildType,
+                scanCentralIncludeTests,
+                scanCentralSkipBuild,
+                scanCentralBuildCommand,
+                scanCentralBuildFile,
+                scanCentralBuildToolVersion,
+                scanCentralVirtualEnv,
+                scanCentralRequirementFile);
 
     }
 
@@ -255,6 +269,20 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public String getSelectedScanCentralBuildType() {
         return sharedBuildStep.getModel().getSelectedScanCentralBuildType();
     }
+
+    public boolean getScanCentralIncludeTests() { return sharedBuildStep.getModel().getScanCentralIncludeTests(); }
+
+    public boolean getScanCentralSkipBuild() { return sharedBuildStep.getModel().getScanCentralSkipBuild(); }
+
+    public String getScanCentralBuildCommand() { return sharedBuildStep.getModel().getScanCentralBuildCommand(); }
+
+    public String getScanCentralBuildFile() { return sharedBuildStep.getModel().getScanCentralBuildFile(); }
+
+    public String getScanCentralBuildToolVersion() { return sharedBuildStep.getModel().getScanCentralBuildToolVersion(); }
+
+    public String getScanCentralVirtualEnv() { return sharedBuildStep.getModel().getScanCentralVirtualEnv(); }
+
+    public String getScanCentralRequirementFile() { return sharedBuildStep.getModel().getScanCentralRequirementFile(); }
 
     @Extension
     public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {
