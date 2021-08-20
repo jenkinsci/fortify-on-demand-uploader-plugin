@@ -1,8 +1,8 @@
 jq = jQuery;
 
-const api = new Api(instance, descriptor);
+const _api = new Api(instance, descriptor);
 
-// let _lastRequestId = null;
+let _uiLoaded = false;
 
 function setSelectValues(id, selected, options) {
     let select = jq(`#${id} .fode-edit > select`);
@@ -23,24 +23,29 @@ function setSelectValues(id, selected, options) {
     jq(`#${id} .fode-view > div`).text(selText);
 }
 
-function loadEntitlementSettings(releaseId) {
+async function loadEntitlementSettings(releaseChangedPayload) {
+    if (!_uiLoaded) {
+        setTimeout(loadEntitlementSettings, 500);
+        return;
+    }
+
+    jq('#releaseNotSelected').hide();
+    jq('#fode-error').hide();
+
+    let releaseId = releaseChangedPayload ? releaseChangedPayload.releaseId : null;
     let rows = jq('tr.fode-field-row');
     let fields = jq('.fode-field.spinner-container');
 
     releaseId = Number(releaseId);
-
-    // _lastRequestId = newGuid();
+    let success = false;
 
     if (Number.isInteger(releaseId) && releaseId > 0) {
-        jq('#releaseNotSelected').hide();
-
         rows.show();
         fields.addClass('spinner');
 
-        descriptor.getReleaseEntitlementSettings(releaseId, getAuthInfo(), async t => {
-            let r = JSON.parse(t.responseJSON);
+        let r = await _api.getReleaseEntitlementSettings(releaseId, getAuthInfo());
 
-            // if (_lastRequestId === r.requestId) {
+        if (r) {
             setSelectValues('assessmentTypeForm', r.assessmentType, r.assessmentTypes);
             setSelectValues('entitlementForm', r.entitlement, r.entitlements);
             setSelectValues('technologyStackForm', r.technologyStack, null);
@@ -48,61 +53,17 @@ function loadEntitlementSettings(releaseId) {
             setSelectValues('auditPreferenceForm', r.auditPreference, r.auditPreferences);
             jq('#sonatypeForm').prop('checked', r.sonatypeScan === true);
 
-            jq('.fode-field.spinner-container').removeClass('spinner');
             jq('#cbOverrideRelease').val(false);
-            // }
-        });
-    } else {
-        fields.removeClass('spinner');
-        rows.hide();
-        jq('#releaseNotSelected').show();
-    }
-}
+            success = true;
+        }
+        else jq('#fode-error').show();
+    } else jq('#releaseNotSelected').show();
 
-function getReleaseFromBsi() {
-
-}
-
-function releaseSelectorChanged() {
-    let releaseId = -1;
-
-    jq('tr.fode-field-row').hide();
-    jq('#releaseNotSelected').show();
-
-    switch (jq('#releaseTypeSelectList').val()) {
-        case 'UseAppAndReleaseName':
-            let dd = jq('#releaseSelectList');
-
-            if (dd.is(':visible')) releaseId = dd.val();
-            else setTimeout(releaseSelectorChanged, 500);
-            break;
-        case 'UseBsiToken':
-            getReleaseFromBsi();
-            return;
-        case 'UseReleaseId':
-            let tb = jq('#releaseIdField');
-
-            if (tb.is(':visible')) releaseId = tb.val();
-            else setTimeout(releaseSelectorChanged, 500);
-            break;
-    }
-
-    loadEntitlementSettings(releaseId);
+    fields.removeClass('spinner');
+    if (!success) rows.hide();
 }
 
 function initEntitlements() {
-    jq('#releaseSelectList')
-        .change(e => loadEntitlementSettings(jq(e.target).val())); // is the val the id?
-
-    jq('#bsiTokenField')
-        .change(e => loadEntitlementSettings(null)); // parse bsi
-
-    jq('#releaseIdField')
-        .change(e => loadEntitlementSettings(jq(e.target).val()));
-
-    jq('#releaseTypeSelectList')
-        .change(releaseSelectorChanged)
-
     jq('.fode-field').parent().parent().addClass('fode-field-row');
     jq('#cbOverrideRelease').parent().parent().parent().addClass('fode-field-row');
 
@@ -129,17 +90,16 @@ function initEntitlements() {
                 checkboxes.prop('disabled', true);
             }
         });
-
-    releaseSelectorChanged();
 }
 
 function elementLoaded(id) {
     return jq('#' + id).val() !== undefined;
 }
 
+subscribeToEvent('releaseChanged', p => loadEntitlementSettings(p.detail));
+
 spinAndWait(() => {
-    return elementLoaded('cbOverrideRelease') && // override checkbox
-        elementLoaded('releaseSelectList') && // AppAndReleaseSelection
-        elementLoaded('bsiTokenField') && // BSI Token
-        elementLoaded('releaseIdField') // Release Id
+    _uiLoaded = elementLoaded('cbOverrideRelease');
+
+    return _uiLoaded;
 }).then(initEntitlements);
