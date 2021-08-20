@@ -37,7 +37,9 @@ public class FodEnums {
         ReportTypes,
         ReportStatusTypes,
         PassFailReasonTypes,
-        DynamicScanWebServiceTypes
+        DynamicScanWebServiceTypes,
+        TechnologyTypes,
+        LanguageLevels
     }
 
     public enum GrantType {CLIENT_CREDENTIALS, PASSWORD}
