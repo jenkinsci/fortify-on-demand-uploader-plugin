@@ -31,6 +31,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String TENANT_ID = "tenantId";
     private static final String BASE_URL = "baseUrl";
     private static final String API_URL = "apiUrl";
+    private static final String SCANCENTRAL_PATH = "scanCentralPath";
 
     private String globalAuthType;
     private String clientId;
@@ -40,6 +41,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private String tenantId;
     private String baseUrl;
     private String apiUrl;
+    private String scanCentralPath;
 
     public FodGlobalDescriptor() {
         load();
@@ -62,6 +64,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         }
         baseUrl = formData.getString(BASE_URL);
         apiUrl = formData.getString(API_URL);
+        scanCentralPath = formData.getString(SCANCENTRAL_PATH);
 
         save();
 
@@ -136,6 +139,11 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     @SuppressWarnings("unused")
     public String getApiUrl() {
         return apiUrl;
+    }
+
+    @SuppressWarnings("unused")
+    public String getScanCentralPath() {
+        return scanCentralPath;
     }
 
     public boolean getAuthTypeIsApiKey() {
