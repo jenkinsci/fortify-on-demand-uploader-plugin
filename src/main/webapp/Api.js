@@ -122,6 +122,16 @@ class Api {
         });
     }
 
+    getReleaseEntitlementSettings(releaseId, customAuth) {
+        return new Promise((res, rej) => {
+            this.descriptor.getReleaseEntitlementSettings(releaseId,  customAuth, async t => {
+                const responseJSON = JSON.parse(t.responseJSON);
+
+                return res(responseJSON);
+            });
+        });
+    }
+
     //</editor-fold>
 
     isAuthError(err) {

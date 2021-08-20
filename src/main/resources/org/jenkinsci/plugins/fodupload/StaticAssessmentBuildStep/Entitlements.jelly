@@ -21,6 +21,7 @@
             <f:block>
 
                 <div id="releaseNotSelected">Select a release</div>
+                <div id="fode-error">Error</div>
 
                 <!--  Move to other section? -->
 <!--                <f:entry title="Scan Central Build Type" field="selectedScanCentralBuildType">-->

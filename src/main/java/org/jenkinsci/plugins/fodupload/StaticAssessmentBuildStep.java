@@ -502,7 +502,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 return null;
             }
         }
-        
+
+        // ToDo: This is a mock, get rid of it
+        @JavaScriptMethod
         public String getReleaseEntitlementSettings(int selectedReleaseId, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
