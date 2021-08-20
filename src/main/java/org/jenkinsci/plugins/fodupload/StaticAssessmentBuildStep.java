@@ -492,7 +492,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @JavaScriptMethod
         public String getReleaseEntitlementSettings(int selectedReleaseId, JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedUploadBuildStep.customFillEntitlementSettings(selectedReleaseId, authModel));
             }
             catch (Exception e) {
@@ -509,17 +509,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 StaticScanController staticScanController = new StaticScanController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(staticScanController.getStaticScanSettings(releaseId));
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-        
-        public String getReleaseEntitlementSettings(int selectedReleaseId, JSONObject authModelObject) {
-            try {
-                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillEntitlementSettings(selectedReleaseId, authModel));
             }
             catch (Exception e) {
                 e.printStackTrace();
