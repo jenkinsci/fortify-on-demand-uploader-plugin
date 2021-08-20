@@ -193,7 +193,13 @@ public class StaticScanController extends ControllerBase {
         return scanResults;
     }
 
-    public StaticScanSetupResponse getStaticScanSettings(final Integer releaseId) throws IOException {
+    /**
+     *
+     * @deprecated
+     * Use the {@link StaticScanController#getStaticScanSettings} method instead
+     */
+    @Deprecated
+    public StaticScanSetupResponse getStaticScanSettingsOld(final Integer releaseId) throws IOException {
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
 
@@ -223,5 +229,19 @@ public class StaticScanController extends ControllerBase {
         StaticScanSetupResponse result = gson.fromJson(content, t);
 
         return result;
+    }
+
+    public StaticScanSetupResponse getStaticScanSettings(final Integer releaseId) throws IOException {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments(String.format("/api/v3/releases/%d/static-scans/scan-setup", releaseId));
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .get()
+                .build();
+
+        return apiConnection.requestTyped(request, new TypeToken<StaticScanSetupResponse>(){}.getType());
     }
 }

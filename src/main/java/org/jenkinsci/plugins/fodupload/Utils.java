@@ -21,8 +21,10 @@ import java.util.regex.Pattern;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 
+import net.sf.json.JSONObject;
 import okhttp3.Response;
 import org.apache.http.HttpStatus;
+import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.response.ApplicationApiResponse;
 import org.jenkinsci.plugins.fodupload.models.response.MicroserviceApiResponse;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseApiResponse;
@@ -209,5 +211,16 @@ public class Utils {
     }
     public static List<String> unexpectedServerResponseErrors() {
         return unexpectedErrorResponseErrors;
+    }
+
+    public static AuthenticationModel getAuthModelFromObject(JSONObject authModelObject) {
+        AuthenticationModel authModel = new AuthenticationModel(false, null, null, null);
+        if (authModelObject.getBoolean("overrideGlobalAuth")) {
+            authModel = AuthenticationModel.fromPersonalAccessToken(
+                    authModelObject.getString("username"),
+                    authModelObject.getString("accessTokenKey"),
+                    authModelObject.getString("tenantId"));
+        }
+        return authModel;
     }
 }

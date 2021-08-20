@@ -20,6 +20,9 @@ import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
+import org.jenkinsci.plugins.fodupload.controllers.AssessmentTypesController;
+import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
+import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.controllers.UsersController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
@@ -57,6 +60,13 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String tenantId,
                                      boolean purchaseEntitlements,
                                      String entitlementPreference,
+                                     String assessmentTypeId,
+                                     String entitlementId,
+                                     String entitlementFrequencyType,
+                                     String technologyStackId,
+                                     String languageLevelId,
+                                     boolean performOpenSourceAnalysis,
+                                     String auditPreferenceType,
                                      String srcLocation,
                                      String remediationScanPreferenceType,
                                      String inProgressScanActionType,
@@ -66,7 +76,10 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String userSelectedMicroservice,
                                      String userSelectedRelease,
                                      String selectedScanCentralBuildType) {
-                                         
+
+        FodApiConnection apiConnection = getApiConnection(overrideGlobalConfig, username, personalAccessToken, tenantId);
+        saveReleaseSettings(apiConnection, purchaseEntitlements, entitlementPreference, assessmentTypeId, entitlementFrequencyType, technologyStackId, languageLevelId, performOpenSourceAnalysis, auditPreferenceType);
+
         if(selectedReleaseType != null && selectedReleaseType.equals(FodEnums.SelectedReleaseType.UseAppAndReleaseName.getValue()) && !userSelectedRelease.isEmpty()) {
                 releaseId = userSelectedRelease;
         }
@@ -96,6 +109,18 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
     }
 
+    private FodApiConnection getApiConnection(boolean overrideGlobalConfig, String username, String personalAccessToken, String tenantId) {
+        AuthenticationModel authModel = new AuthenticationModel(false, null, null, null);
+        if (overrideGlobalConfig) {
+            authModel = AuthenticationModel.fromPersonalAccessToken(username, personalAccessToken, tenantId);
+        }
+
+        return ApiConnectionFactory.createApiConnection(authModel);
+    }
+
+    private void saveReleaseSettings(FodApiConnection apiConnection, boolean purchaseEntitlements, String entitlementPreference, String assessmentTypeId, String entitlementFrequencyType, String technologyStackId, String languageLevelId, boolean performOpenSourceAnalysis, String auditPreferenceType) {
+
+    }
 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -108,7 +133,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
 
-                            PrintStream log = listener.getLogger();
+        PrintStream log = listener.getLogger();
         build.addAction(new CrossBuildAction());
         try{build.save();} catch(IOException ex){log.println("Error saving settings. Error message: " + ex.toString());}
 
@@ -325,7 +350,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @JavaScriptMethod
         public String submitCreateApplication(JSONObject formObject, JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedCreateApplicationForm.submitCreateApplication(authModel, formObject));
             }
             catch (Exception e) {
@@ -337,7 +362,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @JavaScriptMethod
         public String submitCreateMicroservice(JSONObject formObject, JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedCreateApplicationForm.submitCreateMicroservice(authModel, formObject));
             }
             catch (Exception e) {
@@ -349,7 +374,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @JavaScriptMethod
         public String submitCreateRelease(JSONObject formObject, JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedCreateApplicationForm.submitCreateRelease(authModel, formObject));
             }
             catch (Exception e) {
@@ -361,7 +386,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @JavaScriptMethod
         public String retrieveApplicationList(String searchTerm, int offset, int limit, JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedApplicationList(searchTerm, offset, limit, authModel));
             }
             catch (Exception e) {
@@ -373,7 +398,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @JavaScriptMethod
         public String retrieveApplicationById(int applicationId, JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserApplicationById(applicationId, authModel));
             }
             catch (Exception e) {
@@ -385,7 +410,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @JavaScriptMethod
         public String retrieveMicroserviceList(int selectedApplicationId, JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedMicroserviceList(selectedApplicationId, authModel));
             }
             catch (Exception e) {
@@ -397,7 +422,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @JavaScriptMethod
         public String retrieveReleaseList(int selectedApplicationId, int microserviceId, String searchTerm, int offset, int limit, JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserSelectedReleaseList(selectedApplicationId, microserviceId, searchTerm, offset, limit, authModel));
             }
             catch (Exception e) {
@@ -409,7 +434,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @JavaScriptMethod
         public String retrieveReleaseById(int releaseId, JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 return Utils.createResponseViewModel(SharedUploadBuildStep.customFillUserReleaseById(releaseId, authModel));
             }
             catch (Exception e) {
@@ -421,7 +446,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         @JavaScriptMethod
         public String retrieveCurrentUserSession(JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
                 UsersController usersController = new UsersController(apiConnection, null, Utils.createCorrelationId());
 
@@ -432,11 +457,15 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 return null;
             }
         }
-        
-        public String getReleaseEntitlementSettings(int selectedReleaseId, JSONObject authModelObject) {
+
+        @JavaScriptMethod
+        public String retrieveAssessmentTypeEntitlements(Integer releaseId, JSONObject authModelObject) {
             try {
-                AuthenticationModel authModel = getAuthModelFromObject(authModelObject);
-                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillEntitlementSettings(selectedReleaseId, authModel));
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                AssessmentTypesController assessmentTypesController = new AssessmentTypesController(apiConnection, null, Utils.createCorrelationId());
+
+                return Utils.createResponseViewModel(assessmentTypesController.getStaticAssessmentTypeEntitlements(releaseId));
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -444,15 +473,45 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             }
         }
 
-        private AuthenticationModel getAuthModelFromObject(JSONObject authModelObject) {
-            AuthenticationModel authModel = new AuthenticationModel(false, null, null, null);
-            if (authModelObject.getBoolean("overrideGlobalAuth")) {
-                authModel = AuthenticationModel.fromPersonalAccessToken(
-                        authModelObject.getString("username"),
-                        authModelObject.getString("accessTokenKey"),
-                        authModelObject.getString("tenantId"));
+        @JavaScriptMethod
+        public String retrieveLookupItems(String type, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                LookupItemsController lookupItemsController = new LookupItemsController(apiConnection, null, Utils.createCorrelationId());
+
+                return Utils.createResponseViewModel(lookupItemsController.getLookupItems(FodEnums.APILookupItemTypes.valueOf(type)));
             }
-            return authModel;
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @JavaScriptMethod
+        public String retrieveStaticScanSettings(Integer releaseId, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                StaticScanController staticScanController = new StaticScanController(apiConnection, null, Utils.createCorrelationId());
+
+                return Utils.createResponseViewModel(staticScanController.getStaticScanSettings(releaseId));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        
+        public String getReleaseEntitlementSettings(int selectedReleaseId, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillEntitlementSettings(selectedReleaseId, authModel));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 

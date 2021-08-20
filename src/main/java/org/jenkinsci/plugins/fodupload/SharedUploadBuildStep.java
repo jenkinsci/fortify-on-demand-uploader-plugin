@@ -372,7 +372,7 @@ public class SharedUploadBuildStep {
                     model.loadBsiToken();
                     technologyStack = model.getBsiToken().getTechnologyStack();
                 } else {
-                    staticScanSetup = staticScanController.getStaticScanSettings(releaseId);
+                    staticScanSetup = staticScanController.getStaticScanSettingsOld(releaseId);
                     if (staticScanSetup == null) {
                         logger.println("No scan settings defined for release " + releaseId.toString());
                         build.setResult(Result.FAILURE);
