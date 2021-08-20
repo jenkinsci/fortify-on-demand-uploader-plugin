@@ -4,36 +4,19 @@
     <f:block>
 
         <style>
-            .fode-edit {
-            display: none;
-            }
 
-            .fode-view {
-            display: none;
-            }
-
-            .fode-checkbox {
-            display: none;
-            }
         </style>
 
-        <f:section title="Entitlement Options">
+        <f:section title="Scan Settings">
             <f:block>
 
                 <div id="releaseNotSelected">Select a release</div>
-                <div id="fode-error">Error</div>
+                <div id="fode-error" style="display: none">Error</div>
 
-                <!--  Move to other section? -->
+                <!--  ToDo: Move down and control Tech Type -->
 <!--                <f:entry title="Scan Central Build Type" field="selectedScanCentralBuildType">-->
 <!--                    <f:select id="scanCentralBuildTypeSelectList"/>-->
 <!--                </f:entry>-->
-
-                <f:entry>
-                    <label>
-                        <input type="checkbox" name="overrideRelease" id="cbOverrideRelease"/>
-                        Override Release Settings
-                    </label>
-                </f:entry>
 
                 <f:entry title="Assessment Type">
                     <div id="assessmentTypeForm" class="fode-field spinner-container fode-required">
@@ -41,9 +24,6 @@
                             <select name="userSelectedAssessmentType" id="ddAssessmentType">
                                 <option value="">Select an Assessment Type</option>
                             </select>
-                        </div>
-                        <div class="fode-view">
-                            <div></div>
                         </div>
                     </div>
                 </f:entry>
@@ -54,9 +34,6 @@
                             <select name="userSelectedEntitlement" id="entitlementSelectList">
                                 <option value="">Select an Entitlement</option>
                             </select>
-                        </div>
-                        <div class="fode-view">
-                            <div></div>
                         </div>
                     </div>
                 </f:entry>
@@ -69,9 +46,6 @@
                                 <option value="1">Placeholder</option>
                             </select>
                         </div>
-                        <div class="fode-view">
-                            <div></div>
-                        </div>
                     </div>
                 </f:entry>
 
@@ -83,9 +57,6 @@
                                 <option value="1">Placeholder</option>
                             </select>
                         </div>
-                        <div class="fode-view">
-                            <div></div>
-                        </div>
                     </div>
                 </f:entry>
 
@@ -95,9 +66,6 @@
                             <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">
                                 <option value="">Select an Audit Preference</option>
                             </select>
-                        </div>
-                        <div class="fode-view">
-                            <div></div>
                         </div>
                     </div>
                 </f:entry>
