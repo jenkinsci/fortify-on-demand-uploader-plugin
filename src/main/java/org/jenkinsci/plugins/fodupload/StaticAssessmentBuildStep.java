@@ -488,19 +488,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             }
         }
 
-        // ToDo: This is a mock, get rid of it
-        @JavaScriptMethod
-        public String getReleaseEntitlementSettings(int selectedReleaseId, JSONObject authModelObject) {
-            try {
-                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillEntitlementSettings(selectedReleaseId, authModel));
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
         @JavaScriptMethod
         public String retrieveStaticScanSettings(Integer releaseId, JSONObject authModelObject) {
             try {
@@ -509,6 +496,19 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 StaticScanController staticScanController = new StaticScanController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(staticScanController.getStaticScanSettings(releaseId));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        // ToDo: This is a mock, get rid of it
+        @JavaScriptMethod
+        public String getReleaseEntitlementSettings(int selectedReleaseId, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedUploadBuildStep.customFillEntitlementSettings(selectedReleaseId, authModel));
             }
             catch (Exception e) {
                 e.printStackTrace();
