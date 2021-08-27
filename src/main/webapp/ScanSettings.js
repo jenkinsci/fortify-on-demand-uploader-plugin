@@ -7,9 +7,25 @@ class ScanSettings {
     constructor() {
         this.api = new Api(instance, descriptor);
         this.uiLoaded = false;
+        this.techStacks = {};
+        this.techStacksSorted = [];
         subscribeToEvent('releaseChanged', p => this.loadEntitlementSettings(p.detail));
     }
 
+    showMessage(msg, isError) {
+        let msgElem;
+
+        if (isError) msgElem = jq('#fode-error');
+        else msgElem = jq('#fode-msg');
+
+        msgElem.text(msg);
+        msgElem.show();
+    }
+
+    hideMessages(msg) {
+        jq('#fode-error').hide();
+        jq('#fode-msg').hide();
+    }
 
     setSelectValues(id, selected, options) {
         let select = jq(`#${id} .fode-edit > select`);
@@ -24,21 +40,46 @@ class ScanSettings {
         select.val(selected);
     }
 
+    populateAssessmentsDropdown() {
+        let atsel = jq(`#ddAssessmentType`);
+
+        atsel.find('option').remove();
+        jq(`#entitlementSelectList`).find('option').remove();
+
+        for (let k of Object.keys(this.assessments)) {
+            let at = this.assessments[k];
+
+            atsel.append(`<option value="${at.id}">${at.name}</option>`);
+        }
+    }
+
+    onAssessmentChanged() {
+        let atval = jq(`#ddAssessmentType`).val();
+        let entsel = jq(`#entitlementSelectList`);
+        let at = this.assessments[atval];
+
+        entsel.find('option').remove();
+
+        if (at) {
+            for (let e of at.entitlementsSorted) {
+                entsel.append(`<option value="${e.id}">${e.description}</option>`);
+            }
+        }
+    }
+
     async loadEntitlementSettings(releaseChangedPayload) {
         if (!this.uiLoaded) {
-            setTimeout(_ => this.loadEntitlementSettings(releaseChangedPayload), 500);
+            this.deferredLoadEntitlementSettings = _ => this.loadEntitlementSettings(releaseChangedPayload);
             return;
-        }
+        } else this.deferredLoadEntitlementSettings = null;
 
         let rows = jq(fodeRowSelector);
 
-        jq('#releaseNotSelected').hide();
-        jq('#releaseInBsi').hide();
-        jq('#fode-error').hide();
         rows.hide();
+        this.hideMessages();
 
         if (releaseChangedPayload && releaseChangedPayload.mode === ReleaseSetMode.bsiToken) {
-            jq('#releaseInBsi').show();
+            this.showMessage('Settings defined in BSI Token');
             return;
         }
 
@@ -52,35 +93,40 @@ class ScanSettings {
             this.setScanCentralVisibility();
             fields.addClass('spinner');
 
-            let r = await this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo());
+            // ToDo: deal with overlapping calls
+            let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo())
+                .then(r => this.scanSettings = r);
+            let entp = this.api.getAssessmentTypeEntitlements(releaseId, getAuthInfo())
+                .then(r => this.assessments = r);
 
-            if (r) {
-                this.setSelectValues('assessmentTypeForm', r.assessmentType, r.assessmentTypes);
-                this.setSelectValues('entitlementForm', r.entitlement, r.entitlements);
-                this.setSelectValues('technologyStackForm', r.technologyStack, null);
-                this.setSelectValues('languageLevelForm', r.languageLevel, null);
-                this.setSelectValues('auditPreferenceForm', r.auditPreference, r.auditPreferences);
-                jq('#sonatypeForm').prop('checked', r.sonatypeScan === true);
 
-                jq('#cbOverrideRelease').val(false);
+            await Promise.all([ssp, entp]);
+
+            if (this.scanSettings && this.assessments) {
+                let assessmentId = this.scanSettings.assessmentTypeId;
+                let entitlementId = this.scanSettings.entitlementId;
+
+                this.populateAssessmentsDropdown();
+
+                jq('#assessmentTypeForm').val(assessmentId);
+                this.onAssessmentChanged();
+                jq('#entitlementForm').val(entitlementId);
+                jq('#technologyStackForm').val(this.scanSettings.technologyStackId);
+                jq('#languageLevelForm').val(this.scanSettings.languageLevelId);
+                jq('#auditPreferenceForm').val(this.scanSettings.auditPreferenceTypeId);
+                jq('#sonatypeForm').prop('checked', this.scanSettings.performOpenSourceAnalysis === true);
+
+                this.onTechStackChange();
             } else {
-                // ToDo: Write some useful error message
-                jq('#fode-error').show();
+                if (releaseChangedPayload.mode === ReleaseSetMode.releaseSelect) this.showMessage('Select a release');
+                else this.showMessage('Enter a release id');
                 rows.hide();
             }
         } else {
-            jq('#releaseNotSelected').show();
+            this.showMessage('Failed to retrieve scan settings from API', true);
         }
 
         fields.removeClass('spinner');
-    }
-
-    getValidationErrRow(row) {
-        let vtr = nextRow(row);
-
-        if (vtr.length > 0 && vtr.hasClass('validation-error-area')) return vtr;
-
-        return null;
     }
 
     setScanCentralVisibility() {
@@ -101,17 +147,83 @@ class ScanSettings {
                     if (jqe.hasClass(scClass)) jqe.show();
                     else jqe.hide();
                 });
+
+            if (val === 'msbuild') {
+                closestRow(jq('#technologyStackForm')).show();
+                jq('#technologyStackSelectList').val('.Net');
+                this.onTechStackChange();
+            }
         }
     }
 
-    init() {
+    populateTechStackDropdown(filter) {
+        let tsSel = jq('#technologyStackSelectList');
+        let currVal = tsSel.val();
+        let currValSelected = false;
+
+        tsSel.find('option').not(':first').remove();
+        tsSel.find('option').first().prop('selected', true);
+
+
+        for (let ts of this.techStacksSorted) {
+            if (filter && filter(ts) !== true) continue;
+
+            // noinspection EqualityComparisonWithCoercionJS
+            if (currVal == ts.value) {
+                currValSelected = true;
+                tsSel.append(`<option value="${ts.value}" selected>${ts.text}</option>`);
+            } else tsSel.append(`<option value="${ts.value}">${ts.text}</option>`);
+        }
+
+        if (!currValSelected) {
+            tsSel.find('option').first().prop('selected', true);
+            this.onTechStackChange();
+        }
+    }
+
+    onTechStackChange() {
+        let ts = this.techStacks[jq('#technologyStackSelectList').val()];
+        let llsel = jq('#languageLevelSelectList');
+
+        llsel.find('option').not(':first').remove();
+        llsel.find('option').first().prop('selected', true);
+
+        if (!ts) return;
+
+        for (let ll of ts.levels) {
+            llsel.append(`<option value="${ll}">${ll}</option>`);
+        }
+    }
+
+    async init() {
+        try {
+            this.techStacks = await this.api.getTechStacks(getAuthInfo());
+            for (let k of Object.keys(this.techStacks)) {
+                this.techStacksSorted.push(this.techStacks[k]);
+            }
+
+            this.techStacksSorted = this.techStacksSorted.sort((a, b) => a.text.toLowerCase() < b.text.toLowerCase() ? -1 : 1);
+        } catch (err) {
+            if (this.api.isAuthError(err)) {
+                this.unsubInit = () => this.init();
+                subscribeToEvent('authInfoChanged', this.unsubInit);
+            } else {
+                this.showMessage('Unhandled error, please reload page', true);
+            }
+            return;
+        }
+
+        this.hideMessages();
+        if (this.unsubInit) unsubscribeEvent('authInfoChanged', this.unsubInit);
+
         jq('.fode-field')
             .each((i, e) => {
                 let jqe = jq(e);
                 let tr = closestRow(jqe);
 
                 tr.addClass('fode-field-row');
-                let vtr = this.getValidationErrRow(tr);
+                // ToDo: run this in other Jenkins version to make sure not broken
+                let vtr = getValidationErrRow(tr);
 
                 if (vtr) vtr.addClass('fode-field-row-verr');
             });
@@ -132,7 +244,7 @@ class ScanSettings {
 
                         // Copy Scan Central css classes to validation-error-area rows
                         if (c.startsWith('fode-row-sc') || c === 'fode-row-nonsc') {
-                            let vtr = this.getValidationErrRow(tr);
+                            let vtr = getValidationErrRow(tr);
 
                             if (vtr) vtr.addClass(c);
                         }
@@ -143,15 +255,19 @@ class ScanSettings {
         jq('#scanCentralBuildTypeForm > select')
             .change(_ => this.setScanCentralVisibility());
 
-        this.setScanCentralVisibility();
+        jq('#technologyStackSelectList')
+            .change(_ => this.onTechStackChange());
+
+        this.populateTechStackDropdown();
+
+        this.uiLoaded = true;
+        if (this.deferredLoadEntitlementSettings) this.deferredLoadEntitlementSettings();
+        else this.setScanCentralVisibility();
     }
 
 }
 
 const scanSettings = new ScanSettings();
 
-spinAndWait(() => {
-    scanSettings.uiLoaded = jq('#sonatypeForm').val() !== undefined && jq('#scanCentralBuildTypeForm > select').val();
-
-    return scanSettings.uiLoaded;
-}).then(scanSettings.init.bind(scanSettings));
+spinAndWait(() => jq('#sonatypeForm').val() !== undefined && jq('#scanCentralBuildTypeForm > select').val())
+    .then(scanSettings.init.bind(scanSettings));

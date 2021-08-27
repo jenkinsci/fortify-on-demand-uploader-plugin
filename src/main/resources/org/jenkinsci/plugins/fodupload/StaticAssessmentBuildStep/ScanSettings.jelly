@@ -9,15 +9,15 @@
 
         <f:section title="Scan Settings">
             <f:block>
-                <div id="releaseNotSelected">Select a release</div>
-                <div id="releaseInBsi"  style="display: none">Settings defined in BSI Token</div>
+                <div id="fode-msg">Select a release</div>
                 <div id="fode-error" style="display: none">Error</div>
 
+                <!-- ToDo: Add names to elements with values needing saving to API                -->
                 <f:entry title="Assessment Type">
                     <div id="assessmentTypeForm" class="fode-field spinner-container fode-required">
                         <div class="fode-edit">
                             <select name="userSelectedAssessmentType" id="ddAssessmentType">
-                                <option value="">Select an Assessment Type</option>
+                                <option value="-1">Select an Assessment Type</option>
                             </select>
                         </div>
                     </div>
@@ -27,11 +27,13 @@
                     <div id="entitlementForm" class="fode-field spinner-container fode-required">
                         <div class="fode-edit">
                             <select name="userSelectedEntitlement" id="entitlementSelectList">
-                                <option value="">Select an Entitlement</option>
+                                <option value="-1">Select an Entitlement</option>
                             </select>
                         </div>
                     </div>
                 </f:entry>
+
+                <input type="textbox" name="userSelectedFrequencyType" style="display: none"></input>
 
                 <f:entry title="Scan Central Build Type" field="selectedScanCentralBuildType">
                     <div id="scanCentralBuildTypeForm" class="fode-field spinner-container">
@@ -85,8 +87,7 @@
                     <div id="technologyStackForm" class="fode-field spinner-container fode-required fode-row-nonsc">
                         <div class="fode-edit">
                             <select name="userSelectedTechnologyStack" id="technologyStackSelectList">
-                                <option value="">Select a Technology Stack</option>
-                                <option value="1">Placeholder</option>
+                                <option value="-1">Select a Technology Stack</option>
                             </select>
                         </div>
                     </div>
@@ -96,8 +97,7 @@
                     <div id="languageLevelForm" class="fode-field spinner-container fode-required">
                         <div class="fode-edit">
                             <select name="userSelectedLanguageLevel" id="languageLevelSelectList">
-                                <option value="">Select a Language Level</option>
-                                <option value="1">Placeholder</option>
+                                <option value="-1">Select a Language Level</option>
                             </select>
                         </div>
                     </div>
@@ -107,7 +107,8 @@
                     <div id="auditPreferenceForm" class="fode-field spinner-container fode-required">
                         <div class="fode-edit">
                             <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">
-                                <option value="">Select an Audit Preference</option>
+                                <option value="2">Automated</option>
+                                <option value="1">Manual</option>
                             </select>
                         </div>
                     </div>

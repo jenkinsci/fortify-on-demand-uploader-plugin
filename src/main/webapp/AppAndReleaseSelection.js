@@ -10,7 +10,6 @@ class AppAndReleaseSelection {
 
     constructor() {
         this.api = new Api(instance, descriptor);
-        this.releaseIdPreviousValue = null;
     }
 
     //<editor-fold desc="Init">
@@ -22,11 +21,8 @@ class AppAndReleaseSelection {
         jq('#appAndReleaseNameErrorView').hide();
     }
 
-    onReleaseIdFieldChanged(newVal) {
-        if (newVal !== this.releaseIdPreviousValue) {
-            dispatchEvent('releaseChanged', {releaseId: newVal, mode: ReleaseSetMode.releaseId});
-            this.releaseIdPreviousValue = newVal;
-        }
+    onReleaseIdFieldChanged() {
+        dispatchEvent('releaseChanged', {releaseId: jq('#releaseIdField').val(), mode: ReleaseSetMode.releaseId});
     }
 
     onReleaseMethodSelection() {
@@ -41,7 +37,10 @@ class AppAndReleaseSelection {
                 this.initReleaseId();
                 break;
             case "UseAppAndReleaseName":
-                this.catchAuthError(() => this.initAppAndReleaseSelection(true));
+                this.catchAuthError(
+                    () => this.initAppAndReleaseSelection(true),
+                    _ => dispatchEvent('releaseChanged', {mode: ReleaseSetMode.releaseSelect})
+                );
                 break;
         }
     }
@@ -58,14 +57,10 @@ class AppAndReleaseSelection {
     async initReleaseId() {
         const savedReleaseId = await this.api.getSavedReleaseId();
 
-        this.releaseIdPreviousValue = null;
-
-        if (savedReleaseId) {
-            jq('#releaseIdField').val(savedReleaseId);
-            dispatchEvent('releaseChanged', {releaseId: savedReleaseId, mode: ReleaseSetMode.releaseId});
-        } else dispatchEvent('releaseChanged', {mode: ReleaseSetMode.releaseId});
+        if (savedReleaseId) jq('#releaseIdField').val(savedReleaseId);
 
         jq('.releaseIdView').show();
+        this.onReleaseIdFieldChanged();
     }
 
     async initAppAndReleaseSelection() {
@@ -166,7 +161,7 @@ class AppAndReleaseSelection {
         return prevReleaseId;
     }
 
-    async catchAuthError(op) {
+    async catchAuthError(op, onCatch) {
         try {
             await op();
         } catch (err) {
@@ -175,6 +170,7 @@ class AppAndReleaseSelection {
             } else {
                 throw err;
             }
+
         }
     }
 
@@ -186,7 +182,10 @@ class AppAndReleaseSelection {
         const viewChoice = jq('#releaseTypeSelectList').val();
 
         if (viewChoice == "UseAppAndReleaseName") {
-            this.catchAuthError(() => this.initAppAndReleaseSelection(true));
+            this.catchAuthError(
+                () => this.initAppAndReleaseSelection(true),
+                _ => dispatchEvent('releaseChanged', {mode: ReleaseSetMode.releaseSelect})
+            );
         }
     }
 
@@ -261,7 +260,7 @@ class AppAndReleaseSelection {
         this.fEntriesIdPlacement();
         this.onReleaseMethodSelection();
         jq('#releaseTypeSelectList').off('change').change(() => this.onReleaseMethodSelection());
-        jq('#releaseIdField').focusout(_ => this.onReleaseIdFieldChanged(jq('#releaseIdField').val()));
+        jq('#releaseIdField').off('change').change(_ => this.onReleaseIdFieldChanged());
 
         subscribeToEvent('authInfoChanged', () => this.onCredsChanged());
         subscribeToEvent('dialogSelectedApplication', e => this.onAppSelectedFromDialog(e.detail.applicationId, e.detail.applicationName, e.detail.hasMicroservices));

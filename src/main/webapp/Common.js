@@ -9,6 +9,10 @@ function subscribeToEvent(type, cb) {
     document.addEventListener(type, cb);
 }
 
+function unsubscribeEvent(type, cb) {
+    document.removeEventListener(type, cb);
+}
+
 function debounce(func, wait, immediate) {
     var timeout;
     return function () {
@@ -52,6 +56,13 @@ function nextRow(elem) {
     return elem.is('tr') ? elem.next('tr') : elem.next('.tr') ;
 }
 
+function getValidationErrRow(row) {
+    let vtr = nextRow(row);
+
+    if (vtr.length > 0 && vtr.hasClass('validation-error-area')) return vtr;
+
+    return null;
+}
 function createDialog(dialog) {
     spinAndWait(() => jq('#' + dialog._formId).html())
         .then(() => dialog.init());

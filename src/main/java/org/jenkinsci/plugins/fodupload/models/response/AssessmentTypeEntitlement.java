@@ -1,6 +1,9 @@
 package org.jenkinsci.plugins.fodupload.models.response;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class AssessmentTypeEntitlement {
 
@@ -10,14 +13,17 @@ public class AssessmentTypeEntitlement {
     private String frequencyType;
     private Integer units;
     private Integer unitsAvailable;
-    private Calendar subscriptionEndDate;
+    private String subscriptionEndDate;
     private Boolean isRemediation;
     private Integer remediationScansAvailable;
     private Boolean isBundledAssessment;
     private Integer parentAssessmentTypeId;
     private String entitlementDescription;
 
-    public AssessmentTypeEntitlement(Integer assessmentTypeId, String name, Integer entitlementId, String frequencyType, Integer units, Integer unitsAvailable, Calendar subscriptionEndDate, Boolean isRemediation, Integer remediationScansAvailable, Boolean isBundledAssessment, Integer parentAssessmentTypeId, String entitlementDescription) {
+    public AssessmentTypeEntitlement(Integer assessmentTypeId, String name, Integer entitlementId, String frequencyType, Integer units,
+                                     Integer unitsAvailable, String subscriptionEndDate, Boolean isRemediation, Integer remediationScansAvailable,
+                                     Boolean isBundledAssessment, Integer parentAssessmentTypeId, String entitlementDescription)
+    {
         this.assessmentTypeId = assessmentTypeId;
         this.name = name;
         this.entitlementId = entitlementId;
@@ -56,7 +62,7 @@ public class AssessmentTypeEntitlement {
         return unitsAvailable;
     }
 
-    public Calendar getSubscriptionEndDate() {
+    public String getSubscriptionEndDate() {
         return subscriptionEndDate;
     }
 
