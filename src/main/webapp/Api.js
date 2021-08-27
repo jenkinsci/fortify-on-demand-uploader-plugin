@@ -156,6 +156,7 @@ class Api {
                         let entitlement = {
                             id: ae.entitlementId,
                             frequency: ae.frequencyType,
+                            frequencyId: ae.frequencyTypeId,
                             units: ae.units,
                             unitsAvailable: ae.unitsAvailable,
                             subscriptionEndDate: Date.parse(ae.subscriptionEndDate),
@@ -221,7 +222,7 @@ class Api {
                         for (let ll of langLevels) {
                             let tt = result[ll.group];
 
-                            if (tt) tt.levels.push(ll.value);
+                            if (tt) tt.levels.push(ll);
                         }
 
                         res(result);

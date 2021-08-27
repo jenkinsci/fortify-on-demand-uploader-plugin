@@ -1,6 +1,14 @@
 jq = jQuery;
 
 const fodeRowSelector = '.fode-field-row, .fode-field-row-verr';
+const techStackConsts = {
+    none: -1,
+    dotNet: 1,
+    dotNetCore: 23,
+    java: 7,
+    php: 9,
+    python: 10
+};
 
 class ScanSettings {
 
@@ -62,9 +70,10 @@ class ScanSettings {
 
         if (at) {
             for (let e of at.entitlementsSorted) {
-                entsel.append(`<option value="${e.id}">${e.description}</option>`);
+                entsel.append(`<option value="${this.getEntitlementDropdownValue(e.id, e.frequencyId)}">${e.description}</option>`);
             }
         }
+        // ToDo: set to unselected if selected value doesn't exist
     }
 
     async loadEntitlementSettings(releaseChangedPayload) {
@@ -90,7 +99,7 @@ class ScanSettings {
 
         if (Number.isInteger(releaseId) && releaseId > 0) {
             rows.show();
-            this.setScanCentralVisibility();
+            this.onScanCentralChanged();
             fields.addClass('spinner');
 
             // ToDo: deal with overlapping calls
@@ -108,15 +117,15 @@ class ScanSettings {
 
                 this.populateAssessmentsDropdown();
 
-                jq('#assessmentTypeForm').val(assessmentId);
+                jq('#ddAssessmentType').val(assessmentId);
                 this.onAssessmentChanged();
-                jq('#entitlementForm').val(entitlementId);
-                jq('#technologyStackForm').val(this.scanSettings.technologyStackId);
-                jq('#languageLevelForm').val(this.scanSettings.languageLevelId);
-                jq('#auditPreferenceForm').val(this.scanSettings.auditPreferenceTypeId);
-                jq('#sonatypeForm').prop('checked', this.scanSettings.performOpenSourceAnalysis === true);
-
+                jq('#entitlementSelectList').val(this.getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
+                jq('#technologyStackSelectList').val(this.scanSettings.technologyStackId);
                 this.onTechStackChange();
+                jq('#languageLevelSelectList').val(this.scanSettings.languageLevelId);
+                jq('#auditPreferenceSelectList').val(this.scanSettings.auditPreferenceType);
+                jq('#cbSonatypeEnabled').prop('checked', this.scanSettings.performOpenSourceAnalysis === true);
+
             } else {
                 if (releaseChangedPayload.mode === ReleaseSetMode.releaseSelect) this.showMessage('Select a release');
                 else this.showMessage('Enter a release id');
@@ -129,7 +138,12 @@ class ScanSettings {
         fields.removeClass('spinner');
     }
 
-    setScanCentralVisibility() {
+    isDotNetStack(ts) {
+        // noinspection EqualityComparisonWithCoercionJS
+        return ts.value == techStackConsts.dotNet || ts.value == techStackConsts.dotNetCore;
+    }
+
+    onScanCentralChanged() {
         let val = jq('#scanCentralBuildTypeForm > select').val().toLowerCase();
 
         if (val === 'none') {
@@ -148,11 +162,30 @@ class ScanSettings {
                     else jqe.hide();
                 });
 
-            if (val === 'msbuild') {
-                closestRow(jq('#technologyStackForm')).show();
-                jq('#technologyStackSelectList').val('.Net');
-                this.onTechStackChange();
+            let techStackFilter;
+
+            switch (val) {
+                case 'msbuild':
+                    closestRow(jq('#technologyStackForm')).show();
+                    let currVal = this.techStacks[jq('#technologyStackSelectList').val()];
+
+                    if (!this.isDotNetStack(currVal)) jq('#technologyStackSelectList').val(techStackConsts.none);
+                    techStackFilter = this.isDotNetStack;
+                    break;
+                case 'maven':
+                case 'gradle':
+                    jq('#technologyStackSelectList').val(techStackConsts.java);
+                    break;
+                case 'php':
+                    jq('#technologyStackSelectList').val(techStackConsts.php);
+                    break;
+                case 'python':
+                    jq('#technologyStackSelectList').val(techStackConsts.python);
+                    break;
             }
+
+            this.populateTechStackDropdown(techStackFilter)
+            this.onTechStackChange();
         }
     }
 
@@ -181,6 +214,10 @@ class ScanSettings {
         }
     }
 
+    getEntitlementDropdownValue(id, freq) {
+        return `${id}-${freq}`;
+    }
+
     onTechStackChange() {
         let ts = this.techStacks[jq('#technologyStackSelectList').val()];
         let llsel = jq('#languageLevelSelectList');
@@ -191,7 +228,7 @@ class ScanSettings {
         if (!ts) return;
 
         for (let ll of ts.levels) {
-            llsel.append(`<option value="${ll}">${ll}</option>`);
+            llsel.append(`<option value="${ll.value}">${ll.text}</option>`);
         }
     }
 
@@ -199,7 +236,16 @@ class ScanSettings {
         try {
             this.techStacks = await this.api.getTechStacks(getAuthInfo());
             for (let k of Object.keys(this.techStacks)) {
-                this.techStacksSorted.push(this.techStacks[k]);
+                let ts = this.techStacks[k];
+
+                // noinspection EqualityComparisonWithCoercionJS
+                if (ts.value == techStackConsts.dotNetCore) {
+                    for (let ll of ts.levels) {
+                        ll.text = ll.text.replace(' (.NET Core)','');
+                    }
+                }
+
+                this.techStacksSorted.push(ts);
             }
 
             this.techStacksSorted = this.techStacksSorted.sort((a, b) => a.text.toLowerCase() < b.text.toLowerCase() ? -1 : 1);
@@ -253,16 +299,19 @@ class ScanSettings {
             });
 
         jq('#scanCentralBuildTypeForm > select')
-            .change(_ => this.setScanCentralVisibility());
+            .change(_ => this.onScanCentralChanged());
 
         jq('#technologyStackSelectList')
             .change(_ => this.onTechStackChange());
+
+        jq('#ddAssessmentType')
+            .change(_ => this.onAssessmentChanged());
 
         this.populateTechStackDropdown();
 
         this.uiLoaded = true;
         if (this.deferredLoadEntitlementSettings) this.deferredLoadEntitlementSettings();
-        else this.setScanCentralVisibility();
+        else this.onScanCentralChanged();
     }
 
 }

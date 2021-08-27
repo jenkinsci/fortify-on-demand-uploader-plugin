@@ -11,6 +11,7 @@ public class AssessmentTypeEntitlement {
     private String name;
     private Integer entitlementId;
     private String frequencyType;
+    private Integer frequencyTypeId;
     private Integer units;
     private Integer unitsAvailable;
     private String subscriptionEndDate;
@@ -20,7 +21,7 @@ public class AssessmentTypeEntitlement {
     private Integer parentAssessmentTypeId;
     private String entitlementDescription;
 
-    public AssessmentTypeEntitlement(Integer assessmentTypeId, String name, Integer entitlementId, String frequencyType, Integer units,
+    public AssessmentTypeEntitlement(Integer assessmentTypeId, String name, Integer entitlementId, String frequencyType, Integer frequencyTypeId, Integer units,
                                      Integer unitsAvailable, String subscriptionEndDate, Boolean isRemediation, Integer remediationScansAvailable,
                                      Boolean isBundledAssessment, Integer parentAssessmentTypeId, String entitlementDescription)
     {
@@ -28,6 +29,7 @@ public class AssessmentTypeEntitlement {
         this.name = name;
         this.entitlementId = entitlementId;
         this.frequencyType = frequencyType;
+        this.frequencyTypeId = frequencyTypeId;
         this.units = units;
         this.unitsAvailable = unitsAvailable;
         this.subscriptionEndDate = subscriptionEndDate;
