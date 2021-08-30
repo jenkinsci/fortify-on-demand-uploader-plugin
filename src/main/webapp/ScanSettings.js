@@ -73,7 +73,26 @@ class ScanSettings {
                 entsel.append(`<option value="${this.getEntitlementDropdownValue(e.id, e.frequencyId)}">${e.description}</option>`);
             }
         }
+        this.onEntitlementChanged();
         // ToDo: set to unselected if selected value doesn't exist
+    }
+
+    onEntitlementChanged() {
+        let entId = '';
+        let freqId = '';
+        let val = jq('#entitlementSelectList').val();
+
+        if (val) {
+            let spl = val.split('-');
+
+            if (spl.length === 2){
+                entId = spl[0];
+                freqId = spl[1];
+            }
+        }
+
+        jq('#entitlementId').val(entId);
+        jq('#frequencyId').val(freqId);
     }
 
     async loadEntitlementSettings(releaseChangedPayload) {
@@ -120,17 +139,20 @@ class ScanSettings {
                 jq('#ddAssessmentType').val(assessmentId);
                 this.onAssessmentChanged();
                 jq('#entitlementSelectList').val(this.getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
+                this.onEntitlementChanged();
                 jq('#technologyStackSelectList').val(this.scanSettings.technologyStackId);
-                this.onTechStackChange();
+                this.onTechStackChanged();
                 jq('#languageLevelSelectList').val(this.scanSettings.languageLevelId);
                 jq('#auditPreferenceSelectList').val(this.scanSettings.auditPreferenceType);
                 jq('#cbSonatypeEnabled').prop('checked', this.scanSettings.performOpenSourceAnalysis === true);
 
             } else {
+                this.onAssessmentChanged();
                 this.showMessage('Failed to retrieve scan settings from API', true);
                 rows.hide();
             }
         } else {
+            this.onAssessmentChanged();
             if (releaseChangedPayload.mode === ReleaseSetMode.releaseSelect) this.showMessage('Select a release');
             else this.showMessage('Enter a release id');
         }
@@ -185,7 +207,7 @@ class ScanSettings {
             }
 
             this.populateTechStackDropdown(techStackFilter)
-            this.onTechStackChange();
+            this.onTechStackChanged();
         }
     }
 
@@ -210,7 +232,7 @@ class ScanSettings {
 
         if (!currValSelected) {
             tsSel.find('option').first().prop('selected', true);
-            this.onTechStackChange();
+            this.onTechStackChanged();
         }
     }
 
@@ -218,7 +240,7 @@ class ScanSettings {
         return `${id}-${freq}`;
     }
 
-    onTechStackChange() {
+    onTechStackChanged() {
         let ts = this.techStacks[jq('#technologyStackSelectList').val()];
         let llsel = jq('#languageLevelSelectList');
 
@@ -303,10 +325,13 @@ class ScanSettings {
             .change(_ => this.onScanCentralChanged());
 
         jq('#technologyStackSelectList')
-            .change(_ => this.onTechStackChange());
+            .change(_ => this.onTechStackChanged());
 
         jq('#ddAssessmentType')
             .change(_ => this.onAssessmentChanged());
+
+        jq('#entitlementSelectList')
+            .change(_ => this.onEntitlementChanged());
 
         this.populateTechStackDropdown();
 

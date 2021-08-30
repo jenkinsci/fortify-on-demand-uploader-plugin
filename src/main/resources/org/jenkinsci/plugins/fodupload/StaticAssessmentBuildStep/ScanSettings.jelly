@@ -4,7 +4,13 @@
     <f:block>
 
         <style>
+            #fode-error {
+            color: red;
+            }
 
+            .fode-row-hidden {
+                display: none;
+            }
         </style>
 
         <f:section title="Scan Settings">
@@ -33,8 +39,6 @@
                     </div>
                 </f:entry>
 
-                <input type="textbox" name="userSelectedFrequencyType" style="display: none"></input>
-
                 <f:entry title="Scan Central Build Type" field="selectedScanCentralBuildType">
                     <div id="scanCentralBuildTypeForm" class="fode-field spinner-container">
                         <f:select></f:select>
@@ -48,19 +52,22 @@
                 </f:entry>
 
                 <f:entry title="Skip Build" field="scanCentralSkipBuild">
-                    <div id="skipBuildForm" class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
+                    <div id="skipBuildForm"
+                         class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
                         <f:checkbox></f:checkbox>
                     </div>
                 </f:entry>
 
                 <f:entry title="Build Command" field="scanCentralBuildCommand">
-                    <div id="buildCommandForm" class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
+                    <div id="buildCommandForm"
+                         class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
                         <f:textbox></f:textbox>
                     </div>
                 </f:entry>
 
                 <f:entry title="Build File" field="scanCentralBuildFile">
-                    <div id="buildFileForm" class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
+                    <div id="buildFileForm"
+                         class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
                         <f:textbox></f:textbox>
                     </div>
                 </f:entry>
@@ -123,6 +130,12 @@
                     </div>
                 </f:entry>
 
+                <f:entry>
+                    <div id="hiddenFields" class="fode-field fode-row-hidden">
+                        <input type="textbox" name="userSelectedEntitlementId" id="entitlementId"></input>
+                        <input type="textbox" name="userSelectedFrequencyType" id="frequencyId"></input>
+                    </div>
+                </f:entry>
                 <!--                ToDo: remove these from backend and deal with adapting from existing config-->
                 <!--                <f:section title="Entitlement Options">-->
                 <!--                    <f:entry title="Entitlement Preference" field="entitlementPreference">-->
