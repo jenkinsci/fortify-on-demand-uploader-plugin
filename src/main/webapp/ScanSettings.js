@@ -98,9 +98,9 @@ class ScanSettings {
         releaseId = Number(releaseId);
 
         if (Number.isInteger(releaseId) && releaseId > 0) {
+            fields.addClass('spinner');
             rows.show();
             this.onScanCentralChanged();
-            fields.addClass('spinner');
 
             // ToDo: deal with overlapping calls
             let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo())
@@ -127,12 +127,12 @@ class ScanSettings {
                 jq('#cbSonatypeEnabled').prop('checked', this.scanSettings.performOpenSourceAnalysis === true);
 
             } else {
-                if (releaseChangedPayload.mode === ReleaseSetMode.releaseSelect) this.showMessage('Select a release');
-                else this.showMessage('Enter a release id');
+                this.showMessage('Failed to retrieve scan settings from API', true);
                 rows.hide();
             }
         } else {
-            this.showMessage('Failed to retrieve scan settings from API', true);
+            if (releaseChangedPayload.mode === ReleaseSetMode.releaseSelect) this.showMessage('Select a release');
+            else this.showMessage('Enter a release id');
         }
 
         fields.removeClass('spinner');
@@ -260,6 +260,7 @@ class ScanSettings {
         }
 
         this.hideMessages();
+        this.showMessage('Select a release');
         if (this.unsubInit) unsubscribeEvent('authInfoChanged', this.unsubInit);
 
         jq('.fode-field')
@@ -311,7 +312,6 @@ class ScanSettings {
 
         this.uiLoaded = true;
         if (this.deferredLoadEntitlementSettings) this.deferredLoadEntitlementSettings();
-        else this.onScanCentralChanged();
     }
 
 }
