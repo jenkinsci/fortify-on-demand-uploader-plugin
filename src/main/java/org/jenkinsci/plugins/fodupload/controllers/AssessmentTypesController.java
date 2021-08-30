@@ -19,7 +19,8 @@ public class AssessmentTypesController extends ControllerBase {
 
     public List<AssessmentTypeEntitlement> getStaticAssessmentTypeEntitlements(Integer releaseId) throws IOException {
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
-                .addPathSegments("/api/v3/releases/" + releaseId + "/assessment-types");
+                .addPathSegments("/api/v3/releases/" + releaseId + "/assessment-types")
+                .addQueryParameter("scanType","1");
 
         Request request = new Request.Builder()
                 .url(urlBuilder.build())

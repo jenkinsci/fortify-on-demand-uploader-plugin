@@ -1,0 +1,147 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+         xmlns:f="/lib/form">
+    <f:block>
+
+        <style>
+            #fode-error {
+            color: red;
+            }
+        </style>
+
+        <f:section title="Scan Settings">
+            <f:block>
+                <div id="fode-msg">Select a release</div>
+                <div id="fode-error" style="display: none">Error</div>
+
+                <!-- ToDo: Add names to elements with values needing saving to API                -->
+                <f:entry title="Assessment Type">
+                    <div id="assessmentTypeForm" class="fode-field spinner-container fode-required">
+                        <div class="fode-edit">
+                            <select name="userSelectedAssessmentType" id="ddAssessmentType">
+                                <option value="-1">Select an Assessment Type</option>
+                            </select>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Entitlement">
+                    <div id="entitlementForm" class="fode-field spinner-container fode-required">
+                        <div class="fode-edit">
+                            <select name="userSelectedEntitlement" id="entitlementSelectList">
+                                <option value="-1">Select an Entitlement</option>
+                            </select>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Scan Central Build Type" field="selectedScanCentralBuildType">
+                    <div id="scanCentralBuildTypeForm" class="fode-field spinner-container">
+                        <f:select></f:select>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Include Tests" field="scanCentralIncludeTests">
+                    <div id="includeTestsForm" class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-gradle fode-row-sc-maven">
+                        <f:checkbox></f:checkbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Skip Build" field="scanCentralSkipBuild">
+                    <div id="skipBuildForm"
+                         class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
+                        <f:checkbox></f:checkbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Build Command" field="scanCentralBuildCommand">
+                    <div id="buildCommandForm"
+                         class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
+                        <f:textbox></f:textbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Build File" field="scanCentralBuildFile">
+                    <div id="buildFileForm"
+                         class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
+                        <f:textbox></f:textbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Version" field="scanCentralBuildToolVersion">
+                    <div id="buildToolVersionForm" class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-php fode-row-sc-python">
+                        <f:textbox></f:textbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Virtual Env" field="scanCentralVirtualEnv">
+                    <div id="virtualEnvForm" class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-python">
+                        <f:textbox></f:textbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Requirement File" field="scanCentralRequirementFile">
+                    <div id="requirementFileForm" class="fode-field spinner-container fode-required fode-row-sc fode-row-sc-python">
+                        <f:textbox></f:textbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Technology Stack">
+                    <div id="technologyStackForm" class="fode-field spinner-container fode-required fode-row-nonsc">
+                        <div class="fode-edit">
+                            <select name="userSelectedTechnologyStack" id="technologyStackSelectList">
+                                <option value="-1">Select a Technology Stack</option>
+                            </select>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Language Level">
+                    <div id="languageLevelForm" class="fode-field spinner-container fode-required">
+                        <div class="fode-edit">
+                            <select name="userSelectedLanguageLevel" id="languageLevelSelectList">
+                                <option value="-1">Select a Language Level</option>
+                            </select>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Audit Preference">
+                    <div id="auditPreferenceForm" class="fode-field spinner-container fode-required">
+                        <div class="fode-edit">
+                            <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">
+                                <option value="2">Automated</option>
+                                <option value="1">Manual</option>
+                            </select>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Open Source Component Analysis by Sonatype">
+                    <div id="sonatypeForm" class="fode-field fode-checkbox spinner-container">
+                        <input type="checkbox" value="false" name="sonatypeEnabled" id="cbSonatypeEnabled"/>
+                    </div>
+                </f:entry>
+
+                <f:entry>
+                    <div id="hiddenFields" class="fode-row-hidden">
+                        <input type="textbox" name="userSelectedEntitlementId" id="entitlementId"></input>
+                        <input type="textbox" name="userSelectedFrequencyType" id="frequencyId"></input>
+                    </div>
+                </f:entry>
+                <!--                ToDo: remove these from backend and deal with adapting from existing config-->
+                <!--                <f:section title="Entitlement Options">-->
+                <!--                    <f:entry title="Entitlement Preference" field="entitlementPreference">-->
+                <!--                        <f:select />-->
+                <!--                    </f:entry>-->
+                <!--                    <f:entry title="Purchase Entitlements" field="purchaseEntitlements">-->
+                <!--                        <f:checkbox/>-->
+                <!--                    </f:entry>-->
+                <!--                    <f:entry title="Remediation Preference" field="remediationScanPreferenceType">-->
+                <!--                        <f:select />-->
+                <!--                    </f:entry>-->
+                <!--                </f:section>-->
+            </f:block>
+        </f:section>
+    </f:block>
+</j:jelly>

@@ -26,6 +26,8 @@ import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.controllers.UsersController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.models.PutStaticScanSetupModel;
+import org.jenkinsci.plugins.fodupload.models.response.PutStaticScanSetupResponse;
 import org.kohsuke.stapler.DataBoundConstructor;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
@@ -60,13 +62,13 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String tenantId,
                                      boolean purchaseEntitlements,
                                      String entitlementPreference,
-                                     String assessmentTypeId,
-                                     String entitlementId,
-                                     String entitlementFrequencyType,
-                                     String technologyStackId,
-                                     String languageLevelId,
-                                     boolean performOpenSourceAnalysis,
-                                     String auditPreferenceType,
+                                     String userSelectedAssessmentType,
+                                     String userSelectedEntitlementId,
+                                     String userSelectedFrequencyType,
+                                     String userSelectedTechnologyStack,
+                                     String userSelectedLanguageLevel,
+                                     boolean sonatypeEnabled,
+                                     String userSelectedAuditPreference,
                                      String srcLocation,
                                      String remediationScanPreferenceType,
                                      String inProgressScanActionType,
@@ -75,10 +77,14 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String userSelectedApplication,
                                      String userSelectedMicroservice,
                                      String userSelectedRelease,
-                                     String selectedScanCentralBuildType) {
-
-        FodApiConnection apiConnection = getApiConnection(overrideGlobalConfig, username, personalAccessToken, tenantId);
-        saveReleaseSettings(apiConnection, purchaseEntitlements, entitlementPreference, assessmentTypeId, entitlementFrequencyType, technologyStackId, languageLevelId, performOpenSourceAnalysis, auditPreferenceType);
+                                     String selectedScanCentralBuildType,
+                                     boolean scanCentralIncludeTests,
+                                     boolean scanCentralSkipBuild,
+                                     String scanCentralBuildCommand,
+                                     String scanCentralBuildFile,
+                                     String scanCentralBuildToolVersion,
+                                     String scanCentralVirtualEnv,
+                                     String scanCentralRequirementFile) {
 
         if(selectedReleaseType != null && selectedReleaseType.equals(FodEnums.SelectedReleaseType.UseAppAndReleaseName.getValue()) && !userSelectedRelease.isEmpty()) {
                 releaseId = userSelectedRelease;
@@ -88,6 +94,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             userSelectedMicroservice = "";
             userSelectedRelease = "";
         }
+
+        FodApiConnection apiConnection = getApiConnection(overrideGlobalConfig, username, personalAccessToken, tenantId);
+        saveReleaseSettings(apiConnection, releaseId, purchaseEntitlements, entitlementPreference, userSelectedAssessmentType, userSelectedEntitlementId, userSelectedFrequencyType, userSelectedTechnologyStack, userSelectedLanguageLevel, sonatypeEnabled, userSelectedAuditPreference);
 
         sharedBuildStep = new SharedUploadBuildStep(releaseId,
                 bsiToken,
@@ -105,7 +114,14 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 userSelectedApplication,
                 userSelectedMicroservice,
                 userSelectedRelease,
-                selectedScanCentralBuildType);
+                selectedScanCentralBuildType,
+                scanCentralIncludeTests,
+                scanCentralSkipBuild,
+                scanCentralBuildCommand,
+                scanCentralBuildFile,
+                scanCentralBuildToolVersion,
+                scanCentralVirtualEnv,
+                scanCentralRequirementFile);
 
     }
 
@@ -118,8 +134,31 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         return ApiConnectionFactory.createApiConnection(authModel);
     }
 
-    private void saveReleaseSettings(FodApiConnection apiConnection, boolean purchaseEntitlements, String entitlementPreference, String assessmentTypeId, String entitlementFrequencyType, String technologyStackId, String languageLevelId, boolean performOpenSourceAnalysis, String auditPreferenceType) {
+    private void saveReleaseSettings(FodApiConnection apiConnection, String releaseIdStr, boolean purchaseEntitlements, String entitlementPreferenceStr, String assessmentTypeIdStr, String entitlementIdStr, String entitlementFrequencyTypeStr, String technologyStackIdStr, String languageLevelIdStr, boolean performOpenSourceAnalysis, String auditPreferenceTypeStr) {
+        StaticScanController staticScanController = new StaticScanController(apiConnection, null, Utils.createCorrelationId());
 
+        int releaseId = Integer.parseInt(releaseIdStr);
+        int assessmentTypeId = Integer.parseInt(assessmentTypeIdStr);
+        int entitlementId = Integer.parseInt(entitlementIdStr);
+        int entitlementFrequencyType = Integer.parseInt(entitlementFrequencyTypeStr);
+        int technologyStackId = Integer.parseInt(technologyStackIdStr);
+        int languageLevelId = Integer.parseInt(languageLevelIdStr);
+        int auditPreferenceType = Integer.parseInt(auditPreferenceTypeStr);
+
+        try {
+            PutStaticScanSetupResponse response = staticScanController.putStaticScanSettings(releaseId, new PutStaticScanSetupModel(assessmentTypeId, entitlementId, entitlementFrequencyType, technologyStackId, languageLevelId, performOpenSourceAnalysis, auditPreferenceType));
+            if (response.isSuccess()) {
+                System.out.println("Successfully saved settings for release id = " + releaseIdStr);
+            }
+            else if (response.getErrors() != null) {
+                for (String error : response.getErrors()) {
+                    System.out.println("Error saving settings for release id = " + releaseIdStr + ": " + error);
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -255,6 +294,20 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     public String getSelectedScanCentralBuildType() {
         return sharedBuildStep.getModel().getSelectedScanCentralBuildType();
     }
+
+    public boolean getScanCentralIncludeTests() { return sharedBuildStep.getModel().getScanCentralIncludeTests(); }
+
+    public boolean getScanCentralSkipBuild() { return sharedBuildStep.getModel().getScanCentralSkipBuild(); }
+
+    public String getScanCentralBuildCommand() { return sharedBuildStep.getModel().getScanCentralBuildCommand(); }
+
+    public String getScanCentralBuildFile() { return sharedBuildStep.getModel().getScanCentralBuildFile(); }
+
+    public String getScanCentralBuildToolVersion() { return sharedBuildStep.getModel().getScanCentralBuildToolVersion(); }
+
+    public String getScanCentralVirtualEnv() { return sharedBuildStep.getModel().getScanCentralVirtualEnv(); }
+
+    public String getScanCentralRequirementFile() { return sharedBuildStep.getModel().getScanCentralRequirementFile(); }
 
     @Extension
     public static final class StaticAssessmentStepDescriptor extends BuildStepDescriptor<Publisher> {

@@ -1,16 +1,16 @@
 package org.jenkinsci.plugins.fodupload.models.response;
 
-public class StaticScanSetupResponse {
+public class GetStaticScanSetupResponse {
     private int assessmentTypeId;
     private int entitlementId;
-    private int entitlementFrequencyTypeId;
+    private int entitlementFrequencyType;
     private int releaseId;
     private String technologyStack;
     private int technologyStackId;
     private int languageLevelId;
     private String languageLevel;
     private boolean performOpenSourceAnalysis;
-    private int auditPreferenceTypeId;
+    private int auditPreferenceType;
     private boolean includeThirdPartyLibraries;
     private boolean useSourceControl;
     private String bsiToken;
@@ -23,8 +23,8 @@ public class StaticScanSetupResponse {
         return entitlementId;
     }
 
-    public int getEntitlementFrequencyTypeId() {
-        return entitlementFrequencyTypeId;
+    public int getEntitlementFrequencyType() {
+        return entitlementFrequencyType;
     }
 
     public int getReleaseId() {
@@ -43,8 +43,8 @@ public class StaticScanSetupResponse {
         return performOpenSourceAnalysis;
     }
 
-    public int getAuditPreferenceTypeId() {
-        return auditPreferenceTypeId;
+    public int getAuditPreferenceType() {
+        return auditPreferenceType;
     }
 
     public boolean isIncludeThirdPartyLibraries() {

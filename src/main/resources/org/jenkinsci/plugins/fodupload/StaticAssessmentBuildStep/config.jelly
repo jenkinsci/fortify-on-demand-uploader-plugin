@@ -16,6 +16,10 @@
             display: none;
         }
 
+        .spinner input {
+            display: none;
+        }
+
         .spinner .createLink {
             display: none;
         }
@@ -54,7 +58,7 @@
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/CreateReleaseForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/AppAndReleaseSelectionForm.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/Entitlements.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
+    <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/ScanSettings.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
 
     <f:section title="Scan Options">
         <f:entry title="Action when scan is in progress" field="inProgressScanActionType">
@@ -79,6 +83,6 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/MicroserviceCreationDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreationDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelectionDialog.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Entitlements.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ScanSettings.js"/>
     
 </j:jelly>

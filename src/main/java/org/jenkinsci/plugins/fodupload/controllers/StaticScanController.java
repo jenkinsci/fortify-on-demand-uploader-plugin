@@ -8,13 +8,12 @@ import okhttp3.*;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.BsiToken;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
-import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
-import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
-import org.jenkinsci.plugins.fodupload.models.response.StartScanResponse;
-import org.jenkinsci.plugins.fodupload.models.response.StaticScanSetupResponse;
+import org.jenkinsci.plugins.fodupload.models.PutStaticScanSetupModel;
+import org.jenkinsci.plugins.fodupload.models.response.*;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -48,7 +47,7 @@ public class StaticScanController extends ControllerBase {
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
-    public StartScanResponse startStaticScan(final Integer releaseId, final StaticScanSetupResponse staticScanSettings, final JobModel uploadRequest, final String notes) {
+    public StartScanResponse startStaticScan(final Integer releaseId, final GetStaticScanSetupResponse staticScanSettings, final JobModel uploadRequest, final String notes) {
 
         PostStartScanResponse scanStartedResponse = null;
         StartScanResponse scanResults = new StartScanResponse();
@@ -199,7 +198,7 @@ public class StaticScanController extends ControllerBase {
      * Use the {@link StaticScanController#getStaticScanSettings} method instead
      */
     @Deprecated
-    public StaticScanSetupResponse getStaticScanSettingsOld(final Integer releaseId) throws IOException {
+    public GetStaticScanSetupResponse getStaticScanSettingsOld(final Integer releaseId) throws IOException {
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
 
@@ -225,13 +224,13 @@ public class StaticScanController extends ControllerBase {
         response.body().close();
 
         Gson gson = new Gson();
-        Type t = new TypeToken<StaticScanSetupResponse>() {}.getType();
-        StaticScanSetupResponse result = gson.fromJson(content, t);
+        Type t = new TypeToken<GetStaticScanSetupResponse>() {}.getType();
+        GetStaticScanSetupResponse result = gson.fromJson(content, t);
 
         return result;
     }
 
-    public StaticScanSetupResponse getStaticScanSettings(final Integer releaseId) throws IOException {
+    public GetStaticScanSetupResponse getStaticScanSettings(final Integer releaseId) throws IOException {
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments(String.format("/api/v3/releases/%d/static-scans/scan-setup", releaseId));
 
@@ -242,6 +241,26 @@ public class StaticScanController extends ControllerBase {
                 .get()
                 .build();
 
-        return apiConnection.requestTyped(request, new TypeToken<StaticScanSetupResponse>(){}.getType());
+        return apiConnection.requestTyped(request, new TypeToken<GetStaticScanSetupResponse>(){}.getType());
+    }
+
+    public PutStaticScanSetupResponse putStaticScanSettings(final Integer releaseId, PutStaticScanSetupModel settings) throws IOException {
+        String requestContent = Json.getInstance().toJson(settings);
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/releases/" + releaseId + "/static-scans/scan-setup");
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .put(RequestBody.create(MediaType.parse("application/json"), requestContent))
+                .build();
+        Response response = apiConnection.request(request);
+
+        if (response.code() < 500) {
+            return apiConnection.parseResponse(response, new TypeToken<PutStaticScanSetupResponse>(){}.getType());
+        }
+        else {
+            return new PutStaticScanSetupResponse(false, null, Utils.unexpectedServerResponseErrors(), null);
+        }
     }
 }

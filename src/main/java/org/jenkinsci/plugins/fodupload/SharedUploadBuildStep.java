@@ -1,28 +1,20 @@
 package org.jenkinsci.plugins.fodupload;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.text.Normalizer;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 
-import org.apache.commons.lang.CharEncoding;
 import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
-import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.BsiToken;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressBuildResultType;
-import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressScanActionType;
-import org.jenkinsci.plugins.fodupload.models.FodEnums.SelectedReleaseType;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
@@ -73,7 +65,14 @@ public class SharedUploadBuildStep {
                                  String userSelectedApplication,
                                  String userSelectedMicroservice,
                                  String userSelectedRelease,
-                                 String selectedScanCentralBuildType) {
+                                 String selectedScanCentralBuildType,
+                                 boolean scanCentralIncludeTests,
+                                 boolean scanCentralSkipBuild,
+                                 String scanCentralBuildCommand,
+                                 String scanCentralBuildFile,
+                                 String scanCentralBuildToolVersion,
+                                 String scanCentralVirtualEnv,
+                                 String scanCentralRequirementFile) {
 
         model = new JobModel(releaseId,
                 bsiToken,
@@ -87,7 +86,14 @@ public class SharedUploadBuildStep {
                 userSelectedApplication,
                 userSelectedMicroservice,
                 userSelectedRelease,
-                selectedScanCentralBuildType);
+                selectedScanCentralBuildType,
+                scanCentralIncludeTests,
+                scanCentralSkipBuild,
+                scanCentralBuildCommand,
+                scanCentralBuildFile,
+                scanCentralBuildToolVersion,
+                scanCentralVirtualEnv,
+                scanCentralRequirementFile);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -360,7 +366,7 @@ public class SharedUploadBuildStep {
             }
 
             String technologyStack = null;
-            StaticScanSetupResponse staticScanSetup = null;
+            GetStaticScanSetupResponse staticScanSetup = null;
 
             apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
             if (apiConnection != null) {

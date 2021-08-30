@@ -2,7 +2,7 @@ class Api {
 
     //<editor-fold desc="Instance operations">
 
-    constructor (instance, descriptor) {
+    constructor(instance, descriptor) {
         this.instance = instance;
         this.descriptor = descriptor;
         this.failedToAuthMessage = 'Failed to authenticate';
@@ -82,12 +82,12 @@ class Api {
 
         return new Promise((res, rej) => {
             this.descriptor.retrieveReleaseList(appId, microserviceId ?? 0, searchTerm, searchArgs?.offset ?? 0, searchArgs.limit ?? 25, customAuth, async t => {
-               const responseJSON = JSON.parse(t.responseJSON);
-               if (responseJSON == null) {
-                   return rej(this.failedToAuthMessage);
-               }
+                const responseJSON = JSON.parse(t.responseJSON);
+                if (responseJSON == null) {
+                    return rej(this.failedToAuthMessage);
+                }
 
-               res(responseJSON);
+                res(responseJSON);
             });
         });
     }
@@ -122,13 +122,113 @@ class Api {
         });
     }
 
-    getReleaseEntitlementSettings(releaseId, customAuth) {
+    getStaticScanSettings(releaseId, customAuth) {
         return new Promise((res, rej) => {
-            this.descriptor.getReleaseEntitlementSettings(releaseId,  customAuth, async t => {
+            this.descriptor.retrieveStaticScanSettings(releaseId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
 
                 return res(responseJSON);
             });
+        });
+    }
+
+    getAssessmentTypeEntitlements(releaseId, customAuth) {
+        return new Promise((res, rej) => {
+            this.descriptor.retrieveAssessmentTypeEntitlements(releaseId, customAuth, async t => {
+                const responseJSON = JSON.parse(t.responseJSON);
+
+                if (Array.isArray(responseJSON) && responseJSON.length > 0) {
+                    let assessments = {};
+
+                    for (let ae of responseJSON) {
+                        if (ae.isRemediation) continue;
+                        let assessment = assessments[ae.assessmentTypeId];
+
+                        if (!assessment) {
+                            assessment = {
+                                id: ae.assessmentTypeId,
+                                name: ae.name,
+                                entitlements: {},
+                                entitlementsSorted: []
+                            };
+                            assessments[ae.assessmentTypeId] = assessment;
+                        }
+                        let entitlement = {
+                            id: ae.entitlementId,
+                            frequency: ae.frequencyType,
+                            frequencyId: ae.frequencyTypeId,
+                            units: ae.units,
+                            unitsAvailable: ae.unitsAvailable,
+                            subscriptionEndDate: Date.parse(ae.subscriptionEndDate),
+                            isBundledAssessment: ae.isBundledAssessment,
+                            parentAssessmentTypeId: ae.parentAssessmentTypeId,
+                            description: ae.entitlementDescription,
+                            sortValue: (ae.frequencyType === 'Subscription' ? 0 : 1).toString() + '_' + ae.entitlementDescription.toLowerCase()
+                        };
+
+                        assessment.entitlements[ae.entitlementId] = entitlement;
+                        assessment.entitlementsSorted.push(entitlement);
+                    }
+
+                    for (let k of Object.keys(assessments)) {
+                        assessments[k].entitlementsSorted = assessments[k].entitlementsSorted.sort((a, b) => a.sortValue < b.sortValue ? -1 : 0);
+                    }
+
+                    return res(assessments);
+                }
+
+                return res(null);
+            });
+        });
+    }
+
+    getReleaseEntitlementSettings(releaseId, customAuth) {
+        return new Promise((res, rej) => {
+            this.descriptor.retrieveStaticScanSettings(releaseId, customAuth, async t => {
+                const responseJSON = JSON.parse(t.responseJSON);
+
+                return res(responseJSON);
+            });
+        });
+    }
+
+    getTechStacks(customAuth) {
+        return new Promise((res, rej) => {
+            let techStacks;
+            let langLevels;
+
+            let ttprom = new Promise((ttres, ttrej) => {
+                this.descriptor.retrieveLookupItems('TechnologyTypes', customAuth, t => {
+                    techStacks = JSON.parse(t.responseJSON);
+                    ttres();
+                });
+            });
+            let llprom = new Promise((llres, llrej) => {
+                this.descriptor.retrieveLookupItems('LanguageLevels', customAuth, t => {
+                    langLevels = JSON.parse(t.responseJSON);
+                    llres();
+                });
+            });
+
+            // ToDo: handle auth errors
+            Promise.all([ttprom, llprom])
+                .then(_ => {
+                    let result = {};
+
+                    if (Array.isArray(techStacks) && Array.isArray(langLevels)) {
+                        for (let tt of techStacks) {
+                            result[tt.value] = {...tt, levels: []};
+                        }
+                        for (let ll of langLevels) {
+                            let tt = result[ll.group];
+
+                            if (tt) tt.levels.push(ll);
+                        }
+
+                        res(result);
+                    } else rej('Invalid response');
+                })
+                .catch(rej);
         });
     }
 

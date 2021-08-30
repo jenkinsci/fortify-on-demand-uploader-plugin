@@ -60,6 +60,13 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String userSelectedMicroservice;
     private String userSelectedRelease;
     private String selectedScanCentralBuildType;
+    private boolean scanCentralIncludeTests;
+    private boolean scanCentralSkipBuild;
+    private String scanCentralBuildCommand;
+    private String scanCentralBuildFile;
+    private String scanCentralBuildToolVersion;
+    private String scanCentralVirtualEnv;
+    private String scanCentralRequirementFile;
 
     private SharedUploadBuildStep commonBuildStep;
 
@@ -216,6 +223,48 @@ public class FortifyStaticAssessment extends FortifyStep {
         this.selectedScanCentralBuildType = selectedScanCentralBuildType;
     }
 
+    @SuppressWarnings("unused")
+    public boolean getScanCentralIncludeTests() { return scanCentralIncludeTests; }
+
+    @DataBoundSetter
+    public void setScanCentralIncludeTests(boolean scanCentralIncludeTests) { this.scanCentralIncludeTests = scanCentralIncludeTests; }
+
+    @SuppressWarnings("unused")
+    public boolean getScanCentralSkipBuild() { return scanCentralSkipBuild; }
+
+    @DataBoundSetter
+    public void setScanCentralSkipBuild(boolean scanCentralSkipBuild) { this.scanCentralSkipBuild = scanCentralSkipBuild; }
+
+    @SuppressWarnings("unused")
+    public String getScanCentralBuildCommand() { return scanCentralBuildCommand; }
+
+    @DataBoundSetter
+    public void setScanCentralBuildCommand(String scanCentralBuildCommand) { this.scanCentralBuildCommand = scanCentralBuildCommand; }
+
+    @SuppressWarnings("unused")
+    public String getScanCentralBuildFile() { return scanCentralBuildFile; }
+
+    @DataBoundSetter
+    public void setScanCentralBuildFile(String scanCentralBuildFile) { this.scanCentralBuildFile = scanCentralBuildFile; }
+
+    @SuppressWarnings("unused")
+    public String getScanCentralBuildToolVersion() { return scanCentralBuildToolVersion; }
+
+    @DataBoundSetter
+    public void setScanCentralBuildToolVersion(String scanCentralBuildToolVersion) { this.scanCentralBuildToolVersion = scanCentralBuildToolVersion; }
+
+    @SuppressWarnings("unused")
+    public String getScanCentralVirtualEnv() { return scanCentralVirtualEnv; }
+
+    @DataBoundSetter
+    public void setScanCentralVirtualEnv(String scanCentralVirtualEnv) { this.scanCentralVirtualEnv = scanCentralVirtualEnv; }
+
+    @SuppressWarnings("unused")
+    public String getScanCentralRequirementFile() { return scanCentralRequirementFile; }
+
+    @DataBoundSetter
+    public void setScanCentralRequirementFile(String scanCentralRequirementFile) { this.scanCentralRequirementFile = scanCentralRequirementFile; }
+
     @Override
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -237,7 +286,14 @@ public class FortifyStaticAssessment extends FortifyStep {
                 userSelectedApplication,
                 userSelectedMicroservice,
                 userSelectedRelease,
-                selectedScanCentralBuildType);
+                selectedScanCentralBuildType,
+                scanCentralIncludeTests,
+                scanCentralSkipBuild,
+                scanCentralBuildCommand,
+                scanCentralBuildFile,
+                scanCentralBuildToolVersion,
+                scanCentralVirtualEnv,
+                scanCentralRequirementFile);
 
         return true;
     }
@@ -281,7 +337,14 @@ public class FortifyStaticAssessment extends FortifyStep {
                 userSelectedApplication,
                 userSelectedMicroservice,
                 userSelectedRelease,
-                selectedScanCentralBuildType);
+                selectedScanCentralBuildType,
+                scanCentralIncludeTests,
+                scanCentralSkipBuild,
+                scanCentralBuildCommand,
+                scanCentralBuildFile,
+                scanCentralBuildToolVersion,
+                scanCentralVirtualEnv,
+                scanCentralRequirementFile);
 
         commonBuildStep.perform(build, workspace, launcher, listener, correlationId);
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
