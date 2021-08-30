@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.fodupload.models.response;
 
-public class StaticScanSetupResponse {
+public class GetStaticScanSetupResponse {
     private int assessmentTypeId;
     private int entitlementId;
     private int entitlementFrequencyType;
