@@ -191,7 +191,7 @@ class ScanSettings {
                     closestRow(jq('#technologyStackForm')).show();
                     let currVal = this.techStacks[jq('#technologyStackSelectList').val()];
 
-                    if (!this.isDotNetStack(currVal)) jq('#technologyStackSelectList').val(techStackConsts.none);
+                    if (!currVal || !this.isDotNetStack(currVal)) jq('#technologyStackSelectList').val(techStackConsts.none);
                     techStackFilter = this.isDotNetStack;
                     break;
                 case 'maven':
@@ -291,10 +291,19 @@ class ScanSettings {
                 let tr = closestRow(jqe);
 
                 tr.addClass('fode-field-row');
-                // ToDo: run this in other Jenkins version to make sure not broken
                 let vtr = getValidationErrRow(tr);
 
                 if (vtr) vtr.addClass('fode-field-row-verr');
+            });
+        jq('.fode-row-hidden')
+            .each((i, e) => {
+                let jqe = jq(e);
+                let tr = closestRow(jqe);
+
+                tr.hide();
+                let vtr = getValidationErrRow(tr);
+
+                if (vtr) vtr.hide();
             });
         jq(fodeRowSelector).hide();
 

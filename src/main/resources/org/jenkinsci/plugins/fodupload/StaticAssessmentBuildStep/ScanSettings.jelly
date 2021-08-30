@@ -7,10 +7,6 @@
             #fode-error {
             color: red;
             }
-
-            .fode-row-hidden {
-                display: none;
-            }
         </style>
 
         <f:section title="Scan Settings">
@@ -121,17 +117,14 @@
                     </div>
                 </f:entry>
 
-                <f:entry>
+                <f:entry title="Open Source Component Analysis by Sonatype">
                     <div id="sonatypeForm" class="fode-field fode-checkbox spinner-container">
-                        <label>
-                            <input type="checkbox" value="false" name="sonatypeEnabled" id="cbSonatypeEnabled"/>
-                            Open Source Component Analysis by Sonatype
-                        </label>
+                        <input type="checkbox" value="false" name="sonatypeEnabled" id="cbSonatypeEnabled"/>
                     </div>
                 </f:entry>
 
                 <f:entry>
-                    <div id="hiddenFields" class="fode-field fode-row-hidden">
+                    <div id="hiddenFields" class="fode-row-hidden">
                         <input type="textbox" name="userSelectedEntitlementId" id="entitlementId"></input>
                         <input type="textbox" name="userSelectedFrequencyType" id="frequencyId"></input>
                     </div>

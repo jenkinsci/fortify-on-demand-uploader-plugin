@@ -16,6 +16,10 @@
             display: none;
         }
 
+        .spinner input {
+            display: none;
+        }
+
         .spinner .createLink {
             display: none;
         }
