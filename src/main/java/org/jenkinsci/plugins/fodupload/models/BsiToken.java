@@ -3,7 +3,7 @@ package org.jenkinsci.plugins.fodupload.models;
 public class BsiToken {
     private int tenantId;
     private String tenantCode;
-    private int projectVersionId;
+    private int releaseId;
     private int assessmentTypeId;
     
     private String payloadType;
@@ -30,8 +30,8 @@ public class BsiToken {
     public void setTenantId(int tenantId) { this.tenantId = tenantId; }
     public String getTenantCode() { return tenantCode; }
     public void setTenantCode(String tenantCode) { this.tenantCode = tenantCode; }
-    public int getProjectVersionId() { return projectVersionId; }
-    public void setProjectVersionId(int projectVersionId) { this.projectVersionId = projectVersionId; }
+    public int getReleaseId() { return releaseId; }
+    public void setReleaseId(int releaseId) { this.releaseId = releaseId; }
     public int getAssessmentTypeId() { return assessmentTypeId; }
     public void setAssessmentTypeId(int assessmentTypeId) { this.assessmentTypeId = assessmentTypeId; }
 

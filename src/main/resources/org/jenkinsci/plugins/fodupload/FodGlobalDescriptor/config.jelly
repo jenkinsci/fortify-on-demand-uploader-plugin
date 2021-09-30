@@ -38,7 +38,7 @@
               </f:radioBlock>
             </table>
         </f:block>
-
+<!--https://fodtenant/Tools/Downloads-->
 
     <f:section title="Scan Central">
         <f:entry title="Path" description="Path to the scancentral executable" field="scanCentralPath">

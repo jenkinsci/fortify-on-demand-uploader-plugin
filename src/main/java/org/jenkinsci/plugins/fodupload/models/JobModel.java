@@ -4,12 +4,8 @@ import org.jenkinsci.plugins.fodupload.BsiTokenParser;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class JobModel {
 
@@ -37,6 +33,26 @@ public class JobModel {
     private String scanCentralVirtualEnv;
     private String scanCentralRequirementFile;
 
+    private Boolean isPipeline;
+    private String assessmentType;
+    private String entitlementId;
+    private String frequencyId;
+    private String auditPreference;
+    private String technologyStack;
+    private String languageLevel;
+    private String openSourceScan;
+
+    private Boolean autoProvision;
+    private String applicationName;
+    private String applicationType;
+    private String releaseName;
+    private String owner;
+    private String attributes;
+    private String businessCriticality;
+    private String sdlcStatus;
+    private String microserviceName;
+    private String isMicroservice;
+
     private File payload;
 
     /**
@@ -53,12 +69,12 @@ public class JobModel {
      * @param selectedReleaseType           selectedReleaseType
      * @param selectedScanCentralBuildType  selectedScanCentralBuildType
      * @param scanCentralIncludeTests       Scan Central IncludeTests option for Maven and Gradle
-     * @param scanCentralSkipBuild			Desc
-     * @param scanCentralBuildCommand		Desc
-     * @param scanCentralBuildFile			Desc
-     * @param scanCentralBuildToolVersion	Desc
-     * @param scanCentralVirtualEnv			Desc
-     * @param scanCentralRequirementFile	Desc
+     * @param scanCentralSkipBuild          Desc
+     * @param scanCentralBuildCommand       Desc
+     * @param scanCentralBuildFile          Desc
+     * @param scanCentralBuildToolVersion   Desc
+     * @param scanCentralVirtualEnv         Desc
+     * @param scanCentralRequirementFile    Desc
      */
     public JobModel(String releaseId,
                     String bsiToken,
@@ -79,7 +95,25 @@ public class JobModel {
                     String scanCentralBuildFile,
                     String scanCentralBuildToolVersion,
                     String scanCentralVirtualEnv,
-                    String scanCentralRequirementFile) {
+                    String scanCentralRequirementFile,
+                    Boolean isPipeline,
+                    String assessmentType,
+                    String entitlementId,
+                    String frequencyId,
+                    String auditPreference,
+                    String technologyStack,
+                    String languageLevel,
+                    String openSourceScan,
+                    Boolean autoProvision,
+                    String applicationName,
+                    String applicationType,
+                    String releaseName,
+                    String owner,
+                    String attributes,
+                    String businessCriticality,
+                    String sdlcStatus,
+                    String microserviceName,
+                    String isMicroservice) {
 
         this.releaseId = releaseId;
         this.bsiTokenOriginal = bsiToken;
@@ -101,6 +135,24 @@ public class JobModel {
         this.scanCentralBuildToolVersion = scanCentralBuildToolVersion;
         this.scanCentralVirtualEnv = scanCentralVirtualEnv;
         this.scanCentralRequirementFile = scanCentralRequirementFile;
+        this.isPipeline = isPipeline;
+        this.assessmentType = assessmentType;
+        this.entitlementId = entitlementId;
+        this.frequencyId = frequencyId;
+        this.auditPreference = auditPreference;
+        this.technologyStack = technologyStack;
+        this.languageLevel = languageLevel;
+        this.openSourceScan = openSourceScan;
+        this.autoProvision = autoProvision;
+        this.applicationName = applicationName;
+        this.applicationType = applicationType;
+        this.releaseName = releaseName;
+        this.owner = owner;
+        this.attributes = attributes;
+        this.businessCriticality = businessCriticality;
+        this.sdlcStatus = sdlcStatus;
+        this.microserviceName = microserviceName;
+        this.isMicroservice = isMicroservice;
     }
 
     public File getPayload() {
@@ -163,21 +215,89 @@ public class JobModel {
         return userSelectedRelease;
     }
 
-    public String getSelectedScanCentralBuildType() { return selectedScanCentralBuildType; }
+    public String getSelectedScanCentralBuildType() {
+        return selectedScanCentralBuildType;
+    }
 
-    public boolean getScanCentralIncludeTests() { return scanCentralIncludeTests; }
+    public boolean getScanCentralIncludeTests() {
+        return scanCentralIncludeTests;
+    }
 
-    public boolean getScanCentralSkipBuild() { return scanCentralSkipBuild; }
+    public boolean getScanCentralSkipBuild() {
+        return scanCentralSkipBuild;
+    }
 
-    public String getScanCentralBuildCommand() { return scanCentralBuildCommand; }
+    public String getScanCentralBuildCommand() {
+        return scanCentralBuildCommand;
+    }
 
-    public String getScanCentralBuildFile() { return scanCentralBuildFile; }
+    public String getScanCentralBuildFile() {
+        return scanCentralBuildFile;
+    }
 
-    public String getScanCentralBuildToolVersion() { return scanCentralBuildToolVersion; }
+    public String getScanCentralBuildToolVersion() {
+        return scanCentralBuildToolVersion;
+    }
 
-    public String getScanCentralVirtualEnv() { return scanCentralVirtualEnv; }
+    public String getScanCentralVirtualEnv() {
+        return scanCentralVirtualEnv;
+    }
 
-    public String getScanCentralRequirementFile() { return scanCentralRequirementFile; }
+    public String getScanCentralRequirementFile() {
+        return scanCentralRequirementFile;
+    }
+    public Boolean getIsPipeline() {
+        return isPipeline;
+    }
+
+    public String getAssessmentType() {
+        return assessmentType;
+    }
+
+    public String getEntitlementId() {
+        return entitlementId;
+    }
+
+    public String getFrequencyId() {
+        return frequencyId;
+    }
+
+    public String getAuditPreference() {
+        return auditPreference;
+    }
+
+    public String getTechnologyStack() {
+        return technologyStack;
+    }
+
+    public String getLanguageLevel() {
+        return languageLevel;
+    }
+
+    public String getOpenSourceScan() {
+        return openSourceScan;
+    }
+
+    public Boolean getAutoProvision() { return autoProvision; }
+
+    public String getApplicationName() { return applicationName; }
+
+    public String getApplicationType() { return applicationType; }
+
+    public String getReleaseName() { return releaseName; }
+
+    public String getOwner() { return owner; }
+
+    public String getAttributes() { return attributes; }
+
+    public String getBusinessCriticality() { return businessCriticality; }
+
+    public String getSdlcStatus() { return sdlcStatus; }
+
+    public String getMicroserviceName() { return microserviceName; }
+
+    public String getIsMicroservice() { return isMicroservice; }
+
 
     // ToDo: This is outdated
     @Override
@@ -193,7 +313,7 @@ public class JobModel {
                             "In Progress Scan Action:           %s%n" +
                             "In Progress Build Action:          %s%n" +
                             "Selected Release Type:             %s%n",
-                    bsiTokenCache.getProjectVersionId(),
+                    bsiTokenCache.getReleaseId(),
                     bsiTokenCache.getAssessmentTypeId(),
                     bsiTokenCache.getTechnologyStack(),
                     bsiTokenCache.getLanguageLevel(),
@@ -212,11 +332,8 @@ public class JobModel {
             return true;
         }
 
-        try {
-            this.bsiTokenCache = tokenParser.parseBsiToken(bsiTokenOriginal);
-        } catch (Exception ex) {
-            return false;
-        }
+        this.bsiTokenCache = tokenParser.tryParseBsiToken(bsiTokenOriginal);
+
         return (this.bsiTokenCache != null);
     }
 
@@ -242,7 +359,7 @@ public class JobModel {
             if (bsiTokenCache.getTechnologyType() == null)
                 errors.add("Technology Stack");
 
-            if (bsiTokenCache.getProjectVersionId() == 0)
+            if (bsiTokenCache.getReleaseId() == 0)
                 errors.add("BSI Token Release Id");
         }
 

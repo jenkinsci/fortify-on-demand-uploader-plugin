@@ -188,7 +188,10 @@ public class ApplicationsController extends ControllerBase {
         if (response.isSuccessful()) {
             return apiConnection.parseResponse(response, new TypeToken<CreateApplicationResponse>(){}.getType());
         }
-        else if (response.code() >= 500) {
+        else if (response.code() == 401) {
+            return new CreateApplicationResponse(0, 0, 0, false, Utils.unauthorizedServerResponseErrors());
+        }
+        else if (response.code() >= 400) {
             return new CreateApplicationResponse(0, 0, 0, false, Utils.unexpectedServerResponseErrors());
         }
         else {

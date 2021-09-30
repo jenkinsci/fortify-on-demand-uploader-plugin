@@ -1,5 +1,3 @@
-jq = jQuery;
-
 class MicroserviceCreationDialog extends Dialog {
 
     constructor() {

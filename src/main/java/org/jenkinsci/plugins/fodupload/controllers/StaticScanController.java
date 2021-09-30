@@ -10,7 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.Utils;
-import org.jenkinsci.plugins.fodupload.models.BsiToken;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.PutStaticScanSetupModel;
 import org.jenkinsci.plugins.fodupload.models.response.*;
@@ -40,15 +40,14 @@ public class StaticScanController extends ControllerBase {
 
     /**
      * Begin a static scan on FoD
+     *
      * @param releaseId     id of release being targeted
-     * @param staticScanSettings config information for scan
      * @param uploadRequest zip file to upload
      * @param notes         notes
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
-    public StartScanResponse startStaticScan(final Integer releaseId, final GetStaticScanSetupResponse staticScanSettings, final JobModel uploadRequest, final String notes) {
-
+    public StartScanResponse startStaticScan(Integer releaseId, final JobModel uploadRequest, final String notes) {
         PostStartScanResponse scanStartedResponse = null;
         StartScanResponse scanResults = new StartScanResponse();
 
@@ -60,45 +59,50 @@ public class StaticScanController extends ControllerBase {
             int byteCount;
             long offset = 0;
 
-            if (apiConnection.getToken() == null)
-                apiConnection.authenticate();
+            if (apiConnection.getToken() == null) apiConnection.authenticate();
 
             println("Getting Assessment");
 
-            BsiToken token = null;
-            if (releaseId == 0) {
-                token = uploadRequest.getBsiToken();
-            }
-
-            String projectVersion;
+            String projectVersion = "Not Found";
             try (InputStream inputStream = this.getClass().getResourceAsStream("/application.properties")) {
                 Properties props = new Properties();
                 props.load(inputStream);
                 projectVersion = props.getProperty("application.version", "Not Found");
             }
 
-            HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
-                    .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", releaseId != 0 ? releaseId : token.getProjectVersionId()))
-                    .addQueryParameter("technologyStack", releaseId == 0 ? token.getTechnologyType() : staticScanSettings.getTechnologyStack())
-                    .addQueryParameter("entitlementPreferenceType", uploadRequest.getEntitlementPreference())
+            HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder();
+
+            if (Utils.isNullOrEmpty(uploadRequest.getSelectedReleaseType())) {
+                if (uploadRequest.getIsPipeline()) {
+                    if (releaseId < 1) releaseId = createApplicationAndRelease(uploadRequest);
+                    buildPipelineRequest(builder, releaseId, uploadRequest);
+                } else throw new IllegalArgumentException("Invalid job model");
+            } else {
+                FodEnums.SelectedReleaseType type = FodEnums.SelectedReleaseType.valueOf(uploadRequest.getSelectedReleaseType());
+
+                switch (type) {
+                    case UseReleaseId:
+                    case UseAppAndReleaseName:
+                        buildReleaseSettingsRequest(builder, releaseId, uploadRequest);
+                        break;
+                    case UseBsiToken:
+                        buildBsiRequest(builder, uploadRequest);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Invalid job model");
+                }
+            }
+
+            builder.addQueryParameter("inProgressScanActionType", uploadRequest.getInProgressScanActionType())
                     .addQueryParameter("purchaseEntitlement", Boolean.toString(uploadRequest.isPurchaseEntitlements()))
-                    .addQueryParameter("remdiationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType())
                     .addQueryParameter("inProgressScanActionType", uploadRequest.getInProgressScanActionType())
                     .addQueryParameter("scanMethodType", "CICD")
                     .addQueryParameter("scanTool", "Jenkins")
-                    .addQueryParameter("scanToolVersion", projectVersion != null ? projectVersion : "NotFound");
-
-            if (releaseId == 0) {
-                builder = builder.addQueryParameter("bsiToken", uploadRequest.getBsiTokenOriginal());
-            }
+                    .addQueryParameter("scanToolVersion", projectVersion);
 
             if (!Utils.isNullOrEmpty(notes)) {
                 String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);
-                builder = builder.addQueryParameter("notes", truncatedNotes);
-            }
-
-            if ((releaseId == 0 ? token.getTechnologyVersion() : staticScanSettings.getLanguageLevel()) != null) {
-                builder = builder.addQueryParameter("languageLevel", releaseId == 0 ? token.getTechnologyVersion() : staticScanSettings.getLanguageLevel());
+                builder.addQueryParameter("notes", truncatedNotes);
             }
 
             // TODO: Come back and fix the request to set fragNo and offset query parameters
@@ -164,17 +168,16 @@ public class StaticScanController extends ControllerBase {
                         println("An error occurred during the upload.");
                         GenericErrorResponse errors = gson.fromJson(responseJsonStr, GenericErrorResponse.class);
                         if (errors != null) {
-                            if(errors.toString().contains("Can not start scan another scan is in progress")) {
+                            if (errors.toString().contains("Can not start scan another scan is in progress")) {
                                 scanResults.uploadSuccessfulScanNotStarted();
-                            }
-                            else {
+                            } else {
                                 println("Package upload failed for the following reasons: ");
                                 println(errors.toString());
                                 scanResults.uploadNotSuccessful();
                             }
                         }
-                            
-                        
+
+
                         return scanResults; // if there is an error, get out of loop and mark build unstable
                     }
                 }
@@ -192,10 +195,51 @@ public class StaticScanController extends ControllerBase {
         return scanResults;
     }
 
+    private void buildBsiRequest(final HttpUrl.Builder builder, final JobModel uploadRequest) {
+        builder
+                .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", uploadRequest.getBsiToken().getReleaseId()))
+                .addQueryParameter("entitlementPreferenceType", uploadRequest.getEntitlementPreference())
+                .addQueryParameter("remdiationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType())
+                .addQueryParameter("bsiToken", uploadRequest.getBsiTokenOriginal());
+    }
+
+    private void buildReleaseSettingsRequest(final HttpUrl.Builder builder, final Integer releaseId, final JobModel uploadRequest) {
+        builder
+                .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced-with-defaults", releaseId))
+                .addQueryParameter("remediationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType());
+    }
+
+    private void buildPipelineRequest(final HttpUrl.Builder builder, final Integer releaseId, final JobModel uploadRequest) {
+        builder.addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced-with-defaults", releaseId));
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getAssessmentType())) builder.addQueryParameter("assessmentTypeId", uploadRequest.getAssessmentType());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getEntitlementId())) builder.addQueryParameter("entitlementId", uploadRequest.getEntitlementId());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getFrequencyId()))
+            builder.addQueryParameter("entitlementFrequencyType", uploadRequest.getFrequencyId());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getOpenSourceScan())) builder.addQueryParameter("doSonatypeScan", uploadRequest.getOpenSourceScan());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getAuditPreference()))
+            builder.addQueryParameter("auditPreferenceType", uploadRequest.getAuditPreference());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getTechnologyStack()))
+            builder.addQueryParameter("technologyTypeId", uploadRequest.getTechnologyStack());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getLanguageLevel()))
+            builder.addQueryParameter("technologyVersionTypeId", uploadRequest.getLanguageLevel());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getRemediationScanPreferenceType()))
+            builder.addQueryParameter("remediationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType());
+    }
+
+    private Integer createApplicationAndRelease(final JobModel uploadRequest) throws Exception {
+        throw new Exception("Not implemented");
+    }
+
     /**
-     *
-     * @deprecated
-     * Use the {@link StaticScanController#getStaticScanSettings} method instead
+     * @deprecated Use the {@link StaticScanController#getStaticScanSettings} method instead
      */
     @Deprecated
     public GetStaticScanSetupResponse getStaticScanSettingsOld(final Integer releaseId) throws IOException {
@@ -224,7 +268,8 @@ public class StaticScanController extends ControllerBase {
         response.body().close();
 
         Gson gson = new Gson();
-        Type t = new TypeToken<GetStaticScanSetupResponse>() {}.getType();
+        Type t = new TypeToken<GetStaticScanSetupResponse>() {
+        }.getType();
         GetStaticScanSetupResponse result = gson.fromJson(content, t);
 
         return result;
@@ -241,7 +286,8 @@ public class StaticScanController extends ControllerBase {
                 .get()
                 .build();
 
-        return apiConnection.requestTyped(request, new TypeToken<GetStaticScanSetupResponse>(){}.getType());
+        return apiConnection.requestTyped(request, new TypeToken<GetStaticScanSetupResponse>() {
+        }.getType());
     }
 
     public PutStaticScanSetupResponse putStaticScanSettings(final Integer releaseId, PutStaticScanSetupModel settings) throws IOException {
@@ -256,10 +302,10 @@ public class StaticScanController extends ControllerBase {
                 .build();
         Response response = apiConnection.request(request);
 
-        if (response.code() < 500) {
-            return apiConnection.parseResponse(response, new TypeToken<PutStaticScanSetupResponse>(){}.getType());
-        }
-        else {
+        if (response.code() < 300) {
+            return apiConnection.parseResponse(response, new TypeToken<PutStaticScanSetupResponse>() {
+            }.getType());
+        } else {
             return new PutStaticScanSetupResponse(false, null, Utils.unexpectedServerResponseErrors(), null);
         }
     }

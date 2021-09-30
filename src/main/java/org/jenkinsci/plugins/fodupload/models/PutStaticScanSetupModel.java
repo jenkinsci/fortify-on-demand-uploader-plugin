@@ -5,11 +5,11 @@ public class PutStaticScanSetupModel {
     private int entitlementId;
     private int entitlementFrequencyType;
     private int technologyStackId;
-    private int languageLevelId;
+    private Integer languageLevelId;
     private boolean performOpenSourceAnalysis;
     private int auditPreferenceType;
 
-    public PutStaticScanSetupModel(int assessmentTypeId, int entitlementId, int entitlementFrequencyType, int technologyStackId, int languageLevelId, boolean performOpenSourceAnalysis, int auditPreferenceType) {
+    public PutStaticScanSetupModel(int assessmentTypeId, int entitlementId, int entitlementFrequencyType, int technologyStackId, Integer languageLevelId, boolean performOpenSourceAnalysis, int auditPreferenceType) {
         this.assessmentTypeId = assessmentTypeId;
         this.entitlementId = entitlementId;
         this.entitlementFrequencyType = entitlementFrequencyType;
@@ -35,7 +35,7 @@ public class PutStaticScanSetupModel {
         return technologyStackId;
     }
 
-    public int getLanguageLevelId() {
+    public Integer getLanguageLevelId() {
         return languageLevelId;
     }
 

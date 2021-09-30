@@ -2,12 +2,10 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.kenai.jnr.x86asm.Logger;
 
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.FodApiFilterList;
@@ -226,7 +224,7 @@ public class ReleaseController extends ControllerBase {
 
         //TODO: "Project version ID"
         String url = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
-                .addPathSegments(String.format("/api/v3/releases/%s/assessment-types", model.getBsiToken().getProjectVersionId()))
+                .addPathSegments(String.format("/api/v3/releases/%s/assessment-types", model.getBsiToken().getReleaseId()))
                 .addQueryParameter("scanType", "1")
                 .addQueryParameter("filters", filters.toString())
                 .build().toString();

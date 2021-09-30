@@ -1,4 +1,23 @@
-jq = jQuery;
+/**
+ * @typedef {jQuery} jQueryExtended
+ * @property {function([value:string]): string} val
+ */
+/**
+ * @callback jQueryFunc
+ * @param {string|Object} selector
+ * @return {jQueryExtended}
+ * */
+/** @type {jQueryFunc} */
+const jq = jQuery;
+
+const techStackConsts = {
+    none: -1,
+    dotNet: 1,
+    dotNetCore: 23,
+    java: 7,
+    php: 9,
+    python: 10
+};
 
 function dispatchEvent(type, payload) {
     document.dispatchEvent(new CustomEvent(type, {detail: payload}));
@@ -27,6 +46,26 @@ function debounce(func, wait, immediate) {
         if (callNow) func.apply(context, args);
     };
 };
+
+function getEntitlementDropdownValue(id, freq) {
+    return `${id}-${freq}`;
+}
+
+function parseEntitlementDropdownValue(val) {
+    let entitlementId = '';
+    let frequencyId = '';
+
+    if (val) {
+        let spl = val.split('-');
+
+        if (spl.length === 2) {
+            entitlementId = numberOrNull(spl[0]);
+            frequencyId = numberOrNull(spl[1]);
+        }
+    }
+
+    return { entitlementId, frequencyId };
+}
 
 function spinAndWait(fn) {
     return new Promise((res, rej) => {
@@ -63,6 +102,19 @@ function getValidationErrRow(row) {
 
     return null;
 }
+
+function getHelpRow(row) {
+    let vtr = nextRow(row);
+
+    if (vtr.length > 0 && vtr.hasClass('validation-error-area')) {
+        let htr = nextRow(vtr);
+
+        if (htr.length > 0 && htr.hasClass('help-area')) return htr;
+    } else if (vtr.length > 0 && vtr.hasClass('help-area')) return vtr;
+
+    return null;
+}
+
 function createDialog(dialog) {
     spinAndWait(() => jq('#' + dialog._formId).html())
         .then(() => dialog.init());
@@ -179,4 +231,10 @@ function partitionArray(arr, elementsPerPartition) {
     }
 
     return partitions;
+}
+
+function numberOrNull(str) {
+    let res = Number(str);
+
+    return Number.isInteger(res) ? res : null;
 }

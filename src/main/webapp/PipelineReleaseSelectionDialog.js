@@ -30,80 +30,80 @@ class ApplicationSource {
         dispatchEvent('dialogSelectedApplication', { applicationId, applicationName, hasMicroservices });
     }
 }
+//
+// class MicroserviceSource {
+//
+//     constructor(api, appId) {
+//         this.api = api;
+//         this.appId = appId;
+//     }
+//
+//     async fetch(search, offset, limit) {
+//         if (!this.cache) {
+//             this.cache = await this.api.getMicroservices(this.appId, getAuthInfo());
+//         }
+//
+//         const filtered = search ? this.cache.filter(x => x.microserviceName.toLowerCase().indexOf(search) !== -1) : this.cache;
+//         return { totalCount: filtered.length, items: filtered.slice(offset, offset + limit) };
+//     }
+//
+//     getHTMLLink(item) {
+//         return '<a href="#" class="selectMicroserviceLink" data-ms-id="' + item.microserviceId + '" data-ms-name="' + item.microserviceName + '">' + item.microserviceName + '</a>';
+//     }
+//
+//     getLinkClass() {
+//         return 'selectMicroserviceLink';
+//     }
+//
+//     handleClick(target) {
+//         const microserviceId = Number(target.attr('data-ms-id'));
+//         const microserviceName = target.attr('data-ms-name');
+//
+//         dispatchEvent('dialogSelectedMicroservice', { microserviceId, microserviceName });
+//     }
+// }
+//
+// class ReleaseSource {
+//
+//     constructor(api, appId, microserviceId) {
+//         this.api = api;
+//         this.appId = appId;
+//         this.microserviceId = microserviceId;
+//     }
+//
+//     async fetch(search, offset, limit) {
+//         const res = await this.api.getReleases(this.appId, this.microserviceId, {
+//             keyword: search,
+//             offset,
+//             limit
+//         }, getAuthInfo());
+//
+//         return res;
+//     }
+//
+//     getHTMLLink(item) {
+//         return '<a href="#" class="selectReleaseLink" data-release-id="' + item.releaseId + '" data-release-name="' + item.releaseName + '">' + item.releaseName + '</a>';
+//     }
+//
+//     getLinkClass() {
+//         return 'selectReleaseLink';
+//     }
+//
+//     handleClick(target) {
+//         const releaseId = Number(target.attr('data-release-id'));
+//         const releaseName = target.attr('data-release-name');
+//
+//         dispatchEvent('dialogSelectedRelease', { releaseId, releaseName });
+//     }
+// }
 
-class MicroserviceSource {
-
-    constructor(api, appId) {
-        this.api = api;
-        this.appId = appId;
-    }
-
-    async fetch(search, offset, limit) {
-        if (!this.cache) {
-            this.cache = await this.api.getMicroservices(this.appId, getAuthInfo());
-        }
-
-        const filtered = search ? this.cache.filter(x => x.microserviceName.toLowerCase().indexOf(search) !== -1) : this.cache;
-        return { totalCount: filtered.length, items: filtered.slice(offset, offset + limit) };
-    }
-
-    getHTMLLink(item) {
-        return '<a href="#" class="selectMicroserviceLink" data-ms-id="' + item.microserviceId + '" data-ms-name="' + item.microserviceName + '">' + item.microserviceName + '</a>';
-    }
-
-    getLinkClass() {
-        return 'selectMicroserviceLink';
-    }
-
-    handleClick(target) {
-        const microserviceId = Number(target.attr('data-ms-id'));
-        const microserviceName = target.attr('data-ms-name');
-
-        dispatchEvent('dialogSelectedMicroservice', { microserviceId, microserviceName });
-    }
-}
-
-class ReleaseSource {
-
-    constructor(api, appId, microserviceId) {
-        this.api = api;
-        this.appId = appId;
-        this.microserviceId = microserviceId;
-    }
-
-    async fetch(search, offset, limit) {
-        const res = await this.api.getReleases(this.appId, this.microserviceId, {
-            keyword: search,
-            offset,
-            limit
-        }, getAuthInfo());
-
-        return res;
-    }
-
-    getHTMLLink(item) {
-        return '<a href="#" class="selectReleaseLink" data-release-id="' + item.releaseId + '" data-release-name="' + item.releaseName + '">' + item.releaseName + '</a>';
-    }
-
-    getLinkClass() {
-        return 'selectReleaseLink';
-    }
-
-    handleClick(target) {
-        const releaseId = Number(target.attr('data-release-id'));
-        const releaseName = target.attr('data-release-name');
-
-        dispatchEvent('dialogSelectedRelease', { releaseId, releaseName });
-    }
-}
-
-class AppAndReleaseSelectionDialog extends Dialog {
+class PipelineReleaseSelectionDialog extends Dialog {
 
     SIZE_PER_PAGE = 25;
 
     constructor() {
-        super('appAndReleaseSelectionDialog', 'appAndReleaseSelectionForm');
-        this.api = new Api(instance, descriptor);
+        super('pipelineReleaseSelectionDialog', 'pipelineReleaseSelectionForm');
+        this.api = new Api(null, descriptor);
     }
 
     clearForm() {
@@ -206,22 +206,9 @@ class AppAndReleaseSelectionDialog extends Dialog {
     }
 
     onInit() {
-        jq('#selectedApp').off('click').click((ev) => {
+        jq('#releaseLookup').off('click').click((ev) => {
             ev.preventDefault();
             this.spawnDialog('Select an Application', new ApplicationSource(this.api));
-        });
-
-        jq('#selectedMicroservice').off('click').click((ev) => {
-            ev.preventDefault();
-            const appId = Number(jq('[name="userSelectedApplication"]').val());
-            this.spawnDialog('Select a Microservice', new MicroserviceSource(this.api, appId));
-        });
-
-        jq('#selectedRelease').off('click').click((ev) => {
-            ev.preventDefault();
-            const appId = Number(jq('[name="userSelectedApplication"]').val());
-            const microserviceId = jq('[name="userSelectedMicroservice"]').val();
-            this.spawnDialog('Select a Release', new ReleaseSource(this.api, appId, microserviceId));
         });
     }
 
@@ -232,4 +219,4 @@ class AppAndReleaseSelectionDialog extends Dialog {
     }
 }
 
-createDialog(new AppAndReleaseSelectionDialog());
+createDialog(new PipelineReleaseSelectionDialog());

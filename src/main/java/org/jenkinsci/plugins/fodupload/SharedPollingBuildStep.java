@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.fodupload;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URISyntaxException;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 
@@ -264,7 +263,7 @@ public class SharedPollingBuildStep {
             if (apiConnection != null) {
                 apiConnection.authenticate();
                 ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.getPollingInterval(), logger);
-                PollReleaseStatusResult result = poller.pollReleaseStatus(releaseIdNum == 0 ? token.getProjectVersionId() : releaseIdNum, scanId, correlationId);
+                PollReleaseStatusResult result = poller.pollReleaseStatus(releaseIdNum == 0 ? token.getReleaseId() : releaseIdNum, scanId, correlationId);
 
                 // if the polling fails, crash the build
                 if (!result.isPollingSuccessful()) {

@@ -60,8 +60,8 @@
 
     <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/ScanSettings.jelly" class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep" />
 
-    <f:section title="Scan Options">
-        <f:entry title="Action when scan is in progress" field="inProgressScanActionType">
+    <f:section title="Build Step Options">
+        <f:entry title="Action when scan is in progress" field="inProgressScanActionType" help="/plugin/fortify-on-demand-uploader/help-scanOptions-existingScan.html">
             <f:select/>
         </f:entry>
         <f:entry title="Build result if scan in progress" field="inProgressBuildResultType">

@@ -9,6 +9,7 @@ import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Type;
 import java.util.List;
 
 public class AssessmentTypesController extends ControllerBase {
@@ -20,7 +21,8 @@ public class AssessmentTypesController extends ControllerBase {
     public List<AssessmentTypeEntitlement> getStaticAssessmentTypeEntitlements(Integer releaseId) throws IOException {
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments("/api/v3/releases/" + releaseId + "/assessment-types")
-                .addQueryParameter("scanType","1");
+                .addQueryParameter("scanType", "1")
+                .addQueryParameter("offset", "0");
 
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
@@ -28,8 +30,27 @@ public class AssessmentTypesController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        GenericListResponse<AssessmentTypeEntitlement> response = apiConnection.requestTyped(request, new TypeToken<GenericListResponse<AssessmentTypeEntitlement>>(){}.getType());
+        Type typeToken = new TypeToken<GenericListResponse<AssessmentTypeEntitlement>>() {
+        }.getType();
+        GenericListResponse<AssessmentTypeEntitlement> response = apiConnection.requestTyped(request, typeToken);
+        List<AssessmentTypeEntitlement> items = response.getItems();
+        int totalCount = response.getTotalCount();
 
-        return response.getItems();
+        while (items.size() < totalCount) {
+            urlBuilder.setQueryParameter("offset", String.valueOf(items.size()));
+            request = new Request.Builder()
+                    .url(urlBuilder.build())
+                    .addHeader("Accept", "application/json")
+                    .addHeader("CorrelationId", getCorrelationId())
+                    .get()
+                    .build();
+            response = apiConnection.requestTyped(request, typeToken);
+
+            if (response.getItems().size() < 1) throw new IOException("Invalid API response, assessment-types page was empty");
+
+            items.addAll(response.getItems());
+        }
+
+        return items;
     }
 }

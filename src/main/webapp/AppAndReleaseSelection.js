@@ -1,5 +1,3 @@
-jq = jQuery;
-
 const ReleaseSetMode = Object.freeze({
     bsiToken: 0,
     releaseId: 1,

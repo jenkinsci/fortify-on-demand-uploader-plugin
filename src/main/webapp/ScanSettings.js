@@ -1,14 +1,4 @@
-jq = jQuery;
-
 const fodeRowSelector = '.fode-field-row, .fode-field-row-verr';
-const techStackConsts = {
-    none: -1,
-    dotNet: 1,
-    dotNetCore: 23,
-    java: 7,
-    php: 9,
-    python: 10
-};
 
 class ScanSettings {
 
@@ -35,19 +25,6 @@ class ScanSettings {
         jq('#fode-msg').hide();
     }
 
-    setSelectValues(id, selected, options) {
-        let select = jq(`#${id} .fode-edit > select`);
-
-        if (options) {
-            select.find('option[value]:not([value=""])').remove();
-            for (let o of options) {
-                select.append(`<option value="${o.value}">${o.text}</option>`);
-            }
-        }
-
-        select.val(selected);
-    }
-
     populateAssessmentsDropdown() {
         let atsel = jq(`#ddAssessmentType`);
 
@@ -62,37 +39,50 @@ class ScanSettings {
     }
 
     onAssessmentChanged() {
-        let atval = jq(`#ddAssessmentType`).val();
-        let entsel = jq(`#entitlementSelectList`);
+        let atval = jq('#ddAssessmentType').val();
+        let entsel = jq('#entitlementSelectList');
+        let apsel = jq('#auditPreferenceSelectList');
         let at = this.assessments[atval];
 
-        entsel.find('option').remove();
+        entsel.find('option,optgroup').remove();
 
         if (at) {
-            for (let e of at.entitlementsSorted) {
-                entsel.append(`<option value="${this.getEntitlementDropdownValue(e.id, e.frequencyId)}">${e.description}</option>`);
+            let available = at.entitlementsSorted.filter(e => e.id > 0);
+            let forPurchase = at.entitlementsSorted.filter(e => e.id <= 0);
+            let availableGrp = forPurchase.length > 0 ? jq(`<optgroup label="Available Entitlements"></optgroup>`) : entsel;
+
+            for (let e of available) {
+                availableGrp.append(`<option value="${getEntitlementDropdownValue(e.id, e.frequencyId)}">${e.description}</option>`);
+            }
+
+            if (forPurchase.length > 0){
+                let grp = jq(`<optgroup label="Available For Purchase"></optgroup>`);
+
+                entsel.append(availableGrp);
+                entsel.append(grp);
+                for (let e of forPurchase) {
+                    grp.append(`<option value="${getEntitlementDropdownValue(0, e.frequencyId)}">${e.description}</option>`);
+                }
             }
         }
+
+        if (at && at.name === 'Static+ Assessment') apsel.prop('disabled', false);
+        else {
+            apsel.val('2');
+            apsel.prop('disabled', true);
+        }
+
         this.onEntitlementChanged();
         // ToDo: set to unselected if selected value doesn't exist
     }
 
     onEntitlementChanged() {
-        let entId = '';
-        let freqId = '';
         let val = jq('#entitlementSelectList').val();
+        let {entitlementId, frequencyId} = parseEntitlementDropdownValue(val);
 
-        if (val) {
-            let spl = val.split('-');
-
-            if (spl.length === 2){
-                entId = spl[0];
-                freqId = spl[1];
-            }
-        }
-
-        jq('#entitlementId').val(entId);
-        jq('#frequencyId').val(freqId);
+        jq('#entitlementId').val(entitlementId);
+        jq('#frequencyId').val(frequencyId);
+        jq('#purchaseEntitlementsForm input').prop('checked', (entitlementId <=  0));
     }
 
     async loadEntitlementSettings(releaseChangedPayload) {
@@ -107,18 +97,20 @@ class ScanSettings {
         this.hideMessages();
 
         if (releaseChangedPayload && releaseChangedPayload.mode === ReleaseSetMode.bsiToken) {
-            this.showMessage('Settings defined in BSI Token');
+            jq('.fode-row-bsi').show();
+            jq('.fode-row-remediation').show();
             return;
         }
 
         let releaseId = releaseChangedPayload ? releaseChangedPayload.releaseId : null;
         let fields = jq('.fode-field.spinner-container');
 
-        releaseId = Number(releaseId);
+        releaseId = numberOrNull(releaseId);
 
-        if (Number.isInteger(releaseId) && releaseId > 0) {
+        if (releaseId > 0) {
             fields.addClass('spinner');
             rows.show();
+            jq('.fode-row-bsi').hide();
             this.onScanCentralChanged();
 
             // ToDo: deal with overlapping calls
@@ -138,7 +130,7 @@ class ScanSettings {
 
                 jq('#ddAssessmentType').val(assessmentId);
                 this.onAssessmentChanged();
-                jq('#entitlementSelectList').val(this.getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
+                jq('#entitlementSelectList').val(getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
                 this.onEntitlementChanged();
                 jq('#technologyStackSelectList').val(this.scanSettings.technologyStackId);
                 this.onTechStackChanged();
@@ -167,6 +159,7 @@ class ScanSettings {
 
     onScanCentralChanged() {
         let val = jq('#scanCentralBuildTypeForm > select').val().toLowerCase();
+        let techStackFilter;
 
         if (val === 'none') {
             jq('.fode-row-sc').hide();
@@ -183,8 +176,6 @@ class ScanSettings {
                     if (jqe.hasClass(scClass)) jqe.show();
                     else jqe.hide();
                 });
-
-            let techStackFilter;
 
             switch (val) {
                 case 'msbuild':
@@ -205,10 +196,10 @@ class ScanSettings {
                     jq('#technologyStackSelectList').val(techStackConsts.python);
                     break;
             }
-
-            this.populateTechStackDropdown(techStackFilter)
-            this.onTechStackChanged();
         }
+
+        this.populateTechStackDropdown(techStackFilter);
+        this.onTechStackChanged();
     }
 
     populateTechStackDropdown(filter) {
@@ -236,55 +227,43 @@ class ScanSettings {
         }
     }
 
-    getEntitlementDropdownValue(id, freq) {
-        return `${id}-${freq}`;
-    }
-
     onTechStackChanged() {
         let ts = this.techStacks[jq('#technologyStackSelectList').val()];
         let llsel = jq('#languageLevelSelectList');
+        let llr = jq('.fode-row-langLev');
 
+        llr.show();
         llsel.find('option').not(':first').remove();
         llsel.find('option').first().prop('selected', true);
 
-        if (!ts) return;
+        // noinspection EqualityComparisonWithCoercionJS
+        if (ts && ts.value == techStackConsts.php) llr.hide();
+        else if (ts) {
+            for (let ll of ts.levels) {
+                llsel.append(`<option value="${ll.value}">${ll.text}</option>`);
+            }
+        }
 
-        for (let ll of ts.levels) {
-            llsel.append(`<option value="${ll.value}">${ll.text}</option>`);
+        this.onLangLevelChanged();
+    }
+
+    onLangLevelChanged(){
+        let bt = jq('#scanCentralBuildTypeForm > select').val();
+        let ssv = jq('#buildToolVersionForm > input');
+
+        if (bt === 'Python'){
+            let ll = this.techStacks[techStackConsts.python].levels.find(e => e.value == jq('#languageLevelSelectList').val());
+
+            if (ll && ll.text) ssv.val(ll.text.replace(' (Django)', ''));
+
+            ssv.data('python', true);
+        } else if (ssv.data('python')) {
+            ssv.removeData();
+            ssv.val('');
         }
     }
 
-    async init() {
-        try {
-            this.techStacks = await this.api.getTechStacks(getAuthInfo());
-            for (let k of Object.keys(this.techStacks)) {
-                let ts = this.techStacks[k];
-
-                // noinspection EqualityComparisonWithCoercionJS
-                if (ts.value == techStackConsts.dotNetCore) {
-                    for (let ll of ts.levels) {
-                        ll.text = ll.text.replace(' (.NET Core)','');
-                    }
-                }
-
-                this.techStacksSorted.push(ts);
-            }
-
-            this.techStacksSorted = this.techStacksSorted.sort((a, b) => a.text.toLowerCase() < b.text.toLowerCase() ? -1 : 1);
-        } catch (err) {
-            if (this.api.isAuthError(err)) {
-                this.unsubInit = () => this.init();
-                subscribeToEvent('authInfoChanged', this.unsubInit);
-            } else {
-                this.showMessage('Unhandled error, please reload page', true);
-            }
-            return;
-        }
-
-        this.hideMessages();
-        this.showMessage('Select a release');
-        if (this.unsubInit) unsubscribeEvent('authInfoChanged', this.unsubInit);
-
+    preinit() {
         jq('.fode-field')
             .each((i, e) => {
                 let jqe = jq(e);
@@ -320,15 +299,52 @@ class ScanSettings {
 
                         tr.addClass(c)
 
-                        // Copy Scan Central css classes to validation-error-area rows
-                        if (c.startsWith('fode-row-sc') || c === 'fode-row-nonsc') {
+                        // Copy Scan Central and BSI css classes to validation-error-area and help-area rows
+                        if (c.startsWith('fode-row-sc') || c === 'fode-row-nonsc' || c === 'fode-row-bsi' || c === 'fode-row-langLev') {
                             let vtr = getValidationErrRow(tr);
+                            let htr = getHelpRow(tr);
 
                             if (vtr) vtr.addClass(c);
+                            if (htr) htr.addClass(c);
                         }
                     }
                 }
             });
+        this.init();
+    }
+
+    async init() {
+        try {
+            this.techStacks = await this.api.getTechStacks(getAuthInfo());
+            for (let k of Object.keys(this.techStacks)) {
+                let ts = this.techStacks[k];
+
+                // noinspection EqualityComparisonWithCoercionJS
+                if (ts.value == techStackConsts.dotNetCore) {
+                    for (let ll of ts.levels) {
+                        ll.text = ll.text.replace(' (.NET Core)', '');
+                    }
+                }
+
+                this.techStacksSorted.push(ts);
+            }
+
+            this.techStacksSorted = this.techStacksSorted.sort((a, b) => a.text.toLowerCase() < b.text.toLowerCase() ? -1 : 1);
+        } catch (err) {
+            // if (this.api.isAuthError(err)) {
+            if (!this.unsubInit) {
+                this.unsubInit = () => this.init();
+                subscribeToEvent('authInfoChanged', this.unsubInit);
+            }
+            // } else {
+            //     this.showMessage('Unhandled error, please reload page', true);
+            // }
+            return;
+        }
+
+        this.hideMessages();
+        this.showMessage('Select a release');
+        if (this.unsubInit) unsubscribeEvent('authInfoChanged', this.unsubInit);
 
         jq('#scanCentralBuildTypeForm > select')
             .change(_ => this.onScanCentralChanged());
@@ -342,10 +358,16 @@ class ScanSettings {
         jq('#entitlementSelectList')
             .change(_ => this.onEntitlementChanged());
 
+        jq('#languageLevelSelectList')
+            .change(_ => this.onLangLevelChanged());
+
         this.populateTechStackDropdown();
 
         this.uiLoaded = true;
-        if (this.deferredLoadEntitlementSettings) this.deferredLoadEntitlementSettings();
+        if (this.deferredLoadEntitlementSettings) {
+            this.deferredLoadEntitlementSettings();
+            this.deferredLoadEntitlementSettings = null;
+        }
     }
 
 }
@@ -353,4 +375,4 @@ class ScanSettings {
 const scanSettings = new ScanSettings();
 
 spinAndWait(() => jq('#sonatypeForm').val() !== undefined && jq('#scanCentralBuildTypeForm > select').val())
-    .then(scanSettings.init.bind(scanSettings));
+    .then(scanSettings.preinit.bind(scanSettings));

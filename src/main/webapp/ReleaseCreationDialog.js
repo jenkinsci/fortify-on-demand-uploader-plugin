@@ -1,5 +1,3 @@
-jq = jQuery;
-
 class ReleaseCreationDialog extends Dialog {
 
     constructor() {

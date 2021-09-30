@@ -56,12 +56,20 @@ public class Utils {
         }
     }
 
+    public static Integer tryParseInt(String value, Integer defaultValue) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException nfe) {
+            return defaultValue;
+        }
+    }
+
     public static boolean isNullOrEmpty(List list) {
         return list == null || list.isEmpty();
     }
 
     public static boolean isNullOrEmpty(String string) {
-        return string == null || string.isEmpty();
+        return string == null || string.trim().isEmpty();
     }
 
     public static String getFileExpressionPatternString(String technologyStack) {
@@ -209,8 +217,19 @@ public class Utils {
         unexpectedErrorResponseErrors = new ArrayList<>();
         unexpectedErrorResponseErrors.add("Unexpected response from server");
     }
+
     public static List<String> unexpectedServerResponseErrors() {
         return unexpectedErrorResponseErrors;
+    }
+
+    private static List<String> unauthorizedErrorResponseErrors;
+    static {
+        unauthorizedErrorResponseErrors = new ArrayList<>();
+        unauthorizedErrorResponseErrors.add("Not authorized to perform this action");
+    }
+
+    public static List<String> unauthorizedServerResponseErrors() {
+        return unauthorizedErrorResponseErrors;
     }
 
     public static AuthenticationModel getAuthModelFromObject(JSONObject authModelObject) {

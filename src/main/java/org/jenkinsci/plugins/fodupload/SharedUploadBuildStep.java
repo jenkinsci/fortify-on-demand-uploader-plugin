@@ -93,7 +93,92 @@ public class SharedUploadBuildStep {
                 scanCentralBuildFile,
                 scanCentralBuildToolVersion,
                 scanCentralVirtualEnv,
-                scanCentralRequirementFile);
+                scanCentralRequirementFile,
+                false, null, null, null, null, null, null, null,
+                false, null, null, null, null, null, null, null, null, null);
+
+        authModel = new AuthenticationModel(overrideGlobalConfig,
+                username,
+                personalAccessToken,
+                tenantId);
+    }
+
+    public SharedUploadBuildStep(String releaseId,
+                                 String bsiToken,
+                                 boolean overrideGlobalConfig,
+                                 String username,
+                                 String personalAccessToken,
+                                 String tenantId,
+                                 boolean purchaseEntitlements,
+                                 String entitlementPreference,
+                                 String srcLocation,
+                                 String remediationScanPreferenceType,
+                                 String inProgressScanActionType,
+                                 String inProgressBuildResultType,
+                                 String selectedScanCentralBuildType,
+                                 boolean scanCentralIncludeTests,
+                                 boolean scanCentralSkipBuild,
+                                 String scanCentralBuildCommand,
+                                 String scanCentralBuildFile,
+                                 String scanCentralBuildToolVersion,
+                                 String scanCentralVirtualEnv,
+                                 String scanCentralRequirementFile,
+                                 String assessmentType,
+                                 String entitlementId,
+                                 String frequencyId,
+                                 String auditPreference,
+                                 String technologyStack,
+                                 String languageLevel,
+                                 String openSourceScan,
+                                 Boolean autoProvision,
+                                 String applicationName,
+                                 String applicationType,
+                                 String releaseName,
+                                 String owner,
+                                 String attributes,
+                                 String businessCriticality,
+                                 String sdlcStatus,
+                                 String microserviceName,
+                                 String isMicroservice) {
+
+        model = new JobModel(releaseId,
+                bsiToken,
+                purchaseEntitlements,
+                entitlementPreference,
+                srcLocation,
+                remediationScanPreferenceType,
+                inProgressScanActionType,
+                inProgressBuildResultType,
+                null,
+                null,
+                null,
+                null,
+                selectedScanCentralBuildType,
+                scanCentralIncludeTests,
+                scanCentralSkipBuild,
+                scanCentralBuildCommand,
+                scanCentralBuildFile,
+                scanCentralBuildToolVersion,
+                scanCentralVirtualEnv,
+                scanCentralRequirementFile,
+                true,
+                assessmentType,
+                entitlementId,
+                frequencyId,
+                auditPreference,
+                technologyStack,
+                languageLevel,
+                openSourceScan,
+                autoProvision,
+                applicationName,
+                applicationType,
+                releaseName,
+                owner,
+                attributes,
+                businessCriticality,
+                sdlcStatus,
+                microserviceName,
+                isMicroservice);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -271,7 +356,7 @@ public class SharedUploadBuildStep {
 
         return result;
     }
-    
+
     public static EntitlementSettings customFillEntitlementSettings(int releaseId, AuthenticationModel authModel) throws IOException {
         return new EntitlementSettings(
                 1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
@@ -366,7 +451,6 @@ public class SharedUploadBuildStep {
             }
 
             String technologyStack = null;
-            GetStaticScanSetupResponse staticScanSetup = null;
 
             apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
             if (apiConnection != null) {
@@ -377,8 +461,11 @@ public class SharedUploadBuildStep {
                 if (releaseId == 0) {
                     model.loadBsiToken();
                     technologyStack = model.getBsiToken().getTechnologyStack();
+                } else if (!Utils.isNullOrEmpty(model.getTechnologyStack())) {
+                    technologyStack = model.getTechnologyStack();
                 } else {
-                    staticScanSetup = staticScanController.getStaticScanSettingsOld(releaseId);
+                    GetStaticScanSetupResponse staticScanSetup = staticScanController.getStaticScanSettingsOld(releaseId);
+
                     if (staticScanSetup == null) {
                         logger.println("No scan settings defined for release " + releaseId.toString());
                         build.setResult(Result.FAILURE);
@@ -387,6 +474,7 @@ public class SharedUploadBuildStep {
 
                     technologyStack = staticScanSetup.getTechnologyStack();
                 }
+                String scanCentralPath = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getScanCentralPath();
 
                 FilePath workspaceModified = new FilePath(workspace, model.getSrcLocation());
                 // zips the file in a temporary location
@@ -409,7 +497,7 @@ public class SharedUploadBuildStep {
                         build.getNumber(),
                         build.getDisplayName());
 
-                StartScanResponse scanResponse = staticScanController.startStaticScan(releaseId, staticScanSetup, model, notes);
+                StartScanResponse scanResponse = staticScanController.startStaticScan(releaseId, model, notes);
                 boolean deleted = payload.delete();
 
                 boolean isWarningSettingEnabled = model.getInProgressBuildResultType().equalsIgnoreCase(InProgressBuildResultType.WarnBuild.getValue());
