@@ -194,6 +194,7 @@ class ScanSettings {
                     break;
                 case 'python':
                     jq('#technologyStackSelectList').val(techStackConsts.python);
+
                     break;
             }
         }
@@ -248,6 +249,7 @@ class ScanSettings {
     }
 
     onLangLevelChanged(){
+        // Todo: When you switch to Python, Version remembers previous value. Could be problem
         let bt = jq('#scanCentralBuildTypeForm > select').val();
         let ssv = jq('#buildToolVersionForm > input');
 
