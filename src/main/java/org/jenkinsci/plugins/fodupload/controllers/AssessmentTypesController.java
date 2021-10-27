@@ -53,4 +53,23 @@ public class AssessmentTypesController extends ControllerBase {
 
         return items;
     }
+
+    public List<AssessmentTypeEntitlement> getStaticAssessmentTypeEntitlements() throws IOException {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/tenant-assessment-types")
+                .addQueryParameter("scanType", "1");
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .get()
+                .build();
+        Type typeToken = new TypeToken<GenericListResponse<AssessmentTypeEntitlement>>() {
+        }.getType();
+        GenericListResponse<AssessmentTypeEntitlement> response = apiConnection.requestTyped(request, typeToken);
+        List<AssessmentTypeEntitlement> items = response.getItems();
+
+        return items;
+    }
 }

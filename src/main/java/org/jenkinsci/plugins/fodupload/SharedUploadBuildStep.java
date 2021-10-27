@@ -138,12 +138,12 @@ public class SharedUploadBuildStep {
                                  String applicationName,
                                  String applicationType,
                                  String releaseName,
-                                 String owner,
+                                 Integer owner,
                                  String attributes,
                                  String businessCriticality,
                                  String sdlcStatus,
                                  String microserviceName,
-                                 String isMicroservice) {
+                                 Boolean isMicroservice) {
 
         model = new JobModel(releaseId,
                 bsiToken,

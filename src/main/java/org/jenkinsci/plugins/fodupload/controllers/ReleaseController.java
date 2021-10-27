@@ -10,16 +10,14 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.FodApiFilterList;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
-import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
-import org.jenkinsci.plugins.fodupload.models.response.PollingSummaryDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
+import org.jenkinsci.plugins.fodupload.models.response.*;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.util.List;
 
 import org.jenkinsci.plugins.fodupload.Utils;
 
@@ -29,7 +27,7 @@ public class ReleaseController extends ControllerBase {
      * Constructor
      *
      * @param apiConnection apiConnection object with client info
-     * @param logger logger object
+     * @param logger        logger object
      * @param correlationId correlation id
      */
     public ReleaseController(final FodApiConnection apiConnection, final PrintStream logger, final String correlationId) {
@@ -145,9 +143,8 @@ public class ReleaseController extends ControllerBase {
         GenericListResponse<ScanSummaryDTO> results = gson.fromJson(content, t);
         ScanSummaryDTO resultDto = null;
         if (results.getItems().size() > 0) {
-            for (ScanSummaryDTO sdto : results.getItems())
-            {
-                if(sdto.getScanId() == scanId)
+            for (ScanSummaryDTO sdto : results.getItems()) {
+                if (sdto.getScanId() == scanId)
                     resultDto = sdto;
             }
         }
@@ -268,4 +265,51 @@ public class ReleaseController extends ControllerBase {
         return null;
 
     }
+
+    public Integer getReleaseIdByName(final String appName, final String relName) throws IOException {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/releases/")
+                .addQueryParameter("filters", "applicationName:" + appName + "+releaseName:" + relName)
+                .addQueryParameter("fields", "releaseId,applicationName,releaseName")
+                .addQueryParameter("offset", "0");
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .get()
+                .build();
+        Type typeToken = new TypeToken<GenericListResponse<ReleaseIdLookupResult>>() {
+        }.getType();
+        GenericListResponse<ReleaseIdLookupResult> response = apiConnection.requestTyped(request, typeToken);
+        List<ReleaseIdLookupResult> items = response.getItems();
+        int totalCount = response.getTotalCount();
+        int itemsReceived = 0;
+
+        do {
+            for (ReleaseIdLookupResult rel : items) {
+                if (rel.getApplicationName().equals(appName) && rel.getReleaseName().equals(relName)) return rel.getReleaseId();
+            }
+
+            itemsReceived = items.size();
+
+            if (itemsReceived < totalCount) {
+                urlBuilder.setQueryParameter("offset", String.valueOf(items.size()));
+                request = new Request.Builder()
+                        .url(urlBuilder.build())
+                        .addHeader("Accept", "application/json")
+                        .addHeader("CorrelationId", getCorrelationId())
+                        .get()
+                        .build();
+                response = apiConnection.requestTyped(request, typeToken);
+
+                if (response.getItems().size() < 1) throw new IOException("Invalid API response, releases page was empty");
+
+                items = response.getItems();
+            }
+        } while (itemsReceived < totalCount);
+
+        return null;
+    }
+
 }

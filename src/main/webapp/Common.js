@@ -120,6 +120,12 @@ function createDialog(dialog) {
         .then(() => dialog.init());
 }
 
+function isNullOrEmpty(str) {
+    if (typeof str === 'string' && str !== ''&& str !== ' ') return str.trim() ? false : true;
+
+    return !str;
+}
+
 class Dialog {
 
     constructor(dialogId, formId) {

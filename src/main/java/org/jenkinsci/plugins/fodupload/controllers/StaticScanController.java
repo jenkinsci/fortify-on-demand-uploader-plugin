@@ -10,15 +10,12 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.Utils;
-import org.jenkinsci.plugins.fodupload.models.FodEnums;
-import org.jenkinsci.plugins.fodupload.models.JobModel;
-import org.jenkinsci.plugins.fodupload.models.PutStaticScanSetupModel;
+import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Properties;
+import java.util.*;
 
 public class StaticScanController extends ControllerBase {
 
@@ -74,7 +71,7 @@ public class StaticScanController extends ControllerBase {
 
             if (Utils.isNullOrEmpty(uploadRequest.getSelectedReleaseType())) {
                 if (uploadRequest.getIsPipeline()) {
-                    if (releaseId < 1) releaseId = createApplicationAndRelease(uploadRequest);
+                    if (releaseId == null || releaseId < 1) releaseId = createApplicationAndRelease(uploadRequest);
                     buildPipelineRequest(builder, releaseId, uploadRequest);
                 } else throw new IllegalArgumentException("Invalid job model");
             } else {
@@ -132,15 +129,18 @@ public class StaticScanController extends ControllerBase {
                         .post(RequestBody.create(byteArray, sendByteArray))
                         .build();
 
+                println("Uploading fragment " + fragmentNumber);
                 // Get the response
                 Response response = apiConnection.getClient().newCall(request).execute();
 
                 if (response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
+                    String raw = apiConnection.getRawBody(response);
+
+                    if (Utils.isNullOrEmpty(raw)) println("Uploading fragment failed, reauthenticating");
+                    else println("Uploading fragment failed, reauthenticating \n" + raw);
                     // Re-authenticate
                     apiConnection.authenticate();
-
-                    // if you had to reauthenticate here, would the loop and request not need to be resubmitted?
-                    // possible continue?
+                    continue;
                 }
 
                 offset += byteCount;
@@ -183,7 +183,7 @@ public class StaticScanController extends ControllerBase {
                 response.body().close();
 
             } // end while
-
+            println("Payload upload complete");
         } catch (Exception e) {
             printStackTrace(e);
             scanResults.uploadNotSuccessful();
@@ -233,8 +233,76 @@ public class StaticScanController extends ControllerBase {
             builder.addQueryParameter("remediationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType());
     }
 
-    private Integer createApplicationAndRelease(final JobModel uploadRequest) throws Exception {
-        throw new Exception("Not implemented");
+    private Integer createApplicationAndRelease(final JobModel job) throws Exception {
+        PostReleaseWithUpsertApplicationModel model = new PostReleaseWithUpsertApplicationModel();
+
+        model.setApplicationName(job.getApplicationName());
+        model.setApplicationType(job.getApplicationType());
+        model.setReleaseName(job.getReleaseName());
+        model.setOwnerId(job.getOwner());
+        model.setBusinessCriticalityType(job.getBusinessCriticality());
+        model.setSdlcStatusType(job.getSdlcStatus());
+
+        if (job.getIsMicroservice()) {
+            model.setHasMicroservices(job.getIsMicroservice());
+            model.setReleaseMicroserviceName(job.getMicroserviceName());
+        }
+
+        if (!job.getAttributes().isEmpty()) {
+            String[] attrSpl = job.getAttributes().split("\\&");
+            Map<String, String> attrs = new HashMap<>();
+
+            for (String a : attrSpl) {
+                String[] kvSpl = a.split(":");
+
+                if (kvSpl.length == 2 && !attrs.containsKey(kvSpl[0])) attrs.put(kvSpl[0], kvSpl[1]);
+                else throw new Exception("Failure parsing application attributes");
+            }
+
+            for (FodAttributeMapItem a : MapAttributesToFod(attrs)) {
+                model.getAttributes().add(new ApplicationAttributeModel(a.getDefinition().getId(), a.getValue()));
+            }
+        }
+
+        HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+                .addPathSegments("/api/v3/releases/releaseWithUpsertApplication");
+
+        String requestContent = Json.getInstance().toJson(model);
+        Request request = new Request.Builder()
+                .url(builder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .put(RequestBody.create(MediaType.parse("application/json"), requestContent))
+                .build();
+        Response response = apiConnection.request(request);
+
+        if (response.code() < 300) {
+            PostReleaseWithUpsertApplicationResponseModel result = apiConnection.parseResponse(response, new TypeToken<PostReleaseWithUpsertApplicationResponseModel>() {
+            }.getType());
+
+            if (result.getSuccess()) return result.getReleaseId();
+            else throw new Exception("Failed to create application and/or release: \n" + String.join("\n", result.getErrors()));
+        } else {
+            throw new Exception("Failed to create application and/or release: \n" + apiConnection.getRawBody(response));
+        }
+    }
+
+    public List<FodAttributeMapItem> MapAttributesToFod(Map<String, String> attributes) throws IOException {
+        // Todo: this should be injected
+        AttributesController attrCntr = new AttributesController(apiConnection, logger, correlationId);
+        List<AttributeDefinition> fodAttr = attrCntr.getAttributeDefinitions();
+        List<FodAttributeMapItem> result = new ArrayList<>();
+
+        for (Map.Entry<String, String> a : attributes.entrySet()) {
+            for (AttributeDefinition fa : fodAttr) {
+                if (a.getKey().equals(fa.getName())) {
+                    result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
+                    break;
+                }
+            }
+        }
+
+        return result;
     }
 
     /**

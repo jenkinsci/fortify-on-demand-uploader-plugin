@@ -15,12 +15,11 @@ import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
 import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
-import org.jenkinsci.plugins.fodupload.controllers.AssessmentTypesController;
-import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
-import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
-import org.jenkinsci.plugins.fodupload.controllers.UsersController;
+import org.jenkinsci.plugins.fodupload.controllers.*;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.models.response.AssessmentTypeEntitlementsForAutoProv;
+import org.jenkinsci.plugins.fodupload.models.response.GetStaticScanSetupResponse;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -88,12 +87,12 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String applicationName;
     private String applicationType;
     private String releaseName;
-    private String owner;
+    private Integer owner;
     private String attributes;
     private String businessCriticality;
     private String sdlcStatus;
     private String microserviceName;
-    private String isMicroservice;
+    private Boolean isMicroservice;
 
     private SharedUploadBuildStep commonBuildStep;
 
@@ -321,12 +320,12 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @SuppressWarnings("unused")
-    public String getOwner() {
+    public Integer getOwner() {
         return owner;
     }
 
     @DataBoundSetter
-    public void setOwner(String owner) {
+    public void setOwner(Integer owner) {
         this.owner = owner;
     }
 
@@ -371,12 +370,12 @@ public class FortifyStaticAssessment extends FortifyStep {
     }
 
     @SuppressWarnings("unused")
-    public String getIsMicroservice() {
+    public Boolean getIsMicroservice() {
         return isMicroservice;
     }
 
     @DataBoundSetter
-    public void setIsMicroservice(String isMicroservice) {
+    public void setIsMicroservice(Boolean isMicroservice) {
         this.isMicroservice = isMicroservice;
     }
 
@@ -520,6 +519,10 @@ public class FortifyStaticAssessment extends FortifyStep {
         inProgressScanActionType = inProgressScanActionType != null ? inProgressScanActionType : FodEnums.InProgressScanActionType.DoNotStartScan.getValue();
         inProgressBuildResultType = inProgressBuildResultType != null ? inProgressBuildResultType : FodEnums.InProgressBuildResultType.FailBuild.getValue();
 
+        if (Utils.tryParseInt(releaseId) > 0) selectedReleaseType = FodEnums.SelectedReleaseType.UseReleaseId.getValue();
+        else if (!Utils.isNullOrEmpty(bsiToken)) selectedReleaseType = FodEnums.SelectedReleaseType.UseBsiToken.getValue();
+        else throw new IllegalArgumentException("Invalid arguments, releaseId or bsiToken must be defined");
+
         String correlationId = UUID.randomUUID().toString();
 
         commonBuildStep = new SharedUploadBuildStep(releaseId,
@@ -662,6 +665,32 @@ public class FortifyStaticAssessment extends FortifyStep {
                 AssessmentTypesController assessmentTypesController = new AssessmentTypesController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(assessmentTypesController.getStaticAssessmentTypeEntitlements(releaseId));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @JavaScriptMethod
+        public String retrieveAssessmentTypeEntitlementsForAutoProv(String appName, String relName, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                ReleaseController releases = new ReleaseController(apiConnection, null, Utils.createCorrelationId());
+                AssessmentTypesController assessments = new AssessmentTypesController(apiConnection, null, Utils.createCorrelationId());
+                Integer relId = releases.getReleaseIdByName(appName.trim(), relName.trim());
+                AssessmentTypeEntitlementsForAutoProv result = null;
+
+                if (relId == null) {
+                    result = new AssessmentTypeEntitlementsForAutoProv(null, assessments.getStaticAssessmentTypeEntitlements(), null);
+                } else {
+                    StaticScanController staticScanController = new StaticScanController(apiConnection, null, Utils.createCorrelationId());
+                    GetStaticScanSetupResponse settings = staticScanController.getStaticScanSettings(relId);
+
+                    result = new AssessmentTypeEntitlementsForAutoProv(relId, assessments.getStaticAssessmentTypeEntitlements(relId), settings);
+                }
+
+                return Utils.createResponseViewModel(result);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;

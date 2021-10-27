@@ -137,49 +137,69 @@ class Api {
             this.descriptor.retrieveAssessmentTypeEntitlements(releaseId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
 
-                if (Array.isArray(responseJSON) && responseJSON.length > 0) {
-                    let assessments = {};
+                if (responseJSON === null) return res(null);
 
-                    for (let ae of responseJSON) {
-                        if (ae.isRemediation) continue;
-                        let assessment = assessments[ae.assessmentTypeId];
-
-                        if (!assessment) {
-                            assessment = {
-                                id: ae.assessmentTypeId,
-                                name: ae.name,
-                                entitlements: {},
-                                entitlementsSorted: []
-                            };
-                            assessments[ae.assessmentTypeId] = assessment;
-                        }
-                        let entitlement = {
-                            id: ae.entitlementId,
-                            frequency: ae.frequencyType,
-                            frequencyId: ae.frequencyTypeId,
-                            units: ae.units,
-                            unitsAvailable: ae.unitsAvailable,
-                            subscriptionEndDate: Date.parse(ae.subscriptionEndDate),
-                            isBundledAssessment: ae.isBundledAssessment,
-                            parentAssessmentTypeId: ae.parentAssessmentTypeId,
-                            description: ae.entitlementDescription,
-                            sortValue: (ae.frequencyType === 'Subscription' ? 0 : 1).toString() + '_' + ae.entitlementDescription.toLowerCase()
-                        };
-
-                        assessment.entitlements[ae.entitlementId] = entitlement;
-                        assessment.entitlementsSorted.push(entitlement);
-                    }
-
-                    for (let k of Object.keys(assessments)) {
-                        assessments[k].entitlementsSorted = assessments[k].entitlementsSorted.sort((a, b) => a.sortValue < b.sortValue ? -1 : 0);
-                    }
-
-                    return res(assessments);
-                }
-
-                return res(null);
+                return res(this._mutateAssessmentEntitlements(responseJSON));
             });
         });
+    }
+
+    getAssessmentTypeEntitlementsForAutoProv(appName, relName, customAuth) {
+        return new Promise((res, rej) => {
+            this.descriptor.retrieveAssessmentTypeEntitlementsForAutoProv(appName, relName, customAuth, async t => {
+                const responseJSON = JSON.parse(t.responseJSON);
+
+                if (responseJSON === null) return res(null);
+
+                responseJSON.assessments = this._mutateAssessmentEntitlements(responseJSON.assessments);
+
+                return res(responseJSON);
+            });
+        });
+    }
+
+    _mutateAssessmentEntitlements(responseJSON){
+        if (Array.isArray(responseJSON) && responseJSON.length > 0) {
+            let assessments = {};
+
+            for (let ae of responseJSON) {
+                if (ae.isRemediation) continue;
+                let assessment = assessments[ae.assessmentTypeId];
+
+                if (!assessment) {
+                    assessment = {
+                        id: ae.assessmentTypeId,
+                        name: ae.name,
+                        entitlements: {},
+                        entitlementsSorted: []
+                    };
+                    assessments[ae.assessmentTypeId] = assessment;
+                }
+                let entitlement = {
+                    id: ae.entitlementId,
+                    frequency: ae.frequencyType,
+                    frequencyId: ae.frequencyTypeId,
+                    units: ae.units,
+                    unitsAvailable: ae.unitsAvailable,
+                    subscriptionEndDate: Date.parse(ae.subscriptionEndDate),
+                    isBundledAssessment: ae.isBundledAssessment,
+                    parentAssessmentTypeId: ae.parentAssessmentTypeId,
+                    description: ae.entitlementDescription,
+                    sortValue: (ae.frequencyType === 'Subscription' ? 0 : 1).toString() + '_' + ae.entitlementDescription.toLowerCase()
+                };
+
+                assessment.entitlements[ae.entitlementId] = entitlement;
+                assessment.entitlementsSorted.push(entitlement);
+            }
+
+            for (let k of Object.keys(assessments)) {
+                assessments[k].entitlementsSorted = assessments[k].entitlementsSorted.sort((a, b) => a.sortValue < b.sortValue ? -1 : 0);
+            }
+
+            return assessments;
+        }
+
+        return null;
     }
 
     getReleaseEntitlementSettings(releaseId, customAuth) {

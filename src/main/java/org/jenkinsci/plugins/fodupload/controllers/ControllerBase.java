@@ -8,8 +8,8 @@ abstract class ControllerBase {
 
     protected FodApiConnection apiConnection;
 
-    private String correlationId;
-    private PrintStream logger;
+    protected String correlationId;
+    protected PrintStream logger;
 
     /**
      * Base constructor for all apiConnection controllers

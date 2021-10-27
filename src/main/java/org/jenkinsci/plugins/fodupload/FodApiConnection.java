@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import hudson.ProxyConfiguration;
+import javafx.util.Pair;
 import jenkins.model.Jenkins;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
@@ -233,6 +234,26 @@ public class FodApiConnection {
             stream.close();
             body.close();
         }
+    }
+
+    public String getRawBody(Response response) {
+        ResponseBody body = response.body();
+        if (body == null) return null;
+
+        InputStream stream = body.byteStream();
+        String content = null;
+
+        try {
+            content = IOUtils.toString(stream, "utf-8");
+
+            stream.close();
+            body.close();
+        }
+        catch (Exception e) {
+
+        }
+
+        return content;
     }
 
     /**

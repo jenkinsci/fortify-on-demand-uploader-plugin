@@ -46,12 +46,12 @@ public class JobModel {
     private String applicationName;
     private String applicationType;
     private String releaseName;
-    private String owner;
+    private Integer owner;
     private String attributes;
     private String businessCriticality;
     private String sdlcStatus;
     private String microserviceName;
-    private String isMicroservice;
+    private Boolean isMicroservice;
 
     private File payload;
 
@@ -108,12 +108,12 @@ public class JobModel {
                     String applicationName,
                     String applicationType,
                     String releaseName,
-                    String owner,
+                    Integer owner,
                     String attributes,
                     String businessCriticality,
                     String sdlcStatus,
                     String microserviceName,
-                    String isMicroservice) {
+                    Boolean isMicroservice) {
 
         this.releaseId = releaseId;
         this.bsiTokenOriginal = bsiToken;
@@ -286,7 +286,7 @@ public class JobModel {
 
     public String getReleaseName() { return releaseName; }
 
-    public String getOwner() { return owner; }
+    public Integer getOwner() { return owner; }
 
     public String getAttributes() { return attributes; }
 
@@ -296,7 +296,7 @@ public class JobModel {
 
     public String getMicroserviceName() { return microserviceName; }
 
-    public String getIsMicroservice() { return isMicroservice; }
+    public Boolean getIsMicroservice() { return isMicroservice; }
 
 
     // ToDo: This is outdated

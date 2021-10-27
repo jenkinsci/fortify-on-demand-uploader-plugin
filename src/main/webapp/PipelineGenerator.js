@@ -40,10 +40,12 @@ class PipelineGenerator {
         atsel.find('option').remove();
         jq(`#entitlementSelect`).find('option').remove();
 
-        for (let k of Object.keys(this.assessments)) {
-            let at = this.assessments[k];
+        if (this.assessments) {
+            for (let k of Object.keys(this.assessments)) {
+                let at = this.assessments[k];
 
-            atsel.append(`<option value="${at.id}">${at.name}</option>`);
+                atsel.append(`<option value="${at.id}">${at.name}</option>`);
+            }
         }
     }
 
@@ -102,74 +104,81 @@ class PipelineGenerator {
 
         await Promise.all([ssp, entp]);
 
-        if (this.scanSettings && this.assessments) {
-            let assessmentId = this.scanSettings.assessmentTypeId;
-            let entitlementId = this.scanSettings.entitlementId;
-
-            this.populateAssessmentsDropdown();
-
-            jq('#assessmentTypeSelect').val(assessmentId);
-            this.onAssessmentChanged();
-            jq('#entitlementSelect').val(getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
-            this.onEntitlementChanged();
-            jq('#technologyStackSelect').val(this.scanSettings.technologyStackId);
-            this.onTechStackChanged();
-            jq('#languageLevelSelect').val(this.scanSettings.languageLevelId);
-            this.onLangLevelChanged();
-            jq('#auditPreferenceSelect').val(this.scanSettings.auditPreferenceType);
-            jq('#sonatypeEnabled').prop('checked', this.scanSettings.performOpenSourceAnalysis === true);
-
-        } else {
+        if (this.scanSettings && this.assessments) this.setAssessmentsAndSettings();
+        else {
             this.onAssessmentChanged();
             this.showMessage('Failed to retrieve scan settings from API', true);
             rows.hide();
         }
-        // await new Promise((res, rej) => setTimeout(res, 1000));
 
         fields.removeClass('spinner');
     }
 
-    async loadAutoProvEntitlementSettings() {
-        this.hideMessages();
-
-        let rows = jq(fodpAutoProvRowsSelector);
+    async loadAutoProvEntitlementSettings(appName, relName) {
         let fields = jq('.fodp-field.spinner-container');
 
         fields.addClass('spinner');
-        rows.show();
         this.onScanCentralChanged();
 
-        let entp = this.api.getAssessmentTypeEntitlements(this.releaseId, getAuthInfo())
-            .then(r => this.assessments = r);
-
-
-        await Promise.all([ssp, entp]);
-
-        if (this.scanSettings && this.assessments) {
-            let assessmentId = this.scanSettings.assessmentTypeId;
-            let entitlementId = this.scanSettings.entitlementId;
-
-            this.populateAssessmentsDropdown();
-
-            jq('#assessmentTypeSelect').val(assessmentId);
+        let assessments = await this.api.getAssessmentTypeEntitlementsForAutoProv(appName, relName, getAuthInfo());
+        let fail = () => {
+            fields.removeClass('spinner');
             this.onAssessmentChanged();
-            jq('#entitlementSelect').val(getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
-            this.onEntitlementChanged();
-            jq('#technologyStackSelect').val(this.scanSettings.technologyStackId);
-            this.onTechStackChanged();
-            jq('#languageLevelSelect').val(this.scanSettings.languageLevelId);
-            this.onLangLevelChanged();
-            jq('#auditPreferenceSelect').val(this.scanSettings.auditPreferenceType);
-            jq('#sonatypeEnabled').prop('checked', this.scanSettings.performOpenSourceAnalysis === true);
+            this.showMessage('Failed to retrieve available entitlements from API', true);
+            return false;
+        };
 
+        if (assessments == null) return fail();
+
+        this.assessments = assessments.assessments;
+
+        if (this.assessments) {
+            this.scanSettings = assessments.settings;
+            this.releaseId = assessments.releaseId;
         } else {
-            this.onAssessmentChanged();
-            this.showMessage('Failed to retrieve scan settings from API', true);
-            rows.hide();
+            this.scanSettings = null;
+            this.releaseId = null;
         }
-        // await new Promise((res, rej) => setTimeout(res, 1000));
+
+        this.setAssessmentsAndSettings();
 
         fields.removeClass('spinner');
+
+        if (this.assessments) return true;
+        else return fail();
+    }
+
+    setAssessmentsAndSettings() {
+        let assmt = null;
+        let entl = null;
+        let freq = null;
+        let tech = null;
+        let lang = null;
+        let audit = null;
+        let sona = false;
+
+        if (this.scanSettings) {
+            assmt = this.scanSettings.assessmentTypeId;
+            entl = this.scanSettings.entitlementId;
+            freq = this.scanSettings.entitlementFrequencyType;
+            tech = this.scanSettings.technologyStackId;
+            lang = this.scanSettings.languageLevelId;
+            audit = this.scanSettings.auditPreferenceType;
+            sona = this.scanSettings.performOpenSourceAnalysis === true;
+        }
+
+        this.populateAssessmentsDropdown();
+
+        jq('#assessmentTypeSelect').val(assmt);
+        this.onAssessmentChanged();
+        jq('#entitlementSelect').val(freq && entl ? getEntitlementDropdownValue(entl, freq) : '');
+        this.onEntitlementChanged();
+        jq('#technologyStackSelect').val(tech);
+        this.onTechStackChanged();
+        jq('#languageLevelSelect').val(lang);
+        this.onLangLevelChanged();
+        jq('#auditPreferenceSelect').val(audit);
+        jq('#sonatypeEnabled').prop('checked', sona);
     }
 
     isDotNetStack(ts) {
@@ -351,9 +360,18 @@ class PipelineGenerator {
         return true;
     }
 
-    loadEntitlementOptions() {
+    async loadEntitlementOptions() {
         if (this.autoProvMode) {
+            this.hideMessages();
 
+            let appName = jq('#autoProvAppName').val();
+            let relName = jq('#autoProvRelName').val();
+
+            if (isNullOrEmpty(appName) || isNullOrEmpty(relName)) {
+                this.showMessage('Enter Application and Release names', true);
+                jq(fodpOverrideRowsSelector).hide();
+            } else if (await this.loadAutoProvEntitlementSettings(appName, relName)) jq(fodpOverrideRowsSelector).show();
+            else jq(fodpOverrideRowsSelector).hide();
         } else {
             this.overrideServerSettings = jq('#overrideReleaseSettings').prop('checked');
             jq(fodpOverrideRowsSelector).show();
@@ -361,6 +379,7 @@ class PipelineGenerator {
         }
 
         this.onScanCentralChanged();
+        this.populateHiddenFields();
     }
 
     onAssignMeClick() {
@@ -703,7 +722,7 @@ class PipelineGenerator {
         this.showMessage('Set a release id');
 
         jq('#autoProvAppName')
-            .change(_ => this.populateHiddenFields());
+            .change(_ => this.loadEntitlementOptions());
         jq('#autoProvBussCrit')
             .change(_ => this.populateHiddenFields());
         jq('#autoProvAppType')
@@ -713,7 +732,7 @@ class PipelineGenerator {
         jq('#autoProvMicroName')
             .change(_ => this.populateHiddenFields());
         jq('#autoProvRelName')
-            .change(_ => this.populateHiddenFields());
+            .change(_ => this.loadEntitlementOptions());
         jq('#autoProvSdlc')
             .change(_ => this.populateHiddenFields());
         jq('#autoProvOwner')
@@ -754,9 +773,6 @@ class PipelineGenerator {
 
         jq('#releaseSelectionValue')
             .change(_ => this.onReleaseIdChanged());
-
-        jq('#overrideReleaseSettings')
-            .change(_ => this.loadEntitlementOptions());
 
         jq('#scanCentralBuildTypeSelect')
             .change(_ => this.onScanCentralChanged());
