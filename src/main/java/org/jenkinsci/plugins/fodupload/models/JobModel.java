@@ -216,7 +216,7 @@ public class JobModel {
     }
 
     public String getSelectedScanCentralBuildType() {
-        return selectedScanCentralBuildType;
+        return selectedScanCentralBuildType == null ? FodEnums.SelectedScanCentralBuildType.None.toString() : selectedScanCentralBuildType;
     }
 
     public boolean getScanCentralIncludeTests() {

@@ -101,6 +101,7 @@ public class StaticScanController extends ControllerBase {
                 String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);
                 builder.addQueryParameter("notes", truncatedNotes);
             }
+
             // TODO: Come back and fix the request to set fragNo and offset query parameters
             String fragUrl = builder.build().toString();
 
@@ -163,9 +164,9 @@ public class StaticScanController extends ControllerBase {
                         return scanResults;
 
                     } else if (!response.isSuccessful()) { // There was an error along the lines of 'another scan in progress' or something
-
                         println("An error occurred during the upload.");
                         GenericErrorResponse errors = gson.fromJson(responseJsonStr, GenericErrorResponse.class);
+
                         if (errors != null) {
                             if (errors.toString().contains("Can not start scan another scan is in progress")) {
                                 scanResults.uploadSuccessfulScanNotStarted();
@@ -174,8 +175,11 @@ public class StaticScanController extends ControllerBase {
                                 println(errors.toString());
                                 scanResults.uploadNotSuccessful();
                             }
+                        } else {
+                            if (!Utils.isNullOrEmpty(responseJsonStr)) println("Raw response\n" + responseJsonStr);
+                            else println("No response body from api");
+                            scanResults.uploadNotSuccessful();
                         }
-
 
                         return scanResults; // if there is an error, get out of loop and mark build unstable
                     }
