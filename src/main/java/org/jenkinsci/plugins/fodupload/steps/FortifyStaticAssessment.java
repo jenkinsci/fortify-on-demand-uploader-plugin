@@ -2,9 +2,7 @@ package org.jenkinsci.plugins.fodupload.steps;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Locale;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -16,8 +14,7 @@ import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
 import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.controllers.*;
-import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
-import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.AssessmentTypeEntitlementsForAutoProv;
 import org.jenkinsci.plugins.fodupload.models.response.GetStaticScanSetupResponse;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -519,7 +516,21 @@ public class FortifyStaticAssessment extends FortifyStep {
         inProgressBuildResultType = inProgressBuildResultType != null ? inProgressBuildResultType : FodEnums.InProgressBuildResultType.FailBuild.getValue();
 
         if ((releaseId == null || Utils.tryParseInt(releaseId) <= 0) && Utils.isNullOrEmpty(bsiToken)) {
-            throw new IllegalArgumentException("Invalid arguments, releaseId or bsiToken must be defined");
+            if (!Utils.isNullOrEmpty(applicationName) || Utils.isNullOrEmpty(releaseName)) {
+                List<String> errors = new ArrayList<>();
+
+                if (Utils.isNullOrEmpty(applicationName)) errors.add("applicationName");
+                if (!Utils.isValidEnumValue(BusinessCriticalityType.class, businessCriticality)) errors.add("businessCriticality");
+                if (!Utils.isValidEnumValue(ApplicationType.class, applicationType)) errors.add("applicationType");
+                if (isMicroservice && Utils.isNullOrEmpty(microserviceName)) errors.add("microserviceName");
+                if (Utils.isNullOrEmpty(releaseName)) errors.add("releaseName");
+                if (!Utils.isValidEnumValue(SDLCStatusType.class, sdlcStatus)) errors.add("sdlcStatus");
+                if (owner == null || owner <= 0) errors.add("owner");
+
+                if (!errors.isEmpty()) {
+                    throw new IllegalArgumentException("Invalid arguments: Missing or invalid fields for auto provisioning: " + String.join(", ", errors));
+                }
+            } else throw new IllegalArgumentException("Invalid arguments: releaseId, bsiToken, or auto provision details must be provided");
         }
 
         // ToDo: add more validation

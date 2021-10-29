@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-public enum ApplicationType {
+public enum ApplicationType implements IFodEnum {
 
     WEB_THICK_CLIENT(1),
     MOBILE(2);
@@ -20,5 +20,15 @@ public enum ApplicationType {
         }
 
         return null;
+    }
+
+    @Override
+    public Integer getIntValue() {
+        return type;
+    }
+
+    @Override
+    public String getStringValue() {
+        return this.toString();
     }
 }

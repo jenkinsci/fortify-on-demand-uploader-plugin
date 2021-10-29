@@ -17,14 +17,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 
 import net.sf.json.JSONObject;
 import okhttp3.Response;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.http.HttpStatus;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.models.IFodEnum;
 import org.jenkinsci.plugins.fodupload.models.response.ApplicationApiResponse;
 import org.jenkinsci.plugins.fodupload.models.response.MicroserviceApiResponse;
 import org.jenkinsci.plugins.fodupload.models.response.ReleaseApiResponse;
@@ -77,7 +81,7 @@ public class Utils {
                 "|.*\\.settings|.*\\.cpx|.*\\.xcfg|.*\\.cscfg|.*\\.cscdef|.*\\.wadcfg|.*\\.appxmanifest"
                 + "|.*\\.wsdl|.*\\.plist|.*\\.properties|.*\\.ini|.*\\.sql|.*\\.pks|.*\\.pkh|.*\\.pkb"
                 + "|.*\\.asl|.*\\.conf|.*\\.inc|.*\\.json|.*\\.jsx|.*\\.phtml|.*\\.tldj|.*\\.ts|.*\\.tsx|.*\\.xaml|.*\\.xhtml|.*\\.yaml|.*\\.yml";
-                
+
 
         switch (technologyStack) {
             case TS_DOT_NET_KEY:
@@ -144,39 +148,39 @@ public class Utils {
         logger.println("End Create Zip.");
         return tempZip;
     }
-    
+
     public static String decrypt(String stringToDecrypt) {
         Secret decryptedSecret = Secret.decrypt(stringToDecrypt);
-        return  decryptedSecret != null ?  decryptedSecret.getPlainText() : stringToDecrypt;
+        return decryptedSecret != null ? decryptedSecret.getPlainText() : stringToDecrypt;
     }
-    
+
     public static String decrypt(Secret stringToDecrypt) {
         return stringToDecrypt.getPlainText();
     }
-    
+
     public static String encrypt(String stringToEncrypt) {
         String result = stringToEncrypt;
-        if(Secret.decrypt(stringToEncrypt) == null){
+        if (Secret.decrypt(stringToEncrypt) == null) {
             result = Secret.fromString(stringToEncrypt).getEncryptedValue();
         }
         return result;
     }
-    
+
     public static boolean isEncrypted(String stringToEncrypt) {
         return (Secret.decrypt(stringToEncrypt) != null);
     }
 
     public static boolean isCredential(String id) {
         StringCredentials s = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(
-                StringCredentials.class, 
-                Jenkins.get(), 
-                ACL.SYSTEM, 
-                null, 
-                null
+                CredentialsProvider.lookupCredentials(
+                        StringCredentials.class,
+                        Jenkins.get(),
+                        ACL.SYSTEM,
+                        null,
+                        null
                 ),
                 CredentialsMatchers.allOf(
-                    CredentialsMatchers.withId(id)
+                        CredentialsMatchers.withId(id)
                 )
         );
         return (s != null);
@@ -184,15 +188,15 @@ public class Utils {
 
     public static String retrieveSecretDecryptedValue(String id) {
         StringCredentials s = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(
-                StringCredentials.class, 
-                Jenkins.get(), 
-                ACL.SYSTEM, 
-                null, 
-                null
+                CredentialsProvider.lookupCredentials(
+                        StringCredentials.class,
+                        Jenkins.get(),
+                        ACL.SYSTEM,
+                        null,
+                        null
                 ),
                 CredentialsMatchers.allOf(
-                    CredentialsMatchers.withId(id)
+                        CredentialsMatchers.withId(id)
                 )
         );
         return s != null ? decrypt(s.getSecret()) : id;
@@ -204,7 +208,8 @@ public class Utils {
 
     public static <T> String createResponseViewModel(T response) {
         Gson gson = new Gson();
-        Type typeOfSrc = new TypeToken<T>(){}.getType();
+        Type typeOfSrc = new TypeToken<T>() {
+        }.getType();
         return gson.toJson(response, typeOfSrc);
     }
 
@@ -213,6 +218,7 @@ public class Utils {
     }
 
     private static List<String> unexpectedErrorResponseErrors;
+
     static {
         unexpectedErrorResponseErrors = new ArrayList<>();
         unexpectedErrorResponseErrors.add("Unexpected response from server");
@@ -223,6 +229,7 @@ public class Utils {
     }
 
     private static List<String> unauthorizedErrorResponseErrors;
+
     static {
         unauthorizedErrorResponseErrors = new ArrayList<>();
         unauthorizedErrorResponseErrors.add("Not authorized to perform this action");
@@ -241,5 +248,23 @@ public class Utils {
                     authModelObject.getString("tenantId"));
         }
         return authModel;
+    }
+
+    public static <E extends Enum<E> & IFodEnum> Boolean isValidEnumValue(Class<E> enumClass, String value) {
+        if(isNullOrEmpty(value)) return false;
+        List<E> enums = EnumUtils.getEnumList(enumClass);
+        Integer valFromInt = tryParseInt(value, null);
+
+        if(valFromInt != null) {
+            for (IFodEnum e : enums) {
+                if (e.getIntValue().equals(valFromInt)) return true;
+            }
+        } else{
+            for (IFodEnum e : enums) {
+                if (e.getStringValue().equals(value)) return true;
+            }
+        }
+
+        return false;
     }
 }

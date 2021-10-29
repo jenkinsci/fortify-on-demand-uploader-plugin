@@ -71,7 +71,7 @@ public class StaticScanController extends ControllerBase {
 
             if (Utils.isNullOrEmpty(uploadRequest.getSelectedReleaseType())) {
                 if (uploadRequest.getIsPipeline()) {
-                    if (releaseId == null || releaseId < 1) releaseId = createApplicationAndRelease(uploadRequest);
+                    if (releaseId == null || releaseId < 1) releaseId = upsertApplicationAndRelease(uploadRequest);
                     buildPipelineRequest(builder, releaseId, uploadRequest);
                 } else throw new IllegalArgumentException("Invalid job model");
             } else {
@@ -236,7 +236,12 @@ public class StaticScanController extends ControllerBase {
             builder.addQueryParameter("remediationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType());
     }
 
-    private Integer createApplicationAndRelease(final JobModel job) throws Exception {
+    private Integer upsertApplicationAndRelease(final JobModel job) throws Exception {
+        ReleaseController relCntr = new ReleaseController(apiConnection, logger, correlationId);
+        Integer releaseId = relCntr.getReleaseIdByName(job.getApplicationName(), job.getReleaseName());
+
+        if(releaseId != null) return releaseId;
+
         PostReleaseWithUpsertApplicationModel model = new PostReleaseWithUpsertApplicationModel();
 
         model.setApplicationName(job.getApplicationName());
@@ -275,7 +280,7 @@ public class StaticScanController extends ControllerBase {
                 .url(builder.build())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
-                .put(RequestBody.create(MediaType.parse("application/json"), requestContent))
+                .post(RequestBody.create(MediaType.parse("application/json"), requestContent))
                 .build();
         Response response = apiConnection.request(request);
 

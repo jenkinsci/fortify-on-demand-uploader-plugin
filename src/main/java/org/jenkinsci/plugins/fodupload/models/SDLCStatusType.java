@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-public enum SDLCStatusType {
+public enum SDLCStatusType implements IFodEnum {
 
     PRODUCTION(1),
     QA(2),
@@ -23,5 +23,15 @@ public enum SDLCStatusType {
         }
 
         return null;
+    }
+
+    @Override
+    public Integer getIntValue() {
+        return type;
+    }
+
+    @Override
+    public String getStringValue() {
+        return this.toString();
     }
 }

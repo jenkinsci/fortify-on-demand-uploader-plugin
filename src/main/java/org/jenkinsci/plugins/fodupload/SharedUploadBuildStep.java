@@ -373,7 +373,7 @@ public class SharedUploadBuildStep {
             return false;
         }
 
-        if ((model.getReleaseId() == null || model.getReleaseId().isEmpty()) && model.loadBsiToken() == false) {
+        if (!model.getIsPipeline() && (model.getReleaseId() == null || model.getReleaseId().isEmpty()) && model.loadBsiToken() == false) {
             logger.println("Invalid release ID or BSI Token");
             build.setResult(Result.FAILURE);
             return false;
@@ -440,7 +440,7 @@ public class SharedUploadBuildStep {
             } catch (NumberFormatException ex) {
             }
 
-            if (releaseId == 0 && !model.loadBsiToken()) {
+            if (!model.getIsPipeline() && releaseId == 0 && !model.loadBsiToken()) {
                 build.setResult(Result.FAILURE);
                 logger.println("Invalid release ID or BSI Token");
                 return;
@@ -458,12 +458,9 @@ public class SharedUploadBuildStep {
 
                 StaticScanController staticScanController = new StaticScanController(apiConnection, logger, correlationId);
 
-                if (releaseId == 0) {
-                    model.loadBsiToken();
-                    technologyStack = model.getBsiToken().getTechnologyStack();
-                } else if (!Utils.isNullOrEmpty(model.getTechnologyStack())) {
-                    technologyStack = model.getTechnologyStack();
-                } else {
+                if (model.getIsPipeline() || releaseId > 0) technologyStack = model.getTechnologyStack();
+                else if (model.loadBsiToken()) technologyStack = model.getBsiToken().getTechnologyStack();
+                else {
                     GetStaticScanSetupResponse staticScanSetup = staticScanController.getStaticScanSettingsOld(releaseId);
 
                     if (staticScanSetup == null) {

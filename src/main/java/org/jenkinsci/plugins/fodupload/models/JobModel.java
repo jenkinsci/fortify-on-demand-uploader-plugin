@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload.models;
 
 import org.jenkinsci.plugins.fodupload.BsiTokenParser;
+import org.jenkinsci.plugins.fodupload.Utils;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -212,7 +213,7 @@ public class JobModel {
     }
 
     public String getSelectedScanCentralBuildType() {
-        return selectedScanCentralBuildType == null ? FodEnums.SelectedScanCentralBuildType.None.toString() : selectedScanCentralBuildType;
+        return Utils.isNullOrEmpty(selectedScanCentralBuildType) ? FodEnums.SelectedScanCentralBuildType.None.toString() : selectedScanCentralBuildType;
     }
 
     public boolean getScanCentralSkipBuild() {

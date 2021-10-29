@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-public enum BusinessCriticalityType {
+public enum BusinessCriticalityType implements IFodEnum {
 
     HIGH(1),
     MEDIUM(2),
@@ -23,5 +23,15 @@ public enum BusinessCriticalityType {
         }
 
         return null;
+    }
+
+    @Override
+    public Integer getIntValue() {
+        return type;
+    }
+
+    @Override
+    public String getStringValue() {
+        return this.toString();
     }
 }
