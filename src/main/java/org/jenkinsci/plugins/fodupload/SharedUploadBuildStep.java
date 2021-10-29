@@ -70,7 +70,6 @@ public class SharedUploadBuildStep {
                                  String userSelectedMicroservice,
                                  String userSelectedRelease,
                                  String selectedScanCentralBuildType,
-                                 boolean scanCentralIncludeTests,
                                  boolean scanCentralSkipBuild,
                                  String scanCentralBuildCommand,
                                  String scanCentralBuildFile,
@@ -91,7 +90,6 @@ public class SharedUploadBuildStep {
                 userSelectedMicroservice,
                 userSelectedRelease,
                 selectedScanCentralBuildType,
-                scanCentralIncludeTests,
                 scanCentralSkipBuild,
                 scanCentralBuildCommand,
                 scanCentralBuildFile,
@@ -120,7 +118,6 @@ public class SharedUploadBuildStep {
                                  String inProgressScanActionType,
                                  String inProgressBuildResultType,
                                  String selectedScanCentralBuildType,
-                                 boolean scanCentralIncludeTests,
                                  boolean scanCentralSkipBuild,
                                  String scanCentralBuildCommand,
                                  String scanCentralBuildFile,
@@ -158,7 +155,6 @@ public class SharedUploadBuildStep {
                 null,
                 null,
                 selectedScanCentralBuildType,
-                scanCentralIncludeTests,
                 scanCentralSkipBuild,
                 scanCentralBuildCommand,
                 scanCentralBuildFile,
@@ -643,8 +639,6 @@ public class SharedUploadBuildStep {
                             build.setResult(Result.FAILURE);
                             return null;
                         }
-                        logger.println("ScanCentral Version " + scanCentralVersion);
-                        isValidVersion = true;
                         break;
                     }
                 }
@@ -661,7 +655,6 @@ public class SharedUploadBuildStep {
                 switch (buildType) {
                     case Gradle:
                         scanCentralPackageCommandList.add("gradle");
-                        if (model.getScanCentralIncludeTests()) scanCentralPackageCommandList.add("--include-test");
                         if (model.getScanCentralSkipBuild()) scanCentralPackageCommandList.add("--skipBuild");
                         if (!Utils.isNullOrEmpty(model.getScanCentralBuildCommand())) {
                             scanCentralPackageCommandList.add("--build-command");
@@ -674,7 +667,6 @@ public class SharedUploadBuildStep {
                         break;
                     case Maven:
                         scanCentralPackageCommandList.add("mvn");
-                        if (model.getScanCentralIncludeTests()) scanCentralPackageCommandList.add("--include-test");
                         if (model.getScanCentralSkipBuild()) scanCentralPackageCommandList.add("--skipBuild");
                         if (!Utils.isNullOrEmpty(model.getScanCentralBuildCommand())) {
                             scanCentralPackageCommandList.add("--build-command");
@@ -738,7 +730,6 @@ public class SharedUploadBuildStep {
                     logger.println(s);
                 }
                 int exitCode = scanCentralProcess.waitFor();
-                logger.println(versionLine);
                 if (exitCode != 0) {
                     logger.println("Errors executing Scan Central. Exiting with errorcode : " + exitCode);
                     build.setResult(Result.FAILURE);
@@ -794,5 +785,4 @@ public class SharedUploadBuildStep {
             throw e;
         }
     }
-
 }

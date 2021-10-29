@@ -101,7 +101,6 @@ public class StaticScanController extends ControllerBase {
                 String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);
                 builder.addQueryParameter("notes", truncatedNotes);
             }
-
             // TODO: Come back and fix the request to set fragNo and offset query parameters
             String fragUrl = builder.build().toString();
 

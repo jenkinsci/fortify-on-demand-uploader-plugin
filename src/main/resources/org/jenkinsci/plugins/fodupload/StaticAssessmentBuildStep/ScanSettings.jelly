@@ -69,12 +69,6 @@
                     </div>
                 </f:entry>
 
-                <f:entry title="Include Tests" field="scanCentralIncludeTests" help="/plugin/fortify-on-demand-uploader/help-scanCentral-includeTests.html">
-                    <div id="includeTestsForm" class="fode-field spinner-container fode-row-sc fode-row-sc-gradle fode-row-sc-maven">
-                        <f:checkbox></f:checkbox>
-                    </div>
-                </f:entry>
-
                 <f:entry title="Skip Build" field="scanCentralSkipBuild" help="/plugin/fortify-on-demand-uploader/help-scanCentral-skipBuild.html">
                     <div id="skipBuildForm" class="fode-field spinner-container fode-row-sc fode-row-sc-gradle fode-row-sc-maven">
                         <f:checkbox></f:checkbox>

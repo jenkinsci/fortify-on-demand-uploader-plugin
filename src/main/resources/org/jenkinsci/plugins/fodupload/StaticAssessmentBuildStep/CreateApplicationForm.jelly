@@ -38,7 +38,7 @@
                             <td class="setting-main"><input type="text" class="setting-input" id="applicationAttributesField" /></td>
                         </tr>
 
-                        <tr class="config-table-top-row" id="microserviceApplicationRow">
+                        <tr class="config-table-top-row microservice-checkbox-fields" id="microserviceApplicationRow">
                             <td class="setting-name">Microservice Application</td>
                             <td class="setting-main"><input type="checkbox" id="microserviceApplicationField" /></td>
                         </tr>

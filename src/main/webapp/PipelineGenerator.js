@@ -514,7 +514,6 @@ class PipelineGenerator {
         ss = jq('#scanCentralBuildTypeSelect').val();
 
         if (ss !== 'None') {
-            ssit = this.getHiddenFieldCheckValue('#scanCentralIncludeTestsCheck');
             sssb = this.getHiddenFieldCheckValue('#scanCentralSkipBuildCheck');
             ssbc = jq('#scanCentralBuildCommandInput').val();
             ssbf = jq('#scanCentralBuildFileInput').val();
@@ -544,7 +543,6 @@ class PipelineGenerator {
 
         // ScanCentral
         jq('#scanCentral').val(ss);
-        jq('#scanCentralIncludeTests').val(ssit);
         jq('#scanCentralSkipBuild').val(sssb);
         jq('#scanCentralBuildCommand').val(ssbc);
         jq('#scanCentralBuildFile').val(ssbf);
@@ -742,9 +740,6 @@ class PipelineGenerator {
             .change(_ => this.populateHiddenFields());
 
         jq('#sonatypeEnabled')
-            .change(_ => this.populateHiddenFields());
-
-        jq('#scanCentralIncludeTestsCheck')
             .change(_ => this.populateHiddenFields());
 
         jq('#scanCentralSkipBuildCheck')

@@ -25,7 +25,6 @@ public class JobModel {
     private String userSelectedMicroservice;
     private String userSelectedRelease;
     private String selectedScanCentralBuildType;
-    private boolean scanCentralIncludeTests;
     private boolean scanCentralSkipBuild;
     private String scanCentralBuildCommand;
     private String scanCentralBuildFile;
@@ -68,7 +67,6 @@ public class JobModel {
      * @param inProgressBuildResultType     inProgressBuildResultType
      * @param selectedReleaseType           selectedReleaseType
      * @param selectedScanCentralBuildType  selectedScanCentralBuildType
-     * @param scanCentralIncludeTests       Scan Central IncludeTests option for Maven and Gradle
      * @param scanCentralSkipBuild          Desc
      * @param scanCentralBuildCommand       Desc
      * @param scanCentralBuildFile          Desc
@@ -89,7 +87,6 @@ public class JobModel {
                     String userSelectedMicroservice,
                     String userSelectedRelease,
                     String selectedScanCentralBuildType,
-                    boolean scanCentralIncludeTests,
                     boolean scanCentralSkipBuild,
                     String scanCentralBuildCommand,
                     String scanCentralBuildFile,
@@ -128,7 +125,6 @@ public class JobModel {
         this.userSelectedMicroservice = userSelectedMicroservice;
         this.userSelectedRelease = userSelectedRelease;
         this.selectedScanCentralBuildType = selectedScanCentralBuildType;
-        this.scanCentralIncludeTests = scanCentralIncludeTests;
         this.scanCentralSkipBuild = scanCentralSkipBuild;
         this.scanCentralBuildCommand = scanCentralBuildCommand;
         this.scanCentralBuildFile = scanCentralBuildFile;
@@ -217,10 +213,6 @@ public class JobModel {
 
     public String getSelectedScanCentralBuildType() {
         return selectedScanCentralBuildType == null ? FodEnums.SelectedScanCentralBuildType.None.toString() : selectedScanCentralBuildType;
-    }
-
-    public boolean getScanCentralIncludeTests() {
-        return scanCentralIncludeTests;
     }
 
     public boolean getScanCentralSkipBuild() {

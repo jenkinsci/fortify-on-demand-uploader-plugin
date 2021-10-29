@@ -50,6 +50,19 @@ class ApplicationCreationDialog extends Dialog {
     }
 
     subscribeToFormEvents() {
+        this.jqDialog('#applicationTypeField').off('change').change(() => {
+              const show = this.jqDialog('#applicationTypeField').val() == "2";
+                if(show){
+                this.jqDialog('.microservice-checkbox-fields').hide();
+                this.jqDialog('.microservice-fields').hide();
+                this.jqDialog('#microserviceApplicationField').prop('checked', false);
+                this.jqDialog('#microserviceNameField').val('');
+                }else {
+                this.jqDialog('.microservice-checkbox-fields').show();
+                }
+           });
+
+
         this.jqDialog('#microserviceApplicationField').off('change').change(() => {
 
             const show = this.jqDialog('#microserviceApplicationField').is(':checked');

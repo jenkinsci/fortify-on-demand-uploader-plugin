@@ -91,8 +91,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String scanCentralVirtualEnv,
                                      String scanCentralRequirementFile) throws IllegalArgumentException {
 
-        if (Utils.isNullOrEmpty(srcLocation)) {
-            throw new IllegalArgumentException("Invalid srcLocation");
+        if (! selectedScanCentralBuildType.equalsIgnoreCase(FodEnums.SelectedScanCentralBuildType.None.toString()) && (Utils.isNullOrEmpty(srcLocation))){
+              throw new IllegalArgumentException("Source Location cannot be empty if Scan Central is chosen for packaging i.e if ScanCentralBuildType is other than None.");
         }
 
         if (Utils.isNullOrEmpty(selectedReleaseType)) {
@@ -130,8 +130,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             int ts = Utils.tryParseInt(userSelectedTechnologyStack);
 
             if (ts <= 0) invalidFields.add("userSelectedTechnologyStack");
-                // PHP has no language levels
-            else if (ts != 9 && Utils.tryParseInt(userSelectedLanguageLevel) <= 0) {
+                // Except .NET . Java , Python all other languages has no language levels
+            else if (isTechStackWithLanguageLevel(ts) && Utils.tryParseInt(userSelectedLanguageLevel) <= 0) {
                 invalidFields.add("userSelectedLanguageLevel");
             }
 
@@ -167,7 +167,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 userSelectedMicroservice,
                 userSelectedRelease,
                 selectedScanCentralBuildType,
-                scanCentralIncludeTests,
                 scanCentralSkipBuild,
                 scanCentralBuildCommand,
                 scanCentralBuildFile,
@@ -186,6 +185,10 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         return ApiConnectionFactory.createApiConnection(authModel);
     }
 
+    private boolean isTechStackWithLanguageLevel(int techStack){
+        return (techStack == 1 || techStack == 7 || techStack == 10) ? true : false;
+    }
+
     private void saveReleaseSettings(FodApiConnection apiConnection, String releaseIdStr, boolean purchaseEntitlements, String assessmentTypeIdStr, String entitlementIdStr, String entitlementFrequencyTypeStr, String technologyStackIdStr, String languageLevelIdStr, boolean performOpenSourceAnalysis, String auditPreferenceTypeStr) throws IllegalArgumentException {
         StaticScanController staticScanController = new StaticScanController(apiConnection, null, Utils.createCorrelationId());
 
@@ -194,7 +197,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         int entitlementId = Integer.parseInt(entitlementIdStr);
         int entitlementFrequencyType = Integer.parseInt(entitlementFrequencyTypeStr);
         int technologyStackId = Integer.parseInt(technologyStackIdStr);
-        Integer languageLevelId = Utils.tryParseInt(languageLevelIdStr, null);
+        Integer languageLevelId = (Utils.tryParseInt(languageLevelIdStr, null) == -1) ? null : Utils.tryParseInt(languageLevelIdStr, null);
         int auditPreferenceType = Integer.parseInt(auditPreferenceTypeStr);
 
         try {
@@ -354,10 +357,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
     @SuppressWarnings("unused")
     public String getSelectedScanCentralBuildType() {
         return sharedBuildStep.getModel().getSelectedScanCentralBuildType();
-    }
-
-    public boolean getScanCentralIncludeTests() {
-        return sharedBuildStep.getModel().getScanCentralIncludeTests();
     }
 
     public boolean getScanCentralSkipBuild() {
