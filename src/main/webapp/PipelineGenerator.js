@@ -206,6 +206,8 @@ class PipelineGenerator {
                     else jqe.hide();
                 });
 
+            this.populateTechStackDropdown();
+
             switch (val) {
                 case 'msbuild':
                     if (this.overrideServerSettings) {
@@ -229,7 +231,7 @@ class PipelineGenerator {
             }
         }
 
-        this.populateTechStackDropdown(techStackFilter);
+        if (techStackFilter) this.populateTechStackDropdown(techStackFilter);
         this.onTechStackChanged();
     }
 
