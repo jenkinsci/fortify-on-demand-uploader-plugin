@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.regex.Pattern;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
@@ -487,7 +489,21 @@ public class SharedUploadBuildStep {
                         return;
                     }
                 } else {
-                    FilePath scanCentralPath = new FilePath(new File(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getScanCentralPath()));
+                    FilePath scanCentralPath = null;
+
+                    try {
+                        String scsetting = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getScanCentralPath();
+
+                        if(Utils.isNullOrEmpty(scsetting)) {
+                            logger.println("ScanCentral location not set");
+                            build.setResult(Result.FAILURE);
+                        }
+                        scanCentralPath = new FilePath(new File(scsetting));
+                    } catch (Exception e){
+                        logger.println("Failed to retrieve ScanCentral location");
+                        build.setResult(Result.FAILURE);
+                    }
+
                     logger.println("Scan Central Path : " + scanCentralPath);
                     Path scPackPath = packageScanCentral(workspaceModified, scanCentralPath, workspace, model, logger, build);
                     logger.println("Packaged File Output Path : " + scPackPath);
@@ -603,11 +619,12 @@ public class SharedUploadBuildStep {
 
     private Path packageScanCentral(FilePath srcLocation, FilePath scanCentralLocation, FilePath outputLocation, JobModel job, PrintStream logger, Run<?, ?> build) {
         BufferedReader stdInputVersion = null, stdInput = null;
+        String scexec = SystemUtils.IS_OS_WINDOWS ? "scancentral.bat" : "scancentral";
 
         try {
             //version check
             logger.println("Checking ScanCentralVersion");
-            String scanCentralbatLocation = Paths.get(String.valueOf(scanCentralLocation)).resolve("scancentral.bat").toString();
+            String scanCentralbatLocation = Paths.get(String.valueOf(scanCentralLocation)).resolve(scexec).toString();
             ArrayList scanCentralVersionCommandList = new ArrayList<>();
             scanCentralVersionCommandList.add(scanCentralbatLocation);
             scanCentralVersionCommandList.add("--version");
