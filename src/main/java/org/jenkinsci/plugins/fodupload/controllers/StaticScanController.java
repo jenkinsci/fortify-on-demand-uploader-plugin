@@ -240,7 +240,12 @@ public class StaticScanController extends ControllerBase {
         ReleaseController relCntr = new ReleaseController(apiConnection, logger, correlationId);
         Integer releaseId = relCntr.getReleaseIdByName(job.getApplicationName(), job.getReleaseName());
 
-        if(releaseId != null) return releaseId;
+        if (releaseId != null) {
+            println("Existing release found matching " + job.getApplicationName() + " " + job.getReleaseName());
+            return releaseId;
+        }
+
+        println("Provisioning application and release");
 
         PostReleaseWithUpsertApplicationModel model = new PostReleaseWithUpsertApplicationModel();
 
@@ -282,14 +287,19 @@ public class StaticScanController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .post(RequestBody.create(MediaType.parse("application/json"), requestContent))
                 .build();
+
+        println("Submitting application and release model");
+
         Response response = apiConnection.request(request);
 
         if (response.code() < 300) {
             PostReleaseWithUpsertApplicationResponseModel result = apiConnection.parseResponse(response, new TypeToken<PostReleaseWithUpsertApplicationResponseModel>() {
             }.getType());
 
-            if (result.getSuccess()) return result.getReleaseId();
-            else throw new Exception("Failed to create application and/or release: \n" + String.join("\n", result.getErrors()));
+            if (result.getSuccess()) {
+                println("Provisioning successful. Release Id: " + result.getReleaseId());
+                return result.getReleaseId();
+            } else throw new Exception("Failed to create application and/or release: \n" + String.join("\n", result.getErrors()));
         } else {
             throw new Exception("Failed to create application and/or release: \n" + apiConnection.getRawBody(response));
         }
