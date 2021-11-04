@@ -462,11 +462,13 @@ public class SharedUploadBuildStep {
 
                 if (model.getIsPipeline() || releaseId > 0) technologyStack = model.getTechnologyStack();
                 else if (model.loadBsiToken()) technologyStack = model.getBsiToken().getTechnologyStack();
-                else {
+
+
+                if (Utils.isNullOrEmpty(technologyStack)) {
                     GetStaticScanSetupResponse staticScanSetup = staticScanController.getStaticScanSettingsOld(releaseId);
 
-                    if (staticScanSetup == null) {
-                        logger.println("No scan settings defined for release " + releaseId.toString());
+                    if (staticScanSetup == null || Utils.isNullOrEmpty(staticScanSetup.getTechnologyStack())) {
+                        logger.println("No scan settings defined for release " + releaseId);
                         build.setResult(Result.FAILURE);
                         return;
                     }
@@ -494,12 +496,12 @@ public class SharedUploadBuildStep {
                     try {
                         String scsetting = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getScanCentralPath();
 
-                        if(Utils.isNullOrEmpty(scsetting)) {
+                        if (Utils.isNullOrEmpty(scsetting)) {
                             logger.println("ScanCentral location not set");
                             build.setResult(Result.FAILURE);
                         }
                         scanCentralPath = new FilePath(new File(scsetting));
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         logger.println("Failed to retrieve ScanCentral location");
                         build.setResult(Result.FAILURE);
                     }

@@ -49,10 +49,13 @@ public class FortifyStaticAssessment extends FortifyStep {
 
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
 
+    private final String correlationId = UUID.randomUUID().toString();
+
     private String releaseId;
     private String bsiToken;
 
-    private boolean overrideGlobalConfig;
+    @Deprecated
+    private Boolean overrideGlobalConfig;
     private String username;
     private String personalAccessToken;
     private String tenantId;
@@ -116,12 +119,14 @@ public class FortifyStaticAssessment extends FortifyStep {
         this.releaseId = releaseId.trim();
     }
 
-    public boolean getOverrideGlobalConfig() {
+    @Deprecated
+    public Boolean getOverrideGlobalConfig() {
         return overrideGlobalConfig;
     }
 
+    @Deprecated
     @DataBoundSetter
-    public void setOverrideGlobalConfig(boolean overrideGlobalConfig) {
+    public void setOverrideGlobalConfig(Boolean overrideGlobalConfig) {
         this.overrideGlobalConfig = overrideGlobalConfig;
     }
 
@@ -452,10 +457,18 @@ public class FortifyStaticAssessment extends FortifyStep {
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
+
         log.println("Fortify on Demand Upload PreBuild Running...");
+
+        List<String> errors = ValidateModel();
+
+        if (!errors.isEmpty()) {
+            throw new IllegalArgumentException("Invalid arguments: Missing or invalid fields for auto provisioning: " + String.join(", ", errors));
+        }
+
         commonBuildStep = new SharedUploadBuildStep(releaseId,
                 bsiToken,
-                overrideGlobalConfig,
+                !Utils.isNullOrEmpty(username),
                 username,
                 personalAccessToken,
                 tenantId,
@@ -509,37 +522,15 @@ public class FortifyStaticAssessment extends FortifyStep {
         } catch (IOException ex) {
             log.println("Error saving settings. Error message: " + ex.toString());
         }
+        List<String> errors = ValidateModel();
 
-
-        remediationScanPreferenceType = remediationScanPreferenceType != null ? remediationScanPreferenceType : FodEnums.RemediationScanPreferenceType.RemediationScanIfAvailable.getValue();
-        inProgressScanActionType = inProgressScanActionType != null ? inProgressScanActionType : FodEnums.InProgressScanActionType.DoNotStartScan.getValue();
-        inProgressBuildResultType = inProgressBuildResultType != null ? inProgressBuildResultType : FodEnums.InProgressBuildResultType.FailBuild.getValue();
-
-        if ((releaseId == null || Utils.tryParseInt(releaseId) <= 0) && Utils.isNullOrEmpty(bsiToken)) {
-            if (!Utils.isNullOrEmpty(applicationName) || Utils.isNullOrEmpty(releaseName)) {
-                List<String> errors = new ArrayList<>();
-
-                if (Utils.isNullOrEmpty(applicationName)) errors.add("applicationName");
-                if (!Utils.isValidEnumValue(BusinessCriticalityType.class, businessCriticality)) errors.add("businessCriticality");
-                if (!Utils.isValidEnumValue(ApplicationType.class, applicationType)) errors.add("applicationType");
-                if (isMicroservice && Utils.isNullOrEmpty(microserviceName)) errors.add("microserviceName");
-                if (Utils.isNullOrEmpty(releaseName)) errors.add("releaseName");
-                if (!Utils.isValidEnumValue(SDLCStatusType.class, sdlcStatus)) errors.add("sdlcStatus");
-                if (owner == null || owner <= 0) errors.add("owner");
-
-                if (!errors.isEmpty()) {
-                    throw new IllegalArgumentException("Invalid arguments: Missing or invalid fields for auto provisioning: " + String.join(", ", errors));
-                }
-            } else throw new IllegalArgumentException("Invalid arguments: releaseId, bsiToken, or auto provision details must be provided");
+        if (!errors.isEmpty()) {
+            throw new IllegalArgumentException("Invalid arguments:\n\t" + String.join("\n\t", errors));
         }
-
-        // ToDo: add more validation
-
-        String correlationId = UUID.randomUUID().toString();
 
         commonBuildStep = new SharedUploadBuildStep(releaseId,
                 bsiToken,
-                overrideGlobalConfig,
+                !Utils.isNullOrEmpty(username),
                 username,
                 personalAccessToken,
                 tenantId,
@@ -586,6 +577,39 @@ public class FortifyStaticAssessment extends FortifyStep {
         } catch (IOException ex) {
             log.println("Error saving settings. Error message: " + ex.toString());
         }
+    }
+
+    private List<String> ValidateModel() {
+        List<String> errors = new ArrayList<>();
+
+        remediationScanPreferenceType = remediationScanPreferenceType != null ? remediationScanPreferenceType : FodEnums.RemediationScanPreferenceType.RemediationScanIfAvailable.getValue();
+        inProgressScanActionType = inProgressScanActionType != null ? inProgressScanActionType : FodEnums.InProgressScanActionType.DoNotStartScan.getValue();
+        inProgressBuildResultType = inProgressBuildResultType != null ? inProgressBuildResultType : FodEnums.InProgressBuildResultType.FailBuild.getValue();
+
+        if ((releaseId == null || Utils.tryParseInt(releaseId) <= 0) && Utils.isNullOrEmpty(bsiToken)) {
+            if (!Utils.isNullOrEmpty(applicationName) || Utils.isNullOrEmpty(releaseName)) {
+                List<String> aperrors = new ArrayList<>();
+
+                if (Utils.isNullOrEmpty(applicationName)) aperrors.add("applicationName");
+                if (!Utils.isValidEnumValue(BusinessCriticalityType.class, businessCriticality)) aperrors.add("businessCriticality");
+                if (!Utils.isValidEnumValue(ApplicationType.class, applicationType)) aperrors.add("applicationType");
+                if (isMicroservice && Utils.isNullOrEmpty(microserviceName)) aperrors.add("microserviceName");
+                if (Utils.isNullOrEmpty(releaseName)) errors.add("releaseName");
+                if (!Utils.isValidEnumValue(SDLCStatusType.class, sdlcStatus)) aperrors.add("sdlcStatus");
+                if (owner == null || owner <= 0) aperrors.add("owner");
+
+                if (!aperrors.isEmpty()) errors.add("Missing or invalid fields for auto provisioning" + String.join(", ", aperrors));
+            } else errors.add("releaseId, bsiToken, or auto provision must be provided");
+        }
+
+        // Any have value and any don't have value
+        if (!(Utils.isNullOrEmpty(username) == Utils.isNullOrEmpty(tenantId) && Utils.isNullOrEmpty(tenantId) == Utils.isNullOrEmpty(personalAccessToken))) {
+            errors.add("Personal access token override requires all 3 be provided: username, personalAccessToken, tenantId");
+        }
+
+        // ToDo: add more validation
+
+        return errors;
     }
 
     @Extension
