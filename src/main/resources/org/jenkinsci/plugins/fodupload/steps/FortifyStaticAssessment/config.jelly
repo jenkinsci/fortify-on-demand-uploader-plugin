@@ -159,7 +159,7 @@
                     </div>
                 </f:entry>
                 <f:entry title="Is Microservice">
-                    <div class="fodp-field fodp-row-autoProv">
+                    <div class="fodp-field fodp-row-autoProv fodp-row-autoProv-is-micro">
                         <input type="checkbox" id="autoProvIsMicro"/>
                     </div>
                 </f:entry>
@@ -263,12 +263,12 @@
         <f:entry title="ScanCentral Build Type" help="/plugin/fortify-on-demand-uploader/help-scanCentral-buildType.html">
             <div id="scanCentralBuildTypeForm" class="fodp-field spinner-container fodp-row-all">
                 <select id="scanCentralBuildTypeSelect" value="None" class="setting-input">
-                    <option value="None">None</option>
-                    <option value="Gradle">Gradle</option>
-                    <option value="Maven">Maven</option>
-                    <option value="MSBuild">MSBuild</option>
-                    <option value="PHP">PHP</option>
-                    <option value="Python">Python</option>
+                    <option id="None" value="None">None</option>
+                    <option id="Gradle" value="Gradle">Gradle</option>
+                    <option id="Maven" value="Maven">Maven</option>
+                    <option id="MSBuild" value="MSBuild">MSBuild</option>
+                    <option id="PHP" value="PHP">PHP</option>
+                    <option id="Python" value="Python">Python</option>
                 </select>
             </div>
         </f:entry>

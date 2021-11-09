@@ -189,7 +189,7 @@ class PipelineGenerator {
     onScanCentralChanged() {
         let val = jq('#scanCentralBuildTypeForm > select').val().toLowerCase();
         let techStackFilter;
-
+        this.populateTechStackDropdown();
         if (val === 'none') {
             jq('.fodp-row-sc').hide();
             if (this.overrideServerSettings) jq('.fodp-row-nonsc').show();
@@ -205,15 +205,11 @@ class PipelineGenerator {
                     if (jqe.hasClass(scClass)) jqe.show();
                     else jqe.hide();
                 });
-
-            this.populateTechStackDropdown();
-
             switch (val) {
                 case 'msbuild':
                     if (this.overrideServerSettings) {
                         closestRow(jq('#technologyStackForm')).show();
                         let currVal = this.techStacks[jq('#technologyStackSelect').val()];
-
                         if (!currVal || !this.isDotNetStack(currVal)) jq('#technologyStackSelect').val(techStackConsts.none);
                         techStackFilter = this.isDotNetStack;
                     }
@@ -230,7 +226,6 @@ class PipelineGenerator {
                     break;
             }
         }
-
         if (techStackFilter) this.populateTechStackDropdown(techStackFilter);
         this.onTechStackChanged();
     }
@@ -276,6 +271,7 @@ class PipelineGenerator {
                 llsel.append(`<option value="${ll.value}">${ll.text}</option>`);
             }
         }
+
 
         this.onLangLevelChanged();
     }
@@ -395,6 +391,27 @@ class PipelineGenerator {
         else jq('.fodp-row-autoProv-micro').hide()
     }
 
+    onIsApplicationTypeChanged(){
+       let v = jq('#autoProvAppType').val();
+       if(v != 2)
+         {
+             jq('.fodp-row-autoProv-is-micro').show();
+             jq('#autoProvIsMicro').prop( "checked", false );
+             jq('#autoProvMicroName').val('');
+             /*$('#scanCentralBuildTypeSelect').append(`<option id= "PHP" value="PHP">
+                                                    PHP
+                                               </option>`);*/
+         }
+       else
+         {
+             jq('.fodp-row-autoProv-is-micro').hide();
+             jq('.fodp-row-autoProv-micro').hide();
+             jq('#autoProvIsMicro').val('');
+             jq('#autoProvMicroName').val('');
+         }
+    }
+
+
     async onAuthChanged() {
         if (!this.uiLoaded) await this.init();
         else {
@@ -410,9 +427,9 @@ class PipelineGenerator {
         return v && v > 0 ? v : '';
     }
 
-    getHiddenFieldCheckValue(sel, def) {
-        return jq(sel).prop('checked') ? 'true' : (def || '');
-    }
+     getHiddenFieldCheckValue(sel, def) {
+         return jq(sel).prop('checked') ? 'true' : (def || '');
+     }
 
     populateHiddenFields() {
         // Auth
@@ -516,14 +533,27 @@ class PipelineGenerator {
 
         ss = jq('#scanCentralBuildTypeSelect').val();
 
-        if (ss !== 'None') {
-            sssb = this.getHiddenFieldCheckValue('#scanCentralSkipBuildCheck');
-            ssbc = jq('#scanCentralBuildCommandInput').val();
-            ssbf = jq('#scanCentralBuildFileInput').val();
-            ssbtv = jq('#scanCentralBuildToolVersionInput').val();
-            ssve = jq('#scanCentralVirtualEnvInput').val();
-            ssrf = jq('#scanCentralRequirementFileInput').val();
-        } else ss = '';
+        switch(ss){
+                case 'Gradle':
+                case 'Maven':
+                     sssb = this.getHiddenFieldCheckValue('#scanCentralSkipBuildCheck');
+                     ssbc = jq('#scanCentralBuildCommandInput').val();
+                     ssbf = jq('#scanCentralBuildFileInput').val();
+                    break;
+                case 'MSBuild':
+                     ssbc = jq('#scanCentralBuildCommandInput').val();
+                     ssbf = jq('#scanCentralBuildFileInput').val();
+                     break;
+                case 'Python':
+                     ssve = jq('#scanCentralVirtualEnvInput').val();
+                     ssrf = jq('#scanCentralRequirementFileInput').val();
+                    break;
+                case 'PHP':
+                     break;
+                case 'None':
+                     ss = '';
+                     break;
+        }
 
         // Auth
         jq('#username').val(un);
@@ -802,7 +832,8 @@ class PipelineGenerator {
 
         jq('#autoProvIsMicro')
             .change(_ => this.onIsMicroserviceChanged());
-
+        jq('#autoProvAppType')
+            .change(_ => this.onIsApplicationTypeChanged());
         jq('#autoProvOwnerAssignMe')
             .click(e => {
                 e.preventDefault();

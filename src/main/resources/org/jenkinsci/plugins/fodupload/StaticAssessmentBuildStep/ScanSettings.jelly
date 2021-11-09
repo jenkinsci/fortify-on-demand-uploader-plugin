@@ -118,7 +118,7 @@
                     </div>
                 </f:entry>
 
-                <f:entry title="Language Level">
+                <f:entry title="Language Level" id="languageLevelFormElementId">
                     <div id="languageLevelForm" class="fode-field spinner-container fode-row-langLev">
                         <div class="fode-edit">
                             <select name="userSelectedLanguageLevel" id="languageLevelSelectList">

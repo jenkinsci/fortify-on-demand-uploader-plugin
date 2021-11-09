@@ -160,7 +160,7 @@ class ScanSettings {
     onScanCentralChanged() {
         let val = jq('#scanCentralBuildTypeForm > select').val().toLowerCase();
         let techStackFilter;
-
+        this.populateTechStackDropdown();
         if (val === 'none') {
             jq('.fode-row-sc').hide();
             jq('.fode-row-nonsc').show();
@@ -176,7 +176,6 @@ class ScanSettings {
                     if (jqe.hasClass(scClass)) jqe.show();
                     else jqe.hide();
                 });
-
             switch (val) {
                 case 'msbuild':
                     closestRow(jq('#technologyStackForm')).show();
@@ -198,8 +197,8 @@ class ScanSettings {
                     break;
             }
         }
-
-        this.populateTechStackDropdown(techStackFilter);
+        if(techStackFilter)
+           this.populateTechStackDropdown(techStackFilter);
         this.onTechStackChanged();
     }
 
@@ -244,8 +243,13 @@ class ScanSettings {
                 llsel.append(`<option value="${ll.value}">${ll.text}</option>`);
             }
         }
+        if(ts){
+            if (ts.value == techStackConsts.python || ts.value == techStackConsts.java || ts.value == techStackConsts.dotNet)
+                   this.onLangLevelChanged();
+            else
+                 llr.hide();
 
-        this.onLangLevelChanged();
+        }
     }
 
     onLangLevelChanged(){

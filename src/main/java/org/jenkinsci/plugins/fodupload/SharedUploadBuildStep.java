@@ -460,9 +460,10 @@ public class SharedUploadBuildStep {
 
                 StaticScanController staticScanController = new StaticScanController(apiConnection, logger, correlationId);
 
-                if (model.getIsPipeline() || releaseId > 0) technologyStack = model.getTechnologyStack();
-                else if (model.loadBsiToken()) technologyStack = model.getBsiToken().getTechnologyStack();
-
+                if (model.getIsPipeline() && releaseId > 0)
+                    technologyStack = model.getTechnologyStack();
+                else if (releaseId <= 0 && model.loadBsiToken())
+                    technologyStack = model.getBsiToken().getTechnologyStack();
 
                 if (Utils.isNullOrEmpty(technologyStack)) {
                     GetStaticScanSetupResponse staticScanSetup = staticScanController.getStaticScanSettingsOld(releaseId);
@@ -661,12 +662,20 @@ public class SharedUploadBuildStep {
             }
             if (versionLine.contains("version")) {
                 Path outputZipFolderPath = Paths.get(String.valueOf(outputLocation)).resolve("output.zip");
+                FodEnums.SelectedScanCentralBuildType buildType = FodEnums.SelectedScanCentralBuildType.valueOf(model.getSelectedScanCentralBuildType());
+                if (buildType == FodEnums.SelectedScanCentralBuildType.Gradle) {
+                    logger.println("Giving permission to gradlew");
+                    int permissionsExitCode = givePermissionsToGradle(srcLocation, logger);
+                    logger.println("Finished Giving Permissions : " + permissionsExitCode);
+                    if (permissionsExitCode != 0) {
+                        logger.println("Errors giving permissions to gradle : " + permissionsExitCode);
+                        build.setResult(Result.FAILURE);
+                    }
+                }
                 ArrayList scanCentralPackageCommandList = new ArrayList<>();
                 scanCentralPackageCommandList.add(scanCentralbatLocation);
                 scanCentralPackageCommandList.add("package");
                 scanCentralPackageCommandList.add("--bt");
-
-                FodEnums.SelectedScanCentralBuildType buildType = FodEnums.SelectedScanCentralBuildType.valueOf(model.getSelectedScanCentralBuildType());
 
                 switch (buildType) {
                     case Gradle:
@@ -772,6 +781,32 @@ public class SharedUploadBuildStep {
             }
         }
         return null;
+    }
+
+    private int givePermissionsToGradle(FilePath srcLocation, PrintStream logger) {
+        if (!SystemUtils.IS_OS_WINDOWS) {
+            BufferedReader stdInput = null;
+            ArrayList linuxPermissionsList = new ArrayList<>();
+
+            linuxPermissionsList.add("chmod");
+            linuxPermissionsList.add("u+x");
+            linuxPermissionsList.add("gradlew");
+
+            try {
+                if (linuxPermissionsList.size() > 0) {
+                    Process gradlePermissionsProcess = runProcessBuilder(linuxPermissionsList, srcLocation);
+                    stdInput = new BufferedReader(new InputStreamReader(gradlePermissionsProcess.getInputStream()));
+                    String s = null;
+                    while ((s = stdInput.readLine()) != null) {
+                        logger.println(s);
+                    }
+                    return gradlePermissionsProcess.waitFor();
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
     }
 
     private String transformMsBuildCommand(String cmd) {
