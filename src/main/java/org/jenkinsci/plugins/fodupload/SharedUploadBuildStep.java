@@ -460,10 +460,10 @@ public class SharedUploadBuildStep {
 
                 StaticScanController staticScanController = new StaticScanController(apiConnection, logger, correlationId);
 
-                if (model.getIsPipeline() && releaseId > 0)
-                    technologyStack = model.getTechnologyStack();
-                else if (releaseId <= 0 && model.loadBsiToken())
+                if (releaseId <= 0 && model.loadBsiToken())
                     technologyStack = model.getBsiToken().getTechnologyStack();
+                else if (model.getIsPipeline() || releaseId > 0)
+                    technologyStack = model.getTechnologyStack();
 
                 if (Utils.isNullOrEmpty(technologyStack)) {
                     GetStaticScanSetupResponse staticScanSetup = staticScanController.getStaticScanSettingsOld(releaseId);

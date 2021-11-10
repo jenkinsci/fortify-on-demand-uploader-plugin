@@ -262,6 +262,9 @@ public class StaticScanController extends ControllerBase {
         if (job.getIsMicroservice()) {
             model.setHasMicroservices(job.getIsMicroservice());
             model.setReleaseMicroserviceName(job.getMicroserviceName());
+            ArrayList<String> microserviceArray = new ArrayList<>();
+            microserviceArray.add(job.getMicroserviceName());
+            model.setMicroservices(microserviceArray);
         }
 
         if (!job.getAttributes().isEmpty()) {
