@@ -1,14 +1,5 @@
 const fodeRowSelector = '.fode-field-row, .fode-field-row-verr';
 
-const _scanCentralBuildTypes = {
-    "None": "None",
-    "Gradle": "Gradle",
-    "Maven": "Maven",
-    "MSBuild": "MSBuild",
-    "PHP": "PHP",
-    "Python": "Python"
-};
-
 class ScanSettings {
 
     constructor() {

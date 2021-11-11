@@ -19,6 +19,15 @@ const techStackConsts = {
     python: 10
 };
 
+const _scanCentralBuildTypes = {
+    "None": "None",
+    "Gradle": "Gradle",
+    "Maven": "Maven",
+    "MSBuild": "MSBuild",
+    "PHP": "PHP",
+    "Python": "Python"
+};
+
 function dispatchEvent(type, payload) {
     document.dispatchEvent(new CustomEvent(type, {detail: payload}));
 }

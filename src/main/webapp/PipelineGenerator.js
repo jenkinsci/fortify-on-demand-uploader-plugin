@@ -172,12 +172,59 @@ class PipelineGenerator {
         this.onAssessmentChanged();
         jq('#entitlementSelect').val(freq && entl ? getEntitlementDropdownValue(entl, freq) : '');
         this.onEntitlementChanged();
-        jq('#technologyStackSelect').val(tech);
-        this.onTechStackChanged();
-        jq('#languageLevelSelect').val(lang);
-        this.onLangLevelChanged();
+
+        let scval = this.getScanCentralBuildTypeSelected();
+
+        if (scval === _scanCentralBuildTypes.None) {
+            jq('#technologyStackSelect').val(tech);
+            this.onTechStackChanged();
+            jq('#languageLevelSelect').val(lang);
+            this.onScanCentralChanged();
+        } else {
+            switch (tech) {
+                case 1:
+                case 23:
+                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.MSBuild);
+                    jq('#technologyStackSelectList').val(tech);
+                    break;
+                case 7:
+                    // Selected release is Java, but SC was not set to None, Maven, nor Gradle, default to Maven
+                    if (scval !== _scanCentralBuildTypes.Maven && scval !== _scanCentralBuildTypes.Gradle) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Maven);
+                    break;
+                case 9:
+                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
+                    break;
+                case 10:
+                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
+                    break;
+                default:
+                    // It's a valid tech stack but not supported by SC
+                    if (tech > 0) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.None);
+                    break;
+            }
+
+            if (this.getScanCentralBuildTypeSelected() === _scanCentralBuildTypes.None) {
+                jq('#technologyStackSelect').val(tech);
+                this.onTechStackChanged();
+                jq('#languageLevelSelect').val(lang);
+                this.onScanCentralChanged();
+            } else {
+                this.onScanCentralChanged();
+                if (lang) jq('#languageLevelSelectList').val(lang);
+                this.onLangLevelChanged();
+            }
+        }
+
         jq('#auditPreferenceSelect').val(audit);
         jq('#sonatypeEnabled').prop('checked', sona);
+    }
+
+    getScanCentralBuildTypeSelected() {
+        return _scanCentralBuildTypes[jq('#scanCentralBuildTypeSelect').val()] || _scanCentralBuildTypes.None;
+    }
+
+    setScanCentralBuildTypeSelected(val) {
+        if (val && _scanCentralBuildTypes[val]) jq('#scanCentralBuildTypeSelect').val(val);
     }
 
     isDotNetStack(ts) {
@@ -369,11 +416,10 @@ class PipelineGenerator {
             if (isNullOrEmpty(appName) || isNullOrEmpty(relName)) {
                 this.showMessage('Enter Application and Release names', true);
                 jq(fodpOverrideRowsSelector).hide();
-            } else if (isMicro && isNullOrEmpty(microName)){
+            } else if (isMicro && isNullOrEmpty(microName)) {
                 this.showMessage('Enter Microservice Name', true);
                 jq(fodpOverrideRowsSelector).hide();
-            }
-            else if (await this.loadAutoProvEntitlementSettings(appName, relName, isMicro, microName)) jq(fodpOverrideRowsSelector).show();
+            } else if (await this.loadAutoProvEntitlementSettings(appName, relName, isMicro, microName)) jq(fodpOverrideRowsSelector).show();
             else jq(fodpOverrideRowsSelector).hide();
         } else {
             this.overrideServerSettings = jq('#overrideReleaseSettings').prop('checked');
@@ -396,17 +442,14 @@ class PipelineGenerator {
         else jq('.fodp-row-autoProv-micro').hide()
     }
 
-    onIsApplicationTypeChanged(){
-       let v = jq('#autoProvAppType').val();
-       if(v != 2)
-         {
-             jq('.fodp-row-autoProv-is-micro').show();
-         }
-       else
-         {
-             jq('.fodp-row-autoProv-is-micro').hide();
-             jq('.fodp-row-autoProv-micro').hide();
-         }
+    onIsApplicationTypeChanged() {
+        let v = jq('#autoProvAppType').val();
+        if (v != 2) {
+            jq('.fodp-row-autoProv-is-micro').show();
+        } else {
+            jq('.fodp-row-autoProv-is-micro').hide();
+            jq('.fodp-row-autoProv-micro').hide();
+        }
     }
 
 
@@ -425,9 +468,9 @@ class PipelineGenerator {
         return v && v > 0 ? v : '';
     }
 
-     getHiddenFieldCheckValue(sel, def) {
-         return jq(sel).prop('checked') ? 'true' : (def || '');
-     }
+    getHiddenFieldCheckValue(sel, def) {
+        return jq(sel).prop('checked') ? 'true' : (def || '');
+    }
 
     populateHiddenFields() {
         // Auth
@@ -494,10 +537,9 @@ class PipelineGenerator {
                     attr += k + appAttributeKeyValueDelimiter + a;
                 }
             }
-            if(jq('#autoProvAppType').val() != 2)
-            {
-               ismic = jq('#autoProvIsMicro').prop('checked');
-               if (ismic) mic = jq('#autoProvMicroName').val();
+            if (jq('#autoProvAppType').val() != 2) {
+                ismic = jq('#autoProvIsMicro').prop('checked');
+                if (ismic) mic = jq('#autoProvMicroName').val();
             }
             rel = jq('#autoProvRelName').val();
             sdlc = jq('#autoProvSdlc').val();
@@ -532,26 +574,26 @@ class PipelineGenerator {
 
         ss = jq('#scanCentralBuildTypeSelect').val();
 
-        switch(ss){
-                case 'Gradle':
-                case 'Maven':
-                     sssb = this.getHiddenFieldCheckValue('#scanCentralSkipBuildCheck');
-                     ssbc = jq('#scanCentralBuildCommandInput').val();
-                     ssbf = jq('#scanCentralBuildFileInput').val();
-                    break;
-                case 'MSBuild':
-                     ssbc = jq('#scanCentralBuildCommandInput').val();
-                     ssbf = jq('#scanCentralBuildFileInput').val();
-                     break;
-                case 'Python':
-                     ssve = jq('#scanCentralVirtualEnvInput').val();
-                     ssrf = jq('#scanCentralRequirementFileInput').val();
-                    break;
-                case 'PHP':
-                     break;
-                case 'None':
-                     ss = '';
-                     break;
+        switch (ss) {
+            case 'Gradle':
+            case 'Maven':
+                sssb = this.getHiddenFieldCheckValue('#scanCentralSkipBuildCheck');
+                ssbc = jq('#scanCentralBuildCommandInput').val();
+                ssbf = jq('#scanCentralBuildFileInput').val();
+                break;
+            case 'MSBuild':
+                ssbc = jq('#scanCentralBuildCommandInput').val();
+                ssbf = jq('#scanCentralBuildFileInput').val();
+                break;
+            case 'Python':
+                ssve = jq('#scanCentralVirtualEnvInput').val();
+                ssrf = jq('#scanCentralRequirementFileInput').val();
+                break;
+            case 'PHP':
+                break;
+            case 'None':
+                ss = '';
+                break;
         }
 
         // Auth
