@@ -1,8 +1,7 @@
 const fodpRowSelector = '.fodp-field-row, .fodp-field-row-verr';
 const fodpOverrideRowsSelector = '.fodp-row-relid-ovr';
 const fodpAutoProvRowsSelector = '.fodp-row-autoProv';
-const appAttributeKeyDelimiter = '&';
-const appAttributeValueDelimiter = ';';
+const appAttributeKeyDelimiter = ';';
 const appAttributeKeyValueDelimiter = ':';
 
 class PipelineGenerator {
@@ -492,7 +491,7 @@ class PipelineGenerator {
 
                 if (a.length > 0) {
                     if (attr) attr += appAttributeKeyDelimiter;
-                    attr += k + appAttributeKeyValueDelimiter + a.join(appAttributeValueDelimiter);
+                    attr += k + appAttributeKeyValueDelimiter + a;
                 }
             }
             if(jq('#autoProvAppType').val() != 2)
@@ -690,22 +689,22 @@ class PipelineGenerator {
         let val = jq('#autoProvAttrValue').val().trim();
 
         if (key !== '' && val != '') {
+            jq('#autoProvAttrKey').removeAttr('style');
             let attr = this.appAttributes[key];
 
-            if (!attr) {
-                attr = [];
-                this.appAttributes[key] = attr;
+            if (attr) {
+                jq('#autoProvAttrKey').css('border-color', 'red');
+                return;
             }
 
-            attr.push(val);
+            this.appAttributes[key] = val;
 
             let ul = jq('#autoProvAttr');
 
             ul.find('li').remove();
 
-            for (let k of Object.keys(this.appAttributes)) {
-                let attr = this.appAttributes[k];
-                let val = attr.join(';');
+            for (let k of Object.keys(this.appAttributes).sort()) {
+                let val = this.appAttributes[k];
 
                 let li = ul.append(`<li value="${k}"><span>X</span>${k}:${val}</li>`);
 
