@@ -114,13 +114,13 @@ class PipelineGenerator {
         fields.removeClass('spinner');
     }
 
-    async loadAutoProvEntitlementSettings(appName, relName) {
+    async loadAutoProvEntitlementSettings(appName, relName, isMicro, microName) {
         let fields = jq('.fodp-field.spinner-container');
 
         fields.addClass('spinner');
         this.onScanCentralChanged();
 
-        let assessments = await this.api.getAssessmentTypeEntitlementsForAutoProv(appName, relName, getAuthInfo());
+        let assessments = await this.api.getAssessmentTypeEntitlementsForAutoProv(appName, relName, isMicro, microName, getAuthInfo());
         let fail = () => {
             fields.removeClass('spinner');
             this.onAssessmentChanged();
@@ -364,11 +364,17 @@ class PipelineGenerator {
 
             let appName = jq('#autoProvAppName').val();
             let relName = jq('#autoProvRelName').val();
+            let isMicro = jq('#autoProvIsMicro').prop('checked');
+            let microName = jq('#autoProvMicroName').val();
 
             if (isNullOrEmpty(appName) || isNullOrEmpty(relName)) {
                 this.showMessage('Enter Application and Release names', true);
                 jq(fodpOverrideRowsSelector).hide();
-            } else if (await this.loadAutoProvEntitlementSettings(appName, relName)) jq(fodpOverrideRowsSelector).show();
+            } else if (isMicro && isNullOrEmpty(microName)){
+                this.showMessage('Enter Microservice Name', true);
+                jq(fodpOverrideRowsSelector).hide();
+            }
+            else if (await this.loadAutoProvEntitlementSettings(appName, relName, isMicro, microName)) jq(fodpOverrideRowsSelector).show();
             else jq(fodpOverrideRowsSelector).hide();
         } else {
             this.overrideServerSettings = jq('#overrideReleaseSettings').prop('checked');
@@ -753,9 +759,9 @@ class PipelineGenerator {
         jq('#autoProvAppType')
             .change(_ => this.populateHiddenFields());
         jq('#autoProvIsMicro')
-            .change(_ => this.populateHiddenFields());
+            .change(_ => this.loadEntitlementOptions());
         jq('#autoProvMicroName')
-            .change(_ => this.populateHiddenFields());
+            .change(_ => this.loadEntitlementOptions());
         jq('#autoProvRelName')
             .change(_ => this.loadEntitlementOptions());
         jq('#autoProvSdlc')

@@ -144,9 +144,9 @@ class Api {
         });
     }
 
-    getAssessmentTypeEntitlementsForAutoProv(appName, relName, customAuth) {
+    getAssessmentTypeEntitlementsForAutoProv(appName, relName, isMicro, microName, customAuth) {
         return new Promise((res, rej) => {
-            this.descriptor.retrieveAssessmentTypeEntitlementsForAutoProv(appName, relName, customAuth, async t => {
+            this.descriptor.retrieveAssessmentTypeEntitlementsForAutoProv(appName, relName, isMicro, microName, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
 
                 if (responseJSON === null) return res(null);

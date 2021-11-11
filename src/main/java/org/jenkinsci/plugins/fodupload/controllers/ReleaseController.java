@@ -266,12 +266,14 @@ public class ReleaseController extends ControllerBase {
 
     }
 
-    public Integer getReleaseIdByName(final String appName, final String relName) throws IOException {
+    public Integer getReleaseIdByName(final String appName, final String relName, final Boolean isMicroservice, final String microserviceName) throws IOException {
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments("/api/v3/releases/")
                 .addQueryParameter("filters", "applicationName:" + appName + "+releaseName:" + relName)
-                .addQueryParameter("fields", "releaseId,applicationName,releaseName")
+                .addQueryParameter("fields", "releaseId,applicationName,releaseName,microserviceName")
                 .addQueryParameter("offset", "0");
+
+        if (isMicroservice) urlBuilder.addQueryParameter("microserviceName", microserviceName);
 
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
@@ -288,7 +290,11 @@ public class ReleaseController extends ControllerBase {
 
         do {
             for (ReleaseIdLookupResult rel : items) {
-                if (rel.getApplicationName().equals(appName) && rel.getReleaseName().equals(relName)) return rel.getReleaseId();
+                if (rel.getApplicationName().equals(appName) &&
+                        rel.getReleaseName().equals(relName) &&
+                        (!isMicroservice || rel.getMicroserviceName().equals(microserviceName))) {
+                    return rel.getReleaseId();
+                }
             }
 
             itemsReceived = items.size();

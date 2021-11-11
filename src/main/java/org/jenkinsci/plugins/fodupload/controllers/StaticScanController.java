@@ -241,7 +241,7 @@ public class StaticScanController extends ControllerBase {
 
     private Integer upsertApplicationAndRelease(final JobModel job) throws Exception {
         ReleaseController relCntr = new ReleaseController(apiConnection, logger, correlationId);
-        Integer releaseId = relCntr.getReleaseIdByName(job.getApplicationName(), job.getReleaseName());
+        Integer releaseId = relCntr.getReleaseIdByName(job.getApplicationName(), job.getReleaseName(), job.getIsMicroservice(), job.getMicroserviceName());
 
         if (releaseId != null) {
             println("Existing release found matching " + job.getApplicationName() + " " + job.getReleaseName());
@@ -267,7 +267,7 @@ public class StaticScanController extends ControllerBase {
             model.setMicroservices(microserviceArray);
         }
 
-        if (!job.getAttributes().isEmpty()) {
+        if (!Utils.isNullOrEmpty(job.getAttributes())) {
             String[] attrSpl = job.getAttributes().split("\\&");
             Map<String, String> attrs = new HashMap<>();
 

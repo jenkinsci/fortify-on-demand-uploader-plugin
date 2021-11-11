@@ -586,6 +586,8 @@ public class FortifyStaticAssessment extends FortifyStep {
         inProgressScanActionType = inProgressScanActionType != null ? inProgressScanActionType : FodEnums.InProgressScanActionType.DoNotStartScan.getValue();
         inProgressBuildResultType = inProgressBuildResultType != null ? inProgressBuildResultType : FodEnums.InProgressBuildResultType.FailBuild.getValue();
 
+        srcLocation = Utils.isNullOrEmpty(srcLocation) ? "./" : srcLocation;
+
         if ((releaseId == null || Utils.tryParseInt(releaseId) <= 0) && Utils.isNullOrEmpty(bsiToken)) {
             if (!Utils.isNullOrEmpty(applicationName) || Utils.isNullOrEmpty(releaseName)) {
                 List<String> aperrors = new ArrayList<>();
@@ -707,13 +709,13 @@ public class FortifyStaticAssessment extends FortifyStep {
         }
 
         @JavaScriptMethod
-        public String retrieveAssessmentTypeEntitlementsForAutoProv(String appName, String relName, JSONObject authModelObject) {
+        public String retrieveAssessmentTypeEntitlementsForAutoProv(String appName, String relName, Boolean isMicroservice, String microserviceName, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
                 ReleaseController releases = new ReleaseController(apiConnection, null, Utils.createCorrelationId());
                 AssessmentTypesController assessments = new AssessmentTypesController(apiConnection, null, Utils.createCorrelationId());
-                Integer relId = releases.getReleaseIdByName(appName.trim(), relName.trim());
+                Integer relId = releases.getReleaseIdByName(appName.trim(), relName.trim(), isMicroservice, microserviceName);
                 AssessmentTypeEntitlementsForAutoProv result = null;
 
                 if (relId == null) {
