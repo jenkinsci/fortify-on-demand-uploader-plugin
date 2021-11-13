@@ -54,10 +54,11 @@ public class AssessmentTypesController extends ControllerBase {
         return items;
     }
 
-    public List<AssessmentTypeEntitlement> getStaticAssessmentTypeEntitlements() throws IOException {
+    public List<AssessmentTypeEntitlement> getStaticAssessmentTypeEntitlements(Boolean isMicroservice) throws IOException {
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments("/api/v3/tenant-assessment-types")
-                .addQueryParameter("scanType", "1");
+                .addQueryParameter("scanType", "1")
+                .addQueryParameter("forMicroservice", isMicroservice != null ? isMicroservice.toString() : "false" );
 
         Request request = new Request.Builder()
                 .url(urlBuilder.build())

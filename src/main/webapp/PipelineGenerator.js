@@ -238,7 +238,7 @@ class PipelineGenerator {
         this.populateTechStackDropdown();
         if (val === 'none') {
             jq('.fodp-row-sc').hide();
-            if (this.overrideServerSettings) jq('.fodp-row-nonsc').show();
+            if (this.overrideServerSettings || this.autoProvMode) jq('.fodp-row-nonsc').show();
         } else {
             let scClass = 'fodp-row-sc-' + val;
 
@@ -253,7 +253,7 @@ class PipelineGenerator {
                 });
             switch (val) {
                 case 'msbuild':
-                    if (this.overrideServerSettings) {
+                    if (this.overrideServerSettings || this.autoProvMode) {
                         closestRow(jq('#technologyStackForm')).show();
                         let currVal = this.techStacks[jq('#technologyStackSelect').val()];
                         if (!currVal || !this.isDotNetStack(currVal)) jq('#technologyStackSelect').val(techStackConsts.none);
@@ -262,13 +262,13 @@ class PipelineGenerator {
                     break;
                 case 'maven':
                 case 'gradle':
-                    if (this.overrideServerSettings) jq('#technologyStackSelect').val(techStackConsts.java);
+                    if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.java);
                     break;
                 case 'php':
-                    if (this.overrideServerSettings) jq('#technologyStackSelect').val(techStackConsts.php);
+                    if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.php);
                     break;
                 case 'python':
-                    if (this.overrideServerSettings) jq('#technologyStackSelect').val(techStackConsts.python);
+                    if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.python);
                     break;
             }
         }
@@ -303,21 +303,26 @@ class PipelineGenerator {
 
     onTechStackChanged() {
         let ts = this.techStacks[jq('#technologyStackSelect').val()];
+        let llv = numberOrNull(jq('#languageLevelSelect').val()) || -1;
         let llsel = jq('#languageLevelSelect');
         let llr = jq('.fodp-row-langLev');
 
-        if (this.overrideServerSettings) llr.show();
+        if (this.overrideServerSettings || this.autoProvMode) llr.show();
         llsel.find('option').not(':first').remove();
         llsel.find('option').first().prop('selected', true);
 
-        // noinspection EqualityComparisonWithCoercionJS
-        if (ts && ts.value == techStackConsts.php) llr.hide();
-        else if (ts) {
-            for (let ll of ts.levels) {
-                llsel.append(`<option value="${ll.value}">${ll.text}</option>`);
-            }
-        }
+        if (ts) {
+            if (Array.isArray(ts.levels) && ts.levels.length > 0) {
+                let setllv = false;
 
+                for (let ll of ts.levels) {
+                    if (ll.value == llv) setllv = true;
+                    llsel.append(`<option value="${ll.value}">${ll.text}</option>`);
+                }
+
+                if (setllv) jq('#languageLevelSelect').val(llv);
+            } else llr.hide();
+        }
 
         this.onLangLevelChanged();
     }

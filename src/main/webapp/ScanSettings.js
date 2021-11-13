@@ -288,10 +288,10 @@ class ScanSettings {
                 }
 
                 if (setllv) jq('#languageLevelSelectList').val(llv);
-
-                this.onLangLevelChanged();
             } else llr.hide();
         }
+
+        this.onLangLevelChanged();
     }
 
     onLangLevelChanged() {

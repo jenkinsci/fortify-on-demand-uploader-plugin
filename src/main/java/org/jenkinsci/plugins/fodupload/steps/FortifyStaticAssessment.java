@@ -719,7 +719,7 @@ public class FortifyStaticAssessment extends FortifyStep {
                 AssessmentTypeEntitlementsForAutoProv result = null;
 
                 if (relId == null) {
-                    result = new AssessmentTypeEntitlementsForAutoProv(null, assessments.getStaticAssessmentTypeEntitlements(), null);
+                    result = new AssessmentTypeEntitlementsForAutoProv(null, assessments.getStaticAssessmentTypeEntitlements(isMicroservice), null);
                 } else {
                     StaticScanController staticScanController = new StaticScanController(apiConnection, null, Utils.createCorrelationId());
                     GetStaticScanSetupResponse settings = staticScanController.getStaticScanSettings(relId);
