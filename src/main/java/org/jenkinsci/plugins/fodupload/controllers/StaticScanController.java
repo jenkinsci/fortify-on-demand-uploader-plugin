@@ -16,6 +16,8 @@ import org.jenkinsci.plugins.fodupload.models.response.*;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class StaticScanController extends ControllerBase {
@@ -333,13 +335,36 @@ public class StaticScanController extends ControllerBase {
                             invalidPickListAttributes.add(a.getKey());
                         break;
                     }
+                    else if(fa.getAttributeDataType().equalsIgnoreCase("Boolean")){
+                        Pattern queryLangPattern = Pattern.compile("true|false", Pattern.CASE_INSENSITIVE);
+                        Matcher matcher = queryLangPattern.matcher(a.getValue());
+                        if(matcher.matches())
+                            result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
+                        else
+                            invalidPickListAttributes.add(a.getKey()+" : true/false");
+                        break;
+                    }
+                    else if(fa.getAttributeDataType().equalsIgnoreCase("User")){
+                        ArrayList<String> userAttrValues = new ArrayList<>();
+                        ArrayList<String> userAttrValueIdNames = new ArrayList<>();
+                        for (AttributeDefinition.PicklistValue pv : fa.getPicklistValues()) {
+                            userAttrValues.add(pv.getName());
+                            userAttrValues.add(String.valueOf(pv.getId()));
+                            userAttrValueIdNames.add(String.valueOf(pv.getId())+"-"+pv.getName());
+                        }
+                        if(userAttrValues.contains(a.getValue()))
+                            result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
+                        else
+                            invalidPickListAttributes.add(a.getKey()+" : "+userAttrValueIdNames.stream().collect(Collectors.joining(",")));
+                        break;
+                    }
                     result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
                     break;
                 }
             }
         }
         if(invalidPickListAttributes.size() > 0){
-            throw new Exception(String.format("Invalid PickList Attribute Values for the following Picklist Attribute/s : %s",invalidPickListAttributes.stream().collect(Collectors.joining(","))));
+            throw new Exception(String.format("Invalid PickList Attributes/Values for the following Picklist Attribute/s - %s",invalidPickListAttributes.stream().collect(Collectors.joining(" & "))));
         }
         return result;
     }
