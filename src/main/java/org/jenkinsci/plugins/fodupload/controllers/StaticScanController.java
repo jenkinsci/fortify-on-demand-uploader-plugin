@@ -271,7 +271,7 @@ public class StaticScanController extends ControllerBase {
         }
 
         if (!Utils.isNullOrEmpty(job.getAttributes())) {
-            String[] attrSpl = job.getAttributes().split("\\&");
+            String[] attrSpl = job.getAttributes().split(";");
             Map<String, String> attrs = new HashMap<>();
 
             for (String a : attrSpl) {
