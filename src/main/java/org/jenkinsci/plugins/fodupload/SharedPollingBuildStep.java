@@ -2,13 +2,11 @@ package org.jenkinsci.plugins.fodupload;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URISyntaxException;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.fortify.fod.parser.BsiToken;
-import com.fortify.fod.parser.BsiTokenParser;
 
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
+import org.jenkinsci.plugins.fodupload.models.BsiToken;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
 import org.jenkinsci.plugins.fodupload.polling.ScanStatusPoller;
@@ -83,7 +81,7 @@ public class SharedPollingBuildStep {
             }
         }
         else {
-            if (bsiToken != null && !bsiToken.isEmpty()) {
+             if (bsiToken != null && !bsiToken.isEmpty()) {
                 return FormValidation.ok();
             }
 
@@ -95,7 +93,7 @@ public class SharedPollingBuildStep {
         if (bsiToken != null && !bsiToken.isEmpty()) {
             BsiTokenParser tokenParser = new BsiTokenParser();
             try {
-                BsiToken testToken = tokenParser.parse(bsiToken);
+                BsiToken testToken = tokenParser.parseBsiToken(bsiToken);
                 if (testToken != null) {
                     return FormValidation.ok();
                 }
@@ -106,10 +104,8 @@ public class SharedPollingBuildStep {
             if (releaseId != null && !releaseId.isEmpty()) {
                 return FormValidation.ok();
             }
-
             return FormValidation.error("Please specify Release ID or BSI Token.");
         }
-
         return FormValidation.error("Please specify Release ID or BSI Token.");
     }
 
@@ -258,16 +254,16 @@ public class SharedPollingBuildStep {
                 logger.println("Invalid release ID or BSI Token");
                 return;
             }
-
+ 
             if (releaseIdNum > 0 && this.getBsiToken() != null && !this.getBsiToken().isEmpty()) {
                 logger.println("Warning: The BSI Token will be ignored since Release ID was entered.");
             }
 
-            BsiToken token = releaseIdNum == 0 ? tokenParser.parse(this.getBsiToken()) : null;
+            BsiToken token = releaseIdNum == 0 ? tokenParser.parseBsiToken(this.getBsiToken()) : null;
             if (apiConnection != null) {
                 apiConnection.authenticate();
                 ScanStatusPoller poller = new ScanStatusPoller(apiConnection, this.getPollingInterval(), logger);
-                PollReleaseStatusResult result = poller.pollReleaseStatus(releaseIdNum == 0 ? token.getProjectVersionId() : releaseIdNum, scanId, correlationId);
+                PollReleaseStatusResult result = poller.pollReleaseStatus(releaseIdNum == 0 ? token.getReleaseId() : releaseIdNum, scanId, correlationId);
 
                 // if the polling fails, crash the build
                 if (!result.isPollingSuccessful()) {
@@ -303,9 +299,6 @@ public class SharedPollingBuildStep {
                 logger.println("Failed to authenticate");
                 run.setResult(Result.FAILURE);
             }
-
-        } catch (URISyntaxException e) {
-            logger.println("Failed to parse BSI.");
         } finally {
             if (apiConnection != null) {
                 apiConnection.retireToken();

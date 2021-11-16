@@ -35,10 +35,10 @@ public class StaticScanSummaryController extends ControllerBase {
 
         HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
                 .addPathSegments(String.format("/api/v3/releases/%d/scans/%d", releaseId, scanId));
-        logger.println("--------------------------");
-        logger.println("Retrieving scan summary data");
-        logger.println(String.format("ReleaseID: %s; ScanID: %s", releaseId, scanId));
-        logger.println("--------------------------");
+        println("--------------------------");
+        println("Retrieving scan summary data");
+        println(String.format("ReleaseID: %s; ScanID: %s", releaseId, scanId));
+        println("--------------------------");
 
         String url = builder.build().toString();
 
@@ -76,9 +76,9 @@ public class StaticScanSummaryController extends ControllerBase {
         if (results != null) {
             return results;
         } else {
-            logger.println("Error retrieving scan summary data from API. Please log into online website to view summary information.");
-            logger.println(String.format("API response code: %s", response.code()));
-            logger.println(String.format("API response message: %s", response.message()));
+            println("Error retrieving scan summary data from API. Please log into online website to view summary information.");
+            println(String.format("API response code: %s", response.code()));
+            println(String.format("API response message: %s", response.message()));
             return null;
         }
     }

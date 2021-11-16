@@ -1,22 +1,27 @@
 package org.jenkinsci.plugins.fodupload;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.text.Normalizer;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.fortify.fod.parser.BsiToken;
-import com.fortify.fod.parser.BsiTokenParser;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
+import org.jenkinsci.plugins.fodupload.models.BsiToken;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressBuildResultType;
-import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressScanActionType;
-import org.jenkinsci.plugins.fodupload.models.response.StartScanResponse;
-import org.jenkinsci.plugins.fodupload.models.response.StaticScanSetupResponse;
+import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -61,7 +66,18 @@ public class SharedUploadBuildStep {
                                  String srcLocation,
                                  String remediationScanPreferenceType,
                                  String inProgressScanActionType,
-                                 String inProgressBuildResultType) {
+                                 String inProgressBuildResultType,
+                                 String selectedReleaseType,
+                                 String userSelectedApplication,
+                                 String userSelectedMicroservice,
+                                 String userSelectedRelease,
+                                 String selectedScanCentralBuildType,
+                                 boolean scanCentralSkipBuild,
+                                 String scanCentralBuildCommand,
+                                 String scanCentralBuildFile,
+                                 String scanCentralBuildToolVersion,
+                                 String scanCentralVirtualEnv,
+                                 String scanCentralRequirementFile) {
 
         model = new JobModel(releaseId,
                 bsiToken,
@@ -70,7 +86,101 @@ public class SharedUploadBuildStep {
                 srcLocation,
                 remediationScanPreferenceType,
                 inProgressScanActionType,
-                inProgressBuildResultType);
+                inProgressBuildResultType,
+                selectedReleaseType,
+                userSelectedApplication,
+                userSelectedMicroservice,
+                userSelectedRelease,
+                selectedScanCentralBuildType,
+                scanCentralSkipBuild,
+                scanCentralBuildCommand,
+                scanCentralBuildFile,
+                scanCentralBuildToolVersion,
+                scanCentralVirtualEnv,
+                scanCentralRequirementFile,
+                false, null, null, null, null, null, null, null,
+                false, null, null, null, null, null, null, null, null, null);
+
+        authModel = new AuthenticationModel(overrideGlobalConfig,
+                username,
+                personalAccessToken,
+                tenantId);
+    }
+
+    public SharedUploadBuildStep(String releaseId,
+                                 String bsiToken,
+                                 boolean overrideGlobalConfig,
+                                 String username,
+                                 String personalAccessToken,
+                                 String tenantId,
+                                 boolean purchaseEntitlements,
+                                 String entitlementPreference,
+                                 String srcLocation,
+                                 String remediationScanPreferenceType,
+                                 String inProgressScanActionType,
+                                 String inProgressBuildResultType,
+                                 String selectedScanCentralBuildType,
+                                 boolean scanCentralSkipBuild,
+                                 String scanCentralBuildCommand,
+                                 String scanCentralBuildFile,
+                                 String scanCentralBuildToolVersion,
+                                 String scanCentralVirtualEnv,
+                                 String scanCentralRequirementFile,
+                                 String assessmentType,
+                                 String entitlementId,
+                                 String frequencyId,
+                                 String auditPreference,
+                                 String technologyStack,
+                                 String languageLevel,
+                                 String openSourceScan,
+                                 Boolean autoProvision,
+                                 String applicationName,
+                                 String applicationType,
+                                 String releaseName,
+                                 Integer owner,
+                                 String attributes,
+                                 String businessCriticality,
+                                 String sdlcStatus,
+                                 String microserviceName,
+                                 Boolean isMicroservice) {
+
+        model = new JobModel(releaseId,
+                bsiToken,
+                purchaseEntitlements,
+                entitlementPreference,
+                srcLocation,
+                remediationScanPreferenceType,
+                inProgressScanActionType,
+                inProgressBuildResultType,
+                null,
+                null,
+                null,
+                null,
+                selectedScanCentralBuildType,
+                scanCentralSkipBuild,
+                scanCentralBuildCommand,
+                scanCentralBuildFile,
+                scanCentralBuildToolVersion,
+                scanCentralVirtualEnv,
+                scanCentralRequirementFile,
+                true,
+                assessmentType,
+                entitlementId,
+                frequencyId,
+                auditPreference,
+                technologyStack,
+                languageLevel,
+                openSourceScan,
+                autoProvision,
+                applicationName,
+                applicationType,
+                releaseName,
+                owner,
+                attributes,
+                businessCriticality,
+                sdlcStatus,
+                microserviceName,
+                isMicroservice);
 
         authModel = new AuthenticationModel(overrideGlobalConfig,
                 username,
@@ -86,8 +196,7 @@ public class SharedUploadBuildStep {
             } catch (NumberFormatException ex) {
                 return FormValidation.error("Could not parse Release ID.");
             }
-        }
-        else {
+        } else {
             if (bsiToken != null && !bsiToken.isEmpty()) {
                 return FormValidation.ok();
             }
@@ -100,7 +209,7 @@ public class SharedUploadBuildStep {
         if (bsiToken != null && !bsiToken.isEmpty()) {
             BsiTokenParser tokenParser = new BsiTokenParser();
             try {
-                BsiToken testToken = tokenParser.parse(bsiToken);
+                BsiToken testToken = tokenParser.parseBsiToken(bsiToken);
                 if (testToken != null) {
                     return FormValidation.ok();
                 }
@@ -111,10 +220,8 @@ public class SharedUploadBuildStep {
             if (releaseId != null && !releaseId.isEmpty()) {
                 return FormValidation.ok();
             }
-
             return FormValidation.error("Please specify Release ID or BSI Token.");
         }
-
         return FormValidation.error("Please specify Release ID or BSI Token.");
     }
 
@@ -172,11 +279,11 @@ public class SharedUploadBuildStep {
                 ACL.SYSTEM,
                 null,
                 null
-                );
+        );
 
         return items;
     }
-    
+
     @SuppressWarnings("unused")
     public static ListBoxModel doFillInProgressScanActionTypeItems() {
         ListBoxModel items = new ListBoxModel();
@@ -185,7 +292,7 @@ public class SharedUploadBuildStep {
         }
         return items;
     }
-    
+
     @SuppressWarnings("unused")
     public static ListBoxModel doFillInProgressBuildResultTypeItems() {
         ListBoxModel items = new ListBoxModel();
@@ -193,6 +300,71 @@ public class SharedUploadBuildStep {
             items.add(new ListBoxModel.Option(buildResultType.toString(), buildResultType.getValue()));
         }
         return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillSelectedReleaseTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.SelectedReleaseType selectedReleaseType : FodEnums.SelectedReleaseType.values()) {
+            items.add(new ListBoxModel.Option(selectedReleaseType.toString(), selectedReleaseType.getValue()));
+        }
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillSelectedScanCentralBuildTypeItems() {
+        return doFillFromEnum(FodEnums.SelectedScanCentralBuildType.class);
+    }
+
+    private static <T extends Enum<T>> ListBoxModel doFillFromEnum(Class<T> enumClass) {
+        ListBoxModel items = new ListBoxModel();
+        for (T selected : EnumSet.allOf(enumClass)) {
+            items.add(new ListBoxModel.Option(selected.toString(), selected.name()));
+        }
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static GenericListResponse<ApplicationApiResponse> customFillUserSelectedApplicationList(String searchTerm, int offset, int limit, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+        ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
+        return applicationController.getApplicationList(searchTerm, offset, limit);
+    }
+
+    public static org.jenkinsci.plugins.fodupload.models.Result<ApplicationApiResponse> customFillUserApplicationById(int applicationId, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+        ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, null);
+        org.jenkinsci.plugins.fodupload.models.Result<ApplicationApiResponse> result = applicationsController.getApplicationById(applicationId);
+
+        return result;
+    }
+
+    public static List<MicroserviceApiResponse> customFillUserSelectedMicroserviceList(int applicationId, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+        ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
+        return applicationController.getMicroserviceListByApplication(applicationId);
+    }
+
+    public static GenericListResponse<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, String searchTerm, Integer offset, Integer limit, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+        ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
+        return applicationController.getReleaseListByApplication(applicationId, microserviceId, searchTerm, offset, limit);
+    }
+
+    public static org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> customFillUserReleaseById(int releaseId, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+        ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, null);
+        org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> result = applicationsController.getReleaseById(releaseId);
+
+        return result;
+    }
+
+    public static EntitlementSettings customFillEntitlementSettings(int releaseId, AuthenticationModel authModel) throws IOException {
+        return new EntitlementSettings(
+                1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
+                1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
+                1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
+                1, 1, false);
     }
 
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -203,7 +375,7 @@ public class SharedUploadBuildStep {
             return false;
         }
 
-        if ((model.getReleaseId() == null || model.getReleaseId().isEmpty()) && model.loadBsiToken() == false) {
+        if (!model.getIsPipeline() && (model.getReleaseId() == null || model.getReleaseId().isEmpty()) && model.loadBsiToken() == false) {
             logger.println("Invalid release ID or BSI Token");
             build.setResult(Result.FAILURE);
             return false;
@@ -213,7 +385,7 @@ public class SharedUploadBuildStep {
             build.setResult(Result.FAILURE);
             return false;
         }
-        
+
         return true;
     }
 
@@ -227,40 +399,31 @@ public class SharedUploadBuildStep {
         try {
             taskListener.set(listener);
 
-            // check to see if sensitive fields are encrypte. If not halt scan and recommend encryption.
-            if(authModel != null)
-            {
-                if(authModel.getOverrideGlobalConfig() == true){
-                    if(!Utils.isCredential(authModel.getPersonalAccessToken()))
-                    {
+            // check to see if sensitive fields are encrypted. If not halt scan and recommend encryption.
+            if (authModel != null) {
+                if (authModel.getOverrideGlobalConfig() == true) {
+                    if (!Utils.isCredential(authModel.getPersonalAccessToken())) {
                         build.setResult(Result.UNSTABLE);
                         logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
-                        return ;
+                        return;
                     }
-                }
-                else
-                {
-                    if(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey())
-                    {
-                        if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
-                        {
+                } else {
+                    if (GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey()) {
+                        if (!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret())) {
                             build.setResult(Result.UNSTABLE);
                             logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
-                            return ;
+                            return;
                         }
-                    }
-                    else
-                    {
-                         if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
-                        {
+                    } else {
+                        if (!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken())) {
                             build.setResult(Result.UNSTABLE);
                             logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
-                            return ;
-                        }      
+                            return;
+                        }
                     }
                 }
             }
-            
+
             Result currentResult = build.getResult();
             if (Result.FAILURE.equals(currentResult)
                     || Result.ABORTED.equals(currentResult)
@@ -276,22 +439,20 @@ public class SharedUploadBuildStep {
             Integer releaseId = 0;
             try {
                 releaseId = Integer.parseInt(model.getReleaseId());
+            } catch (NumberFormatException ex) {
             }
-            catch (NumberFormatException ex) {}
 
-            if (releaseId == 0 && !model.loadBsiToken()) {
+            if (!model.getIsPipeline() && releaseId == 0 && !model.loadBsiToken()) {
                 build.setResult(Result.FAILURE);
                 logger.println("Invalid release ID or BSI Token");
                 return;
             }
-
 
             if (releaseId > 0 && model.loadBsiToken()) {
                 logger.println("Warning: The BSI Token will be ignored since Release ID was entered.");
             }
 
             String technologyStack = null;
-            StaticScanSetupResponse staticScanSetup = null;
 
             apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
             if (apiConnection != null) {
@@ -299,13 +460,16 @@ public class SharedUploadBuildStep {
 
                 StaticScanController staticScanController = new StaticScanController(apiConnection, logger, correlationId);
 
-                if (releaseId == 0) {
-                    model.loadBsiToken();
+                if (releaseId <= 0 && model.loadBsiToken())
                     technologyStack = model.getBsiToken().getTechnologyStack();
-                } else {
-                    staticScanSetup = staticScanController.getStaticScanSettings(releaseId);
-                    if (staticScanSetup == null) {
-                        logger.println("No scan settings defined for release " + releaseId.toString());
+                else if (model.getIsPipeline() || releaseId > 0)
+                    technologyStack = model.getTechnologyStack();
+
+                if (Utils.isNullOrEmpty(technologyStack)) {
+                    GetStaticScanSetupResponse staticScanSetup = staticScanController.getStaticScanSettingsOld(releaseId);
+
+                    if (staticScanSetup == null || Utils.isNullOrEmpty(staticScanSetup.getTechnologyStack())) {
+                        logger.println("No scan settings defined for release " + releaseId);
                         build.setResult(Result.FAILURE);
                         return;
                     }
@@ -314,30 +478,62 @@ public class SharedUploadBuildStep {
                 }
 
                 FilePath workspaceModified = new FilePath(workspace, model.getSrcLocation());
-                // zips the file in a temporary location
-                File payload = Utils.createZipFile(technologyStack, workspaceModified, logger);
-                if (payload.length() == 0) {
+                File payload;
+                if (model.getSelectedScanCentralBuildType().equalsIgnoreCase(FodEnums.SelectedScanCentralBuildType.None.toString())) {
+                    // zips the file in a temporary location
+                    payload = Utils.createZipFile(technologyStack, workspaceModified, logger);
+                    if (payload.length() == 0) {
+                        boolean deleteSuccess = payload.delete();
+                        if (!deleteSuccess) {
+                            logger.println("Unable to delete empty payload.");
+                        }
+                        logger.println("Source is empty for given Technology Stack and Language Level.");
+                        build.setResult(Result.FAILURE);
+                        return;
+                    }
+                } else {
+                    FilePath scanCentralPath = null;
 
-                    boolean deleteSuccess = payload.delete();
-                    if (!deleteSuccess) {
-                        logger.println("Unable to delete empty payload.");
+                    try {
+                        String scsetting = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getScanCentralPath();
+
+                        if (Utils.isNullOrEmpty(scsetting)) {
+                            logger.println("ScanCentral location not set");
+                            build.setResult(Result.FAILURE);
+                        }
+                        scanCentralPath = new FilePath(new File(scsetting));
+                    } catch (Exception e) {
+                        logger.println("Failed to retrieve ScanCentral location");
+                        build.setResult(Result.FAILURE);
                     }
 
-                    logger.println("Source is empty for given Technology Stack and Language Level.");
-                    build.setResult(Result.FAILURE);
-                    return;
+                    logger.println("Scan Central Path : " + scanCentralPath);
+                    Path scPackPath = packageScanCentral(workspaceModified, scanCentralPath, workspace, model, logger, build);
+                    logger.println("Packaged File Output Path : " + scPackPath);
+
+                    if (scPackPath != null) {
+                        payload = new File(scPackPath.toString());
+
+                        if (!payload.exists()) {
+                            build.setResult(Result.FAILURE);
+                            return;
+                        }
+                    } else {
+                        logger.println("Scan Central package output not found.");
+                        build.setResult(Result.FAILURE);
+                        return;
+                    }
                 }
 
                 model.setPayload(payload);
-
                 String notes = String.format("[%d] %s - Assessment submitted from Jenkins FoD Plugin",
                         build.getNumber(),
                         build.getDisplayName());
 
-                StartScanResponse scanResponse = staticScanController.startStaticScan(releaseId, staticScanSetup, model, notes);
+                StartScanResponse scanResponse = staticScanController.startStaticScan(releaseId, model, notes);
                 boolean deleted = payload.delete();
-
                 boolean isWarningSettingEnabled = model.getInProgressBuildResultType().equalsIgnoreCase(InProgressBuildResultType.WarnBuild.getValue());
+
                 /**
                  * If(able to contact api) {
                  *      if(Scan is allowed to start && the uploaded file is deleted) {
@@ -355,11 +551,11 @@ public class SharedUploadBuildStep {
                  * }
                  */
                 if (scanResponse.isSuccessful()) {
-                    if(scanResponse.isScanUploadAccepted()) {
+                    if (scanResponse.isScanUploadAccepted()) {
                         logger.println("Scan Uploaded Successfully.");
                         setScanId(scanResponse.getScanId());
                         build.setResult(Result.SUCCESS);
-                        if(!deleted) {
+                        if (!deleted) {
                             logger.println("Unable to delete temporary zip file. Please manually delete file at location: " + payload.getAbsolutePath());
                         }
                     } else if (isWarningSettingEnabled) {
@@ -397,15 +593,17 @@ public class SharedUploadBuildStep {
 
     public AuthenticationModel getAuthModel() {
         AuthenticationModel displayModel = new AuthenticationModel(authModel.getOverrideGlobalConfig(),
-                                                                   authModel.getUsername(),
-                                                                   authModel.getPersonalAccessToken(),
-                                                                   authModel.getTenantId() );
-       
+                authModel.getUsername(),
+                authModel.getPersonalAccessToken(),
+                authModel.getTenantId());
+
         return displayModel;
     }
 
-    public JobModel setModel(JobModel newModel) { return model = newModel; }
-    
+    public JobModel setModel(JobModel newModel) {
+        return model = newModel;
+    }
+
     public AuthenticationModel setAuthModel(AuthenticationModel newAuthModel) {
         return authModel = newAuthModel;
     }
@@ -420,5 +618,222 @@ public class SharedUploadBuildStep {
 
     public int setScanId(int newScanId) {
         return scanId = newScanId;
+    }
+
+    private Path packageScanCentral(FilePath srcLocation, FilePath scanCentralLocation, FilePath outputLocation, JobModel job, PrintStream logger, Run<?, ?> build) {
+        BufferedReader stdInputVersion = null, stdInput = null;
+        String scexec = SystemUtils.IS_OS_WINDOWS ? "scancentral.bat" : "scancentral";
+
+        try {
+            //version check
+            logger.println("Checking ScanCentralVersion");
+            String scanCentralbatLocation = Paths.get(String.valueOf(scanCentralLocation)).resolve(scexec).toString();
+            ArrayList scanCentralVersionCommandList = new ArrayList<>();
+            scanCentralVersionCommandList.add(scanCentralbatLocation);
+            scanCentralVersionCommandList.add("--version");
+            Process pVersion = runProcessBuilder(scanCentralVersionCommandList, scanCentralLocation);
+            stdInputVersion = new BufferedReader(new InputStreamReader(
+                    pVersion.getInputStream()));
+            String versionLine = null;
+            String scanCentralVersion = null;
+            Boolean isValidVersion = false;
+
+            while ((versionLine = stdInputVersion.readLine()) != null) {
+                logger.println(versionLine);
+                if (versionLine.contains("version")) {
+
+                    Pattern versionPattern = Pattern.compile("(?<=version:  ).*");
+                    Matcher m = versionPattern.matcher(versionLine);
+
+                    if (m.find()) {
+                        scanCentralVersion = m.group().trim();
+
+                        ComparableVersion minScanCentralVersion = new ComparableVersion("20.2.0.0019");
+                        ComparableVersion userScanCentralVersion = new ComparableVersion(scanCentralVersion);
+
+                        if (userScanCentralVersion.compareTo(minScanCentralVersion) < 0) {
+                            logger.println("The supplied scan central version is outdated . Please upgrade to higher version and try again !!");
+                            build.setResult(Result.FAILURE);
+                            return null;
+                        }
+                        break;
+                    }
+                }
+            }
+            if (versionLine.contains("version")) {
+                Path outputZipFolderPath = Paths.get(String.valueOf(outputLocation)).resolve("output.zip");
+                FodEnums.SelectedScanCentralBuildType buildType = FodEnums.SelectedScanCentralBuildType.valueOf(model.getSelectedScanCentralBuildType());
+                if (buildType == FodEnums.SelectedScanCentralBuildType.Gradle) {
+                    logger.println("Giving permission to gradlew");
+                    int permissionsExitCode = givePermissionsToGradle(srcLocation, logger);
+                    logger.println("Finished Giving Permissions : " + permissionsExitCode);
+                    if (permissionsExitCode != 0) {
+                        logger.println("Errors giving permissions to gradle : " + permissionsExitCode);
+                        build.setResult(Result.FAILURE);
+                    }
+                }
+                ArrayList scanCentralPackageCommandList = new ArrayList<>();
+                scanCentralPackageCommandList.add(scanCentralbatLocation);
+                scanCentralPackageCommandList.add("package");
+                scanCentralPackageCommandList.add("--bt");
+
+                switch (buildType) {
+                    case Gradle:
+                        scanCentralPackageCommandList.add("gradle");
+                        if (model.getScanCentralSkipBuild()) scanCentralPackageCommandList.add("--skipBuild");
+                        if (!Utils.isNullOrEmpty(model.getScanCentralBuildCommand())) {
+                            scanCentralPackageCommandList.add("--build-command");
+                            scanCentralPackageCommandList.add(model.getScanCentralBuildCommand());
+                        }
+                        if (!Utils.isNullOrEmpty(model.getScanCentralBuildFile())) {
+                            scanCentralPackageCommandList.add("--build-file");
+                            scanCentralPackageCommandList.add("\"" + model.getScanCentralBuildFile() + "\"");
+                        }
+                        break;
+                    case Maven:
+                        scanCentralPackageCommandList.add("mvn");
+                        if (model.getScanCentralSkipBuild()) scanCentralPackageCommandList.add("--skipBuild");
+                        if (!Utils.isNullOrEmpty(model.getScanCentralBuildCommand())) {
+                            scanCentralPackageCommandList.add("--build-command");
+                            scanCentralPackageCommandList.add(model.getScanCentralBuildCommand());
+                        }
+                        if (!Utils.isNullOrEmpty(model.getScanCentralBuildFile())) {
+                            scanCentralPackageCommandList.add("--build-file");
+                            scanCentralPackageCommandList.add("\"" + model.getScanCentralBuildFile() + "\"");
+                        }
+                        break;
+                    case MSBuild:
+                        scanCentralPackageCommandList.add("msbuild");
+                        if (!Utils.isNullOrEmpty(model.getScanCentralBuildCommand())) {
+                            scanCentralPackageCommandList.add("--build-command");
+                            scanCentralPackageCommandList.add(transformMsBuildCommand(model.getScanCentralBuildCommand()));
+                        }
+                        if (!Utils.isNullOrEmpty(model.getScanCentralBuildFile())) {
+                            scanCentralPackageCommandList.add("--build-file");
+                            scanCentralPackageCommandList.add("\"" + model.getScanCentralBuildFile() + "\"");
+                        } else {
+                            logger.println("Build File is a required field for msbuild build type. Please fill in the .sln file name in the current source folder ");
+                            build.setResult(Result.FAILURE);
+                        }
+                        break;
+                    case Python:
+                        scanCentralPackageCommandList.add("none");
+                        if (!Utils.isNullOrEmpty(model.getScanCentralVirtualEnv())) {
+                            scanCentralPackageCommandList.add("--python-virtual-env");
+                            scanCentralPackageCommandList.add(model.getScanCentralVirtualEnv());
+                        }
+                        ;
+                        if (!Utils.isNullOrEmpty(model.getScanCentralRequirementFile())) {
+                            scanCentralPackageCommandList.add("--python-requirements");
+                            scanCentralPackageCommandList.add(model.getScanCentralRequirementFile());
+                        }
+                        ;
+                        if (!Utils.isNullOrEmpty(model.getScanCentralBuildToolVersion())) {
+                            scanCentralPackageCommandList.add("--python-version");
+                            scanCentralPackageCommandList.add(model.getScanCentralBuildToolVersion());
+                        }
+                        ;
+                        break;
+                    case PHP:
+                        scanCentralPackageCommandList.add("none");
+                        if (!Utils.isNullOrEmpty(model.getScanCentralBuildToolVersion())) {
+                            scanCentralPackageCommandList.add("--php-version");
+                            scanCentralPackageCommandList.add(model.getScanCentralBuildToolVersion());
+                        }
+                        ;
+                        break;
+                }
+                scanCentralPackageCommandList.add("--o");
+                scanCentralPackageCommandList.add("\"" + outputZipFolderPath.toString() + "\"");
+
+                logger.println("Packaging ScanCentral\n" + String.join(" ", scanCentralPackageCommandList));
+
+                Process scanCentralProcess = runProcessBuilder(scanCentralPackageCommandList, srcLocation);
+                stdInput = new BufferedReader(new InputStreamReader(scanCentralProcess.getInputStream()));
+                String s = null;
+                while ((s = stdInput.readLine()) != null) {
+                    logger.println(s);
+                }
+                int exitCode = scanCentralProcess.waitFor();
+                if (exitCode != 0) {
+                    logger.println("Errors executing Scan Central. Exiting with errorcode : " + exitCode);
+                    build.setResult(Result.FAILURE);
+                } else {
+                    return outputZipFolderPath;
+                }
+            } else {
+                build.setResult(Result.FAILURE);
+                logger.println("ScanCentral not found or invalid version");
+            }
+            return null;
+        } catch (IOException | InterruptedException e) {
+            logger.println(String.format("Failed executing scan central : ", e));
+        } finally {
+            try {
+                if (stdInputVersion != null) {
+                    stdInputVersion.close();
+                }
+                if (stdInput != null) {
+                    stdInput.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    private int givePermissionsToGradle(FilePath srcLocation, PrintStream logger) {
+        if (!SystemUtils.IS_OS_WINDOWS) {
+            BufferedReader stdInput = null;
+            ArrayList linuxPermissionsList = new ArrayList<>();
+
+            linuxPermissionsList.add("chmod");
+            linuxPermissionsList.add("u+x");
+            linuxPermissionsList.add("gradlew");
+
+            try {
+                if (linuxPermissionsList.size() > 0) {
+                    Process gradlePermissionsProcess = runProcessBuilder(linuxPermissionsList, srcLocation);
+                    stdInput = new BufferedReader(new InputStreamReader(gradlePermissionsProcess.getInputStream()));
+                    String s = null;
+                    while ((s = stdInput.readLine()) != null) {
+                        logger.println(s);
+                    }
+                    return gradlePermissionsProcess.waitFor();
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    private String transformMsBuildCommand(String cmd) {
+        if (!Utils.isNullOrEmpty(cmd)) {
+            String[] arrOfCmds = cmd.split(" ");
+            StringBuilder transformedCommands = new StringBuilder();
+            for (String command : arrOfCmds) {
+                if (command.charAt(0) == '-') {
+                    command = '/' + command.substring(1);
+                }
+                transformedCommands.append(command).append(" ");
+            }
+            return transformedCommands.substring(0, transformedCommands.length() - 1);
+        }
+        return null;
+    }
+
+    private Process runProcessBuilder(ArrayList cmdList, FilePath directoryLocation) throws IOException {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(cmdList);
+            pb.directory(new File(String.valueOf(directoryLocation)));
+            Process p = pb.start();
+            System.out.println(pb.redirectErrorStream());
+            pb.redirectErrorStream(true);
+            return p;
+        } catch (IOException e) {
+            throw e;
+        }
     }
 }

@@ -176,7 +176,7 @@ public class FortifyPollResults extends FortifyStep {
             commonBuildStep.perform(build, workspace, launcher, listener);
         }
     }
-
+    
     @Extension
     public static class DescriptorImpl extends StepDescriptor {
         @Override

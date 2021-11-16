@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import org.jenkinsci.plugins.fodupload.Utils;
+
 public class AuthenticationModel {
     private boolean overrideGlobalConfig;
     private String username;
@@ -43,5 +45,8 @@ public class AuthenticationModel {
     public void setTenantId(String newTenantId) {
        tenantId = newTenantId;
     }
-    
+
+    public static AuthenticationModel fromPersonalAccessToken(String username, String accessTokenKey, String tenantId) {
+        return new AuthenticationModel(true, username, Utils.retrieveSecretDecryptedValue(accessTokenKey), tenantId);
+    }
 }

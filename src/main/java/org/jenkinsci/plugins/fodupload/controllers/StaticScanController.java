@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
-import com.fortify.fod.parser.BsiToken;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -9,17 +8,17 @@ import okhttp3.*;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.Utils;
-import org.jenkinsci.plugins.fodupload.models.JobModel;
-import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
-import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
-import org.jenkinsci.plugins.fodupload.models.response.StartScanResponse;
-import org.jenkinsci.plugins.fodupload.models.response.StaticScanSetupResponse;
+import org.jenkinsci.plugins.fodupload.models.*;
+import org.jenkinsci.plugins.fodupload.models.response.*;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Properties;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class StaticScanController extends ControllerBase {
 
@@ -41,15 +40,14 @@ public class StaticScanController extends ControllerBase {
 
     /**
      * Begin a static scan on FoD
+     *
      * @param releaseId     id of release being targeted
-     * @param staticScanSettings config information for scan
      * @param uploadRequest zip file to upload
      * @param notes         notes
      * @return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
-    public StartScanResponse startStaticScan(final Integer releaseId, final StaticScanSetupResponse staticScanSettings, final JobModel uploadRequest, final String notes) {
-
+    public StartScanResponse startStaticScan(Integer releaseId, final JobModel uploadRequest, final String notes) {
         PostStartScanResponse scanStartedResponse = null;
         StartScanResponse scanResults = new StartScanResponse();
 
@@ -61,54 +59,61 @@ public class StaticScanController extends ControllerBase {
             int byteCount;
             long offset = 0;
 
-            if (apiConnection.getToken() == null)
-                apiConnection.authenticate();
+            if (apiConnection.getToken() == null) apiConnection.authenticate();
 
-            logger.println("Getting Assessment");
+            println("Getting Assessment");
 
-            BsiToken token = null;
-            if (releaseId == 0) {
-                token = uploadRequest.getBsiToken();
-            }
-
-            String projectVersion;
+            String projectVersion = "Not Found";
             try (InputStream inputStream = this.getClass().getResourceAsStream("/application.properties")) {
                 Properties props = new Properties();
                 props.load(inputStream);
                 projectVersion = props.getProperty("application.version", "Not Found");
             }
 
-            HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
-                    .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", releaseId != 0 ? releaseId : token.getProjectVersionId()))
-                    .addQueryParameter("technologyStack", releaseId == 0 ? token.getTechnologyType() : staticScanSettings.getTechnologyStack())
-                    .addQueryParameter("entitlementPreferenceType", uploadRequest.getEntitlementPreference())
+            HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder();
+
+            if (Utils.isNullOrEmpty(uploadRequest.getSelectedReleaseType())) {
+                if (uploadRequest.getIsPipeline()) {
+                    if(!Utils.isNullOrEmpty(uploadRequest.getBsiTokenOriginal()) && releaseId <= 0) {
+                        buildBsiRequest(builder, uploadRequest);
+                    }
+                    else if ((releaseId == null || releaseId < 1)) releaseId = upsertApplicationAndRelease(uploadRequest);
+                    if(releaseId > 0 ) buildPipelineRequest(builder, releaseId, uploadRequest);
+                } else throw new IllegalArgumentException("Invalid job model");
+            } else {
+                FodEnums.SelectedReleaseType type = FodEnums.SelectedReleaseType.valueOf(uploadRequest.getSelectedReleaseType());
+
+                switch (type) {
+                    case UseReleaseId:
+                    case UseAppAndReleaseName:
+                        buildReleaseSettingsRequest(builder, releaseId, uploadRequest);
+                        break;
+                    case UseBsiToken:
+                        buildBsiRequest(builder, uploadRequest);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Invalid job model");
+                }
+            }
+
+            builder.addQueryParameter("inProgressScanActionType", uploadRequest.getInProgressScanActionType())
                     .addQueryParameter("purchaseEntitlement", Boolean.toString(uploadRequest.isPurchaseEntitlements()))
-                    .addQueryParameter("remdiationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType())
                     .addQueryParameter("inProgressScanActionType", uploadRequest.getInProgressScanActionType())
                     .addQueryParameter("scanMethodType", "CICD")
                     .addQueryParameter("scanTool", "Jenkins")
-                    .addQueryParameter("scanToolVersion", projectVersion != null ? projectVersion : "NotFound");
-
-            if (releaseId == 0) {
-                builder = builder.addQueryParameter("bsiToken", uploadRequest.getBsiTokenOriginal());
-            }
+                    .addQueryParameter("scanToolVersion", projectVersion);
 
             if (!Utils.isNullOrEmpty(notes)) {
                 String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);
-                builder = builder.addQueryParameter("notes", truncatedNotes);
+                builder.addQueryParameter("notes", truncatedNotes);
             }
-
-            if ((releaseId == 0 ? token.getTechnologyVersion() : staticScanSettings.getLanguageLevel()) != null) {
-                builder = builder.addQueryParameter("languageLevel", releaseId == 0 ? token.getTechnologyVersion() : staticScanSettings.getLanguageLevel());
-            }
-
             // TODO: Come back and fix the request to set fragNo and offset query parameters
             String fragUrl = builder.build().toString();
 
             // Loop through chunks
 
-            logger.println("TOTAL FILE SIZE = " + uploadFile.length());
-            logger.println("CHUNK_SIZE = " + CHUNK_SIZE);
+            println("TOTAL FILE SIZE = " + uploadFile.length());
+            println("CHUNK_SIZE = " + CHUNK_SIZE);
 
             while ((byteCount = fs.read(readByteArray)) != -1) {
 
@@ -130,21 +135,24 @@ public class StaticScanController extends ControllerBase {
                         .post(RequestBody.create(byteArray, sendByteArray))
                         .build();
 
+                println("Uploading fragment " + fragmentNumber);
                 // Get the response
                 Response response = apiConnection.getClient().newCall(request).execute();
 
                 if (response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
+                    String raw = apiConnection.getRawBody(response);
+
+                    if (Utils.isNullOrEmpty(raw)) println("Uploading fragment failed, reauthenticating");
+                    else println("Uploading fragment failed, reauthenticating \n" + raw);
                     // Re-authenticate
                     apiConnection.authenticate();
-
-                    // if you had to reauthenticate here, would the loop and request not need to be resubmitted?
-                    // possible continue?
+                    continue;
                 }
 
                 offset += byteCount;
 
                 if (fragmentNumber % 5 == 0) {
-                    logger.println("Upload Status - Fragment No: " + fragmentNumber + ", Bytes sent: " + offset
+                    println("Upload Status - Fragment No: " + fragmentNumber + ", Bytes sent: " + offset
                             + " (Response: " + response.code() + ")");
                 }
 
@@ -156,35 +164,37 @@ public class StaticScanController extends ControllerBase {
                     if (response.code() == 200) {
 
                         scanStartedResponse = gson.fromJson(responseJsonStr, PostStartScanResponse.class);
-                        logger.println("Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
+                        println("Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
                         scanResults.uploadSuccessfulScanStarting(scanStartedResponse.getScanId());
                         return scanResults;
 
                     } else if (!response.isSuccessful()) { // There was an error along the lines of 'another scan in progress' or something
-
-                        logger.println("An error occurred during the upload.");
+                        println("An error occurred during the upload.");
                         GenericErrorResponse errors = gson.fromJson(responseJsonStr, GenericErrorResponse.class);
+
                         if (errors != null) {
-                            if(errors.toString().contains("Can not start scan another scan is in progress")) {
+                            if (errors.toString().contains("Can not start scan another scan is in progress")) {
                                 scanResults.uploadSuccessfulScanNotStarted();
-                            }
-                            else {
-                                logger.println("Package upload failed for the following reasons: ");
-                                logger.println(errors.toString());
+                            } else {
+                                println("Package upload failed for the following reasons: ");
+                                println(errors.toString());
                                 scanResults.uploadNotSuccessful();
                             }
+                        } else {
+                            if (!Utils.isNullOrEmpty(responseJsonStr)) println("Raw response\n" + responseJsonStr);
+                            else println("No response body from api");
+                            scanResults.uploadNotSuccessful();
                         }
-                            
-                        
+
                         return scanResults; // if there is an error, get out of loop and mark build unstable
                     }
                 }
                 response.body().close();
 
             } // end while
-
+            println("Payload upload complete");
         } catch (Exception e) {
-            e.printStackTrace(logger);
+            printStackTrace(e);
             scanResults.uploadNotSuccessful();
             return scanResults;
         }
@@ -193,7 +203,177 @@ public class StaticScanController extends ControllerBase {
         return scanResults;
     }
 
-    public StaticScanSetupResponse getStaticScanSettings(final Integer releaseId) throws IOException {
+    private void buildBsiRequest(final HttpUrl.Builder builder, final JobModel uploadRequest) {
+        builder
+                .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", uploadRequest.getBsiToken().getReleaseId()))
+                .addQueryParameter("entitlementPreferenceType", uploadRequest.getEntitlementPreference())
+                .addQueryParameter("remdiationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType())
+                .addQueryParameter("bsiToken", uploadRequest.getBsiTokenOriginal());
+    }
+
+    private void buildReleaseSettingsRequest(final HttpUrl.Builder builder, final Integer releaseId, final JobModel uploadRequest) {
+        builder
+                .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced-with-defaults", releaseId))
+                .addQueryParameter("remediationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType());
+    }
+
+    private void buildPipelineRequest(final HttpUrl.Builder builder, final Integer releaseId, final JobModel uploadRequest) {
+        builder.addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced-with-defaults", releaseId));
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getAssessmentType())) builder.addQueryParameter("assessmentTypeId", uploadRequest.getAssessmentType());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getEntitlementId())) builder.addQueryParameter("entitlementId", uploadRequest.getEntitlementId());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getFrequencyId()))
+            builder.addQueryParameter("entitlementFrequencyType", uploadRequest.getFrequencyId());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getOpenSourceScan())) builder.addQueryParameter("doSonatypeScan", Utils.isNullOrEmpty(uploadRequest.getOpenSourceScan())?"false":uploadRequest.getOpenSourceScan());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getAuditPreference()))
+            builder.addQueryParameter("auditPreferenceType", uploadRequest.getAuditPreference());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getTechnologyStack()))
+            builder.addQueryParameter("technologyTypeId", uploadRequest.getTechnologyStack());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getLanguageLevel()))
+            builder.addQueryParameter("technologyVersionTypeId", uploadRequest.getLanguageLevel());
+
+        if (!Utils.isNullOrEmpty(uploadRequest.getRemediationScanPreferenceType()))
+            builder.addQueryParameter("remediationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType());
+    }
+
+    private Integer upsertApplicationAndRelease(final JobModel job) throws Exception {
+        ReleaseController relCntr = new ReleaseController(apiConnection, logger, correlationId);
+        Integer releaseId = relCntr.getReleaseIdByName(job.getApplicationName(), job.getReleaseName(), job.getIsMicroservice(), job.getMicroserviceName());
+
+        if (releaseId != null) {
+            println("Existing release found matching " + job.getApplicationName() + " " + job.getReleaseName());
+            return releaseId;
+        }
+
+        println("Provisioning application and release");
+
+        PostReleaseWithUpsertApplicationModel model = new PostReleaseWithUpsertApplicationModel();
+
+        model.setApplicationName(job.getApplicationName());
+        model.setApplicationType(job.getApplicationType());
+        model.setReleaseName(job.getReleaseName());
+        model.setOwnerId(job.getOwner());
+        model.setBusinessCriticalityType(job.getBusinessCriticality());
+        model.setSdlcStatusType(job.getSdlcStatus());
+
+        if (job.getIsMicroservice()) {
+            model.setHasMicroservices(job.getIsMicroservice());
+            model.setReleaseMicroserviceName(job.getMicroserviceName());
+            ArrayList<String> microserviceArray = new ArrayList<>();
+            microserviceArray.add(job.getMicroserviceName());
+            model.setMicroservices(microserviceArray);
+        }
+
+        if (!Utils.isNullOrEmpty(job.getAttributes())) {
+            String[] attrSpl = job.getAttributes().split(";");
+            Map<String, String> attrs = new HashMap<>();
+
+            for (String a : attrSpl) {
+                String[] kvSpl = a.split(":");
+
+                if (kvSpl.length == 2 && !attrs.containsKey(kvSpl[0])) attrs.put(kvSpl[0], kvSpl[1]);
+                else throw new Exception("Failure parsing application attributes");
+            }
+
+            for (FodAttributeMapItem a : MapAttributesToFod(attrs)) {
+                model.getAttributes().add(new ApplicationAttributeModel(a.getDefinition().getId(), a.getValue()));
+            }
+        }
+
+        HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+                .addPathSegments("/api/v3/releases/releaseWithUpsertApplication");
+
+        String requestContent = Json.getInstance().toJson(model);
+        Request request = new Request.Builder()
+                .url(builder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .post(RequestBody.create(MediaType.parse("application/json"), requestContent))
+                .build();
+
+        println("Submitting application and release model");
+
+        Response response = apiConnection.request(request);
+
+        if (response.code() < 300) {
+            PostReleaseWithUpsertApplicationResponseModel result = apiConnection.parseResponse(response, new TypeToken<PostReleaseWithUpsertApplicationResponseModel>() {
+            }.getType());
+
+            if (result.getSuccess()) {
+                println("Provisioning successful. Release Id: " + result.getReleaseId());
+                return result.getReleaseId();
+            } else throw new Exception("Failed to create application and/or release: \n" + String.join("\n", result.getErrors()));
+        } else {
+            throw new Exception("Failed to create application and/or release: \n" + apiConnection.getRawBody(response));
+        }
+    }
+
+    public List<FodAttributeMapItem> MapAttributesToFod(Map<String, String> attributes) throws Exception {
+        // Todo: this should be injected
+        AttributesController attrCntr = new AttributesController(apiConnection, logger, correlationId);
+        List<AttributeDefinition> fodAttr = attrCntr.getAttributeDefinitions();
+        List<FodAttributeMapItem> result = new ArrayList<>();
+        List<String> invalidPickListAttributes  = new ArrayList<>();
+
+        for (Map.Entry<String, String> a : attributes.entrySet()) {
+            for (AttributeDefinition fa : fodAttr) {
+                if (a.getKey().equals(fa.getName())) {
+                    if (fa.getAttributeDataType().equalsIgnoreCase("Picklist")) {
+                        ArrayList<String> pickListAttrValueStrings = new ArrayList<>();
+                        for (AttributeDefinition.PicklistValue pv : fa.getPicklistValues()) {
+                            pickListAttrValueStrings.add(pv.getName());
+                        }
+                        if(pickListAttrValueStrings.contains(a.getValue()))
+                            result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
+                        else
+                            invalidPickListAttributes.add(a.getKey());
+                        break;
+                    }
+                    else if(fa.getAttributeDataType().equalsIgnoreCase("Boolean")){
+                        Pattern queryLangPattern = Pattern.compile("true|false", Pattern.CASE_INSENSITIVE);
+                        Matcher matcher = queryLangPattern.matcher(a.getValue());
+                        if(matcher.matches())
+                            result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
+                        else
+                            invalidPickListAttributes.add(a.getKey()+" : true/false");
+                        break;
+                    }
+                    else if(fa.getAttributeDataType().equalsIgnoreCase("User")){
+                        ArrayList<String> userAttrValues = new ArrayList<>();
+                        ArrayList<String> userAttrValueIdNames = new ArrayList<>();
+                        for (AttributeDefinition.PicklistValue pv : fa.getPicklistValues()) {
+                            userAttrValues.add(pv.getName());
+                            userAttrValues.add(String.valueOf(pv.getId()));
+                            userAttrValueIdNames.add(String.valueOf(pv.getId())+"-"+pv.getName());
+                        }
+                        if(userAttrValues.contains(a.getValue()))
+                            result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
+                        else
+                            invalidPickListAttributes.add(a.getKey()+" : "+userAttrValueIdNames.stream().collect(Collectors.joining(",")));
+                        break;
+                    }
+                    result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
+                    break;
+                }
+            }
+        }
+        if(invalidPickListAttributes.size() > 0){
+            throw new Exception(String.format("Invalid PickList Attributes/Values for the following Picklist Attribute/s - %s",invalidPickListAttributes.stream().collect(Collectors.joining(" & "))));
+        }
+        return result;
+    }
+
+    /**
+     * @deprecated Use the {@link StaticScanController#getStaticScanSettings} method instead
+     */
+    @Deprecated
+    public GetStaticScanSetupResponse getStaticScanSettingsOld(final Integer releaseId) throws IOException {
         if (apiConnection.getToken() == null)
             apiConnection.authenticate();
 
@@ -219,9 +399,45 @@ public class StaticScanController extends ControllerBase {
         response.body().close();
 
         Gson gson = new Gson();
-        Type t = new TypeToken<StaticScanSetupResponse>() {}.getType();
-        StaticScanSetupResponse result = gson.fromJson(content, t);
+        Type t = new TypeToken<GetStaticScanSetupResponse>() {
+        }.getType();
+        GetStaticScanSetupResponse result = gson.fromJson(content, t);
 
         return result;
+    }
+
+    public GetStaticScanSetupResponse getStaticScanSettings(final Integer releaseId) throws IOException {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments(String.format("/api/v3/releases/%d/static-scans/scan-setup", releaseId));
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .get()
+                .build();
+
+        return apiConnection.requestTyped(request, new TypeToken<GetStaticScanSetupResponse>() {
+        }.getType());
+    }
+
+    public PutStaticScanSetupResponse putStaticScanSettings(final Integer releaseId, PutStaticScanSetupModel settings) throws IOException {
+        String requestContent = Json.getInstance().toJson(settings);
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/releases/" + releaseId + "/static-scans/scan-setup");
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .put(RequestBody.create(MediaType.parse("application/json"), requestContent))
+                .build();
+        Response response = apiConnection.request(request);
+
+        if (response.code() < 300) {
+            return apiConnection.parseResponse(response, new TypeToken<PutStaticScanSetupResponse>() {
+            }.getType());
+        } else {
+            return new PutStaticScanSetupResponse(false, null, Utils.unexpectedServerResponseErrors(), null);
+        }
     }
 }

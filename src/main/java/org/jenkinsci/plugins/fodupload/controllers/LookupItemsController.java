@@ -36,32 +36,20 @@ public class LookupItemsController extends ControllerBase {
      * @throws java.io.IOException in some circumstances
      */
     public List<LookupItemsModel> getLookupItems(FodEnums.APILookupItemTypes type) throws IOException {
-
-        if (apiConnection.getToken() == null)
-            apiConnection.authenticate();
-
-        String url = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+        String url = apiConnection.urlBuilder()
                 .addPathSegments("/api/v3/lookup-items")
                 .addQueryParameter("type", type.toString())
                 .build().toString();
 
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        Response response = apiConnection.getClient().newCall(request).execute();
 
-        // Read the results and close the response
-        String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
+        GenericListResponse<LookupItemsModel> response = apiConnection.requestTyped(request, new TypeToken<GenericListResponse<LookupItemsModel>>(){}.getType());
 
-        Gson gson = new Gson();
-        Type t = new TypeToken<GenericListResponse<LookupItemsModel>>() {
-        }.getType();
-        GenericListResponse<LookupItemsModel> results = gson.fromJson(content, t);
-        return results.getItems();
+        return response.getItems();
     }
 }
