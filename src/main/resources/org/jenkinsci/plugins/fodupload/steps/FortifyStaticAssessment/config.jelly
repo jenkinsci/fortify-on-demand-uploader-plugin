@@ -327,7 +327,7 @@
         </f:entry>
 
         <f:entry title="Open Source Component Analysis by Sonatype">
-            <div id="sonatypeEnabledForm" class="fodp-field fodp-checkbox spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+            <div id="sonatypeEnabledForm" class="fodp-field fodp-checkbox spinner-container fodp-row-relid-ovr fodp-row-autoProv fodp-row-sonatype">
                 <input type="checkbox" value="false" id="sonatypeEnabled"/>
             </div>
         </f:entry>

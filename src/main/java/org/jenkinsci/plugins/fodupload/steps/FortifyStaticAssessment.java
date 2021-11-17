@@ -579,6 +579,11 @@ public class FortifyStaticAssessment extends FortifyStep {
         }
     }
 
+    private boolean isSonatypeScanNotAllowedForTechStack(int techStack){
+        List<Integer> techStacksSupportSonatypeScans = Arrays.asList(2,3,5,6,11,14,18,21);
+        return techStacksSupportSonatypeScans.contains(techStack);
+    }
+
     private List<String> ValidateModel() {
         List<String> errors = new ArrayList<>();
 
@@ -602,6 +607,12 @@ public class FortifyStaticAssessment extends FortifyStep {
 
                 if (!aperrors.isEmpty()) errors.add("Missing or invalid fields for auto provisioning" + String.join(", ", aperrors));
             } else errors.add("releaseId, bsiToken, or auto provision must be provided");
+        }
+
+        if(openSourceScan.equalsIgnoreCase("true") && !Utils.isNullOrEmpty(technologyStack)) {
+            if(isSonatypeScanNotAllowedForTechStack(Integer.parseInt(technologyStack)) ){
+                errors.add("Open Source scans are not allowed for the selected Technology Type.");
+            }
         }
 
         // Any have value and any don't have value

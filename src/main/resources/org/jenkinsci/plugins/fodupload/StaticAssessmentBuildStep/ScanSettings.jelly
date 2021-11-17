@@ -129,7 +129,7 @@
                 </f:entry>
 
                 <f:entry title="Open Source Component Analysis by Sonatype">
-                    <div id="sonatypeForm" class="fode-field fode-checkbox spinner-container">
+                    <div id="sonatypeForm" class="fode-field fode-checkbox fode-row-sonatype spinner-container">
                         <input type="checkbox" value="false" name="sonatypeEnabled" id="cbSonatypeEnabled"/>
                     </div>
                 </f:entry>

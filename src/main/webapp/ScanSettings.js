@@ -8,6 +8,7 @@ class ScanSettings {
         this.techStacks = {};
         this.techStacksSorted = [];
         this.isFirstLoadEntitlementSettingsCall = false;
+        this.techIdsWithOutOpenSourceSupport = ["2","3","5","6","11","14","18","21"];
         subscribeToEvent('releaseChanged', p => this.loadEntitlementSettings(p.detail));
     }
 
@@ -289,6 +290,12 @@ class ScanSettings {
 
                 if (setllv) jq('#languageLevelSelectList').val(llv);
             } else llr.hide();
+
+          if(this.techIdsWithOutOpenSourceSupport.includes(ts.value)){
+            jq('.fode-row-sonatype').hide();
+          }else {
+            jq('.fode-row-sonatype').show();
+          }
         }
 
         this.onLangLevelChanged();

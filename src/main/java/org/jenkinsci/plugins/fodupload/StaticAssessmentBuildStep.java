@@ -134,7 +134,9 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             else if (isTechStackWithLanguageLevel(ts) && Utils.tryParseInt(userSelectedLanguageLevel) <= 0) {
                 invalidFields.add("userSelectedLanguageLevel");
             }
-
+            if(sonatypeEnabled && isSonatypeScanNotAllowedForTechStack(ts)){
+               sonatypeEnabled = false;
+            }
             if (Utils.tryParseInt(userSelectedAuditPreference) <= 0) invalidFields.add("userSelectedAuditPreference");
 
             if (invalidFields.size() == 0) {
@@ -187,6 +189,11 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
     private boolean isTechStackWithLanguageLevel(int techStack){
         return (techStack == 1 || techStack == 7 || techStack == 10) ? true : false;
+    }
+
+    private boolean isSonatypeScanNotAllowedForTechStack(int techStack){
+        List<Integer> techStacksSupportSonatypeScans = Arrays.asList(2,3,5,6,11,14,18,21);
+        return techStacksSupportSonatypeScans.contains(techStack);
     }
 
     private void saveReleaseSettings(FodApiConnection apiConnection, String releaseIdStr, boolean purchaseEntitlements, String assessmentTypeIdStr, String entitlementIdStr, String entitlementFrequencyTypeStr, String technologyStackIdStr, String languageLevelIdStr, boolean performOpenSourceAnalysis, String auditPreferenceTypeStr) throws IllegalArgumentException {

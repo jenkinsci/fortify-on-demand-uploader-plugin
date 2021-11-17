@@ -3,6 +3,7 @@ const fodpOverrideRowsSelector = '.fodp-row-relid-ovr';
 const fodpAutoProvRowsSelector = '.fodp-row-autoProv';
 const appAttributeKeyDelimiter = ';';
 const appAttributeKeyValueDelimiter = ':';
+const techIdsWithOutOpenSourceSupport = ["2","3","5","6","11","14","18","21"];
 
 class PipelineGenerator {
     constructor() {
@@ -322,6 +323,12 @@ class PipelineGenerator {
 
                 if (setllv) jq('#languageLevelSelect').val(llv);
             } else llr.hide();
+
+             if(techIdsWithOutOpenSourceSupport.includes(ts.value)){
+               jq('.fodp-row-sonatype').hide();
+             }else {
+               jq('.fodp-row-sonatype').show();
+             }
         }
 
         this.onLangLevelChanged();
@@ -600,7 +607,10 @@ class PipelineGenerator {
                 ss = '';
                 break;
         }
-
+        if(jq('#sonatypeEnabled').val() && jq('#technologyStackSelect').val() > 0 && techIdsWithOutOpenSourceSupport.includes(jq('#technologyStackSelect').val()) ){
+           jq('#sonatypeEnabled').prop('checked',false);
+           son = false;
+        }
         // Auth
         jq('#username').val(un);
         jq('#personalAccessToken').val(pat);
