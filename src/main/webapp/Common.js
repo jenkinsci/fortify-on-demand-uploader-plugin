@@ -28,6 +28,11 @@ const _scanCentralBuildTypes = {
     "Python": "Python"
 };
 
+const _auditPrefOption = {
+    automated: '<option value="2">Automated</option>',
+    manual: '<option value="1">Manual</option>'
+}
+
 function dispatchEvent(type, payload) {
     document.dispatchEvent(new CustomEvent(type, {detail: payload}));
 }
@@ -249,6 +254,8 @@ function partitionArray(arr, elementsPerPartition) {
 }
 
 function numberOrNull(str) {
+    if (typeof(str) === "number") return str;
+
     let res = Number(str);
 
     return Number.isInteger(res) ? res : null;

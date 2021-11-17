@@ -19,10 +19,7 @@ import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
-import org.jenkinsci.plugins.fodupload.controllers.AssessmentTypesController;
-import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
-import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
-import org.jenkinsci.plugins.fodupload.controllers.UsersController;
+import org.jenkinsci.plugins.fodupload.controllers.*;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.BsiToken;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
@@ -91,8 +88,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String scanCentralVirtualEnv,
                                      String scanCentralRequirementFile) throws IllegalArgumentException {
 
-        if (! selectedScanCentralBuildType.equalsIgnoreCase(FodEnums.SelectedScanCentralBuildType.None.toString()) && (Utils.isNullOrEmpty(srcLocation))){
-              throw new IllegalArgumentException("Source Location cannot be empty if Scan Central is chosen for packaging i.e if ScanCentralBuildType is other than None.");
+        if (!selectedScanCentralBuildType.equalsIgnoreCase(FodEnums.SelectedScanCentralBuildType.None.toString()) && (Utils.isNullOrEmpty(srcLocation))) {
+            throw new IllegalArgumentException("Source Location cannot be empty if Scan Central is chosen for packaging i.e if ScanCentralBuildType is other than None.");
         }
 
         if (Utils.isNullOrEmpty(selectedReleaseType)) {
@@ -187,7 +184,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         return ApiConnectionFactory.createApiConnection(authModel);
     }
 
-    private boolean isTechStackWithLanguageLevel(int techStack){
+    private boolean isTechStackWithLanguageLevel(int techStack) {
         return (techStack == 1 || techStack == 7 || techStack == 10) ? true : false;
     }
 
@@ -591,6 +588,20 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 AssessmentTypesController assessmentTypesController = new AssessmentTypesController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(assessmentTypesController.getStaticAssessmentTypeEntitlements(releaseId));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @JavaScriptMethod
+        public String retrieveAuditPreferences(Integer releaseId, Integer assessmentType, Integer frequencyType, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                ReleaseController releaseController = new ReleaseController(apiConnection, null, Utils.createCorrelationId());
+
+                return Utils.createResponseViewModel(releaseController.getAuditPreferences(releaseId, assessmentType, frequencyType));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;

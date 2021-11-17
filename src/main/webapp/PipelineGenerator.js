@@ -49,10 +49,9 @@ class PipelineGenerator {
         }
     }
 
-    onAssessmentChanged() {
+    async onAssessmentChanged(skipAuditPref) {
         let atval = jq('#assessmentTypeSelect').val();
         let entsel = jq('#entitlementSelect');
-        let apsel = jq('#auditPreferenceSelect');
         let at = this.assessments ? this.assessments[atval] : null;
 
         entsel.find('option,optgroup').remove();
@@ -65,17 +64,72 @@ class PipelineGenerator {
             }
         }
 
-        if (at && at.name === 'Static+ Assessment') apsel.prop('disabled', false);
-        else {
-            apsel.val('2');
-            apsel.prop('disabled', true);
-        }
-
-        this.onEntitlementChanged();
+        await this.onEntitlementChanged(skipAuditPref);
     }
 
-    onEntitlementChanged() {
+    async onEntitlementChanged(skipAuditPref) {
+        let val = jq('#entitlementSelect').val();
+        let {entitlementId, frequencyId} = parseEntitlementDropdownValue(val);
+
+        if (skipAuditPref !== true) await this.loadAuditPrefOptions(jq('#assessmentTypeSelect').val(), frequencyId);
         this.populateHiddenFields();
+    }
+
+    async loadAuditPrefOptions(assessmentType, frequencyId) {
+        let apSel = jq('#auditPreferenceSelect');
+        let curVal = apSel.val();
+        let apCont = jq('#auditPreferenceForm');
+        let setSpinner = apCont.hasClass('spinner') === false;
+
+        if (setSpinner) apCont.addClass('spinner');
+
+        apSel.find('option').remove();
+
+        assessmentType = numberOrNull(assessmentType);
+        frequencyId = numberOrNull(frequencyId);
+
+        if (!this.autoProvMode && this.releaseId && assessmentType && frequencyId) {
+            try {
+                let prefs = await this.api.getAuditPreferences(this.releaseId, assessmentType, frequencyId, getAuthInfo());
+
+                if (prefs.automated) apSel.append(_auditPrefOption.automated);
+                if (prefs.manual) apSel.append(_auditPrefOption.manual);
+            } catch (e) {
+                apSel.hide();
+                apCont.removeClass('spinner');
+                jq('#auditPreferenceForm > div').append('<div class="fode-error">Fatal error loading tenant data, please refresh</div>');
+                return;
+            }
+        } else if (this.autoProvMode) {
+            apSel.append(_auditPrefOption.automated);
+            if (!jq('#autoProvIsMicro').prop('checked')) apSel.append(_auditPrefOption.manual);
+        }
+
+        let optCnt = apSel.find('option').length;
+
+        if (optCnt < 1) {
+            apSel.append(_auditPrefOption.automated);
+            apSel.prop('disabled', true);
+
+            if (setSpinner) apCont.removeClass('spinner');
+        } else if (optCnt === 1) {
+            // For some reason selection wouldn't work without setTimeout
+            setTimeout(_ => {
+                apSel.find('option').first().prop('selected', true);
+                apSel.prop('disabled', true);
+
+                if (setSpinner) apCont.removeClass('spinner');
+            }, 50);
+        } else {
+            // For some reason selection wouldn't work without setTimeout
+            setTimeout(_ => {
+                if (curVal) apSel.val(curVal);
+                else apSel.find('option').first().prop('selected', true);
+                apSel.prop('disabled', false);
+
+                if (setSpinner) apCont.removeClass('spinner');
+            }, 50);
+        }
     }
 
     async loadReleaseEntitlementSettings() {
@@ -104,7 +158,7 @@ class PipelineGenerator {
 
         await Promise.all([ssp, entp]);
 
-        if (this.scanSettings && this.assessments) this.setAssessmentsAndSettings();
+        if (this.scanSettings && this.assessments) await this.setAssessmentsAndSettings();
         else {
             this.onAssessmentChanged();
             this.showMessage('Failed to retrieve scan settings from API', true);
@@ -140,7 +194,7 @@ class PipelineGenerator {
             this.releaseId = null;
         }
 
-        this.setAssessmentsAndSettings();
+        await this.setAssessmentsAndSettings();
 
         fields.removeClass('spinner');
 
@@ -148,7 +202,7 @@ class PipelineGenerator {
         else return fail();
     }
 
-    setAssessmentsAndSettings() {
+    async setAssessmentsAndSettings() {
         let assmt = null;
         let entl = null;
         let freq = null;
@@ -170,9 +224,9 @@ class PipelineGenerator {
         this.populateAssessmentsDropdown();
 
         jq('#assessmentTypeSelect').val(assmt);
-        this.onAssessmentChanged();
+        await this.onAssessmentChanged(true);
         jq('#entitlementSelect').val(freq && entl ? getEntitlementDropdownValue(entl, freq) : '');
-        this.onEntitlementChanged();
+        await this.onEntitlementChanged(false);
 
         let scval = this.getScanCentralBuildTypeSelected();
 

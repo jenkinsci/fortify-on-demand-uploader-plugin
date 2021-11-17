@@ -144,6 +144,18 @@ class Api {
         });
     }
 
+    getAuditPreferences(releaseId, assessmentType, frequencyType, customAuth) {
+        return new Promise((res, rej) => {
+            this.descriptor.retrieveAuditPreferences(releaseId, assessmentType, frequencyType, customAuth, async t => {
+                const responseJSON = JSON.parse(t.responseJSON);
+
+                if (responseJSON === null) return res(null);
+
+                return res(responseJSON);
+            });
+        });
+    }
+
     getAssessmentTypeEntitlementsForAutoProv(appName, relName, isMicro, microName, customAuth) {
         return new Promise((res, rej) => {
             this.descriptor.retrieveAssessmentTypeEntitlementsForAutoProv(appName, relName, isMicro, microName, customAuth, async t => {

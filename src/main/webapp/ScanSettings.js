@@ -9,6 +9,7 @@ class ScanSettings {
         this.techStacksSorted = [];
         this.isFirstLoadEntitlementSettingsCall = false;
         this.techIdsWithOutOpenSourceSupport = ["2","3","5","6","11","14","18","21"];
+        this.releaseId = null;
         subscribeToEvent('releaseChanged', p => this.loadEntitlementSettings(p.detail));
     }
 
@@ -40,10 +41,9 @@ class ScanSettings {
         }
     }
 
-    onAssessmentChanged() {
+    async onAssessmentChanged(skipAuditPref) {
         let atval = jq('#ddAssessmentType').val();
         let entsel = jq('#entitlementSelectList');
-        let apsel = jq('#auditPreferenceSelectList');
         let at = this.assessments[atval];
 
         entsel.find('option,optgroup').remove();
@@ -68,23 +68,62 @@ class ScanSettings {
             }
         }
 
-        if (at && at.name === 'Static+ Assessment') apsel.prop('disabled', false);
-        else {
-            apsel.val('2');
-            apsel.prop('disabled', true);
-        }
-
-        this.onEntitlementChanged();
+        await this.onEntitlementChanged(skipAuditPref);
         // ToDo: set to unselected if selected value doesn't exist
     }
 
-    onEntitlementChanged() {
+    async onEntitlementChanged(skipAuditPref) {
         let val = jq('#entitlementSelectList').val();
         let {entitlementId, frequencyId} = parseEntitlementDropdownValue(val);
 
         jq('#entitlementId').val(entitlementId);
         jq('#frequencyId').val(frequencyId);
         jq('#purchaseEntitlementsForm input').prop('checked', (entitlementId <= 0));
+        if (skipAuditPref !== true) await this.loadAuditPrefOptions(jq('#ddAssessmentType').val(), frequencyId);
+    }
+
+    async loadAuditPrefOptions(assessmentType, frequencyId) {
+        let apSel = jq('#auditPreferenceSelectList');
+        let curVal = apSel.val();
+        let apCont = jq('#auditPreferenceForm');
+        let setSpinner = apCont.hasClass('spinner') === false;
+
+        if (setSpinner) apCont.addClass('spinner');
+
+        apSel.find('option').remove();
+
+        assessmentType = numberOrNull(assessmentType);
+        frequencyId = numberOrNull(frequencyId);
+
+        if (this.releaseId && assessmentType && frequencyId) {
+            try {
+                let prefs = await this.api.getAuditPreferences(this.releaseId, assessmentType, frequencyId, getAuthInfo());
+
+                if (prefs.automated) apSel.append(_auditPrefOption.automated);
+                if (prefs.manual) apSel.append(_auditPrefOption.manual);
+            } catch (e) {
+                apSel.hide();
+                apCont.removeClass('spinner');
+                jq('#auditPreferenceForm > div').append('<div class="fode-error">Fatal error loading tenant data, please refresh</div>');
+                return;
+            }
+        }
+
+        let optCnt = apSel.find('option').length;
+
+        if (optCnt < 1) {
+            apSel.append(_auditPrefOption.automated);
+            apSel.prop('disabled', true);
+        } else if (optCnt === 1) {
+            apSel.find('option').first().prop('selected', true);
+            apSel.prop('disabled', true);
+        } else {
+            if (curVal) apSel.val(curVal);
+            else apSel.find('option').first().prop('selected', true);
+            apSel.prop('disabled', false);
+        }
+
+        if (setSpinner) apCont.removeClass('spinner');
     }
 
     async loadEntitlementSettings(releaseChangedPayload) {
@@ -92,6 +131,8 @@ class ScanSettings {
             this.deferredLoadEntitlementSettings = _ => this.loadEntitlementSettings(releaseChangedPayload);
             return;
         } else this.deferredLoadEntitlementSettings = null;
+
+        this.releaseId = null;
 
         let rows = jq(fodeRowSelector);
 
@@ -110,6 +151,7 @@ class ScanSettings {
         releaseId = numberOrNull(releaseId);
 
         if (releaseId > 0) {
+            this.releaseId = releaseId;
             fields.addClass('spinner');
             rows.show();
             jq('.fode-row-bsi').hide();
@@ -121,7 +163,6 @@ class ScanSettings {
             let entp = this.api.getAssessmentTypeEntitlements(releaseId, getAuthInfo())
                 .then(r => this.assessments = r);
 
-
             await Promise.all([ssp, entp]);
 
             if (this.scanSettings && this.assessments) {
@@ -131,9 +172,9 @@ class ScanSettings {
                 this.populateAssessmentsDropdown();
 
                 jq('#ddAssessmentType').val(assessmentId);
-                this.onAssessmentChanged();
+                await this.onAssessmentChanged(true);
                 jq('#entitlementSelectList').val(getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
-                this.onEntitlementChanged();
+                await this.onEntitlementChanged(false);
 
                 let scval = this.getScanCentralBuildTypeSelected();
 
@@ -180,12 +221,12 @@ class ScanSettings {
                 jq('#auditPreferenceSelectList').val(this.scanSettings.auditPreferenceType);
                 jq('#cbSonatypeEnabled').prop('checked', this.scanSettings.performOpenSourceAnalysis === true);
             } else {
-                this.onAssessmentChanged();
+                await this.onAssessmentChanged(false);
                 this.showMessage('Failed to retrieve scan settings from API', true);
                 rows.hide();
             }
         } else {
-            this.onAssessmentChanged();
+            await this.onAssessmentChanged(false);
             if (releaseChangedPayload.mode === ReleaseSetMode.releaseSelect) this.showMessage('Select a release');
             else this.showMessage('Enter a release id');
         }

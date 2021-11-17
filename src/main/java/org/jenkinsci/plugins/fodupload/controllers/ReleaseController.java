@@ -8,6 +8,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.models.AuditPreferenceOptionsModel;
 import org.jenkinsci.plugins.fodupload.models.FodApiFilterList;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.*;
@@ -16,10 +17,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.util.List;
 
 import org.jenkinsci.plugins.fodupload.Utils;
+import org.springframework.core.enums.LetterCodedLabeledEnum;
 
 public class ReleaseController extends ControllerBase {
 
@@ -316,6 +317,46 @@ public class ReleaseController extends ControllerBase {
         } while (itemsReceived < totalCount);
 
         return null;
+    }
+
+    public AuditPreferenceOptionsModel getAuditPreferences(Integer releaseId, Integer assessmentType, Integer frequencyType) throws IOException {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/releases/" + releaseId + "/static-scan-options")
+                .addQueryParameter("technologyStack", "a") // Doesn't matter for Audit Preferences
+                .addQueryParameter("assessmentTypeId", assessmentType.toString())
+                .addQueryParameter("entitlementFrequencyType", frequencyType.toString());
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .get()
+                .build();
+        Type typeToken = new TypeToken<GenericListResponse<ScanOption>>() {
+        }.getType();
+        GenericListResponse<ScanOption> response = apiConnection.requestTyped(request, typeToken);
+        List<ScanOption> items = response.getItems();
+
+        if (items != null && items.size() > 0) {
+            for (ScanOption option : items) {
+                if(option.getName().equals("AuditPreference")) {
+                    if (option.getOptions() != null && option.getOptions().size() > 0) {
+                        boolean automated = false;
+                        boolean manual = false;
+
+                        for (LookupItemsModel item : option.getOptions()) {
+                            if (item.getText().equals("Automated")) automated = true;
+                            else if (item.getText().equals("Manual")) manual = true;
+                        }
+
+                        return new AuditPreferenceOptionsModel(automated, manual);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return new AuditPreferenceOptionsModel(false, false);
     }
 
 }

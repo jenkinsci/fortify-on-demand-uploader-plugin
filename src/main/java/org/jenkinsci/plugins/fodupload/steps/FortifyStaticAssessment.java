@@ -760,6 +760,20 @@ public class FortifyStaticAssessment extends FortifyStep {
         }
 
         @JavaScriptMethod
+        public String retrieveAuditPreferences(Integer releaseId, Integer assessmentType, Integer frequencyType, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                ReleaseController releaseController = new ReleaseController(apiConnection, null, Utils.createCorrelationId());
+
+                return Utils.createResponseViewModel(releaseController.getAuditPreferences(releaseId, assessmentType, frequencyType));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @JavaScriptMethod
         public String retrieveLookupItems(String type, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
