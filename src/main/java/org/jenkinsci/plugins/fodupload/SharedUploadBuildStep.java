@@ -648,7 +648,7 @@ public class SharedUploadBuildStep {
                     if (m.find()) {
                         scanCentralVersion = m.group().trim();
 
-                        ComparableVersion minScanCentralVersion = new ComparableVersion("20.2.0.0019");
+                        ComparableVersion minScanCentralVersion = new ComparableVersion("21.1.0.2120");
                         ComparableVersion userScanCentralVersion = new ComparableVersion(scanCentralVersion);
 
                         if (userScanCentralVersion.compareTo(minScanCentralVersion) < 0) {
