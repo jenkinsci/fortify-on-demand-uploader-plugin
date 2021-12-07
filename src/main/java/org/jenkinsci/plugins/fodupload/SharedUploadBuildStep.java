@@ -648,11 +648,11 @@ public class SharedUploadBuildStep {
                     if (m.find()) {
                         scanCentralVersion = m.group().trim();
 
-                        ComparableVersion minScanCentralVersion = new ComparableVersion("21.1.0.2120");
+                        ComparableVersion minScanCentralVersion = new ComparableVersion("21.1.2.0002");
                         ComparableVersion userScanCentralVersion = new ComparableVersion(scanCentralVersion);
 
                         if (userScanCentralVersion.compareTo(minScanCentralVersion) < 0) {
-                            logger.println("The supplied scan central version is outdated . Please upgrade to higher version and try again !!");
+                            logger.println("ScanCentral client version used is outdated. Update to the latest version provided on Tools page");
                             build.setResult(Result.FAILURE);
                             return null;
                         }
