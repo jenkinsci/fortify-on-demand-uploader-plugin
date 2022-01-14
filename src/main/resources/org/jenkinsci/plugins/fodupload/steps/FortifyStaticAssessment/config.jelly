@@ -126,7 +126,7 @@
                         <input type="textbox" id="autoProvAppName" class="setting-input"/>
                     </div>
                 </f:entry>
-                <f:entry title="Bussiness Criticality">
+                <f:entry title="Business Criticality">
                     <div class="fodp-field fodp-row-autoProv">
                         <select id="autoProvBussCrit" class="setting-input">
                             <option value="1">High</option>

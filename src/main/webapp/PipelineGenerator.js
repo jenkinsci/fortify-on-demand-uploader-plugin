@@ -3,7 +3,7 @@ const fodpOverrideRowsSelector = '.fodp-row-relid-ovr';
 const fodpAutoProvRowsSelector = '.fodp-row-autoProv';
 const appAttributeKeyDelimiter = ';';
 const appAttributeKeyValueDelimiter = ':';
-const techIdsWithOutOpenSourceSupport = ["2","3","5","6","11","14","18","21"];
+const techIdsWithOutOpenSourceSupport = ["2", "3", "5", "6", "11", "14", "18", "21"];
 
 class PipelineGenerator {
     constructor() {
@@ -230,44 +230,38 @@ class PipelineGenerator {
 
         let scval = this.getScanCentralBuildTypeSelected();
 
-        if (scval === _scanCentralBuildTypes.None) {
+        switch (tech) {
+            case techStackConsts.dotNet:
+            case techStackConsts.dotNetCore:
+                this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.MSBuild);
+                jq('#technologyStackSelect').val(tech);
+                break;
+            case techStackConsts.java:
+                // Selected release is Java, but SC was not set to None, Maven, nor Gradle, default to Maven
+                if (scval !== _scanCentralBuildTypes.Maven && scval !== _scanCentralBuildTypes.Gradle) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Maven);
+                break;
+            case techStackConsts.php:
+                this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
+                break;
+            case techStackConsts.python:
+                this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
+                break;
+            default:
+                // It's a valid tech stack but not supported by SC
+                if (tech > 0) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.None);
+                break;
+        }
+
+        this.onScanCentralChanged();
+
+        if (this.getScanCentralBuildTypeSelected() === _scanCentralBuildTypes.None) {
             jq('#technologyStackSelect').val(tech);
             this.onTechStackChanged();
             jq('#languageLevelSelect').val(lang);
-            this.onScanCentralChanged();
+            this.onLangLevelChanged();
         } else {
-            switch (tech) {
-                case 1:
-                case 23:
-                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.MSBuild);
-                    jq('#technologyStackSelectList').val(tech);
-                    break;
-                case 7:
-                    // Selected release is Java, but SC was not set to None, Maven, nor Gradle, default to Maven
-                    if (scval !== _scanCentralBuildTypes.Maven && scval !== _scanCentralBuildTypes.Gradle) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Maven);
-                    break;
-                case 9:
-                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
-                    break;
-                case 10:
-                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
-                    break;
-                default:
-                    // It's a valid tech stack but not supported by SC
-                    if (tech > 0) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.None);
-                    break;
-            }
-
-            if (this.getScanCentralBuildTypeSelected() === _scanCentralBuildTypes.None) {
-                jq('#technologyStackSelect').val(tech);
-                this.onTechStackChanged();
-                jq('#languageLevelSelect').val(lang);
-                this.onScanCentralChanged();
-            } else {
-                this.onScanCentralChanged();
-                if (lang) jq('#languageLevelSelectList').val(lang);
-                this.onLangLevelChanged();
-            }
+            if (lang) jq('#languageLevelSelect').val(lang);
+            this.onLangLevelChanged();
         }
 
         jq('#auditPreferenceSelect').val(audit);
@@ -288,14 +282,18 @@ class PipelineGenerator {
     }
 
     onScanCentralChanged() {
-        let val = jq('#scanCentralBuildTypeForm > select').val().toLowerCase();
+        let val = this.getScanCentralBuildTypeSelected();
         let techStackFilter;
         this.populateTechStackDropdown();
-        if (val === 'none') {
+
+
+        if (val === _scanCentralBuildTypes.None) {
             jq('.fodp-row-sc').hide();
             if (this.overrideServerSettings || this.autoProvMode) jq('.fodp-row-nonsc').show();
+            jq('#technologyStackSelect').val("-1");
+            this.onTechStackChanged();
         } else {
-            let scClass = 'fodp-row-sc-' + val;
+            let scClass = 'fodp-row-sc-' + val.toLowerCase();
 
             jq('.fodp-row-nonsc').hide();
 
@@ -307,7 +305,7 @@ class PipelineGenerator {
                     else jqe.hide();
                 });
             switch (val) {
-                case 'msbuild':
+                case _scanCentralBuildTypes.MSBuild:
                     if (this.overrideServerSettings || this.autoProvMode) {
                         closestRow(jq('#technologyStackForm')).show();
                         let currVal = this.techStacks[jq('#technologyStackSelect').val()];
@@ -315,20 +313,20 @@ class PipelineGenerator {
                         techStackFilter = this.isDotNetStack;
                     }
                     break;
-                case 'maven':
-                case 'gradle':
+                case _scanCentralBuildTypes.Maven:
+                case _scanCentralBuildTypes.Gradle:
                     if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.java);
                     break;
-                case 'php':
+                case _scanCentralBuildTypes.PHP:
                     if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.php);
                     break;
-                case 'python':
+                case _scanCentralBuildTypes.Python:
                     if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.python);
                     break;
             }
         }
         if (techStackFilter) this.populateTechStackDropdown(techStackFilter);
-        this.onTechStackChanged();
+        this.onTechStackChanged(true);
     }
 
     populateTechStackDropdown(filter) {
@@ -356,7 +354,7 @@ class PipelineGenerator {
         }
     }
 
-    onTechStackChanged() {
+    onTechStackChanged(skipScanCentralCheck) {
         let ts = this.techStacks[jq('#technologyStackSelect').val()];
         let llv = numberOrNull(jq('#languageLevelSelect').val()) || -1;
         let llsel = jq('#languageLevelSelect');
@@ -378,11 +376,48 @@ class PipelineGenerator {
                 if (setllv) jq('#languageLevelSelect').val(llv);
             } else llr.hide();
 
-             if(techIdsWithOutOpenSourceSupport.includes(ts.value)){
-               jq('.fodp-row-sonatype').hide();
-             }else {
-               jq('.fodp-row-sonatype').show();
-             }
+            if (techIdsWithOutOpenSourceSupport.includes(ts.value)) {
+                jq('.fodp-row-sonatype').hide();
+            } else {
+                jq('.fodp-row-sonatype').show();
+            }
+
+            if (skipScanCentralCheck !== true) {
+                let scbt = this.getScanCentralBuildTypeSelected();
+                let tsv = numberOrNull(ts.value);
+
+                switch (tsv) {
+                    case techStackConsts.dotNet:
+                    case techStackConsts.dotNetCore:
+                        if (scbt !== _scanCentralBuildTypes.MSBuild) {
+                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.MSBuild);
+                            this.onScanCentralChanged();
+                            return;
+                        }
+                        break;
+                    case techStackConsts.java:
+                        if (scbt !== _scanCentralBuildTypes.Maven && scbt !== _scanCentralBuildTypes.Gradle) {
+                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Maven);
+                            this.onScanCentralChanged();
+                            return;
+                        }
+                        break;
+                    case techStackConsts.php:
+                        if (scbt !== _scanCentralBuildTypes.PHP) {
+                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
+                            this.onScanCentralChanged();
+                            return;
+                        }
+                        break;
+                    case techStackConsts.python:
+                        if (scbt !== _scanCentralBuildTypes.Python) {
+                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
+                            this.onScanCentralChanged();
+                            return;
+                        }
+                        break;
+                }
+            }
         }
 
         this.onLangLevelChanged();
@@ -661,9 +696,9 @@ class PipelineGenerator {
                 ss = '';
                 break;
         }
-        if(jq('#sonatypeEnabled').val() && jq('#technologyStackSelect').val() > 0 && techIdsWithOutOpenSourceSupport.includes(jq('#technologyStackSelect').val()) ){
-           jq('#sonatypeEnabled').prop('checked',false);
-           son = false;
+        if (jq('#sonatypeEnabled').val() && jq('#technologyStackSelect').val() > 0 && techIdsWithOutOpenSourceSupport.includes(jq('#technologyStackSelect').val())) {
+            jq('#sonatypeEnabled').prop('checked', false);
+            son = false;
         }
         // Auth
         jq('#username').val(un);

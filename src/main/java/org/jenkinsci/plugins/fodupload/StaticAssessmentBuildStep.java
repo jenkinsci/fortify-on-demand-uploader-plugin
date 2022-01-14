@@ -87,13 +87,29 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String scanCentralBuildToolVersion,
                                      String scanCentralVirtualEnv,
                                      String scanCentralRequirementFile) throws IllegalArgumentException {
+        int techStack = Utils.tryParseInt(userSelectedTechnologyStack);
 
-        if (!selectedScanCentralBuildType.equalsIgnoreCase(FodEnums.SelectedScanCentralBuildType.None.toString()) && (Utils.isNullOrEmpty(srcLocation))) {
-            throw new IllegalArgumentException("Source Location cannot be empty if Scan Central is chosen for packaging i.e if ScanCentralBuildType is other than None.");
+        if (techStack < 1) throw new IllegalArgumentException("Invalid Technology Stack");
+
+        if (Utils.isNullOrEmpty(srcLocation)) {
+            srcLocation = "./";
         }
 
         if (Utils.isNullOrEmpty(selectedReleaseType)) {
-            throw new IllegalArgumentException("Invalid selectedReleaseType");
+            throw new IllegalArgumentException("Invalid release selection (Pick a Realease)");
+        }
+
+        if (Utils.isNullOrEmpty(bsiToken)) {
+            ValidationUtils.ScanCentralValidationResult vres = ValidationUtils.isValidScanCentralAndTechStack(selectedScanCentralBuildType, techStack);
+
+            switch (vres) {
+                case Mismatched:
+                    throw new IllegalArgumentException(String.format("ScanCentral Build Type %s doesn't support %s Technology Stack", selectedScanCentralBuildType, techStack));
+                case ScanCentralRequired:
+                    throw new IllegalArgumentException(String.format("Technology Stack %s requires ScanCentral Build Type selection", techStack));
+                case NoSelection:
+                    throw new IllegalArgumentException("ScanCentral Build Type and/or Technology Stack not selected");
+            }
         }
 
         boolean saveSettingsToFod = false;
@@ -124,15 +140,14 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             if (Utils.tryParseInt(userSelectedAssessmentType) <= 0) invalidFields.add("userSelectedAssessmentType");
             if (Utils.tryParseInt(userSelectedEntitlementId) <= 0) invalidFields.add("userSelectedEntitlementId");
             if (Utils.tryParseInt(userSelectedFrequencyType) <= 0) invalidFields.add("userSelectedFrequencyType");
-            int ts = Utils.tryParseInt(userSelectedTechnologyStack);
 
-            if (ts <= 0) invalidFields.add("userSelectedTechnologyStack");
+            if (techStack <= 0) invalidFields.add("userSelectedTechnologyStack");
                 // Except .NET . Java , Python all other languages has no language levels
-            else if (isTechStackWithLanguageLevel(ts) && Utils.tryParseInt(userSelectedLanguageLevel) <= 0) {
+            else if (isTechStackWithLanguageLevel(techStack) && Utils.tryParseInt(userSelectedLanguageLevel) <= 0) {
                 invalidFields.add("userSelectedLanguageLevel");
             }
-            if(sonatypeEnabled && isSonatypeScanNotAllowedForTechStack(ts)){
-               sonatypeEnabled = false;
+            if (sonatypeEnabled && ValidationUtils.isSonatypeScanNotAllowedForTechStack(techStack)) {
+                sonatypeEnabled = false;
             }
             if (Utils.tryParseInt(userSelectedAuditPreference) <= 0) invalidFields.add("userSelectedAuditPreference");
 
@@ -186,11 +201,6 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
     private boolean isTechStackWithLanguageLevel(int techStack) {
         return (techStack == 1 || techStack == 7 || techStack == 10) ? true : false;
-    }
-
-    private boolean isSonatypeScanNotAllowedForTechStack(int techStack){
-        List<Integer> techStacksSupportSonatypeScans = Arrays.asList(2,3,5,6,11,14,18,21);
-        return techStacksSupportSonatypeScans.contains(techStack);
     }
 
     private void saveReleaseSettings(FodApiConnection apiConnection, String releaseIdStr, boolean purchaseEntitlements, String assessmentTypeIdStr, String entitlementIdStr, String entitlementFrequencyTypeStr, String technologyStackIdStr, String languageLevelIdStr, boolean performOpenSourceAnalysis, String auditPreferenceTypeStr) throws IllegalArgumentException {
