@@ -1,5 +1,5 @@
 # Changelog
-## Version 7.0.0 (11-16-2021)
+## Version 7.0.0 (01-18-2022)
 - Added new options to create or select an application and release, configure scan settings, and invoke Fortify ScanCentral SAST to package application files.
 - Added default values for the following pipeline parameters: **RemediationScanPreferenceType** (default **RemediationScanIfAvailable**), **InProgressScanActionType** (default **DoNotStartScan**), **InProgressBuildResultType** (default **FailBuild**)
 - Fixed **Build result if scan in progress** field to populate saved selection.
