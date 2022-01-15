@@ -1,25 +1,18 @@
 package org.jenkinsci.plugins.fodupload;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import hudson.ProxyConfiguration;
-import javafx.util.Pair;
 import jenkins.model.Jenkins;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.http.HttpStatus;
-import org.jenkinsci.plugins.fodupload.models.FodEnums;
-import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
 
 public class FodApiConnection {
 
