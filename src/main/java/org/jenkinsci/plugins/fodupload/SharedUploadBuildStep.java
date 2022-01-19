@@ -744,7 +744,7 @@ public class SharedUploadBuildStep {
                 logger.println("Packaging ScanCentral\n" + String.join(" ", scanCentralPackageCommandList));
 
                 Process scanCentralProcess = runProcessBuilder(scanCentralPackageCommandList, srcLocation);
-                stdInput = new BufferedReader(new InputStreamReader(scanCentralProcess.getInputStream()));
+                stdInput = new BufferedReader(new InputStreamReader(scanCentralProcess.getInputStream(), StandardCharsets.UTF_8));
                 String s = null;
                 while ((s = stdInput.readLine()) != null) {
                     logger.println(s);
@@ -797,11 +797,14 @@ public class SharedUploadBuildStep {
                     while ((s = stdInput.readLine()) != null) {
                         logger.println(s);
                     }
+
                     return gradlePermissionsProcess.waitFor();
                 }
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
                 throw new IOException("Failed to assign executable permissions to gradle file");
+            }finally {
+                if(stdInput != null) stdInput.close();
             }
         }
         return 0;
