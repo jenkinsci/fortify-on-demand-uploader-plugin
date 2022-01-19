@@ -689,8 +689,10 @@ public class FortifyStaticAssessment extends FortifyStep {
                             scanCentral = getScanCentralForTechStack(techStack);
                             break;
                         case NoSelection:
-                        default:
                             errors.add("scanCentral and/or techStack not provided");
+                            break;
+                        case Valid:
+                        default:
                     }
                 }
             }
