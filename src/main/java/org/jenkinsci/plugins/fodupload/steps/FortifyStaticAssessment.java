@@ -1,13 +1,15 @@
 package org.jenkinsci.plugins.fodupload.steps;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.*;
-
 import com.google.common.collect.ImmutableSet;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Tuple2;
-import jenkins.model.Jenkins;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.Result;
+import hudson.model.*;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.fodupload.*;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
@@ -19,27 +21,19 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.Item;
-import hudson.model.Job;
-import hudson.model.Result;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-import hudson.util.Secret;
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.verb.POST;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 
 @SuppressFBWarnings("unused")
@@ -690,9 +684,12 @@ public class FortifyStaticAssessment extends FortifyStep {
                                 scanCentral = t.getFirst();
                                 techStack = t.getSecond();
                             }
+                            break;
                         case ScanCentralRequired:
                             scanCentral = getScanCentralForTechStack(techStack);
+                            break;
                         case NoSelection:
+                        default:
                             errors.add("scanCentral and/or techStack not provided");
                     }
                 }

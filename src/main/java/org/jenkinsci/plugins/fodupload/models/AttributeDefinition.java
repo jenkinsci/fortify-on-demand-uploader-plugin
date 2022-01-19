@@ -15,7 +15,7 @@ public class AttributeDefinition {
         this.attributeType = attributeType;
         this.attributeDataType = attributeDataType;
         this.isRequired = isRequired;
-        this.picklistValues = picklistValues;
+        this.picklistValues = picklistValues.clone();
     }
 
     public int getId() {
@@ -39,26 +39,9 @@ public class AttributeDefinition {
     }
 
     public PicklistValue[] getPicklistValues() {
-        return picklistValues;
+        return picklistValues.clone();
     }
 
-    public class PicklistValue {
-        private int id;
-        private String name;
-
-
-        public PicklistValue(int id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-
-        public int getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
 }
+
+

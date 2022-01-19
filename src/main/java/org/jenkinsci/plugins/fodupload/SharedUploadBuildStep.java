@@ -1,17 +1,15 @@
 package org.jenkinsci.plugins.fodupload;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.*;
+import hudson.security.ACL;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import jenkins.model.GlobalConfiguration;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
@@ -19,28 +17,22 @@ import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.BsiToken;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
-import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressBuildResultType;
+import org.jenkinsci.plugins.fodupload.models.JobModel;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.Item;
-import hudson.model.Job;
-import hudson.model.Result;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.security.ACL;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-import jenkins.model.GlobalConfiguration;
-import jenkins.model.Jenkins;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.verb.POST;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SharedUploadBuildStep {
 
@@ -628,20 +620,20 @@ public class SharedUploadBuildStep {
             //version check
             logger.println("Checking ScanCentralVersion");
             String scanCentralbatLocation = Paths.get(String.valueOf(scanCentralLocation)).resolve(scexec).toString();
-            ArrayList scanCentralVersionCommandList = new ArrayList<>();
+            List<String> scanCentralVersionCommandList = new ArrayList<>();
+
             scanCentralVersionCommandList.add(scanCentralbatLocation);
             scanCentralVersionCommandList.add("--version");
+
             Process pVersion = runProcessBuilder(scanCentralVersionCommandList, scanCentralLocation);
             stdInputVersion = new BufferedReader(new InputStreamReader(
-                    pVersion.getInputStream()));
+                    pVersion.getInputStream(), StandardCharsets.UTF_8));
             String versionLine = null;
             String scanCentralVersion = null;
-            Boolean isValidVersion = false;
 
             while ((versionLine = stdInputVersion.readLine()) != null) {
                 logger.println(versionLine);
                 if (versionLine.contains("version")) {
-
                     Pattern versionPattern = Pattern.compile("(?<=version:  ).*");
                     Matcher m = versionPattern.matcher(versionLine);
 
@@ -660,7 +652,7 @@ public class SharedUploadBuildStep {
                     }
                 }
             }
-            if (versionLine.contains("version")) {
+            if (versionLine != null && versionLine.contains("version")) {
                 Path outputZipFolderPath = Paths.get(String.valueOf(outputLocation)).resolve("output.zip");
                 FodEnums.SelectedScanCentralBuildType buildType = FodEnums.SelectedScanCentralBuildType.valueOf(model.getSelectedScanCentralBuildType());
                 if (buildType == FodEnums.SelectedScanCentralBuildType.Gradle) {
@@ -672,7 +664,8 @@ public class SharedUploadBuildStep {
                         build.setResult(Result.FAILURE);
                     }
                 }
-                ArrayList scanCentralPackageCommandList = new ArrayList<>();
+                List<String> scanCentralPackageCommandList = new ArrayList<>();
+
                 scanCentralPackageCommandList.add(scanCentralbatLocation);
                 scanCentralPackageCommandList.add("package");
                 scanCentralPackageCommandList.add("--bt");
@@ -742,6 +735,8 @@ public class SharedUploadBuildStep {
                         }
                         ;
                         break;
+                    default:
+                        throw new IllegalArgumentException("Invalid ScanCentral build type: " + buildType);
                 }
                 scanCentralPackageCommandList.add("--o");
                 scanCentralPackageCommandList.add("\"" + outputZipFolderPath.toString() + "\"");
@@ -766,7 +761,7 @@ public class SharedUploadBuildStep {
                 logger.println("ScanCentral not found or invalid version");
             }
             return null;
-        } catch (IOException | InterruptedException e) {
+        } catch (IllegalArgumentException | IOException | InterruptedException e) {
             logger.println(String.format("Failed executing scan central : ", e));
         } finally {
             try {
@@ -783,10 +778,10 @@ public class SharedUploadBuildStep {
         return null;
     }
 
-    private int givePermissionsToGradle(FilePath srcLocation, PrintStream logger) {
+    private int givePermissionsToGradle(FilePath srcLocation, PrintStream logger) throws IOException {
         if (!SystemUtils.IS_OS_WINDOWS) {
             BufferedReader stdInput = null;
-            ArrayList linuxPermissionsList = new ArrayList<>();
+            List<String> linuxPermissionsList = new ArrayList<>();
 
             linuxPermissionsList.add("chmod");
             linuxPermissionsList.add("u+x");
@@ -795,8 +790,10 @@ public class SharedUploadBuildStep {
             try {
                 if (linuxPermissionsList.size() > 0) {
                     Process gradlePermissionsProcess = runProcessBuilder(linuxPermissionsList, srcLocation);
-                    stdInput = new BufferedReader(new InputStreamReader(gradlePermissionsProcess.getInputStream()));
+
+                    stdInput = new BufferedReader(new InputStreamReader(gradlePermissionsProcess.getInputStream(), StandardCharsets.UTF_8));
                     String s = null;
+
                     while ((s = stdInput.readLine()) != null) {
                         logger.println(s);
                     }
@@ -804,6 +801,7 @@ public class SharedUploadBuildStep {
                 }
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
+                throw new IOException("Failed to assign executable permissions to gradle file");
             }
         }
         return 0;
@@ -824,7 +822,7 @@ public class SharedUploadBuildStep {
         return null;
     }
 
-    private Process runProcessBuilder(ArrayList cmdList, FilePath directoryLocation) throws IOException {
+    private Process runProcessBuilder(List<String> cmdList, FilePath directoryLocation) throws IOException {
         try {
             ProcessBuilder pb = new ProcessBuilder(cmdList);
             pb.directory(new File(String.valueOf(directoryLocation)));

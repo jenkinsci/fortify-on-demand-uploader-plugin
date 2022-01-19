@@ -10,8 +10,8 @@ public class CurrentUserSessionResponse {
     public CurrentUserSessionResponse(Integer userId, String username, String[] scopes, String[] permissions) {
         this.userId = userId;
         this.username = username;
-        this.scopes = scopes;
-        this.permissions = permissions;
+        this.scopes = scopes.clone();
+        this.permissions = permissions.clone();
     }
 
     public Integer getUserId() {
@@ -23,10 +23,10 @@ public class CurrentUserSessionResponse {
     }
 
     public String[] getScopes() {
-        return scopes;
+        return scopes.clone();
     }
 
     public String[] getPermissions() {
-        return permissions;
+        return permissions.clone();
     }
 }

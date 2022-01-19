@@ -9,8 +9,8 @@ import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 public class TokenCacheManager {
 
@@ -41,9 +41,9 @@ public class TokenCacheManager {
     }
 
     private void clearCache() {
-        for (String key : tokens.keySet()) {
-            if (isCloseToExpiry(tokens.get(key))) {
-                tokens.remove(key);
+        for (Map.Entry<String,Token> token : tokens.entrySet()) {
+            if (isCloseToExpiry(token.getValue())) {
+                tokens.remove(token.getKey());
             }
         }
     }
@@ -98,10 +98,10 @@ public class TokenCacheManager {
     }
 
     private Boolean isCloseToExpiry(Token token) {
-        return token.expiry.getTimeInMillis() - Calendar.getInstance().getTimeInMillis() < 1000 * DELETE_TOKEN_BEFORE_SECONDS;
+        return token.expiry.getTimeInMillis() - Calendar.getInstance().getTimeInMillis() < 1000L * DELETE_TOKEN_BEFORE_SECONDS;
     }
 
-    private class Token {
+    private static class Token {
         private String value;
         private Calendar expiry;
 

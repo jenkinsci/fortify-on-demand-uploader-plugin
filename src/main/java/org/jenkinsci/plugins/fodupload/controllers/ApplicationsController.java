@@ -1,19 +1,18 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import net.sf.json.JSONObject;
 import okhttp3.*;
-import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.Utils;
-import org.jenkinsci.plugins.fodupload.models.*;
+import org.jenkinsci.plugins.fodupload.models.CreateApplicationModel;
+import org.jenkinsci.plugins.fodupload.models.CreateMicroserviceModel;
+import org.jenkinsci.plugins.fodupload.models.CreateReleaseModel;
+import org.jenkinsci.plugins.fodupload.models.Result;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -137,9 +136,6 @@ public class ApplicationsController extends ControllerBase {
         if (microserviceId > 0) {
             urlBuilder = urlBuilder.addQueryParameter("filters", "microserviceId:" + microserviceId);
         }
-
-        String url = urlBuilder
-                .build().toString();
 
         Request request = new Request.Builder()
                 .url(urlBuilder.build())

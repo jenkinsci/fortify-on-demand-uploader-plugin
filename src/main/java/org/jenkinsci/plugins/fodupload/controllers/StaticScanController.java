@@ -281,7 +281,7 @@ public class StaticScanController extends ControllerBase {
                 else throw new Exception("Failure parsing application attributes");
             }
 
-            for (FodAttributeMapItem a : MapAttributesToFod(attrs)) {
+            for (FodAttributeMapItem a : mapAttributesToFod(attrs)) {
                 model.getAttributes().add(new ApplicationAttributeModel(a.getDefinition().getId(), a.getValue()));
             }
         }
@@ -314,7 +314,7 @@ public class StaticScanController extends ControllerBase {
         }
     }
 
-    public List<FodAttributeMapItem> MapAttributesToFod(Map<String, String> attributes) throws Exception {
+    public List<FodAttributeMapItem> mapAttributesToFod(Map<String, String> attributes) throws Exception {
         // Todo: this should be injected
         AttributesController attrCntr = new AttributesController(apiConnection, logger, correlationId);
         List<AttributeDefinition> fodAttr = attrCntr.getAttributeDefinitions();
@@ -326,7 +326,7 @@ public class StaticScanController extends ControllerBase {
                 if (a.getKey().equals(fa.getName())) {
                     if (fa.getAttributeDataType().equalsIgnoreCase("Picklist")) {
                         ArrayList<String> pickListAttrValueStrings = new ArrayList<>();
-                        for (AttributeDefinition.PicklistValue pv : fa.getPicklistValues()) {
+                        for (PicklistValue pv : fa.getPicklistValues()) {
                             pickListAttrValueStrings.add(pv.getName());
                         }
                         if(pickListAttrValueStrings.contains(a.getValue()))
@@ -347,7 +347,7 @@ public class StaticScanController extends ControllerBase {
                     else if(fa.getAttributeDataType().equalsIgnoreCase("User")){
                         ArrayList<String> userAttrValues = new ArrayList<>();
                         ArrayList<String> userAttrValueIdNames = new ArrayList<>();
-                        for (AttributeDefinition.PicklistValue pv : fa.getPicklistValues()) {
+                        for (PicklistValue pv : fa.getPicklistValues()) {
                             userAttrValues.add(pv.getName());
                             userAttrValues.add(String.valueOf(pv.getId()));
                             userAttrValueIdNames.add(String.valueOf(pv.getId())+"-"+pv.getName());

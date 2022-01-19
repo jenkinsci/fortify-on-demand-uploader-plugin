@@ -1,10 +1,5 @@
 package org.jenkinsci.plugins.fodupload.models.response;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-
 public class AssessmentTypeEntitlement {
 
     private Integer assessmentTypeId;
@@ -23,8 +18,7 @@ public class AssessmentTypeEntitlement {
 
     public AssessmentTypeEntitlement(Integer assessmentTypeId, String name, Integer entitlementId, String frequencyType, Integer frequencyTypeId, Integer units,
                                      Integer unitsAvailable, String subscriptionEndDate, Boolean isRemediation, Integer remediationScansAvailable,
-                                     Boolean isBundledAssessment, Integer parentAssessmentTypeId, String entitlementDescription)
-    {
+                                     Boolean isBundledAssessment, Integer parentAssessmentTypeId, String entitlementDescription) {
         this.assessmentTypeId = assessmentTypeId;
         this.name = name;
         this.entitlementId = entitlementId;
@@ -87,4 +81,6 @@ public class AssessmentTypeEntitlement {
     public String getEntitlementDescription() {
         return entitlementDescription;
     }
+
+    public Integer getFrequencyTypeId() { return frequencyTypeId; }
 }

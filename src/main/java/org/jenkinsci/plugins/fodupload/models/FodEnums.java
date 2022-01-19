@@ -267,13 +267,6 @@ public class FodEnums {
         PHP,
         Python;
 
-//        SelectedScanCentralBuildType(String val) {
-//            if(Arrays.stream(SelectedScanCentralBuildType.class.getEnumConstants()).anyMatch(e->e.name().equals(val))){
-//                this._val = val;
-//            }
-//            else this._val = "None";
-//        }
-
         public static SelectedScanCentralBuildType fromInt(int val) {
             switch (val) {
                 case 1:

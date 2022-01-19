@@ -4,45 +4,35 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Item;
-import hudson.model.Job;
-import hudson.model.Result;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
+import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.controllers.*;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.BsiToken;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.PutStaticScanSetupModel;
 import org.jenkinsci.plugins.fodupload.models.response.PutStaticScanSetupResponse;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-import net.sf.json.JSONObject;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+import org.kohsuke.stapler.verb.POST;
 
 import javax.annotation.Nonnull;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import jenkins.model.Jenkins;
-
-import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.verb.POST;
 
 
 @SuppressWarnings("unused")
@@ -141,9 +131,8 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             if (Utils.tryParseInt(userSelectedEntitlementId) <= 0) invalidFields.add("userSelectedEntitlementId");
             if (Utils.tryParseInt(userSelectedFrequencyType) <= 0) invalidFields.add("userSelectedFrequencyType");
 
-            if (techStack <= 0) invalidFields.add("userSelectedTechnologyStack");
-                // Except .NET . Java , Python all other languages has no language levels
-            else if (isTechStackWithLanguageLevel(techStack) && Utils.tryParseInt(userSelectedLanguageLevel) <= 0) {
+            // Except .NET . Java , Python all other languages has no language levels
+            if (isTechStackWithLanguageLevel(techStack) && Utils.tryParseInt(userSelectedLanguageLevel) <= 0) {
                 invalidFields.add("userSelectedLanguageLevel");
             }
             if (sonatypeEnabled && ValidationUtils.isSonatypeScanNotAllowedForTechStack(techStack)) {

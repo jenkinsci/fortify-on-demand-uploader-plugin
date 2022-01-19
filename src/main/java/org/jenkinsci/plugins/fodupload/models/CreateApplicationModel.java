@@ -17,11 +17,11 @@ public class CreateApplicationModel {
         this.applicationType = applicationType;
         this.releaseName = releaseName;
         this.ownerId = ownerId;
-        this.attributes = attributes;
+        this.attributes = attributes.clone();
         this.businessCriticalityType = businessCriticalityType;
         this.sdlcStatusType = sdlcStatusType;
         this.hasMicroservices = hasMicroservices;
-        this.microservices = microservices;
+        this.microservices = microservices.clone();
         this.ownerId = ownerId;
         this.releaseMicroserviceName = releaseMicroserviceName;
     }
@@ -44,7 +44,7 @@ public class CreateApplicationModel {
     }
 
     public ApplicationAttribute[] getAttributes() {
-        return attributes;
+        return attributes.clone();
     }
 
     public BusinessCriticalityType getBusinessCriticalityType() {
@@ -60,7 +60,7 @@ public class CreateApplicationModel {
     }
 
     public String[] getMicroservices() {
-        return microservices;
+        return microservices.clone();
     }
 
     public String getReleaseMicroserviceName() {

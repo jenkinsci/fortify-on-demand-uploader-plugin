@@ -28,22 +28,21 @@ public class AttributesHelper {
         }
 
         // validate that all required attributes are given and that all attributes are given according to their schema
-        for (String defAttributeKey : attributeDefsMap.keySet()) {
-            AttributeDefinition def = attributeDefsMap.get(defAttributeKey);
-            if (def.getRequired() && !userAttributes.getValue().containsKey(defAttributeKey)) {
-                String expectedMessage = buildExpectedMessage(def);
-                errors.add("Attribute '" + defAttributeKey + "' was not provided. " + expectedMessage);
+        for (Map.Entry<String,AttributeDefinition> defAttribute : attributeDefsMap.entrySet()) {
+            if (defAttribute.getValue().getRequired() && !userAttributes.getValue().containsKey(defAttribute.getKey())) {
+                String expectedMessage = buildExpectedMessage(defAttribute.getValue());
+                errors.add("Attribute '" + defAttribute.getKey() + "' was not provided. " + expectedMessage);
             }
-            else if (userAttributes.getValue().containsKey(defAttributeKey)) {
-                String userAttributeValue = userAttributes.getValue().get(defAttributeKey);
-                Result<String> formattedValue = formatUserAttribute(userAttributeValue, def);
+            else if (userAttributes.getValue().containsKey(defAttribute.getKey())) {
+                String userAttributeValue = userAttributes.getValue().get(defAttribute.getKey());
+                Result<String> formattedValue = formatUserAttribute(userAttributeValue, defAttribute.getValue());
 
                 if (!formattedValue.getSuccess()) {
-                    String expectedMessage = buildExpectedMessage(def);
-                    errors.add("Unable to parse attribute '" + defAttributeKey + "'. " + expectedMessage);
+                    String expectedMessage = buildExpectedMessage(defAttribute.getValue());
+                    errors.add("Unable to parse attribute '" + defAttribute.getKey() + "'. " + expectedMessage);
                 }
                 else {
-                    userAttributes.getValue().put(defAttributeKey, formattedValue.getValue());
+                    userAttributes.getValue().put(defAttribute.getKey(), formattedValue.getValue());
                 }
             }
         }
@@ -54,8 +53,8 @@ public class AttributesHelper {
 
         List<ApplicationAttribute> attributes = new ArrayList<>();
 
-        for (String userAttribute : userAttributes.getValue().keySet()) {
-            attributes.add(new ApplicationAttribute(attributeDefsMap.get(userAttribute).getId(), userAttributes.getValue().get(userAttribute)));
+        for (Map.Entry<String,String> userAttribute : userAttributes.getValue().entrySet()) {
+            attributes.add(new ApplicationAttribute(attributeDefsMap.get(userAttribute.getKey()).getId(), userAttribute.getValue()));
         }
 
         ApplicationAttribute[] attributesArray = new ApplicationAttribute[attributes.size()];
@@ -105,10 +104,11 @@ public class AttributesHelper {
         return map;
     }
 
-    private static SimpleDateFormat dateFormat;
-    static {
-        dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+    private static SimpleDateFormat getDateFormat() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+
         dateFormat.setLenient(false);
+        return dateFormat;
     }
 
     private static Result<String> formatUserAttribute(String userAttributeValue, AttributeDefinition attributeDefinition) {
@@ -130,7 +130,7 @@ public class AttributesHelper {
             }
             case "Date": {
                 try {
-                    dateFormat.parse(userAttributeValue);
+                    getDateFormat().parse(userAttributeValue);
                     return new Result<>(true, null, userAttributeValue);
                 }
                 catch (ParseException _) {
