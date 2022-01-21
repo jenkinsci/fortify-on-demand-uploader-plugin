@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.SharedPollingBuildStep;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -28,7 +27,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.Secret;
 import org.kohsuke.stapler.AncestorInPath;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 
@@ -174,10 +172,11 @@ public class FortifyPollResults extends FortifyStep {
 // If the CrossBuildAction fails to save during the upload step, the polling fails semi-gracefully.
         if(build.getAction(CrossBuildAction.class) != null && build.getAction(CrossBuildAction.class).allowPolling()) {
             commonBuildStep.setUploadScanId(build.getAction(CrossBuildAction.class).currentScanId());
+            commonBuildStep.setCorrelationId(build.getAction(CrossBuildAction.class).currentCorrelationId());
             commonBuildStep.perform(build, workspace, launcher, listener);
         }
     }
-
+    
     @Extension
     public static class DescriptorImpl extends StepDescriptor {
         @Override

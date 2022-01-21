@@ -1,7 +1,5 @@
 package org.jenkinsci.plugins.fodupload;
 
-import com.fortify.fod.parser.BsiToken;
-import com.fortify.fod.parser.BsiTokenParser;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
@@ -73,6 +71,7 @@ public class PollingBuildStep extends Recorder implements SimpleBuildStep {
         // If the CrossBuildAction fails to save during the upload step, the polling fails semi-gracefully.
         if(run.getAction(CrossBuildAction.class) != null && run.getAction(CrossBuildAction.class).allowPolling()) {
             sharedBuildStep.setUploadScanId(run.getAction(CrossBuildAction.class).currentScanId());
+            sharedBuildStep.setCorrelationId(run.getAction(CrossBuildAction.class).currentCorrelationId());
             sharedBuildStep.perform(run, filePath, launcher, taskListener);
         }
     }

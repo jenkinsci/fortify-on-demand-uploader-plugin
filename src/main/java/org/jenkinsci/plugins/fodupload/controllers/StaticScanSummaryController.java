@@ -9,6 +9,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 // import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
+import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
 
 import java.io.IOException;
@@ -16,12 +17,9 @@ import java.io.PrintStream;
 import java.lang.reflect.Type;
 
 public class StaticScanSummaryController extends ControllerBase {
-    private PrintStream logger;
 
-
-    public StaticScanSummaryController(FodApiConnection apiConnection, PrintStream logger) {
-        super(apiConnection);
-        this.logger = logger;
+    public StaticScanSummaryController(final FodApiConnection apiConnection, final PrintStream logger, final String correlationId) {
+        super(apiConnection, logger, correlationId);
     }
 
     /**
@@ -37,10 +35,10 @@ public class StaticScanSummaryController extends ControllerBase {
 
         HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
                 .addPathSegments(String.format("/api/v3/releases/%d/scans/%d", releaseId, scanId));
-        logger.println("--------------------------");
-        logger.println("Retrieving scan summary data");
-        logger.println(String.format("ReleaseID: %s; ScanID: %s", releaseId, scanId));
-        logger.println("--------------------------");
+        println("--------------------------");
+        println("Retrieving scan summary data");
+        println(String.format("ReleaseID: %s; ScanID: %s", releaseId, scanId));
+        println("--------------------------");
 
         String url = builder.build().toString();
 
@@ -48,14 +46,20 @@ public class StaticScanSummaryController extends ControllerBase {
                 .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();
 
-        if (response.code() == HttpStatus.SC_FORBIDDEN) {
+        if (Utils.isUnauthorizedResponse(response)) {
             // Re-authenticate
             apiConnection.authenticate();
+            request = apiConnection.reauthenticateRequest(request);
             response = apiConnection.getClient().newCall(request).execute();
+
+            if (Utils.isUnauthorizedResponse(response)) {
+                return null;
+            }
         }
 
         // Read the results and close the response
@@ -72,9 +76,9 @@ public class StaticScanSummaryController extends ControllerBase {
         if (results != null) {
             return results;
         } else {
-            logger.println("Error retrieving scan summary data from API. Please log into online website to view summary information.");
-            logger.println(String.format("API response code: %s", response.code()));
-            logger.println(String.format("API response message: %s", response.message()));
+            println("Error retrieving scan summary data from API. Please log into online website to view summary information.");
+            println(String.format("API response code: %s", response.code()));
+            println(String.format("API response message: %s", response.message()));
             return null;
         }
     }

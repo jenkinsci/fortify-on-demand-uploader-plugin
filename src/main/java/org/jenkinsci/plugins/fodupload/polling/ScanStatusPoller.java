@@ -32,7 +32,6 @@ public class ScanStatusPoller {
      * @param pollingInterval the polling interval in minutes
      * @param logger          the PrintStream that will be logged to
      */
-    @SuppressFBWarnings("URF_UNREAD_FIELD")
     public ScanStatusPoller(FodApiConnection apiConnection, int pollingInterval, PrintStream logger) {
         this.apiConnection = apiConnection;
         this.pollingInterval = pollingInterval;
@@ -42,21 +41,22 @@ public class ScanStatusPoller {
     /**
      * Polls the release status
      *
-     * @param releaseId release to poll
+     * @param releaseId release id
+     * @param scanId scan id of the release
+     * @param correlationId correlation id related to scan id
      * @return true if status is completed | cancelled.
      * @throws java.io.IOException  in certain cases
      * @throws InterruptedException in certain cases
      */
-    public PollReleaseStatusResult pollReleaseStatus(final int releaseId, final int scanId) throws IOException, InterruptedException {
+    public PollReleaseStatusResult pollReleaseStatus(final int releaseId, final int scanId, final String correlationId) throws IOException, InterruptedException {
 
 
         logger.println("Begin polling Fortify on Demand for results.");
 
         boolean finished = false;
         int counter = 1;
-        LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection);
+        LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection, logger, correlationId);
         List<LookupItemsModel> analysisStatusTypes =  lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
-        //List<StatusPollerThread> pollerThreads = new ArrayList<StatusPollerThread>();
         StatusPollerThread pollerThread = null;
 
         // Create a list of values that will be used to break the loop if found
@@ -82,9 +82,9 @@ public class ScanStatusPoller {
                 }
                 if (counter == 1) {
                     //No Thread.sleep() on first round
-                    pollerThread = new StatusPollerThread(String.valueOf(counter), releaseId, analysisStatusTypes, apiConnection, complete, logger, 0, scanId);
+                    pollerThread = new StatusPollerThread(String.valueOf(counter), releaseId, analysisStatusTypes, apiConnection, complete, logger, 0, scanId, correlationId);
                 } else {
-                    pollerThread = new StatusPollerThread(String.valueOf(counter), releaseId, analysisStatusTypes, apiConnection, complete, logger, pollingInterval, scanId);
+                    pollerThread = new StatusPollerThread(String.valueOf(counter), releaseId, analysisStatusTypes, apiConnection, complete, logger, pollingInterval, scanId, correlationId);
                 }
 
                 pollerThread.start();

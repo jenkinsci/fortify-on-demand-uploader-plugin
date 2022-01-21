@@ -1,5 +1,11 @@
 # Changelog
-
+## Version 7.0.0 (01-18-2022)
+- Added new options to create or select an application and release, configure scan settings, and invoke Fortify ScanCentral SAST to package application files.
+- Added default values for the following pipeline parameters: **RemediationScanPreferenceType** (default **RemediationScanIfAvailable**), **InProgressScanActionType** (default **DoNotStartScan**), **InProgressBuildResultType** (default **FailBuild**)
+- Fixed **Build result if scan in progress** field to populate saved selection.
+- Fixed issue where polling status displayed **Not Started** for long running scans.
+- Fixed issue where saved scan settings were not populated after the Jenkins machine was restarted.
+ 
 ## Version 6.1.0 (09-02-2020)
 - Added the option to queue a new scan if a scan is in progress.
 - Added the option to fail the build or provide a warning if the task fails.

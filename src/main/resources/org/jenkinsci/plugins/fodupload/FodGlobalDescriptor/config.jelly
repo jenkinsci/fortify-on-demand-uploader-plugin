@@ -9,7 +9,7 @@
         <f:entry title="Fortify on Demand API URL" description="ex. https://api.ams.fortify.com" field="apiUrl">
             <f:textbox default="https://api.ams.fortify.com"/>
         </f:entry>
-     </f:section>   
+     </f:section>
      
         <f:block >
             <table >
@@ -38,6 +38,11 @@
               </f:radioBlock>
             </table>
         </f:block>
-    
+<!--https://fodtenant/Tools/Downloads-->
 
+    <f:section title="Scan Central">
+        <f:entry title="Path" description="Path to the scancentral executable" field="scanCentralPath">
+            <f:textbox default="" />
+        </f:entry>
+    </f:section>
 </j:jelly>
