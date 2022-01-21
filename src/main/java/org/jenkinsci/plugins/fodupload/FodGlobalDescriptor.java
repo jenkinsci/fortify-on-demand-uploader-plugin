@@ -31,6 +31,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String TENANT_ID = "tenantId";
     private static final String BASE_URL = "baseUrl";
     private static final String API_URL = "apiUrl";
+    private static final String SCANCENTRAL_PATH = "scanCentralPath";
 
     private String globalAuthType;
     private String clientId;
@@ -40,6 +41,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private String tenantId;
     private String baseUrl;
     private String apiUrl;
+    private String scanCentralPath;
 
     public FodGlobalDescriptor() {
         load();
@@ -62,6 +64,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         }
         baseUrl = formData.getString(BASE_URL);
         apiUrl = formData.getString(API_URL);
+        scanCentralPath = formData.getString(SCANCENTRAL_PATH);
 
         save();
 
@@ -138,11 +141,18 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         return apiUrl;
     }
 
+    @SuppressWarnings("unused")
+    public String getScanCentralPath() {
+        return scanCentralPath;
+    }
+
     public boolean getAuthTypeIsApiKey() {
-        return globalAuthType.equals("apiKeyType");
+        if(globalAuthType == null) return false;
+        return globalAuthType.equals("apiKeyType") ;
     }
 
     public boolean getAuthTypeIsPersonalToken() {
+        if(globalAuthType == null) return false;
         return globalAuthType.equals("personalAccessTokenType");
     }
 
@@ -269,7 +279,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
             return FormValidation.error("Unable to retrieve authentication token.");
         }
 
-        return !token.isEmpty() ?
+            return !token.isEmpty() ?
                 FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
                 FormValidation.error("Invalid connection information. Please check your credentials and try again.");
     }

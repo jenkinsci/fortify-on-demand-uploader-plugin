@@ -8,6 +8,7 @@ public class CrossBuildAction implements Action {
     private Result previousStepBuildResult;
     private boolean allowPolling;
     private int scanId;
+    private String correlationId;
 
     public Result getPreviousStepBuildResult() {
         return previousStepBuildResult;
@@ -26,12 +27,18 @@ public class CrossBuildAction implements Action {
         this.scanId = uploadScanId;
     }
 
+    public void setCorrelationId(String correlationId) { this.correlationId = correlationId; }
+
     public boolean allowPolling() {
         return allowPolling;
     }
 
     public int currentScanId() {
         return scanId;
+    }
+
+    public String currentCorrelationId() {
+        return correlationId;
     }
 
     @Override

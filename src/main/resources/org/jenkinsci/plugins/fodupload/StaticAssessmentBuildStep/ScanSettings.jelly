@@ -1,0 +1,146 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+         xmlns:f="/lib/form">
+    <f:block>
+
+        <style>
+            #fode-error, .fode-error {
+            color: red;
+            }
+        </style>
+
+        <f:section title="Scan Settings">
+            <f:block>
+                <div id="fode-msg">Select a release</div>
+                <div id="fode-error" style="display: none">Error</div>
+
+                <f:entry title="Assessment Type">
+                    <div id="assessmentTypeForm" class="fode-field spinner-container">
+                        <div class="fode-edit">
+                            <select name="userSelectedAssessmentType" id="ddAssessmentType">
+                                <option value="-1">Select an Assessment Type</option>
+                            </select>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Entitlement">
+                    <div id="entitlementForm" class="fode-field spinner-container">
+                        <div class="fode-edit">
+                            <select name="userSelectedEntitlement" id="entitlementSelectList">
+                                <option value="-1">Select an Entitlement</option>
+                            </select>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Remediation Preference" field="remediationScanPreferenceType" help="/plugin/fortify-on-demand-uploader/help-scanSettings-remediation.html">
+                    <div id="remediationScanPreferenceTypeForm" class="fode-field fode-row-remediation spinner-container">
+                        <f:select/>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Audit Preference">
+                    <div id="auditPreferenceForm" class="fode-field spinner-container">
+                        <div class="fode-edit">
+                            <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">
+                                <option value="2">Automated</option>
+                                <option value="1">Manual</option>
+                            </select>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Entitlement Preference" field="entitlementPreference">
+                    <div id="entitlementPreferenceForm" class="fode-field fode-row-bsi spinner-container">
+                        <f:select/>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Purchase Entitlements" field="purchaseEntitlements">
+                    <div id="purchaseEntitlementsForm" class="fode-field fode-row-bsi spinner-container">
+                        <f:checkbox/>
+                    </div>
+                </f:entry>
+
+                <f:entry title="ScanCentral Build Type" field="selectedScanCentralBuildType" help="/plugin/fortify-on-demand-uploader/help-scanCentral-buildType.html">
+                    <div id="scanCentralBuildTypeForm" class="fode-field spinner-container">
+                        <f:select></f:select>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Skip Build" field="scanCentralSkipBuild" help="/plugin/fortify-on-demand-uploader/help-scanCentral-skipBuild.html">
+                    <div id="skipBuildForm" class="fode-field spinner-container fode-row-sc fode-row-sc-gradle fode-row-sc-maven">
+                        <f:checkbox></f:checkbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Build Command" field="scanCentralBuildCommand" help="/plugin/fortify-on-demand-uploader/help-scanCentral-buildCmd.html">
+                    <div id="buildCommandForm"
+                         class="fode-field spinner-container fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
+                        <f:textbox></f:textbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Build File" field="scanCentralBuildFile" help="/plugin/fortify-on-demand-uploader/help-scanCentral-buildFile.html">
+                    <div id="buildFileForm"
+                         class="fode-field spinner-container fode-row-sc fode-row-sc-gradle fode-row-sc-maven fode-row-sc-msbuild">
+                        <f:textbox></f:textbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Version" field="scanCentralBuildToolVersion" help="/plugin/fortify-on-demand-uploader/help-scanCentral-version.html">
+                    <div id="buildToolVersionForm" class="fode-field spinner-container fode-row-sc fode-row-sc-php">
+                        <f:textbox></f:textbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Virtual Env" field="scanCentralVirtualEnv" help="/plugin/fortify-on-demand-uploader/help-scanCentral-venv.html">
+                    <div id="virtualEnvForm" class="fode-field spinner-container fode-row-sc fode-row-sc-python">
+                        <f:textbox></f:textbox>
+                    </div>
+
+                </f:entry>
+
+                <f:entry title="Requirement File" field="scanCentralRequirementFile" help="/plugin/fortify-on-demand-uploader/help-scanCentral-reqsFile.html">
+                    <div id="requirementFileForm" class="fode-field spinner-container fode-row-sc fode-row-sc-python">
+                        <f:textbox></f:textbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Technology Stack">
+                    <div id="technologyStackForm" class="fode-field spinner-container fode-row-nonsc">
+                        <div class="fode-edit">
+                            <select name="userSelectedTechnologyStack" id="technologyStackSelectList">
+                                <option value="-1">Select a Technology Stack</option>
+                            </select>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Language Level" id="languageLevelFormElementId">
+                    <div id="languageLevelForm" class="fode-field spinner-container fode-row-langLev">
+                        <div class="fode-edit">
+                            <select name="userSelectedLanguageLevel" id="languageLevelSelectList">
+                                <option value="-1">Select a Language Level</option>
+                            </select>
+                        </div>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Open Source Component Analysis by Sonatype">
+                    <div id="sonatypeForm" class="fode-field fode-checkbox fode-row-sonatype spinner-container">
+                        <input type="checkbox" value="false" name="sonatypeEnabled" id="cbSonatypeEnabled"/>
+                    </div>
+                </f:entry>
+
+                <f:entry>
+                    <div id="hiddenFields" class="fode-row-hidden">
+                        <input type="textbox" name="userSelectedEntitlementId" id="entitlementId"></input>
+                        <input type="textbox" name="userSelectedFrequencyType" id="frequencyId"></input>
+                    </div>
+                </f:entry>
+            </f:block>
+        </f:section>
+    </f:block>
+</j:jelly>

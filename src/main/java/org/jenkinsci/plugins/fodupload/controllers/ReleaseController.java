@@ -2,28 +2,25 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.kenai.jnr.x86asm.Logger;
 
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.models.AuditPreferenceOptionsModel;
 import org.jenkinsci.plugins.fodupload.models.FodApiFilterList;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
-import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
-import org.jenkinsci.plugins.fodupload.models.response.PollingSummaryDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseAssessmentTypeDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ReleaseDTO;
-import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
+import org.jenkinsci.plugins.fodupload.models.response.*;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.jenkinsci.plugins.fodupload.Utils;
+import org.springframework.core.enums.LetterCodedLabeledEnum;
 
 public class ReleaseController extends ControllerBase {
 
@@ -31,9 +28,11 @@ public class ReleaseController extends ControllerBase {
      * Constructor
      *
      * @param apiConnection apiConnection object with client info
+     * @param logger        logger object
+     * @param correlationId correlation id
      */
-    public ReleaseController(FodApiConnection apiConnection) {
-        super(apiConnection);
+    public ReleaseController(final FodApiConnection apiConnection, final PrintStream logger, final String correlationId) {
+        super(apiConnection, logger, correlationId);
     }
 
     /**
@@ -67,11 +66,12 @@ public class ReleaseController extends ControllerBase {
                 .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();
 
-        if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
+        if (Utils.isUnauthorizedResponse(response)) {  // got logged out during polling so log back in
             // Re-authenticate
             apiConnection.authenticate();
         }
@@ -118,14 +118,20 @@ public class ReleaseController extends ControllerBase {
                 .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();
 
-        if (response.code() == HttpStatus.SC_FORBIDDEN) { 
+        if (Utils.isUnauthorizedResponse(response)) {
             // Re-authenticate
             apiConnection.authenticate();
+            request = apiConnection.reauthenticateRequest(request);
             response = apiConnection.getClient().newCall(request).execute();
+
+            if (Utils.isUnauthorizedResponse(response)) {
+                return null;
+            }
         }
         // Read the results and close the response
         String content = IOUtils.toString(response.body().byteStream(), "utf-8");
@@ -138,9 +144,8 @@ public class ReleaseController extends ControllerBase {
         GenericListResponse<ScanSummaryDTO> results = gson.fromJson(content, t);
         ScanSummaryDTO resultDto = null;
         if (results.getItems().size() > 0) {
-           for (ScanSummaryDTO sdto : results.getItems())
-            {
-                if(sdto.getScanId() == scanId)
+            for (ScanSummaryDTO sdto : results.getItems()) {
+                if (sdto.getScanId() == scanId)
                     resultDto = sdto;
             }
         }
@@ -171,14 +176,21 @@ public class ReleaseController extends ControllerBase {
                 .url(url)
                 .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
         Response response = apiConnection.getClient().newCall(request).execute();
 
-        if (response.code() == HttpStatus.SC_FORBIDDEN) { 
+        if (Utils.isUnauthorizedResponse(response)) {
             // Re-authenticate
             apiConnection.authenticate();
+            request = apiConnection.reauthenticateRequest(request);
             response = apiConnection.getClient().newCall(request).execute();
+
+            // if response is still unauthorized, even after re-authentication, return null to the caller, to signal polling failure.
+            if (Utils.isUnauthorizedResponse(response)) {
+                return null;
+            }
         }
         // Read the results and close the response
         String content = IOUtils.toString(response.body().byteStream(), "utf-8");
@@ -208,8 +220,9 @@ public class ReleaseController extends ControllerBase {
                 .addFilter("frequencyTypeId", model.getEntitlementPreference())
                 .addFilter("assessmentTypeId", model.getBsiToken().getAssessmentTypeId());
 
+        //TODO: "Project version ID"
         String url = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
-                .addPathSegments(String.format("/api/v3/releases/%s/assessment-types", model.getBsiToken().getProjectVersionId()))
+                .addPathSegments(String.format("/api/v3/releases/%s/assessment-types", model.getBsiToken().getReleaseId()))
                 .addQueryParameter("scanType", "1")
                 .addQueryParameter("filters", filters.toString())
                 .build().toString();
@@ -253,4 +266,97 @@ public class ReleaseController extends ControllerBase {
         return null;
 
     }
+
+    public Integer getReleaseIdByName(final String appName, final String relName, final Boolean isMicroservice, final String microserviceName) throws IOException {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/releases/")
+                .addQueryParameter("filters", "applicationName:" + appName + "+releaseName:" + relName)
+                .addQueryParameter("fields", "releaseId,applicationName,releaseName,microserviceName")
+                .addQueryParameter("offset", "0");
+
+        if (isMicroservice) urlBuilder.addQueryParameter("microserviceName", microserviceName);
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .get()
+                .build();
+        Type typeToken = new TypeToken<GenericListResponse<ReleaseIdLookupResult>>() {
+        }.getType();
+        GenericListResponse<ReleaseIdLookupResult> response = apiConnection.requestTyped(request, typeToken);
+        List<ReleaseIdLookupResult> items = response.getItems();
+        int totalCount = response.getTotalCount();
+        int itemsReceived = 0;
+
+        do {
+            for (ReleaseIdLookupResult rel : items) {
+                if (rel.getApplicationName().equals(appName) &&
+                        rel.getReleaseName().equals(relName) &&
+                        (!isMicroservice || rel.getMicroserviceName().equals(microserviceName))) {
+                    return rel.getReleaseId();
+                }
+            }
+
+            itemsReceived = items.size();
+
+            if (itemsReceived < totalCount) {
+                urlBuilder.setQueryParameter("offset", String.valueOf(items.size()));
+                request = new Request.Builder()
+                        .url(urlBuilder.build())
+                        .addHeader("Accept", "application/json")
+                        .addHeader("CorrelationId", getCorrelationId())
+                        .get()
+                        .build();
+                response = apiConnection.requestTyped(request, typeToken);
+
+                if (response.getItems().size() < 1) throw new IOException("Invalid API response, releases page was empty");
+
+                items = response.getItems();
+            }
+        } while (itemsReceived < totalCount);
+
+        return null;
+    }
+
+    public AuditPreferenceOptionsModel getAuditPreferences(Integer releaseId, Integer assessmentType, Integer frequencyType) throws IOException {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/releases/" + releaseId + "/static-scan-options")
+                .addQueryParameter("technologyStack", "a") // Doesn't matter for Audit Preferences
+                .addQueryParameter("assessmentTypeId", assessmentType.toString())
+                .addQueryParameter("entitlementFrequencyType", frequencyType.toString());
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .get()
+                .build();
+        Type typeToken = new TypeToken<GenericListResponse<ScanOption>>() {
+        }.getType();
+        GenericListResponse<ScanOption> response = apiConnection.requestTyped(request, typeToken);
+        List<ScanOption> items = response.getItems();
+
+        if (items != null && items.size() > 0) {
+            for (ScanOption option : items) {
+                if(option.getName().equals("AuditPreference")) {
+                    if (option.getOptions() != null && option.getOptions().size() > 0) {
+                        boolean automated = false;
+                        boolean manual = false;
+
+                        for (LookupItemsModel item : option.getOptions()) {
+                            if (item.getText().equals("Automated")) automated = true;
+                            else if (item.getText().equals("Manual")) manual = true;
+                        }
+
+                        return new AuditPreferenceOptionsModel(automated, manual);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return new AuditPreferenceOptionsModel(false, false);
+    }
+
 }
