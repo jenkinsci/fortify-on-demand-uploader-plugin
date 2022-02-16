@@ -721,17 +721,14 @@ public class SharedUploadBuildStep {
                             scanCentralPackageCommandList.add("--python-virtual-env");
                             scanCentralPackageCommandList.add(model.getScanCentralVirtualEnv());
                         }
-                        ;
                         if (!Utils.isNullOrEmpty(model.getScanCentralRequirementFile())) {
                             scanCentralPackageCommandList.add("--python-requirements");
                             scanCentralPackageCommandList.add(model.getScanCentralRequirementFile());
                         }
-                        ;
                         if (!Utils.isNullOrEmpty(model.getScanCentralBuildToolVersion())) {
                             scanCentralPackageCommandList.add("--python-version");
                             scanCentralPackageCommandList.add(model.getScanCentralBuildToolVersion());
                         }
-                        ;
                         break;
                     case PHP:
                         scanCentralPackageCommandList.add("none");
@@ -739,11 +736,10 @@ public class SharedUploadBuildStep {
                             scanCentralPackageCommandList.add("--php-version");
                             scanCentralPackageCommandList.add(model.getScanCentralBuildToolVersion());
                         }
-                        ;
                         break;
                     case Go:
                         scanCentralPackageCommandList.add("none");
-                        ;
+                        break;
                     default:
                         throw new IllegalArgumentException("Invalid ScanCentral build type: " + buildType);
                 }
