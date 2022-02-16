@@ -30,7 +30,7 @@ const _scanCentralBuildTypes = {
     "Go": "Go"
 };
 
-const _scanCentralRecommended = [1, 7, 9, 23];
+const _scanCentralRecommended = [1, 7, 9, 22, 23];
 
 const _auditPrefOption = {
     automated: '<option value="2">Automated</option>',
