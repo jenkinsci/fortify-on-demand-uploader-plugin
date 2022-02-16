@@ -362,12 +362,12 @@ public class SharedUploadBuildStep {
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         final PrintStream logger = listener.getLogger();
         if (model == null) {
-            logger.println("Unexpected Error");
+            logger.println("Unexpected Error: prebuild model is null");
             build.setResult(Result.FAILURE);
             return false;
         }
 
-        if (!model.getIsPipeline() && (model.getReleaseId() == null || model.getReleaseId().isEmpty()) && model.loadBsiToken() == false) {
+        if (!model.getIsPipeline() && (model.getReleaseId() == null || model.getReleaseId().isEmpty()) && !model.loadBsiToken()) {
             logger.println("Invalid release ID or BSI Token");
             build.setResult(Result.FAILURE);
             return false;
@@ -475,7 +475,7 @@ public class SharedUploadBuildStep {
                 if (model.getSelectedScanCentralBuildType().equalsIgnoreCase(FodEnums.SelectedScanCentralBuildType.None.toString())) {
 
                     if (ValidationUtils.isScanCentralRecommended(technologyStack)) {
-                        logger.println("Fortify recommends using ScanCentral SAST to package code for comprehensive scan results.");
+                        logger.println("\nFortify recommends using ScanCentral Client to package code for comprehensive scan results.\n");
                     }
 
                     // zips the file in a temporary location

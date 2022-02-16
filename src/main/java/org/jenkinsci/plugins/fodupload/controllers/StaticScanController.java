@@ -27,8 +27,7 @@ public class StaticScanController extends ControllerBase {
     private final static int EXPRESS_SCAN_PREFERENCE_ID = 2;
     private final static int EXPRESS_AUDIT_PREFERENCE_ID = 2;
     private final static int MAX_NOTES_LENGTH = 250;
-    //    private final static int CHUNK_SIZE = 1024 * 1024; //1MB
-    private final static int CHUNK_SIZE = 1024 * 1024 * 4; //4MB
+    private final static int CHUNK_SIZE = 1024 * 1024; //1MB
 
     /**
      * Constructor

@@ -12,6 +12,10 @@
             color: red;
             }
 
+            .fode-row-screc #technologyScanCentralRec {
+            font-size: 85%
+            }
+
         </style>
 
         <f:section title="Scan Settings">
@@ -115,7 +119,7 @@
 
                 <f:entry title="">
                     <div id="technologyScanCentralRec" class="fode-field fode-row-screc">
-                        <div>Fortify recommends using ScanCentral SAST to package code for comprehensive scan results.</div>
+                        Fortify recommends using ScanCentral Client to package code for comprehensive scan results.
                     </div>
                 </f:entry>
 
