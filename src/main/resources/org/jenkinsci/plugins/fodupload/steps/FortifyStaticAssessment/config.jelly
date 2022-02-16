@@ -273,6 +273,7 @@
                     <option id="MSBuild" value="MSBuild">MSBuild</option>
                     <option id="PHP" value="PHP">PHP</option>
                     <option id="Python" value="Python">Python</option>
+                    <option id="Go" value="Go">Go</option>
                 </select>
             </div>
         </f:entry>

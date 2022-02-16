@@ -741,6 +741,9 @@ public class SharedUploadBuildStep {
                         }
                         ;
                         break;
+                    case Go:
+                        scanCentralPackageCommandList.add("none");
+                        ;
                     default:
                         throw new IllegalArgumentException("Invalid ScanCentral build type: " + buildType);
                 }

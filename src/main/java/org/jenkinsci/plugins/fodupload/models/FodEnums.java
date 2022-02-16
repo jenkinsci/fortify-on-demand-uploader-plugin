@@ -265,6 +265,7 @@ public class FodEnums {
         Maven,
         MSBuild,
         PHP,
+        Go,
         Python;
 
         public static SelectedScanCentralBuildType fromInt(int val) {
@@ -279,6 +280,8 @@ public class FodEnums {
                     return PHP;
                 case 5:
                     return Python;
+                case 6:
+                    return Go;
                 case 0:
                 default:
                     return None;
@@ -297,6 +300,8 @@ public class FodEnums {
                     return 4;
                 case "Python":
                     return 5;
+                case "Go":
+                    return 6;
                 default:
                     return 0;
             }

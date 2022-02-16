@@ -244,6 +244,9 @@ class PipelineGenerator {
                 case techStackConsts.php:
                     this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
                     break;
+                case techStackConsts.go:
+                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Go);
+                    break;
                 case techStackConsts.python:
                     this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
                     break;
@@ -321,6 +324,9 @@ class PipelineGenerator {
                     break;
                 case _scanCentralBuildTypes.PHP:
                     if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.php);
+                    break;
+                case _scanCentralBuildTypes.Go:
+                    if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.go);
                     break;
                 case _scanCentralBuildTypes.Python:
                     if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.python);
@@ -659,21 +665,22 @@ class PipelineGenerator {
         ss = jq('#scanCentralBuildTypeSelect').val();
 
         switch (ss) {
-            case 'Gradle':
-            case 'Maven':
+            case _scanCentralBuildTypes.Gradle:
+            case _scanCentralBuildTypes.Maven:
                 sssb = this.getHiddenFieldCheckValue('#scanCentralSkipBuildCheck');
                 ssbc = jq('#scanCentralBuildCommandInput').val();
                 ssbf = jq('#scanCentralBuildFileInput').val();
                 break;
-            case 'MSBuild':
+            case _scanCentralBuildTypes.MSBuild:
                 ssbc = jq('#scanCentralBuildCommandInput').val();
                 ssbf = jq('#scanCentralBuildFileInput').val();
                 break;
-            case 'Python':
+            case _scanCentralBuildTypes.Python:
                 ssve = jq('#scanCentralVirtualEnvInput').val();
                 ssrf = jq('#scanCentralRequirementFileInput').val();
                 break;
-            case 'PHP':
+            case _scanCentralBuildTypes.PHP:
+            case _scanCentralBuildTypes.Go:
                 break;
             case 'None':
                 ss = '';

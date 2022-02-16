@@ -16,7 +16,8 @@ const techStackConsts = {
     dotNetCore: 23,
     java: 7,
     php: 9,
-    python: 10
+    python: 10,
+    go: 22
 };
 
 const _scanCentralBuildTypes = {
@@ -25,7 +26,8 @@ const _scanCentralBuildTypes = {
     "Maven": "Maven",
     "MSBuild": "MSBuild",
     "PHP": "PHP",
-    "Python": "Python"
+    "Python": "Python",
+    "Go": "Go"
 };
 
 const _scanCentralRecommended = [1, 7, 9, 23];

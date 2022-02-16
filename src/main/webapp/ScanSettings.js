@@ -197,6 +197,9 @@ class ScanSettings {
                         case techStackConsts.php:
                             this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
                             break;
+                        case techStackConsts.go:
+                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Go);
+                            break;
                         case techStackConsts.python:
                             this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
                             break;
@@ -278,6 +281,9 @@ class ScanSettings {
                     break;
                 case _scanCentralBuildTypes.PHP:
                     jq('#technologyStackSelectList').val(techStackConsts.php);
+                    break;
+                case _scanCentralBuildTypes.Go:
+                    jq('#technologyStackSelectList').val(techStackConsts.go);
                     break;
                 case _scanCentralBuildTypes.Python:
                     jq('#technologyStackSelectList').val(techStackConsts.python);
