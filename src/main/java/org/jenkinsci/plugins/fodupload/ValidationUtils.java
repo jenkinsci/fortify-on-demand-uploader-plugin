@@ -10,7 +10,7 @@ public class ValidationUtils {
 
     private static List<Integer> techStacksSupportSonatypeScans = Arrays.asList(2, 3, 5, 6, 11, 14, 18, 21);
     private static List<Integer> scanCentralOnlyTechStacks = Arrays.asList(10);
-    private static List<String> scanCentralRecommended = Arrays.asList(".NET", "JAVA/J2EE", "PHP", ".Net Core");
+    private static List<String> scanCentralRecommended = Arrays.asList(".NET", "JAVA/J2EE", "PHP", "Go", ".Net Core");
 
 
     public enum ScanCentralValidationResult {
@@ -35,6 +35,9 @@ public class ValidationUtils {
                 break;
             case "Python":
                 if (techStack != 10) return ScanCentralValidationResult.Mismatched;
+                break;
+            case "Go":
+                if (techStack != 22) return ScanCentralValidationResult.Mismatched;
                 break;
             default:
                 if (scanCentralOnlyTechStacks.contains(techStack)) return ScanCentralValidationResult.ScanCentralRequired;
