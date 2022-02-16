@@ -7,6 +7,11 @@
             #fode-error, .fode-error {
             color: red;
             }
+
+            .fode-row-screc {
+            color: red;
+            }
+
         </style>
 
         <f:section title="Scan Settings">
@@ -105,6 +110,12 @@
                 <f:entry title="Requirement File" field="scanCentralRequirementFile" help="/plugin/fortify-on-demand-uploader/help-scanCentral-reqsFile.html">
                     <div id="requirementFileForm" class="fode-field spinner-container fode-row-sc fode-row-sc-python">
                         <f:textbox></f:textbox>
+                    </div>
+                </f:entry>
+
+                <f:entry title="">
+                    <div id="technologyScanCentralRec" class="fode-field fode-row-screc">
+                        <div>Fortify recommends using ScanCentral SAST to package code for comprehensive scan results.</div>
                     </div>
                 </f:entry>
 

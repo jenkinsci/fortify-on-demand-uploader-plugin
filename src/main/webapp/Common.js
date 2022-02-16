@@ -28,6 +28,8 @@ const _scanCentralBuildTypes = {
     "Python": "Python"
 };
 
+const _scanCentralRecommended = [1, 7, 9, 23];
+
 const _auditPrefOption = {
     automated: '<option value="2">Automated</option>',
     manual: '<option value="1">Manual</option>'

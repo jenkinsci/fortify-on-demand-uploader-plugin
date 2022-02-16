@@ -471,7 +471,13 @@ public class SharedUploadBuildStep {
 
                 FilePath workspaceModified = new FilePath(workspace, model.getSrcLocation());
                 File payload;
+
                 if (model.getSelectedScanCentralBuildType().equalsIgnoreCase(FodEnums.SelectedScanCentralBuildType.None.toString())) {
+
+                    if (ValidationUtils.isScanCentralRecommended(technologyStack)) {
+                        logger.println("Fortify recommends using ScanCentral SAST to package code for comprehensive scan results.");
+                    }
+
                     // zips the file in a temporary location
                     payload = Utils.createZipFile(technologyStack, workspaceModified, logger);
                     if (payload.length() == 0) {
@@ -634,11 +640,11 @@ public class SharedUploadBuildStep {
             while ((versionLine = stdInputVersion.readLine()) != null) {
                 logger.println(versionLine);
                 if (versionLine.contains("version")) {
-                    Pattern versionPattern = Pattern.compile("(?<=version:  ).*");
+                    Pattern versionPattern = Pattern.compile("(version: *?)(.*)");
                     Matcher m = versionPattern.matcher(versionLine);
 
                     if (m.find()) {
-                        scanCentralVersion = m.group().trim();
+                        scanCentralVersion = m.group(2).trim();
 
                         ComparableVersion minScanCentralVersion = new ComparableVersion("21.1.2.0002");
                         ComparableVersion userScanCentralVersion = new ComparableVersion(scanCentralVersion);
@@ -803,8 +809,8 @@ public class SharedUploadBuildStep {
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
                 throw new IOException("Failed to assign executable permissions to gradle file");
-            }finally {
-                if(stdInput != null) stdInput.close();
+            } finally {
+                if (stdInput != null) stdInput.close();
             }
         }
         return 0;

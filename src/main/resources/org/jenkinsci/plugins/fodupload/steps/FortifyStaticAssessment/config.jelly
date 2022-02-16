@@ -9,6 +9,10 @@
         color: red;
         }
 
+        .fodp-row-screc {
+        color: red;
+        }
+
         .fode-row-hidden {
         display: none;
         }
@@ -310,6 +314,12 @@
             </div>
         </f:entry>
 
+        <f:entry title="">
+            <div id="technologyScanCentralRec" class="fodp-field fodp-row-screc">
+                <div>Fortify recommends using ScanCentral SAST to package code for comprehensive scan results.</div>
+            </div>
+        </f:entry>
+
         <f:entry title="Technology Stack">
             <div id="technologyStackForm" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv fodp-row-nonsc">
                 <select id="technologyStackSelect" class="setting-input">
@@ -395,6 +405,5 @@
     </script>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Auth.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/PipelineReleaseSelectionDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/PipelineGenerator.js"/>
 </j:jelly>
