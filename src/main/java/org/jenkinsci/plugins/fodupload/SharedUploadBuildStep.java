@@ -626,6 +626,9 @@ public class SharedUploadBuildStep {
             //version check
             logger.println("Checking ScanCentralVersion");
             String scanCentralbatLocation = Paths.get(String.valueOf(scanCentralLocation)).resolve(scexec).toString();
+
+            logger.println("JAVA_HOME: " + System.getenv("JAVA_HOME"));
+
             List<String> scanCentralVersionCommandList = new ArrayList<>();
 
             scanCentralVersionCommandList.add(scanCentralbatLocation);
@@ -661,6 +664,7 @@ public class SharedUploadBuildStep {
             if (versionLine != null && versionLine.contains("version")) {
                 Path outputZipFolderPath = Paths.get(String.valueOf(outputLocation)).resolve("output.zip");
                 FodEnums.SelectedScanCentralBuildType buildType = FodEnums.SelectedScanCentralBuildType.valueOf(model.getSelectedScanCentralBuildType());
+
                 if (buildType == FodEnums.SelectedScanCentralBuildType.Gradle) {
                     logger.println("Giving permission to gradlew");
                     int permissionsExitCode = givePermissionsToGradle(srcLocation, logger);
