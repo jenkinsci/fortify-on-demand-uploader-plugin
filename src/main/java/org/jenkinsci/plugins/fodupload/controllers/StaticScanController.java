@@ -15,6 +15,8 @@ import org.jenkinsci.plugins.fodupload.models.response.*;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +27,7 @@ public class StaticScanController extends ControllerBase {
     private final static int EXPRESS_SCAN_PREFERENCE_ID = 2;
     private final static int EXPRESS_AUDIT_PREFERENCE_ID = 2;
     private final static int MAX_NOTES_LENGTH = 250;
-    private final static int CHUNK_SIZE = 1024 * 1024;
+    private final static int CHUNK_SIZE = 1024 * 1024; //1MB
 
     /**
      * Constructor
@@ -74,11 +76,10 @@ public class StaticScanController extends ControllerBase {
 
             if (Utils.isNullOrEmpty(uploadRequest.getSelectedReleaseType())) {
                 if (uploadRequest.getIsPipeline()) {
-                    if(!Utils.isNullOrEmpty(uploadRequest.getBsiTokenOriginal()) && releaseId <= 0) {
+                    if (!Utils.isNullOrEmpty(uploadRequest.getBsiTokenOriginal()) && releaseId <= 0) {
                         buildBsiRequest(builder, uploadRequest);
-                    }
-                    else if ((releaseId == null || releaseId < 1)) releaseId = upsertApplicationAndRelease(uploadRequest);
-                    if(releaseId > 0 ) buildPipelineRequest(builder, releaseId, uploadRequest);
+                    } else if ((releaseId == null || releaseId < 1)) releaseId = upsertApplicationAndRelease(uploadRequest);
+                    if (releaseId > 0) buildPipelineRequest(builder, releaseId, uploadRequest);
                 } else throw new IllegalArgumentException("Invalid job model");
             } else {
                 FodEnums.SelectedReleaseType type = FodEnums.SelectedReleaseType.valueOf(uploadRequest.getSelectedReleaseType());
@@ -135,15 +136,15 @@ public class StaticScanController extends ControllerBase {
                         .post(RequestBody.create(byteArray, sendByteArray))
                         .build();
 
-                println("Uploading fragment " + fragmentNumber);
+                println(getLogTimestamp() + " Uploading fragment " + fragmentNumber);
                 // Get the response
                 Response response = apiConnection.getClient().newCall(request).execute();
 
                 if (response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
                     String raw = apiConnection.getRawBody(response);
 
-                    if (Utils.isNullOrEmpty(raw)) println("Uploading fragment failed, reauthenticating");
-                    else println("Uploading fragment failed, reauthenticating \n" + raw);
+                    if (Utils.isNullOrEmpty(raw)) println(getLogTimestamp() + " Uploading fragment failed, reauthenticating");
+                    else println(getLogTimestamp() + " Uploading fragment failed, reauthenticating \n" + raw);
                     // Re-authenticate
                     apiConnection.authenticate();
                     continue;
@@ -152,7 +153,7 @@ public class StaticScanController extends ControllerBase {
                 offset += byteCount;
 
                 if (fragmentNumber % 5 == 0) {
-                    println("Upload Status - Fragment No: " + fragmentNumber + ", Bytes sent: " + offset
+                    println(getLogTimestamp() + " Upload Status - Fragment No: " + fragmentNumber + ", Bytes sent: " + offset
                             + " (Response: " + response.code() + ")");
                 }
 
@@ -164,25 +165,25 @@ public class StaticScanController extends ControllerBase {
                     if (response.code() == 200) {
 
                         scanStartedResponse = gson.fromJson(responseJsonStr, PostStartScanResponse.class);
-                        println("Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
+                        println(getLogTimestamp() + " Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
                         scanResults.uploadSuccessfulScanStarting(scanStartedResponse.getScanId());
                         return scanResults;
 
                     } else if (!response.isSuccessful()) { // There was an error along the lines of 'another scan in progress' or something
-                        println("An error occurred during the upload.");
+                        println(getLogTimestamp() + " An error occurred during the upload.");
                         GenericErrorResponse errors = gson.fromJson(responseJsonStr, GenericErrorResponse.class);
 
                         if (errors != null) {
                             if (errors.toString().contains("Can not start scan another scan is in progress")) {
                                 scanResults.uploadSuccessfulScanNotStarted();
                             } else {
-                                println("Package upload failed for the following reasons: ");
+                                println(getLogTimestamp() + " Package upload failed for the following reasons: ");
                                 println(errors.toString());
                                 scanResults.uploadNotSuccessful();
                             }
                         } else {
-                            if (!Utils.isNullOrEmpty(responseJsonStr)) println("Raw response\n" + responseJsonStr);
-                            else println("No response body from api");
+                            if (!Utils.isNullOrEmpty(responseJsonStr)) println(getLogTimestamp() + " Raw response\n" + responseJsonStr);
+                            else println(getLogTimestamp() + " No response body from api");
                             scanResults.uploadNotSuccessful();
                         }
 
@@ -192,7 +193,7 @@ public class StaticScanController extends ControllerBase {
                 response.body().close();
 
             } // end while
-            println("Payload upload complete");
+            println(getLogTimestamp() + " Payload upload complete");
         } catch (Exception e) {
             printStackTrace(e);
             scanResults.uploadNotSuccessful();
@@ -201,6 +202,12 @@ public class StaticScanController extends ControllerBase {
 
         scanResults.uploadNotSuccessful();
         return scanResults;
+    }
+
+    private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+    private String getLogTimestamp() {
+        return dateFormat.format(LocalDateTime.now());
     }
 
     private void buildBsiRequest(final HttpUrl.Builder builder, final JobModel uploadRequest) {
@@ -227,7 +234,8 @@ public class StaticScanController extends ControllerBase {
         if (!Utils.isNullOrEmpty(uploadRequest.getFrequencyId()))
             builder.addQueryParameter("entitlementFrequencyType", uploadRequest.getFrequencyId());
 
-        if (!Utils.isNullOrEmpty(uploadRequest.getOpenSourceScan())) builder.addQueryParameter("doSonatypeScan", Utils.isNullOrEmpty(uploadRequest.getOpenSourceScan())?"false":uploadRequest.getOpenSourceScan());
+        if (!Utils.isNullOrEmpty(uploadRequest.getOpenSourceScan()))
+            builder.addQueryParameter("doSonatypeScan", Utils.isNullOrEmpty(uploadRequest.getOpenSourceScan()) ? "false" : uploadRequest.getOpenSourceScan());
 
         if (!Utils.isNullOrEmpty(uploadRequest.getAuditPreference()))
             builder.addQueryParameter("auditPreferenceType", uploadRequest.getAuditPreference());
@@ -319,7 +327,7 @@ public class StaticScanController extends ControllerBase {
         AttributesController attrCntr = new AttributesController(apiConnection, logger, correlationId);
         List<AttributeDefinition> fodAttr = attrCntr.getAttributeDefinitions();
         List<FodAttributeMapItem> result = new ArrayList<>();
-        List<String> invalidPickListAttributes  = new ArrayList<>();
+        List<String> invalidPickListAttributes = new ArrayList<>();
 
         for (Map.Entry<String, String> a : attributes.entrySet()) {
             for (AttributeDefinition fa : fodAttr) {
@@ -329,33 +337,31 @@ public class StaticScanController extends ControllerBase {
                         for (PicklistValue pv : fa.getPicklistValues()) {
                             pickListAttrValueStrings.add(pv.getName());
                         }
-                        if(pickListAttrValueStrings.contains(a.getValue()))
+                        if (pickListAttrValueStrings.contains(a.getValue()))
                             result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
                         else
                             invalidPickListAttributes.add(a.getKey());
                         break;
-                    }
-                    else if(fa.getAttributeDataType().equalsIgnoreCase("Boolean")){
+                    } else if (fa.getAttributeDataType().equalsIgnoreCase("Boolean")) {
                         Pattern queryLangPattern = Pattern.compile("true|false", Pattern.CASE_INSENSITIVE);
                         Matcher matcher = queryLangPattern.matcher(a.getValue());
-                        if(matcher.matches())
+                        if (matcher.matches())
                             result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
                         else
-                            invalidPickListAttributes.add(a.getKey()+" : true/false");
+                            invalidPickListAttributes.add(a.getKey() + " : true/false");
                         break;
-                    }
-                    else if(fa.getAttributeDataType().equalsIgnoreCase("User")){
+                    } else if (fa.getAttributeDataType().equalsIgnoreCase("User")) {
                         ArrayList<String> userAttrValues = new ArrayList<>();
                         ArrayList<String> userAttrValueIdNames = new ArrayList<>();
                         for (PicklistValue pv : fa.getPicklistValues()) {
                             userAttrValues.add(pv.getName());
                             userAttrValues.add(String.valueOf(pv.getId()));
-                            userAttrValueIdNames.add(String.valueOf(pv.getId())+"-"+pv.getName());
+                            userAttrValueIdNames.add(String.valueOf(pv.getId()) + "-" + pv.getName());
                         }
-                        if(userAttrValues.contains(a.getValue()))
+                        if (userAttrValues.contains(a.getValue()))
                             result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
                         else
-                            invalidPickListAttributes.add(a.getKey()+" : "+userAttrValueIdNames.stream().collect(Collectors.joining(",")));
+                            invalidPickListAttributes.add(a.getKey() + " : " + userAttrValueIdNames.stream().collect(Collectors.joining(",")));
                         break;
                     }
                     result.add(new FodAttributeMapItem(a.getKey(), a.getValue(), fa));
@@ -363,8 +369,8 @@ public class StaticScanController extends ControllerBase {
                 }
             }
         }
-        if(invalidPickListAttributes.size() > 0){
-            throw new Exception(String.format("Invalid PickList Attributes/Values for the following Picklist Attribute/s - %s",invalidPickListAttributes.stream().collect(Collectors.joining(" & "))));
+        if (invalidPickListAttributes.size() > 0) {
+            throw new Exception(String.format("Invalid PickList Attributes/Values for the following Picklist Attribute/s - %s", invalidPickListAttributes.stream().collect(Collectors.joining(" & "))));
         }
         return result;
     }

@@ -200,7 +200,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         int entitlementId = Integer.parseInt(entitlementIdStr);
         int entitlementFrequencyType = Integer.parseInt(entitlementFrequencyTypeStr);
         int technologyStackId = Integer.parseInt(technologyStackIdStr);
-        Integer languageLevelId = (Utils.tryParseInt(languageLevelIdStr, null) == -1) ? null : Utils.tryParseInt(languageLevelIdStr, null);
+        Integer languageLevelId = Utils.tryParseInt(languageLevelIdStr, null);
         int auditPreferenceType = Integer.parseInt(auditPreferenceTypeStr);
 
         try {
