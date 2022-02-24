@@ -230,29 +230,34 @@ class PipelineGenerator {
 
         let scval = this.getScanCentralBuildTypeSelected();
 
-        switch (tech) {
-            case techStackConsts.dotNet:
-            case techStackConsts.dotNetCore:
-                this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.MSBuild);
-                jq('#technologyStackSelect').val(tech);
-                break;
-            case techStackConsts.java:
-                // Selected release is Java, but SC was not set to None, Maven, nor Gradle, default to Maven
-                if (scval !== _scanCentralBuildTypes.Maven && scval !== _scanCentralBuildTypes.Gradle) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Maven);
-                break;
-            case techStackConsts.php:
-                this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
-                break;
-            case techStackConsts.python:
-                this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
-                break;
-            default:
-                // It's a valid tech stack but not supported by SC
-                if (tech > 0) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.None);
-                break;
-        }
+        if (scval !== _scanCentralBuildTypes.None) {
+            switch (tech) {
+                case techStackConsts.dotNet:
+                case techStackConsts.dotNetCore:
+                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.MSBuild);
+                    jq('#technologyStackSelect').val(tech);
+                    break;
+                case techStackConsts.java:
+                    // Selected release is Java, but SC was not set to None, Maven, nor Gradle, default to Maven
+                    if (scval !== _scanCentralBuildTypes.Maven && scval !== _scanCentralBuildTypes.Gradle) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Maven);
+                    break;
+                case techStackConsts.php:
+                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
+                    break;
+                case techStackConsts.go:
+                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Go);
+                    break;
+                case techStackConsts.python:
+                    this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
+                    break;
+                default:
+                    // It's a valid tech stack but not supported by SC
+                    if (tech > 0) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.None);
+                    break;
+            }
 
-        this.onScanCentralChanged();
+            this.onScanCentralChanged();
+        }
 
         if (this.getScanCentralBuildTypeSelected() === _scanCentralBuildTypes.None) {
             jq('#technologyStackSelect').val(tech);
@@ -320,6 +325,9 @@ class PipelineGenerator {
                 case _scanCentralBuildTypes.PHP:
                     if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.php);
                     break;
+                case _scanCentralBuildTypes.Go:
+                    if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.go);
+                    break;
                 case _scanCentralBuildTypes.Python:
                     if (this.overrideServerSettings || this.autoProvMode) jq('#technologyStackSelect').val(techStackConsts.python);
                     break;
@@ -363,6 +371,7 @@ class PipelineGenerator {
         if (this.overrideServerSettings || this.autoProvMode) llr.show();
         llsel.find('option').not(':first').remove();
         llsel.find('option').first().prop('selected', true);
+        jq('.fodp-row-screc').hide();
 
         if (ts) {
             if (Array.isArray(ts.levels) && ts.levels.length > 0) {
@@ -386,37 +395,17 @@ class PipelineGenerator {
                 let scbt = this.getScanCentralBuildTypeSelected();
                 let tsv = numberOrNull(ts.value);
 
-                switch (tsv) {
-                    case techStackConsts.dotNet:
-                    case techStackConsts.dotNetCore:
-                        if (scbt !== _scanCentralBuildTypes.MSBuild) {
-                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.MSBuild);
-                            this.onScanCentralChanged();
-                            return;
-                        }
-                        break;
-                    case techStackConsts.java:
-                        if (scbt !== _scanCentralBuildTypes.Maven && scbt !== _scanCentralBuildTypes.Gradle) {
-                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Maven);
-                            this.onScanCentralChanged();
-                            return;
-                        }
-                        break;
-                    case techStackConsts.php:
-                        if (scbt !== _scanCentralBuildTypes.PHP) {
-                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
-                            this.onScanCentralChanged();
-                            return;
-                        }
-                        break;
-                    case techStackConsts.python:
-                        if (scbt !== _scanCentralBuildTypes.Python) {
-                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
-                            this.onScanCentralChanged();
-                            return;
-                        }
-                        break;
+                if (tsv === techStackConsts.python) {
+                    if (scbt !== _scanCentralBuildTypes.Python) {
+                        this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
+                        this.onScanCentralChanged();
+                        return;
+                    }
                 }
+            }
+
+            if (this.getScanCentralBuildTypeSelected() === _scanCentralBuildTypes.None &&_scanCentralRecommended.includes(numberOrNull(ts.value))) {
+                jq('.fodp-row-screc').show();
             }
         }
 
@@ -676,21 +665,22 @@ class PipelineGenerator {
         ss = jq('#scanCentralBuildTypeSelect').val();
 
         switch (ss) {
-            case 'Gradle':
-            case 'Maven':
+            case _scanCentralBuildTypes.Gradle:
+            case _scanCentralBuildTypes.Maven:
                 sssb = this.getHiddenFieldCheckValue('#scanCentralSkipBuildCheck');
                 ssbc = jq('#scanCentralBuildCommandInput').val();
                 ssbf = jq('#scanCentralBuildFileInput').val();
                 break;
-            case 'MSBuild':
+            case _scanCentralBuildTypes.MSBuild:
                 ssbc = jq('#scanCentralBuildCommandInput').val();
                 ssbf = jq('#scanCentralBuildFileInput').val();
                 break;
-            case 'Python':
+            case _scanCentralBuildTypes.Python:
                 ssve = jq('#scanCentralVirtualEnvInput').val();
                 ssrf = jq('#scanCentralRequirementFileInput').val();
                 break;
-            case 'PHP':
+            case _scanCentralBuildTypes.PHP:
+            case _scanCentralBuildTypes.Go:
                 break;
             case 'None':
                 ss = '';
@@ -997,6 +987,8 @@ class PipelineGenerator {
         this.populateTechStackDropdown();
         this.onReleaseSelectionChanged();
         this.onScanCentralChanged();
+
+        jq('.fodp-row-screc').hide();
 
         this.uiLoaded = true;
     }

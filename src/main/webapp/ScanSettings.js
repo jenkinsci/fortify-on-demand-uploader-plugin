@@ -183,29 +183,34 @@ class ScanSettings {
 
                 let scval = this.getScanCentralBuildTypeSelected();
 
-                switch (this.scanSettings.technologyStackId) {
-                    case techStackConsts.dotNet:
-                    case techStackConsts.dotNetCore:
-                        this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.MSBuild);
-                        jq('#technologyStackSelectList').val(this.scanSettings.technologyStackId);
-                        break;
-                    case techStackConsts.java:
-                        // Selected release is Java, but SC was not set to None, Maven, nor Gradle, default to Maven
-                        if (scval !== _scanCentralBuildTypes.Maven && scval !== _scanCentralBuildTypes.Gradle) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Maven);
-                        break;
-                    case techStackConsts.php:
-                        this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
-                        break;
-                    case techStackConsts.python:
-                        this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
-                        break;
-                    default:
-                        // It's a valid tech stack but not supported by SC
-                        if (this.scanSettings.technologyStackId > 0) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.None);
-                        break;
-                }
+                if (scval !== _scanCentralBuildTypes.None) {
+                    switch (this.scanSettings.technologyStackId) {
+                        case techStackConsts.dotNet:
+                        case techStackConsts.dotNetCore:
+                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.MSBuild);
+                            jq('#technologyStackSelectList').val(this.scanSettings.technologyStackId);
+                            break;
+                        case techStackConsts.java:
+                            // Selected release is Java, but SC was not set to None, Maven, nor Gradle, default to Maven
+                            if (scval !== _scanCentralBuildTypes.Maven && scval !== _scanCentralBuildTypes.Gradle) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Maven);
+                            break;
+                        case techStackConsts.php:
+                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
+                            break;
+                        case techStackConsts.go:
+                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Go);
+                            break;
+                        case techStackConsts.python:
+                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
+                            break;
+                        default:
+                            // It's a valid tech stack but not supported by SC
+                            if (this.scanSettings.technologyStackId > 0) this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.None);
+                            break;
+                    }
 
-                this.onScanCentralChanged();
+                    this.onScanCentralChanged();
+                }
 
                 if (this.getScanCentralBuildTypeSelected() === _scanCentralBuildTypes.None) {
                     jq('#technologyStackSelectList').val(this.scanSettings.technologyStackId);
@@ -277,6 +282,9 @@ class ScanSettings {
                 case _scanCentralBuildTypes.PHP:
                     jq('#technologyStackSelectList').val(techStackConsts.php);
                     break;
+                case _scanCentralBuildTypes.Go:
+                    jq('#technologyStackSelectList').val(techStackConsts.go);
+                    break;
                 case _scanCentralBuildTypes.Python:
                     jq('#technologyStackSelectList').val(techStackConsts.python);
                     break;
@@ -322,6 +330,7 @@ class ScanSettings {
         llr.show();
         llsel.find('option').not(':first').remove();
         llsel.find('option').first().prop('selected', true);
+        jq('.fode-row-screc').hide();
 
         if (ts) {
             if (Array.isArray(ts.levels) && ts.levels.length > 0) {
@@ -345,39 +354,19 @@ class ScanSettings {
                 let scbt = this.getScanCentralBuildTypeSelected();
                 let tsv = numberOrNull(ts.value);
 
-                switch (tsv) {
-                    case techStackConsts.dotNet:
-                    case techStackConsts.dotNetCore:
-                        if (scbt !== _scanCentralBuildTypes.MSBuild) {
-                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.MSBuild);
-                            this.onScanCentralChanged();
-                            return;
-                        }
-                        break;
-                    case techStackConsts.java:
-                        if (scbt !== _scanCentralBuildTypes.Maven && scbt !== _scanCentralBuildTypes.Gradle) {
-                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Maven);
-                            this.onScanCentralChanged();
-                            return;
-                        }
-                        break;
-                    case techStackConsts.php:
-                        if (scbt !== _scanCentralBuildTypes.PHP) {
-                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.PHP);
-                            this.onScanCentralChanged();
-                            return;
-                        }
-                        break;
-                    case techStackConsts.python:
-                        if (scbt !== _scanCentralBuildTypes.Python) {
-                            this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
-                            this.onScanCentralChanged();
-                            return;
-                        }
-                        break;
+                if (tsv === techStackConsts.python) {
+                    if (scbt !== _scanCentralBuildTypes.Python) {
+                        this.setScanCentralBuildTypeSelected(_scanCentralBuildTypes.Python);
+                        this.onScanCentralChanged();
+                        return;
+                    }
                 }
+
             }
 
+            if (this.getScanCentralBuildTypeSelected() === _scanCentralBuildTypes.None && _scanCentralRecommended.includes(numberOrNull(ts.value))) {
+                jq('.fode-row-screc').show();
+            }
         } else {
             jq('#technologyStackSelectList').val('-1');
         }
@@ -509,6 +498,8 @@ class ScanSettings {
             .change(_ => this.onLangLevelChanged());
 
         setTimeout(_ => this.onScanCentralChanged(), 50);
+
+        jq('.fode-row-screc').hide();
 
         this.uiLoaded = true;
         if (this.deferredLoadEntitlementSettings) {

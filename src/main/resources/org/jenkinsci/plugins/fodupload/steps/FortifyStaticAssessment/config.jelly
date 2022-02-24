@@ -9,6 +9,14 @@
         color: red;
         }
 
+        .fodp-row-screc {
+        color: red;
+        }
+
+        .fodp-row-screc #technologyScanCentralRec {
+        font-size: 85%
+        }
+
         .fode-row-hidden {
         display: none;
         }
@@ -269,6 +277,7 @@
                     <option id="MSBuild" value="MSBuild">MSBuild</option>
                     <option id="PHP" value="PHP">PHP</option>
                     <option id="Python" value="Python">Python</option>
+                    <option id="Go" value="Go">Go</option>
                 </select>
             </div>
         </f:entry>
@@ -307,6 +316,12 @@
         <f:entry title="Requirement File" help="/plugin/fortify-on-demand-uploader/help-scanCentral-reqsFile.html">
             <div id="requirementFileForm" class="fodp-field spinner-container fodp-row-sc fodp-row-sc-python">
                 <input type="text" id="scanCentralRequirementFileInput" class="setting-input"/>
+            </div>
+        </f:entry>
+
+        <f:entry title="">
+            <div id="technologyScanCentralRec" class="fodp-field fodp-row-screc">
+                Fortify recommends using ScanCentral Client to package code for comprehensive scan results.
             </div>
         </f:entry>
 
@@ -395,6 +410,5 @@
     </script>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Auth.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/PipelineReleaseSelectionDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/PipelineGenerator.js"/>
 </j:jelly>

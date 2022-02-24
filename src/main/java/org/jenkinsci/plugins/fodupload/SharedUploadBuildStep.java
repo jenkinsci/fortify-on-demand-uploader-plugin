@@ -362,12 +362,12 @@ public class SharedUploadBuildStep {
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         final PrintStream logger = listener.getLogger();
         if (model == null) {
-            logger.println("Unexpected Error");
+            logger.println("Unexpected Error: prebuild model is null");
             build.setResult(Result.FAILURE);
             return false;
         }
 
-        if (!model.getIsPipeline() && (model.getReleaseId() == null || model.getReleaseId().isEmpty()) && model.loadBsiToken() == false) {
+        if (!model.getIsPipeline() && (model.getReleaseId() == null || model.getReleaseId().isEmpty()) && !model.loadBsiToken()) {
             logger.println("Invalid release ID or BSI Token");
             build.setResult(Result.FAILURE);
             return false;
@@ -471,7 +471,13 @@ public class SharedUploadBuildStep {
 
                 FilePath workspaceModified = new FilePath(workspace, model.getSrcLocation());
                 File payload;
+
                 if (model.getSelectedScanCentralBuildType().equalsIgnoreCase(FodEnums.SelectedScanCentralBuildType.None.toString())) {
+
+                    if (ValidationUtils.isScanCentralRecommended(technologyStack)) {
+                        logger.println("\nFortify recommends using ScanCentral Client to package code for comprehensive scan results.\n");
+                    }
+
                     // zips the file in a temporary location
                     payload = Utils.createZipFile(technologyStack, workspaceModified, logger);
                     if (payload.length() == 0) {
@@ -620,6 +626,9 @@ public class SharedUploadBuildStep {
             //version check
             logger.println("Checking ScanCentralVersion");
             String scanCentralbatLocation = Paths.get(String.valueOf(scanCentralLocation)).resolve(scexec).toString();
+
+            logger.println("JAVA_HOME: " + System.getenv("JAVA_HOME"));
+
             List<String> scanCentralVersionCommandList = new ArrayList<>();
 
             scanCentralVersionCommandList.add(scanCentralbatLocation);
@@ -634,11 +643,11 @@ public class SharedUploadBuildStep {
             while ((versionLine = stdInputVersion.readLine()) != null) {
                 logger.println(versionLine);
                 if (versionLine.contains("version")) {
-                    Pattern versionPattern = Pattern.compile("(?<=version:  ).*");
+                    Pattern versionPattern = Pattern.compile("(version: *?)(.*)");
                     Matcher m = versionPattern.matcher(versionLine);
 
                     if (m.find()) {
-                        scanCentralVersion = m.group().trim();
+                        scanCentralVersion = m.group(2).trim();
 
                         ComparableVersion minScanCentralVersion = new ComparableVersion("21.1.2.0002");
                         ComparableVersion userScanCentralVersion = new ComparableVersion(scanCentralVersion);
@@ -655,6 +664,7 @@ public class SharedUploadBuildStep {
             if (versionLine != null && versionLine.contains("version")) {
                 Path outputZipFolderPath = Paths.get(String.valueOf(outputLocation)).resolve("output.zip");
                 FodEnums.SelectedScanCentralBuildType buildType = FodEnums.SelectedScanCentralBuildType.valueOf(model.getSelectedScanCentralBuildType());
+
                 if (buildType == FodEnums.SelectedScanCentralBuildType.Gradle) {
                     logger.println("Giving permission to gradlew");
                     int permissionsExitCode = givePermissionsToGradle(srcLocation, logger);
@@ -715,17 +725,14 @@ public class SharedUploadBuildStep {
                             scanCentralPackageCommandList.add("--python-virtual-env");
                             scanCentralPackageCommandList.add(model.getScanCentralVirtualEnv());
                         }
-                        ;
                         if (!Utils.isNullOrEmpty(model.getScanCentralRequirementFile())) {
                             scanCentralPackageCommandList.add("--python-requirements");
                             scanCentralPackageCommandList.add(model.getScanCentralRequirementFile());
                         }
-                        ;
                         if (!Utils.isNullOrEmpty(model.getScanCentralBuildToolVersion())) {
                             scanCentralPackageCommandList.add("--python-version");
                             scanCentralPackageCommandList.add(model.getScanCentralBuildToolVersion());
                         }
-                        ;
                         break;
                     case PHP:
                         scanCentralPackageCommandList.add("none");
@@ -733,7 +740,9 @@ public class SharedUploadBuildStep {
                             scanCentralPackageCommandList.add("--php-version");
                             scanCentralPackageCommandList.add(model.getScanCentralBuildToolVersion());
                         }
-                        ;
+                        break;
+                    case Go:
+                        scanCentralPackageCommandList.add("none");
                         break;
                     default:
                         throw new IllegalArgumentException("Invalid ScanCentral build type: " + buildType);
@@ -803,8 +812,8 @@ public class SharedUploadBuildStep {
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
                 throw new IOException("Failed to assign executable permissions to gradle file");
-            }finally {
-                if(stdInput != null) stdInput.close();
+            } finally {
+                if (stdInput != null) stdInput.close();
             }
         }
         return 0;
