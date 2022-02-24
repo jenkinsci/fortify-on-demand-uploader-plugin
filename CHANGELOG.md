@@ -1,7 +1,7 @@
 # Changelog
 ## Version 7.0.1 (02-23-2022)
-- Added support for packaging Go projects with Fortify ScanCentral SAST.
-- Removed requirement to use Fortify ScanCentral SAST to package .NET, Java, and PHP projects.
+- Added support for packaging Go projects with Fortify ScanCentral.
+- Removed requirement to use Fortify ScanCentral to package .NET, Java, and PHP projects.
 
 ## Version 7.0.0 (01-21-2022)
 - Added new options to create or select an application and release, configure scan settings, and invoke Fortify ScanCentral SAST to package application files.
