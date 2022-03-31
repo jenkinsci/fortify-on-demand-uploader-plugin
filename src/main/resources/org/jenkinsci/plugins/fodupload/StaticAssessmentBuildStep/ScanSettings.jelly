@@ -25,8 +25,8 @@
 
                 <f:entry title="Assessment Type">
                     <div id="assessmentTypeForm" class="fode-field spinner-container">
-                        <div class="fode-edit">
-                            <select name="userSelectedAssessmentType" id="ddAssessmentType">
+                        <div class="fode-edit jenkins-select">
+                            <select name="userSelectedAssessmentType" id="ddAssessmentType" class="jenkins-select__input">
                                 <option value="-1">Select an Assessment Type</option>
                             </select>
                         </div>
@@ -35,8 +35,8 @@
 
                 <f:entry title="Entitlement">
                     <div id="entitlementForm" class="fode-field spinner-container">
-                        <div class="fode-edit">
-                            <select name="userSelectedEntitlement" id="entitlementSelectList">
+                        <div class="fode-edit jenkins-select">
+                            <select name="userSelectedEntitlement" id="entitlementSelectList" class="jenkins-select__input">
                                 <option value="-1">Select an Entitlement</option>
                             </select>
                         </div>
@@ -51,8 +51,8 @@
 
                 <f:entry title="Audit Preference">
                     <div id="auditPreferenceForm" class="fode-field spinner-container">
-                        <div class="fode-edit">
-                            <select name="userSelectedAuditPreference" id="auditPreferenceSelectList">
+                        <div class="fode-edit jenkins-select">
+                            <select name="userSelectedAuditPreference" id="auditPreferenceSelectList" class="jenkins-select__input">
                                 <option value="2">Automated</option>
                                 <option value="1">Manual</option>
                             </select>
@@ -125,18 +125,18 @@
 
                 <f:entry title="Technology Stack">
                     <div id="technologyStackForm" class="fode-field spinner-container fode-row-nonsc">
-                        <div class="fode-edit">
-                            <select name="userSelectedTechnologyStack" id="technologyStackSelectList">
+                        <div class="fode-edit jenkins-select">
+                            <select name="userSelectedTechnologyStack" id="technologyStackSelectList" class="jenkins-select__input">
                                 <option value="-1">Select a Technology Stack</option>
                             </select>
                         </div>
                     </div>
                 </f:entry>
 
-                <f:entry title="Language Level" id="languageLevelFormElementId">
+                <f:entry title="Language Level">
                     <div id="languageLevelForm" class="fode-field spinner-container fode-row-langLev">
-                        <div class="fode-edit">
-                            <select name="userSelectedLanguageLevel" id="languageLevelSelectList">
+                        <div class="fode-edit jenkins-select">
+                            <select name="userSelectedLanguageLevel" id="languageLevelSelectList" class="jenkins-select__input">
                                 <option value="-1">Select a Language Level</option>
                             </select>
                         </div>

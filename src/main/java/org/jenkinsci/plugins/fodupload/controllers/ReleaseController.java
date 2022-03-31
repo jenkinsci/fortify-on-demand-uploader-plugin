@@ -20,7 +20,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import org.jenkinsci.plugins.fodupload.Utils;
-import org.springframework.core.enums.LetterCodedLabeledEnum;
 
 public class ReleaseController extends ControllerBase {
 

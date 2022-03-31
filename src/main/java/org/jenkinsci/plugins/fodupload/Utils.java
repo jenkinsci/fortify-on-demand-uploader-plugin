@@ -225,7 +225,7 @@ public class Utils {
     }
 
     public static List<String> unexpectedServerResponseErrors() {
-        return unexpectedErrorResponseErrors;
+        return new ArrayList<>(unexpectedErrorResponseErrors);
     }
 
     private static List<String> unauthorizedErrorResponseErrors;
@@ -236,7 +236,7 @@ public class Utils {
     }
 
     public static List<String> unauthorizedServerResponseErrors() {
-        return unauthorizedErrorResponseErrors;
+        return new ArrayList<>(unauthorizedErrorResponseErrors);
     }
 
     public static AuthenticationModel getAuthModelFromObject(JSONObject authModelObject) {

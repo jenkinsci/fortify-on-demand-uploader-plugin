@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @SuppressWarnings("unused")
@@ -207,16 +208,16 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
             PutStaticScanSetupResponse response = staticScanController.putStaticScanSettings(releaseId, new PutStaticScanSetupModel(assessmentTypeId, entitlementId, entitlementFrequencyType, technologyStackId, languageLevelId, performOpenSourceAnalysis, auditPreferenceType));
             if (response.isSuccess()) {
                 System.out.println("Successfully saved settings for release id = " + releaseIdStr);
-            } else if (response.getErrors() != null) {
-                for (String error : response.getErrors()) {
-                    System.out.println("Error saving settings for release id = " + releaseIdStr + ": " + error);
-                }
-                throw new IllegalArgumentException("Failed to saved scan settings");
+            } else if (response.getErrors() != null && !response.getErrors().isEmpty()) {
+                String errs = response.getErrors().stream().map(s -> s.replace("\n", "\n\t\t")).collect(Collectors.joining("\n\t"));
+
+                System.err.println("Error saving settings for release id = " + releaseIdStr + "\n\t" + errs);
+                throw new IllegalArgumentException("Failed to save scan settings for release id = " + releaseIdStr);
             }
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to saved scan settings", e);
+            throw new IllegalArgumentException("Failed to save scan settings for release id = " + releaseIdStr, e);
         }
     }
 

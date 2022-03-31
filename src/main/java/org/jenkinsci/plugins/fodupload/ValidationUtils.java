@@ -1,8 +1,5 @@
 package org.jenkinsci.plugins.fodupload;
 
-import org.jenkinsci.plugins.fodupload.models.FodEnums;
-import org.w3c.tidy.Out;
-
 import java.util.Arrays;
 import java.util.List;
 
