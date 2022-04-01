@@ -1,4 +1,7 @@
 # Changelog
+## Version 7.0.2 (03-31-2022)
+- Fixed issue where fields were not populating correctly in Jenkins version 2.338.
+
 ## Version 7.0.1 (02-23-2022)
 - Added support for packaging Go projects with Fortify ScanCentral.
 - Removed requirement to use Fortify ScanCentral to package .NET, Java, and PHP projects.
