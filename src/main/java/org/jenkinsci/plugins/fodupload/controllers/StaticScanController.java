@@ -443,7 +443,13 @@ public class StaticScanController extends ControllerBase {
             return apiConnection.parseResponse(response, new TypeToken<PutStaticScanSetupResponse>() {
             }.getType());
         } else {
-            return new PutStaticScanSetupResponse(false, null, Utils.unexpectedServerResponseErrors(), null);
+            String rawBody = apiConnection.getRawBody(response);
+            List<String> errors = Utils.unexpectedServerResponseErrors();
+
+            if(!rawBody.isEmpty()) errors.add("Raw API response:\n"+rawBody);
+            else errors.add("API empty response");
+
+            return new PutStaticScanSetupResponse(false, null, errors, null);
         }
     }
 }

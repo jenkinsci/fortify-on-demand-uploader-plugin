@@ -20,6 +20,7 @@ import java.util.List;
 public class ApplicationsController extends ControllerBase {
 
     private static final HashMap<String, String> errorCodesMap;
+
     static {
         errorCodesMap = new HashMap<>();
         errorCodesMap.put("InvalidOwnerId", "Invalid Owner Id");
@@ -29,7 +30,7 @@ public class ApplicationsController extends ControllerBase {
      * Constructor
      *
      * @param apiConnection apiConnection connection object with client info
-     * @param logger logger object
+     * @param logger        logger object
      * @param correlationId correlation id
      */
     public ApplicationsController(final FodApiConnection apiConnection, final PrintStream logger, final String correlationId) {
@@ -63,7 +64,16 @@ public class ApplicationsController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        return apiConnection.requestTyped(request, new TypeToken<GenericListResponse<ApplicationApiResponse>>(){}.getType());
+        Response resp = apiConnection.request(request);
+
+        if (resp.code() < 300) {
+            return apiConnection.parseResponse(resp, new TypeToken<GenericListResponse<ApplicationApiResponse>>() {}.getType());
+        } else {
+            String rawBody = apiConnection.getRawBody(resp);
+            String msg = String.format("Failed getApplicationList(%s, %d, %d). %s", searchTerm, offset, limit, !rawBody.isEmpty() ? "Raw API response:\n" + rawBody : "API empty response");
+
+            throw new IOException(msg);
+        }
     }
 
     public Result<ApplicationApiResponse> getApplicationById(Integer applicationId) throws IOException {

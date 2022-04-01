@@ -9,6 +9,7 @@ class ScanSettings {
         this.techStacksSorted = [];
         this.techIdsWithOutOpenSourceSupport = ["2", "3", "5", "6", "11", "14", "18", "21"];
         this.releaseId = null;
+        this.isBsi = false;
         subscribeToEvent('releaseChanged', p => this.loadEntitlementSettings(p.detail));
     }
 
@@ -143,8 +144,10 @@ class ScanSettings {
 
         rows.hide();
         this.hideMessages();
+        this.isBsi = false;
 
         if (releaseChangedPayload && releaseChangedPayload.mode === ReleaseSetMode.bsiToken) {
+            this.isBsi = true;
             jq('.fode-row-bsi').show();
             jq('.fode-row-remediation').show();
             return;
@@ -244,6 +247,7 @@ class ScanSettings {
     }
 
     onScanCentralChanged() {
+        if (this.isBsi) return;
         let val = this.getScanCentralBuildTypeSelected();
         let techStackFilter;
 
@@ -392,11 +396,11 @@ class ScanSettings {
     }
 
     getScanCentralBuildTypeSelected() {
-        return _scanCentralBuildTypes[jq('#scanCentralBuildTypeForm > select').val()] || _scanCentralBuildTypes.None;
+        return _scanCentralBuildTypes[jq('#scanCentralBuildTypeForm select').val()] || _scanCentralBuildTypes.None;
     }
 
     setScanCentralBuildTypeSelected(val) {
-        if (val && _scanCentralBuildTypes[val]) jq('#scanCentralBuildTypeForm > select').val(val);
+        if (val && _scanCentralBuildTypes[val]) jq('#scanCentralBuildTypeForm select').val(val);
     }
 
     preinit() {
@@ -482,7 +486,7 @@ class ScanSettings {
         this.showMessage('Select a release');
         if (this.unsubInit) unsubscribeEvent('authInfoChanged', this.unsubInit);
 
-        jq('#scanCentralBuildTypeForm > select')
+        jq('#scanCentralBuildTypeForm select')
             .change(_ => this.onScanCentralChanged());
 
         jq('#technologyStackSelectList')
@@ -512,5 +516,5 @@ class ScanSettings {
 
 const scanSettings = new ScanSettings();
 
-spinAndWait(() => jq('#sonatypeForm').val() !== undefined && jq('#scanCentralBuildTypeForm > select').val())
+spinAndWait(() => jq('#sonatypeForm').val() !== undefined && jq('#scanCentralBuildTypeForm select').val())
     .then(scanSettings.preinit.bind(scanSettings));
