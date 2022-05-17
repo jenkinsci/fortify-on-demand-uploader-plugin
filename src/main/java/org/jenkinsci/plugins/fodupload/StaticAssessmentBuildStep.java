@@ -80,7 +80,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String scanCentralRequirementFile) throws IllegalArgumentException {
         int techStack = Utils.tryParseInt(userSelectedTechnologyStack);
 
-        if (techStack < 1) throw new IllegalArgumentException("Invalid Technology Stack");
+        if (Utils.isNullOrEmpty(bsiToken) && techStack < 1) throw new IllegalArgumentException("Invalid Technology Stack");
 
         if (Utils.isNullOrEmpty(srcLocation)) {
             srcLocation = "./";
