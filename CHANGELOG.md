@@ -1,4 +1,7 @@
 # Changelog
+## Version 7.0.3 (05-17-2022)
+- Fixed issue where a validation error occurred when using the BSI token in new freestyle projects.
+
 ## Version 7.0.2 (03-31-2022)
 - Fixed issue where fields were not populating correctly in Jenkins version 2.338.
 
