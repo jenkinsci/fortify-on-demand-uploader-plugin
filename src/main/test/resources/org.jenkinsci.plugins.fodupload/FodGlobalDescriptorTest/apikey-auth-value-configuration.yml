@@ -1,0 +1,11 @@
+unclassified:
+  fodGlobal:
+    baseurl: "https://ams.fortify.com"
+    apiurl: "https://api.ams.fortify.com"
+    globalAuthType: "apiKeyType"
+    clientSecret: "myclientSecret"
+    clientId: "myClientId"
+    username: ""
+    personalAccessToken: ""
+    tenantId: ""
+    scanCentralPath: "thePathWithoutValidation"

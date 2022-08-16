@@ -9,9 +9,14 @@ import hudson.security.Permission;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import hudson.Util;
 import jenkins.model.GlobalConfiguration;
+
 import net.sf.json.JSONObject;
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
@@ -21,7 +26,11 @@ import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.verb.POST;
 
+/*
+
+ */
 @Extension
+@Symbol("FodGlobal")
 public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String CLIENT_ID = "clientId";
     private static final String GLOBAL_AUTH_TYPE = "globalAuthType";
@@ -32,7 +41,9 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String BASE_URL = "baseUrl";
     private static final String API_URL = "apiUrl";
     private static final String SCANCENTRAL_PATH = "scanCentralPath";
-
+    private static final String FOD_URL_ERROR_MESSAGE = "The url is not valid. It cannot be blank or contain spaces. "
+            + "The url also requires a valid protocol, either http or https. "
+            + "and a valid fully qualified domain name (fqdn) or hostname";
     private String globalAuthType;
     private String clientId;
     private String clientSecret;
@@ -43,8 +54,146 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private String apiUrl;
     private String scanCentralPath;
 
+
+    @DataBoundConstructor
+    public FodGlobalDescriptor (String globalAuthType) {
+        this.globalAuthType = globalAuthType;
+    }
     public FodGlobalDescriptor() {
         load();
+    }
+
+    /****************************************************
+     *   Code commented by Maura E. Ardden
+     *   To enable configuration-as-code a new group of setters has been provided
+     *   NOTE: Following setters persist data to the global configuration json Object and jelly files.
+     *         All setters use the naming convention: set<JellyField>.
+     *         All getters use the naming convention: get<JellyField>.
+     */
+
+    @DataBoundSetter
+    public void setApiUrl(String apiUrl) throws Exception {
+        this.apiUrl = isValidUrl(apiUrl);
+    }
+
+    @DataBoundSetter
+    public void setBaseUrl(String baseUrl) throws Exception {
+        this.baseUrl = isValidUrl(baseUrl);
+    }
+
+    @DataBoundSetter
+    public void setClientId(String clientId) {
+        this.clientId = Util.fixEmptyAndTrim(clientId);
+    }
+
+    @DataBoundSetter
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = Util.fixEmptyAndTrim(clientSecret);
+    }
+
+    @DataBoundSetter
+    public void setGlobalAuthType(String globalAuthType) {
+        this.globalAuthType = Util.fixEmptyAndTrim(globalAuthType);
+    }
+
+    @DataBoundSetter
+    public void setPersonalAccessToken(String personalAccessToken) {
+        this.personalAccessToken = Util.fixEmptyAndTrim(personalAccessToken);
+    }
+
+    @DataBoundSetter
+    public void setScanCentralPath(String scanCentralPath) {
+        this.scanCentralPath = Util.fixEmptyAndTrim(scanCentralPath);
+    }
+
+    @DataBoundSetter
+    public void setTenantId(String tenantId) {
+        this.tenantId = Util.fixEmptyAndTrim(tenantId);
+    }
+
+    @DataBoundSetter
+    public void setUsername(String username) {
+        this.username = Util.fixEmptyAndTrim(username);
+    }
+
+    private String isValidUrl(String url) throws Exception {
+        if (!url.matches("^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")) {
+            throw new Exception(FOD_URL_ERROR_MESSAGE);
+        }
+        return url;
+    }
+
+    public String getDisplayName() {
+        return "Fortify On Demand Uploader Plugin";
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public String getApiUrl() {
+        return apiUrl;
+    }
+
+    public String getScanCentralPath() {
+        return scanCentralPath;
+    }
+
+    public boolean getAuthTypeIsApiKey() {
+        return (globalAuthType == null) ? false : globalAuthType.equals("apiKeyType");
+    }
+
+    public boolean getAuthTypeIsPersonalToken() {
+        return (globalAuthType == null) ? false : globalAuthType.equals("personalAccessTokenType");
+    }
+
+    public String getGlobalAuthType() {
+        return globalAuthType;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPersonalAccessToken() {
+        return personalAccessToken;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @SuppressWarnings("unused")
+    public String getOriginalClientId() {
+        return clientId;
+    }
+
+    @SuppressWarnings("unused")
+    public String getOriginalClientSecret() {
+        return clientSecret;
+    }
+
+    @SuppressWarnings("unused")
+    public String getOriginalUsername() {
+        return username;
+    }
+
+    @SuppressWarnings("unused")
+    public String getOriginalPersonalAccessToken() {
+        return personalAccessToken;
+    }
+
+    @SuppressWarnings("unused")
+    public String getOriginalTenantId() {
+        return tenantId;
     }
 
     // On save.
@@ -69,91 +218,6 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         save();
 
         return super.configure(req, formData);
-    }
-
-    // NOTE: The following Getters are used to return saved values in the jelly files. Intellij
-    // marks them unused, but they actually are used.
-    // These getters are also named in the following format: Get<JellyField>.
-    public String getDisplayName() {
-        return "Fortify Uploader Plugin";
-    }
-
-    @SuppressWarnings("unused")
-    public String getGlobalAuthType() {
-        return globalAuthType;
-    }
-
-    @SuppressWarnings("unused")
-    public String getClientId() {
-        return clientId;
-    }
-
-    public String getOriginalClientId() {
-        return clientId;
-    }
-    
-    @SuppressWarnings("unused")
-    public String getClientSecret() {
-        return clientSecret;
-    }
-
-    public String getOriginalClientSecret() {
-        return clientSecret;
-    }
-    
-    @SuppressWarnings("unused")
-    public String getUsername() {
-        return username;
-    }
-
-    @SuppressWarnings("unused")
-    public String getOriginalUsername() {
-        return username;
-    }
-
-    @SuppressWarnings("unused")
-    public String getPersonalAccessToken() {
-        return personalAccessToken;
-    }
-
-    @SuppressWarnings("unused")
-    public String getOriginalPersonalAccessToken() {
-        return personalAccessToken;
-    }
-    
-    @SuppressWarnings("unused")
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    @SuppressWarnings("unused")
-    public String getOriginalTenantId() {
-        return tenantId;
-    }
-
-    @SuppressWarnings("unused")
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-
-    @SuppressWarnings("unused")
-    public String getApiUrl() {
-        return apiUrl;
-    }
-
-    @SuppressWarnings("unused")
-    public String getScanCentralPath() {
-        return scanCentralPath;
-    }
-
-    public boolean getAuthTypeIsApiKey() {
-        if(globalAuthType == null) return false;
-        return globalAuthType.equals("apiKeyType") ;
-    }
-
-    public boolean getAuthTypeIsPersonalToken() {
-        if(globalAuthType == null) return false;
-        return globalAuthType.equals("personalAccessTokenType");
     }
 
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
