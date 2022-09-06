@@ -55,10 +55,11 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private String scanCentralPath;
 
 
-    @DataBoundConstructor
+
     public FodGlobalDescriptor (String globalAuthType) {
         this.globalAuthType = globalAuthType;
     }
+
     @DataBoundConstructor
     public FodGlobalDescriptor() {
         load();
