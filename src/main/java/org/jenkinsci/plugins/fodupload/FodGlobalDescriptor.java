@@ -59,6 +59,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     public FodGlobalDescriptor (String globalAuthType) {
         this.globalAuthType = globalAuthType;
     }
+    @DataBoundConstructor
     public FodGlobalDescriptor() {
         load();
     }
@@ -70,6 +71,10 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
      *         All setters use the naming convention: set<JellyField>.
      *         All getters use the naming convention: get<JellyField>.
      */
+
+    // Setters
+    // Use Util.fixEmptyAndTrim(setterVar) instead of the deprecated method Utils.isNullOrEmpty(setterVar)
+    // in all setters
 
     @DataBoundSetter
     public void setApiUrl(String apiUrl) throws Exception {
@@ -115,6 +120,10 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     public void setUsername(String username) {
         this.username = Util.fixEmptyAndTrim(username);
     }
+
+    // URL validation routine
+    // The method should use the type URL, however, the plugin does not support it
+    // A custom regular expression is in use to validate URLs
 
     private String isValidUrl(String url) throws Exception {
         if (!url.matches("^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")) {

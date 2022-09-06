@@ -42,7 +42,7 @@ public class FodGlobalDescriptorTest {
     }
 
     @Test
-    @ConfiguredWithCode("org.jenkinsci.plugins.fodupload/FodGlobalDescriptorTest/pat-auth-value-configuration.yml")
+    @ConfiguredWithCode("org.jenkinsci.plugins.fodupload/FodGlobalDescriptorTest/configuration-as-code.yml")
     public void fodGlobalDescriptor_PatAuthVaue_configuredWithRule() {
 
         final FodGlobalDescriptor fodGlobalDescriptor = (FodGlobalDescriptor) jenkinsConfiguredWithRule.jenkins.getDescriptorOrDie(FodGlobalDescriptor.class);
@@ -55,7 +55,7 @@ public class FodGlobalDescriptorTest {
     }
 
     @Test
-    @ConfiguredWithCode("org.jenkinsci.plugins.fodupload/FodGlobalDescriptorTest/apikey-auth-value-configuration.yml")
+    @ConfiguredWithCode("org.jenkinsci.plugins.fodupload/FodGlobalDescriptorTest/configuration-as-code.yml")
     public void fodGlobalDescriptor_ApiAuthVaue_configuredWithRule() {
 
         final FodGlobalDescriptor fodGlobalDescriptor = (FodGlobalDescriptor) jenkinsConfiguredWithRule.jenkins.getDescriptorOrDie(FodGlobalDescriptor.class);

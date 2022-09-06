@@ -1,7 +1,10 @@
+jenkins:
+  systemMessage: "Configuration As Code Setup"
+
 unclassified:
   fodPlugin:
-    baseurl: "https://ams.fortify.com"
-    apiurl: "https://api.ams.fortify.com"
+    baseurl: "https://ssc.fortify.com"
+    apiurl: "https://api.ssc.fortify.com"
     globalAuthType: "apiKeyType"
     clientSecret: "myclientSecret"
     clientId: "myClientId"
