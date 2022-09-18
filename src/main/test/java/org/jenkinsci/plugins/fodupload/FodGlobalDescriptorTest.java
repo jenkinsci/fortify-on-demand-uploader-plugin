@@ -14,12 +14,12 @@ public class FodGlobalDescriptorTest {
     private static final String EXPECTED_GLOBAL_AUTH_TYPE = "apiKeyType";
     private static final String EXPECTED_API_AUTH_TYPE = "apiKeyType";
     private static final String EXPECTED_PAT_AUTH_TYPE = "personalAccessTokenType";
-    private static final String EXPECTED_CLIENT_SECRET = "myclientSecret";
-    private static final String EXPECTED_CLIENT_ID = "myClientId";
-    private static final String EXPECTED_USER_NAME = "myUserName";
-    private static final String EXPECTED_PERSONAL_ACCESS_TOKEN = "12345678-abcd-1234-efgh-123456abcdef";
-    private static final String EXPECTED_TENANT_ID = "myTenant";
-    private static final String EXPECTED_SCANCENTRAL_PATH = "thePathWithoutValidation";
+    private static final String EXPECTED_CLIENT_SECRET = "testsecret";
+    private static final String EXPECTED_CLIENT_ID = "testclient";
+    private static final String EXPECTED_USER_NAME = "testaccount";
+    private static final String EXPECTED_PERSONAL_ACCESS_TOKEN = "encoded_pat";
+    private static final String EXPECTED_TENANT_ID = "testtenant";
+    private static final String EXPECTED_SCANCENTRAL_PATH = "C:\\Program Files\\Fortify\\Fortify_SCA_and_Apps_21.2.2\\bin\\scancentral.bat";
 
     @Rule
     public final JenkinsConfiguredWithCodeRule jenkinsConfiguredWithRule = new JenkinsConfiguredWithCodeRule();

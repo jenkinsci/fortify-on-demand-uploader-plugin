@@ -23,12 +23,16 @@
  */
 package org.jenkinsci.plugins.fodupload;
 
+import hudson.util.FormValidation;
 import jenkins.model.GlobalConfiguration;
-import org.jenkinsci.plugins.fodupload.FodApiConnection;
+//import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
-import org.jenkinsci.plugins.fodupload.models.JobModel;
+//import org.jenkinsci.plugins.fodupload.models.JobModel;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+import static org.jenkinsci.plugins.fodupload.Utils.FOD_URL_ERROR_MESSAGE;
+import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
 
 /**
  * @author tsotack
@@ -36,17 +40,17 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class ApiConnectionFactory {
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    public static FodApiConnection createApiConnection(AuthenticationModel model) {
+    public static FodApiConnection createApiConnection(AuthenticationModel model) throws FormValidation {
         FodApiConnection apiConnection = null;
         if (GlobalConfiguration.all() != null && GlobalConfiguration.all().get(FodGlobalDescriptor.class) != null) {
             if (model.getOverrideGlobalConfig()) {
 
                 String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
                 String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
-                if (Utils.isNullOrEmpty(baseUrl))
-                    throw new IllegalArgumentException("Base URL is null.");
-                if (Utils.isNullOrEmpty(apiUrl))
-                    throw new IllegalArgumentException("Api URL is null.");
+                if (Utils.isNullOrEmpty(isValidUrl(baseUrl)))
+                    throw new IllegalArgumentException(FOD_URL_ERROR_MESSAGE);
+                if (Utils.isNullOrEmpty(isValidUrl(apiUrl)))
+                    throw new IllegalArgumentException(FOD_URL_ERROR_MESSAGE);
                 apiConnection = new FodApiConnection(model.getTenantId() + "\\" + model.getUsername(),
                         Utils.retrieveSecretDecryptedValue(model.getPersonalAccessToken()),
                         baseUrl,
