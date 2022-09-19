@@ -201,7 +201,7 @@ public class FortifyPollResults extends FortifyStep {
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedPollingBuildStep.USERNAME) final String username,
                                                                   @QueryParameter(SharedPollingBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                                   @QueryParameter(SharedPollingBuildStep.TENANT_ID) final String tenantId,
-                                                                  @AncestorInPath Job job) {
+                                                                  @AncestorInPath Job job) throws FormValidation {
             job.checkPermission(Item.CONFIGURE);
             return SharedPollingBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
 
