@@ -2,8 +2,10 @@ package org.jenkinsci.plugins.fodupload.models.response;
 
 public class PollingSummaryDTO {
     private int ScanId;
+    private int OpenSourceScanId;
     private int TenantId;
     private int AnalysisStatusId;
+    private int OpenSourceStatusId;
     private String AnalysisStatusTypeValue;
     private int AnalysisStatusReasonId;
     private String AnalysisStatusReason;
@@ -21,12 +23,20 @@ public class PollingSummaryDTO {
         return ScanId;
     };
 
+    public int getOpenSourceScanId() {
+        return OpenSourceScanId;
+    };
+
     public int getTenantId() {
         return TenantId;
     };
 
     public int getAnalysisStatusId() {
         return AnalysisStatusId;
+    };
+
+    public int getOpenSourceStatusId() {
+        return OpenSourceStatusId;
     };
 
     public String getAnalysisStatusTypeValue() {
