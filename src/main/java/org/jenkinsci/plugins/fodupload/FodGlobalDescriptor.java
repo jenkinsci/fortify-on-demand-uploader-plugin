@@ -58,8 +58,8 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
      *   Maura E. Ardden: 09/15/2022
      *   To enable configuration-as-code a new group of setters has been provided
      *   NOTE: Following setters persist data to the global configuration json Object and jelly files.
-     *         All setters use the naming convention: set<JellyField>.
-     *         All getters use the naming convention: get<JellyField>.
+     *         All setters use the naming convention: set JellyField.
+     *         All getters use the naming convention: get JellyField.
      */
 
     // Maura E. Ardden: 09/15/2022

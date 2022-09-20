@@ -133,7 +133,7 @@ public class AttributesHelper {
                     getDateFormat().parse(userAttributeValue);
                     return new Result<>(true, null, userAttributeValue);
                 }
-                catch (ParseException _) {
+                catch (ParseException e) {
                     return new Result<>(false, null, null);
                 }
             }
