@@ -119,7 +119,7 @@ public class Utils {
             case TS_DOT_NET_KEY:
                 return ".*\\.dll|.*\\.pdb|.*\\.cs|.*\\.aspx|.*\\.asp|.*\\.vb|.*\\.vbproj|.*\\.csproj|.*\\.sln|.*\\.cshtml|.*\\.vbhtml" + constantFiles;
             case TS_JAVA_KEY:
-                return ".*\\.java|.*\\.class|.*\\.ear|.*\\.war|.*\\.jar|.*\\.jsp|.*\\.tag|.*\\.tagx|.*\\.tld" +
+                return ".*\\.java|.*\\.class|.*\\.ear|.*\\.war|.*\\.jar|.*\\.jsp|.*\\.tag|.*\\.tagx|.*\\.kt|.*\\.kts|.*\\.tld" +
                         "|.*\\.jspx|.*\\.xhtml|.*\\.faces|.*\\.jsff|.*\\.properties" + constantFiles;
             case TS_PYTHON_KEY:
                 return ".*\\.py" + constantFiles;
