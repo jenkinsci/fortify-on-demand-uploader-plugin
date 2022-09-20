@@ -453,7 +453,12 @@ public class FortifyStaticAssessment extends FortifyStep {
         log.println("Fortify on Demand Upload PreBuild Running...");
 
         boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
-        List<String> errors = ValidateModel(overrideGlobalAuthConfig, log);
+        List<String> errors = null;
+        try {
+            errors = ValidateModel(overrideGlobalAuthConfig, log);
+        } catch (FormValidation e) {
+            throw new RuntimeException(e);
+        }
 
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException("Invalid arguments: Missing or invalid fields for auto provisioning: " + String.join(", ", errors));
@@ -516,7 +521,13 @@ public class FortifyStaticAssessment extends FortifyStep {
             log.println("Error saving settings. Error message: " + ex.toString());
         }
         boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
-        List<String> errors = ValidateModel(overrideGlobalAuthConfig, log);
+        //List<String> errors = ValidateModel(overrideGlobalAuthConfig, log);
+        List<String> errors = null;
+        try {
+            errors = ValidateModel(overrideGlobalAuthConfig, log);
+        } catch (FormValidation e) {
+            throw new RuntimeException(e);
+        }
 
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException("Invalid arguments:\n\t" + String.join("\n\t", errors));
@@ -573,7 +584,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         }
     }
 
-    private List<String> ValidateModel(boolean overrideGlobalAuth, PrintStream logger) {
+    private List<String> ValidateModel(boolean overrideGlobalAuth, PrintStream logger) throws FormValidation {
         List<String> errors = new ArrayList<>();
         boolean anyV7Params = false;
 
@@ -769,7 +780,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter("usernameStaplerOnly") final String username,
                                                                   @QueryParameter("personalAccessTokenSelect") final String personalAccessToken,
                                                                   @QueryParameter("tenantIdStaplerOnly") final String tenantId,
-                                                                  @AncestorInPath Job job) {
+                                                                  @AncestorInPath Job job) throws FormValidation {
             job.checkPermission(Item.CONFIGURE);
             return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
 

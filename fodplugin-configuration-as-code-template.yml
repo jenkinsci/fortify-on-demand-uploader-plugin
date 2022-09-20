@@ -1,0 +1,25 @@
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - string:
+              description: "Fortify on Demand API Key"
+              id: "Replace this text with the Jenkins Credential ID the system will use. Any text serving as a unique identifier will do. Keep the quotes"
+              scope: GLOBAL
+              secret: "Obtain encoded API Access Key (API Key) from the Fortify On Demand system and replace this sentence. Keep the quotes."
+          - string:
+              description: "Fortify on Demand Personal Access Token"
+              id: "Replace this text with the Jenkins Credential ID the system will use. Any text serving as a unique identifier will do. Keep the quotes"
+              scope: GLOBAL
+              secret: "Obtain an encoded Personal Access Token from the Fortify On Demand system and replace this sentence. Keep the quotes."
+unclassified:
+  FodGlobal:
+    baseurl: "Include on the Fortify On Demand Base URLs https://ams.fortify.com"
+    apiurl: "Include on the Fortify On Demand API URLs https://api.ams.fortify.com"
+    globalAuthType: "Include one of the following: apiKeyType || PersonalAccessTokenType"
+    clientId: "Obtain an encoded API Access Key client identifier from the Fortify On Demand system and replace this sentence. Keep the quotes."
+    clientSecret: "The unique identifier of the Jenkins Credential secret to use with the API Key. Keep the quotes."
+    personalAccessToken: "The unique identifier of the Jenkins Credential secret to use with the Personal Access Token. Keep the quotes."
+    username: "Fortify On Demand authorized user. Keep the quotes."
+    tenantId: "Fortify On Demand tenant. Keep the quotes"
+    scanCentralPath: Replace this sentence with the full path to the Scan Central client. Do not include quotes.

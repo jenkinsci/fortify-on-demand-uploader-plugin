@@ -77,7 +77,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      String scanCentralBuildFile,
                                      String scanCentralBuildToolVersion,
                                      String scanCentralVirtualEnv,
-                                     String scanCentralRequirementFile) throws IllegalArgumentException {
+                                     String scanCentralRequirementFile) throws IllegalArgumentException, FormValidation {
         int techStack = Utils.tryParseInt(userSelectedTechnologyStack);
 
         if (Utils.isNullOrEmpty(bsiToken) && techStack < 1) throw new IllegalArgumentException("Invalid Technology Stack");
@@ -180,7 +180,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
     }
 
-    private FodApiConnection getApiConnection(boolean overrideGlobalConfig, String username, String personalAccessToken, String tenantId) {
+    private FodApiConnection getApiConnection(boolean overrideGlobalConfig, String username, String personalAccessToken, String tenantId) throws FormValidation {
         AuthenticationModel authModel = new AuthenticationModel(false, null, null, null);
         if (overrideGlobalConfig) {
             authModel = AuthenticationModel.fromPersonalAccessToken(username, personalAccessToken, tenantId);
@@ -428,7 +428,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
                                                                   @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId,
-                                                                  @AncestorInPath Job job) {
+                                                                  @AncestorInPath Job job) throws FormValidation {
             job.checkPermission(Item.CONFIGURE);
             return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
         }

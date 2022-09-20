@@ -1,0 +1,25 @@
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - string:
+              description: "Fortify on Demand API Key"
+              id: "the_secret_id"
+              scope: GLOBAL
+              secret: "the_secret"
+          - string:
+              description: "Fortify on Demand Personal Access Token"
+              id: "the_secret_id"
+              scope: GLOBAL
+              secret: "the_secret"
+unclassified:
+  FodGlobal:
+    baseurl: "https://ams.fortify.com"
+    apiurl: "https://api.ams.fortify.com"
+    globalAuthType: "apiKeyType"
+    clientId: "the_client_id_from_fod"
+    clientSecret: "this_secret_id"
+    personalAccessToken: "that_secret_id"
+    username: "the_fod_username"
+    tenantId: "the_fod_tenant"
+    scanCentralPath: C:/Program Files/Fortify/Fortify_SCA_and_Apps_21.2.2/bin/scancentral.bat

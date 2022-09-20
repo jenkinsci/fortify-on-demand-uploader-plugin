@@ -1,4 +1,9 @@
 # Changelog
+## Version 7.1.0 (09-20-2022)
+- Added support for Jenkins Configuration as Code.
+- Added support for Fortify On Demand URL validation.
+- Fixed issue where Kotlin files were not being packaged.
+
 ## Version 7.0.3 (05-17-2022)
 - Fixed issue where a validation error occurred when using the BSI token in new freestyle projects.
 

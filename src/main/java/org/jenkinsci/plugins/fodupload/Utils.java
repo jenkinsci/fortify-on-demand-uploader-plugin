@@ -52,6 +52,24 @@ public class Utils {
     private static final String TS_VB_SCRIPT_KEY = "VBScript";
     private static final String TS_XML_HTML_KEY = "XML/HTML";
 
+     /*
+        Maura E. Ardden: 09/15/2022
+        static initializers to support URL validation error messages
+
+    */
+
+    protected static final String FOD_URL_ERROR_MESSAGE = "FOD_URL_ERROR_MESSAGE: \n\n" +
+            "The Fortify On Demand url is not valid. \n" +
+            "Make sure to test the URLs under System Configuration --> Fortify On Demand. \n" +
+            "To do so, use the 'Test Connection' button";
+    protected static final String FOD_BASEURL_ERROR_MESSAGE = "FOD_BASEURL_ERROR_MESSAGE: \n\n" +
+            "The Fortify On Demand url is not valid. \n" +
+            "Click the help icon (?) for details";
+
+    protected static final String FOD_APIURL_ERROR_MESSAGE = "FOD_APIURL_ERROR_MESSAGE: \n\n" +
+            "The Fortify On Demand API url is not valid. \n" +
+            "Click the help icon (?) for details";
+
     public static int tryParseInt(String value) {
         try {
             return Integer.parseInt(value);
@@ -76,6 +94,20 @@ public class Utils {
         return string == null || string.trim().isEmpty();
     }
 
+    /*
+        Maura E. Ardden: 09/15/2022
+
+        URL validation routine using a regex
+        Scope is limited (not all possible use cases covered).
+    */
+
+    public static String isValidUrl(String url)  {
+        if (!url.matches("^https?:\\/\\/([^\\. :;\\?\\+&\\/])+(\\S[a-zA-Z0-9:.\\-\\_]+)[^\\. :;\\?\\+&\\/]+$")) {
+            return null;
+        }
+        return url;
+    }
+
     public static String getFileExpressionPatternString(String technologyStack) {
         String constantFiles = "|.*\\.html|.*\\.htm|.*\\.js|.*\\.xml|.*\\.xsd|.*\\.xmi|.*\\.wsdd|.*\\.config" +
                 "|.*\\.settings|.*\\.cpx|.*\\.xcfg|.*\\.cscfg|.*\\.cscdef|.*\\.wadcfg|.*\\.appxmanifest"
@@ -87,7 +119,7 @@ public class Utils {
             case TS_DOT_NET_KEY:
                 return ".*\\.dll|.*\\.pdb|.*\\.cs|.*\\.aspx|.*\\.asp|.*\\.vb|.*\\.vbproj|.*\\.csproj|.*\\.sln|.*\\.cshtml|.*\\.vbhtml" + constantFiles;
             case TS_JAVA_KEY:
-                return ".*\\.java|.*\\.class|.*\\.ear|.*\\.war|.*\\.jar|.*\\.jsp|.*\\.tag|.*\\.tagx|.*\\.tld" +
+                return ".*\\.java|.*\\.class|.*\\.ear|.*\\.war|.*\\.jar|.*\\.jsp|.*\\.tag|.*\\.tagx|.*\\.kt|.*\\.kts|.*\\.tld" +
                         "|.*\\.jspx|.*\\.xhtml|.*\\.faces|.*\\.jsff|.*\\.properties" + constantFiles;
             case TS_PYTHON_KEY:
                 return ".*\\.py" + constantFiles;

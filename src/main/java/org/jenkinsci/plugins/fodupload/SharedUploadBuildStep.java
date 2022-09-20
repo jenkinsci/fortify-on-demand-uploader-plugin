@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.jenkinsci.plugins.fodupload.Utils.FOD_URL_ERROR_MESSAGE;
+import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
+
 public class SharedUploadBuildStep {
 
     public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
@@ -217,21 +220,27 @@ public class SharedUploadBuildStep {
         return FormValidation.error("Please specify Release ID or BSI Token.");
     }
 
+    /*
+    Maura E. Ardden: 09/15/2022
+    Added URL validation using org.jenkinsci.plugins.fodupload.Utils.isValidUrl(url) to
+       doTestPersonalAccessTokenConnection
+    */
+
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @POST
     public static FormValidation doTestPersonalAccessTokenConnection(final String username,
                                                                      final String personalAccessToken,
                                                                      final String tenantId,
-                                                                     @AncestorInPath Job job) {
+                                                                     @AncestorInPath Job job) throws FormValidation {
         job.checkPermission(Item.CONFIGURE);
         FodApiConnection testApi;
         String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
         String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
         String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
-        if (Utils.isNullOrEmpty(baseUrl))
-            return FormValidation.error("Fortify on Demand URL is empty!");
-        if (Utils.isNullOrEmpty(apiUrl))
-            return FormValidation.error("Fortify on Demand API URL is empty!");
+        if (Utils.isNullOrEmpty(isValidUrl(baseUrl)))
+            return FormValidation.error(FOD_URL_ERROR_MESSAGE);
+        if (Utils.isNullOrEmpty(isValidUrl(apiUrl)))
+            return FormValidation.error(FOD_URL_ERROR_MESSAGE);
         if (Utils.isNullOrEmpty(username))
             return FormValidation.error("Username is empty!");
         if (!Utils.isCredential(personalAccessToken))

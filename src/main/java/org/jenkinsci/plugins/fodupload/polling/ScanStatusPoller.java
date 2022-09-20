@@ -135,6 +135,16 @@ public class ScanStatusPoller {
     private void printPassFail(PollingSummaryDTO release, int releaseId) {
 
         boolean isPassed = release.getPassFailStatus();
+        logger.println(String.format("Static Scan with id : %d Completed", release.getScanId()));
+        logger.println(String.format("Static Scan with id : %d Completed", release.getOpenSourceScanId()));
+        logger.println(String.format("Static Scan with id : %d Completed", release.getOpenSourceStatusId()));
+        if(release.getOpenSourceScanId() > 0)
+        {
+            if(release.getOpenSourceStatusId() == 2)
+             logger.println(String.format("Open Source Scan with id : %d Completed", release.getOpenSourceScanId()));
+            else
+             logger.println(String.format("Open Source Scan with id : %d Cancelled/Failed", release.getOpenSourceScanId()));
+        }
         logger.println(String.format("Critical: %d", release.getIssueCountCritical()));
         logger.println(String.format("High:     %d", release.getIssueCountHigh()));
         logger.println(String.format("Medium:   %d", release.getIssueCountMedium()));
