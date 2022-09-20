@@ -50,7 +50,9 @@ public class FodApiConnection {
         this.grantType = grantType;
         this.scope = scope;
 
-        Jenkins instance = Jenkins.getInstance();
+        //Jenkins instance = Jenkins.getInstance();
+        Jenkins instance = Jenkins.getInstanceOrNull();
+
         if (instance != null)
             proxy = instance.proxy;
 
