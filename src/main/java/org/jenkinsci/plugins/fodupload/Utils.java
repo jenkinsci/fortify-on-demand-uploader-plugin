@@ -156,7 +156,7 @@ public class Utils {
      * @param techStack technology stack of the folder to zip
      * @param workspace location of the files to zip
      * @param logger    logger to write status text to
-     * @return a File object
+     * at_return a File object
      * @throws IOException no files
      */
     public static File createZipFile(String techStack, FilePath workspace, PrintStream logger) throws IOException {

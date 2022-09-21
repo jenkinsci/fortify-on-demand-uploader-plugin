@@ -5,7 +5,7 @@
 /**
  * @callback jQueryFunc
  * @param {string|Object} selector
- * @return {jQueryExtended}
+ * at_return {jQueryExtended}
  * */
 /** @type {jQueryFunc} */
 const jq = jQuery;

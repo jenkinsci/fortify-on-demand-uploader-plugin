@@ -94,7 +94,7 @@ public class FodApiConnection {
     /**
      * Creates a okHttp client to connect with.
      *
-     * @return returns a client object
+     * at_return returns a client object
      */
     private OkHttpClient Create() {
         OkHttpClient.Builder baseClient = new OkHttpClient().newBuilder()
@@ -165,7 +165,7 @@ public class FodApiConnection {
     /**
      * @deprecated
      * Use the {@link FodApiConnection#request(Request)} method instead
-     * @return
+     * at_return
      */
     @Deprecated
     public String getToken() {
@@ -191,7 +191,7 @@ public class FodApiConnection {
     /**
      * @deprecated
      * Use the {@link FodApiConnection#request(Request)} method instead
-     * @return
+     * at_return
      */
     @Deprecated
     public OkHttpClient getClient() {
@@ -254,7 +254,7 @@ public class FodApiConnection {
     /**
      * @deprecated
      * Use the {@link FodApiConnection#request(Request)} method instead
-     * @return
+     * at_return
      */
     public Request reauthenticateRequest(Request request) {
         return request.newBuilder()

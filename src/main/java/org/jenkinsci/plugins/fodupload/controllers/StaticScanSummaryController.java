@@ -25,7 +25,7 @@ public class StaticScanSummaryController extends ControllerBase {
     /**
      * @param releaseId releaseId is used in url query string
      * @param scanId    scanId is used in url query string
-     * @return ScanSummaryDTO
+     * at_return ScanSummaryDTO
      * @throws java.io.IOException in some circumstances
      */
     public ScanSummaryDTO getReleaseScanSummary(final int releaseId, final int scanId) throws IOException {

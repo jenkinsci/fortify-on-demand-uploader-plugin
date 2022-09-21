@@ -39,7 +39,7 @@ public class ReleaseController extends ControllerBase {
      *
      * @param releaseId release to get
      * @param fields    fields to return
-     * @return ReleaseDTO object with given fields
+     * at_return ReleaseDTO object with given fields
      * @throws java.io.IOException in some circumstances
      */
     public ReleaseDTO getRelease(final int releaseId, final String fields) throws IOException {
@@ -95,7 +95,7 @@ public class ReleaseController extends ControllerBase {
      *
      * @param releaseId release to get
      * @param scanId    scanId to find specific scan result
-     * @return ScanSummaryDTO object
+     * at_return ScanSummaryDTO object
      * @throws java.io.IOException in some circumstances
      */
     public ScanSummaryDTO getRelease(final int releaseId, final int scanId) throws IOException {
@@ -156,7 +156,7 @@ public class ReleaseController extends ControllerBase {
      *
      * @param releaseId release to get
      * @param scanId    scanId to find specific scan result
-     * @return ScanSummaryDTO object
+     * at_return ScanSummaryDTO object
      * @throws java.io.IOException in some circumstances
      */
     public PollingSummaryDTO getReleaseByScanId(final int releaseId, final int scanId) throws IOException {
@@ -210,7 +210,7 @@ public class ReleaseController extends ControllerBase {
      * Get Assessment Type from bsi url
      *
      * @param model JobModel
-     * @return returns assessment type obj
+     * at_return returns assessment type obj
      */
     ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) throws IOException, URISyntaxException {
 

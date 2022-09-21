@@ -40,7 +40,7 @@ public class ApplicationsController extends ControllerBase {
     /**
      * GET given enum
      *
-     * @return array of enum values and text or null
+     * at_return array of enum values and text or null
      * @throws java.io.IOException in some circumstances
      */
     public GenericListResponse<ApplicationApiResponse> getApplicationList(String searchTerm, Integer offset, Integer limit) throws IOException {
@@ -117,7 +117,7 @@ public class ApplicationsController extends ControllerBase {
      *
      * @param releaseListApplicationId ApplicationId for query
      * @param microserviceId (0 = null)
-     * @return list of Releases
+     * at_return list of Releases
      * @throws java.io.IOException in some circumstances
      */
     public GenericListResponse<ReleaseApiResponse> getReleaseListByApplication(int releaseListApplicationId, int microserviceId, String searchTerm, Integer offset, Integer limit) throws IOException {
@@ -160,7 +160,7 @@ public class ApplicationsController extends ControllerBase {
      * GET given enum
      *
      * @param microserviceListApplicationId ApplicationId for query
-     * @return array of enum values and text or null
+     * at_return array of enum values and text or null
      * @throws java.io.IOException in some circumstances
      */
     public List<MicroserviceApiResponse> getMicroserviceListByApplication(int microserviceListApplicationId) throws IOException {

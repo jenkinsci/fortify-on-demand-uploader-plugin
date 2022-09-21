@@ -46,7 +46,7 @@ public class StaticScanController extends ControllerBase {
      * @param releaseId     id of release being targeted
      * @param uploadRequest zip file to upload
      * @param notes         notes
-     * @return true if the scan succeeded
+     * at_return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
     public StartScanResponse startStaticScan(Integer releaseId, final JobModel uploadRequest, final String notes) {
