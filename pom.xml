@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>fortify-on-demand-uploader</artifactId>
-    <version>7.0.4-SNAPSHOT</version>
+    <version>7.1.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <properties>
