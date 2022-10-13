@@ -687,8 +687,19 @@ public class SharedUploadBuildStep {
 
                 scanCentralPackageCommandList.add(scanCentralbatLocation);
                 scanCentralPackageCommandList.add("package");
+                logger.println("I am before opensource()");
+                if (model.getOpenSourceScan() != null && model.getOpenSourceScan().equalsIgnoreCase("true")){
+                    logger.println("I am here in opensource()" + model.getOpenSourceScan() +  model.getOpenSourceScan().equalsIgnoreCase("true"));
+                    ComparableVersion minScanCentralOpenSourceSupportVersion = new ComparableVersion("22.1.2");
+                    ComparableVersion userScanCentralOpenSourceSupportVersion = new ComparableVersion(scanCentralVersion);
+                    logger.println("I am here in opensource()" + userScanCentralOpenSourceSupportVersion.compareTo(minScanCentralOpenSourceSupportVersion));
+                    if (userScanCentralOpenSourceSupportVersion.compareTo(minScanCentralOpenSourceSupportVersion) < 0) {
+                        logger.println("Warning message : If you are submitting Debricked OSS scan. Scan might fail due to to missing required dependency files");
+                    }else{
+                        scanCentralPackageCommandList.add("--oss");
+                    }
+                }
                 scanCentralPackageCommandList.add("--bt");
-
                 switch (buildType) {
                     case Gradle:
                         scanCentralPackageCommandList.add("gradle");
