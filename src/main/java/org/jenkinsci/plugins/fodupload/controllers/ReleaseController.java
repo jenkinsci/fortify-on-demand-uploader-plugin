@@ -16,6 +16,7 @@ import org.jenkinsci.plugins.fodupload.models.response.*;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -238,7 +239,7 @@ public class ReleaseController extends ControllerBase {
 
         Response response = apiConnection.getClient().newCall(request).execute();
 
-        if (response.code() == org.apache.http.HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
+        if (response.code() == HttpURLConnection.HTTP_FORBIDDEN) {  // got logged out during polling so log back in
             // Re-authenticate
             apiConnection.authenticate();
         }

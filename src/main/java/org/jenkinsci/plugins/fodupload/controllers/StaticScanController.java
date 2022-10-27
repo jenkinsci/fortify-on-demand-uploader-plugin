@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.util.IOUtils;
 import okhttp3.*;
-import org.apache.commons.httpclient.HttpStatus;
+import java.net.HttpURLConnection;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.fodupload.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.Json;
@@ -140,7 +140,7 @@ public class StaticScanController extends ControllerBase {
                 // Get the response
                 Response response = apiConnection.getClient().newCall(request).execute();
 
-                if (response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
+                if (response.code() == HttpURLConnection.HTTP_FORBIDDEN || response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {  // got logged out during polling so log back in
                     String raw = apiConnection.getRawBody(response);
 
                     if (Utils.isNullOrEmpty(raw)) println(getLogTimestamp() + " Uploading fragment failed, reauthenticating");
