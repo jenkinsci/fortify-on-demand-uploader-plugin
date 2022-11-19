@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -167,7 +168,7 @@ public class Utils {
         File dir = new File(tempDir);
 
 
-        File tempZip = File.createTempFile("fodupload", ".zip", dir);
+        File tempZip = Files.createTempFile(dir.toPath(), "fodupload", ".zip").toFile();
         try (FileOutputStream fos = new FileOutputStream(tempZip)) {
             final Pattern pattern = Pattern.compile(Utils.getFileExpressionPatternString(techStack),
                     Pattern.CASE_INSENSITIVE);
