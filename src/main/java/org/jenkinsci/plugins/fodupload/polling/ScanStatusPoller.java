@@ -136,8 +136,6 @@ public class ScanStatusPoller {
 
         boolean isPassed = release.getPassFailStatus();
         logger.println(String.format("Static Scan with id : %d Completed", release.getScanId()));
-        logger.println(String.format("Static Scan with id : %d Completed", release.getOpenSourceScanId()));
-        logger.println(String.format("Static Scan with id : %d Completed", release.getOpenSourceStatusId()));
         if(release.getOpenSourceScanId() > 0)
         {
             if(release.getOpenSourceStatusId() == 2)
