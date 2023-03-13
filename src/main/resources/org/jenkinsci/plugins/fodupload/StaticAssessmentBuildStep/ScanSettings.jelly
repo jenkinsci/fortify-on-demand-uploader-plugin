@@ -143,7 +143,7 @@
                     </div>
                 </f:entry>
 
-                <f:entry title="Open Source Component Analysis">
+                <f:entry title="Open Source Component Analysis" help="/plugin/fortify-on-demand-uploader/help-oss.html">
                     <div id="sonatypeForm" class="fode-field fode-checkbox fode-row-sonatype spinner-container">
                         <input type="checkbox" value="false" name="sonatypeEnabled" id="cbSonatypeEnabled"/>
                     </div>
