@@ -454,7 +454,7 @@ public class SharedUploadBuildStep {
             }
 
             String technologyStack = null;
-
+            Boolean openSourceAnalysis = false;
             apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel());
             if (apiConnection != null) {
                 apiConnection.authenticate();
@@ -466,17 +466,20 @@ public class SharedUploadBuildStep {
                 else if (model.getIsPipeline() || releaseId > 0)
                     technologyStack = model.getTechnologyStack();
 
+                GetStaticScanSetupResponse staticScanSetup = staticScanController.getStaticScanSettingsOld(releaseId);
                 if (Utils.isNullOrEmpty(technologyStack)) {
-                    GetStaticScanSetupResponse staticScanSetup = staticScanController.getStaticScanSettingsOld(releaseId);
-
-                    if (staticScanSetup == null || Utils.isNullOrEmpty(staticScanSetup.getTechnologyStack())) {
+                   if (staticScanSetup == null || Utils.isNullOrEmpty(staticScanSetup.getTechnologyStack())) {
                         logger.println("No scan settings defined for release " + releaseId);
                         build.setResult(Result.FAILURE);
                         return;
                     }
-
                     technologyStack = staticScanSetup.getTechnologyStack();
                 }
+
+                if(model.getOpenSourceScan() == null)
+                    openSourceAnalysis = staticScanSetup.isPerformOpenSourceAnalysis();
+                else
+                    openSourceAnalysis = Boolean.parseBoolean(model.getOpenSourceScan());
 
                 FilePath workspaceModified = new FilePath(workspace, model.getSrcLocation());
                 File payload;
@@ -515,7 +518,7 @@ public class SharedUploadBuildStep {
                     }
 
                     logger.println("Scan Central Path : " + scanCentralPath);
-                    Path scPackPath = packageScanCentral(workspaceModified, scanCentralPath, workspace, model, logger, build);
+                    Path scPackPath = packageScanCentral(workspaceModified, scanCentralPath, workspace, model, logger, build,openSourceAnalysis);
                     logger.println("Packaged File Output Path : " + scPackPath);
 
                     if (scPackPath != null) {
@@ -627,7 +630,7 @@ public class SharedUploadBuildStep {
         return scanId = newScanId;
     }
 
-    private Path packageScanCentral(FilePath srcLocation, FilePath scanCentralLocation, FilePath outputLocation, JobModel job, PrintStream logger, Run<?, ?> build) {
+    private Path packageScanCentral(FilePath srcLocation, FilePath scanCentralLocation, FilePath outputLocation, JobModel job, PrintStream logger, Run<?, ?> build,Boolean openSourceAnalysis) {
         BufferedReader stdInputVersion = null, stdInput = null;
         String scexec = SystemUtils.IS_OS_WINDOWS ? "scancentral.bat" : "scancentral";
 
@@ -635,8 +638,6 @@ public class SharedUploadBuildStep {
             //version check
             logger.println("Checking ScanCentralVersion");
             String scanCentralbatLocation = Paths.get(String.valueOf(scanCentralLocation)).resolve(scexec).toString();
-
-            logger.println("JAVA_HOME: " + System.getenv("JAVA_HOME"));
 
             List<String> scanCentralVersionCommandList = new ArrayList<>();
 
@@ -687,8 +688,18 @@ public class SharedUploadBuildStep {
 
                 scanCentralPackageCommandList.add(scanCentralbatLocation);
                 scanCentralPackageCommandList.add("package");
-                scanCentralPackageCommandList.add("--bt");
 
+                if (openSourceAnalysis){
+                    ComparableVersion minScanCentralOpenSourceSupportVersion = new ComparableVersion("22.1.2");
+                    ComparableVersion oldVersionScanCentralOpenSourceSupportVersionone = new ComparableVersion("21.1.5");
+                    ComparableVersion userScanCentralOpenSourceSupportVersion = new ComparableVersion(scanCentralVersion.substring(0,6));
+                     if (userScanCentralOpenSourceSupportVersion.compareTo(minScanCentralOpenSourceSupportVersion) < 0 && userScanCentralOpenSourceSupportVersion.compareTo(oldVersionScanCentralOpenSourceSupportVersionone) != 0 ) {
+                        logger.println("Warning message : If you are submitting Debricked OSS scan. Scan might fail due to to missing required dependency files");
+                    }else{
+                        scanCentralPackageCommandList.add("--oss");
+                    }
+                }
+                scanCentralPackageCommandList.add("--bt");
                 switch (buildType) {
                     case Gradle:
                         scanCentralPackageCommandList.add("gradle");
