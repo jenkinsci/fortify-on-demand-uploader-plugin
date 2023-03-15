@@ -25,7 +25,7 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import net.sf.json.JSONObject;
 import okhttp3.Response;
 import org.apache.commons.lang3.EnumUtils;
-import org.apache.http.HttpStatus;
+import java.net.HttpURLConnection;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.IFodEnum;
@@ -235,7 +235,7 @@ public class Utils {
     }
 
     public static Boolean isUnauthorizedResponse(Response response) {
-        return response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED;
+        return response.code() == HttpURLConnection.HTTP_FORBIDDEN || response.code() == HttpURLConnection.HTTP_UNAUTHORIZED;
     }
 
     public static <T> String createResponseViewModel(T response) {
