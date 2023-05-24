@@ -83,7 +83,7 @@
             <groupId>io.jenkins</groupId>
             <artifactId>configuration-as-code</artifactId>
             <scope>compile</scope>
-            <version>1.47</version>
+            <version>1.47.1</version>
         </dependency>
         <!-- for Configuration as a Code test-->
         <dependency>
