@@ -5,10 +5,10 @@ import com.google.gson.reflect.TypeToken;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 // import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
+import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
 
@@ -25,14 +25,10 @@ public class StaticScanSummaryController extends ControllerBase {
     /**
      * @param releaseId releaseId is used in url query string
      * @param scanId    scanId is used in url query string
-     * at_return ScanSummaryDTO
+     *                  at_return ScanSummaryDTO
      * @throws java.io.IOException in some circumstances
      */
     public ScanSummaryDTO getReleaseScanSummary(final int releaseId, final int scanId) throws IOException {
-
-        if (apiConnection.getToken() == null)
-            apiConnection.authenticate();
-
         HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
                 .addPathSegments(String.format("/api/v3/releases/%d/scans/%d", releaseId, scanId));
         println("--------------------------");
@@ -44,27 +40,18 @@ public class StaticScanSummaryController extends ControllerBase {
 
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        Response response = apiConnection.getClient().newCall(request).execute();
+        ResponseContent response = apiConnection.request(request);
 
         if (Utils.isUnauthorizedResponse(response)) {
-            // Re-authenticate
-            apiConnection.authenticate();
-            request = apiConnection.reauthenticateRequest(request);
-            response = apiConnection.getClient().newCall(request).execute();
-
-            if (Utils.isUnauthorizedResponse(response)) {
-                return null;
-            }
+            return null;
         }
 
         // Read the results and close the response
-        String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
+        String content = response.bodyContent();
 
         Gson gson = new Gson();
         // Create a type of ScanSummaryDTO to play nice with gson.

@@ -1,19 +1,14 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import okhttp3.HttpUrl;
 import okhttp3.Request;
-import okhttp3.Response;
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Type;
 import java.util.List;
 
 public class LookupItemsController extends ControllerBase {

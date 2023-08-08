@@ -12,6 +12,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.fodupload.*;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.controllers.*;
 import org.jenkinsci.plugins.fodupload.models.*;
@@ -35,6 +36,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/*
+ Pipeline Build Step
+ */
 
 @SuppressFBWarnings("unused")
 public class FortifyStaticAssessment extends FortifyStep {
@@ -452,10 +456,16 @@ public class FortifyStaticAssessment extends FortifyStep {
 
         log.println("Fortify on Demand Upload PreBuild Running...");
 
+        // When does this happen? If this only happens in syntax gen, then just use ServerClient
         boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
         List<String> errors = null;
         try {
-            errors = ValidateModel(overrideGlobalAuthConfig, log);
+            errors = ValidateAuthModel(overrideGlobalAuthConfig);
+
+            if (errors.isEmpty()) {
+                // ToDo: can I construct the api?
+                // errors = ValidateModel(api, log);
+            }
         } catch (FormValidation e) {
             throw new RuntimeException(e);
         }
@@ -521,10 +531,18 @@ public class FortifyStaticAssessment extends FortifyStep {
             log.println("Error saving settings. Error message: " + ex.toString());
         }
         boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
-        //List<String> errors = ValidateModel(overrideGlobalAuthConfig, log);
         List<String> errors = null;
+
         try {
-            errors = ValidateModel(overrideGlobalAuthConfig, log);
+            errors = ValidateAuthModel(overrideGlobalAuthConfig);
+
+            if (errors.isEmpty()) {
+                AuthenticationModel authModel = new AuthenticationModel(overrideGlobalAuthConfig,
+                        username,
+                        personalAccessToken,
+                        tenantId);
+                errors = ValidateModel(ApiConnectionFactory.createApiConnection(authModel, workspace.isRemote(), launcher, log), log);
+            }
         } catch (FormValidation e) {
             throw new RuntimeException(e);
         }
@@ -584,7 +602,19 @@ public class FortifyStaticAssessment extends FortifyStep {
         }
     }
 
-    private List<String> ValidateModel(boolean overrideGlobalAuth, PrintStream logger) throws FormValidation {
+    private List<String> ValidateAuthModel(boolean overrideGlobalAuth) throws FormValidation {
+        List<String> errors = new ArrayList<>();
+
+        // Any have value and any don't have value
+        if (overrideGlobalAuth && (Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(tenantId) || Utils.isNullOrEmpty(personalAccessToken))) {
+            errors.add("Personal access token override requires all 3 be provided: username, personalAccessToken, tenantId");
+        }
+
+        return errors;
+    }
+
+
+    private List<String> ValidateModel(FodApiConnection api, PrintStream logger) throws FormValidation {
         List<String> errors = new ArrayList<>();
         boolean anyV7Params = false;
 
@@ -594,10 +624,6 @@ public class FortifyStaticAssessment extends FortifyStep {
         scanCentral = scanCentral == null ? "" : scanCentral;
         srcLocation = Utils.isNullOrEmpty(srcLocation) ? "./" : srcLocation;
 
-        // Any have value and any don't have value
-        if (overrideGlobalAuth && (Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(tenantId) || Utils.isNullOrEmpty(personalAccessToken))) {
-            errors.add("Personal access token override requires all 3 be provided: username, personalAccessToken, tenantId");
-        }
         Integer releaseIdInt = Utils.tryParseInt(releaseId, null);
         int techStack = Utils.tryParseInt(technologyStack);
 
@@ -654,16 +680,13 @@ public class FortifyStaticAssessment extends FortifyStep {
                         scanCentral = t.getFirst();
                         techStack = t.getSecond();
                     }
-                } else if (vres == ValidationUtils.ScanCentralValidationResult.ScanCentralRequired)
+                }
+                else if (vres == ValidationUtils.ScanCentralValidationResult.ScanCentralRequired)
                     scanCentral = getScanCentralForTechStack(techStack);
                 else if (vres == ValidationUtils.ScanCentralValidationResult.NoSelection) {
                     if (releaseIdInt != null) {
                         String noTechStackMsg = "techStack not provided";
-                        AuthenticationModel authModel = new AuthenticationModel(overrideGlobalAuth,
-                                username,
-                                personalAccessToken,
-                                tenantId);
-                        StaticScanController staticScanController = new StaticScanController(ApiConnectionFactory.createApiConnection(authModel), logger, correlationId);
+                        StaticScanController staticScanController = new StaticScanController(api, logger, correlationId);
                         try {
                             GetStaticScanSetupResponse staticScanSetup = staticScanController.getStaticScanSettings(releaseIdInt);
 
@@ -826,7 +849,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         public String retrieveCurrentUserSession(JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 UsersController usersController = new UsersController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(usersController.getCurrentUserSession());
@@ -840,7 +863,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         public String retrieveAssessmentTypeEntitlements(Integer releaseId, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 AssessmentTypesController assessmentTypesController = new AssessmentTypesController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(assessmentTypesController.getStaticAssessmentTypeEntitlements(releaseId));
@@ -854,7 +877,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         public String retrieveAssessmentTypeEntitlementsForAutoProv(String appName, String relName, Boolean isMicroservice, String microserviceName, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 ReleaseController releases = new ReleaseController(apiConnection, null, Utils.createCorrelationId());
                 AssessmentTypesController assessments = new AssessmentTypesController(apiConnection, null, Utils.createCorrelationId());
                 Integer relId = releases.getReleaseIdByName(appName.trim(), relName.trim(), isMicroservice, microserviceName);
@@ -880,7 +903,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         public String retrieveStaticScanSettings(Integer releaseId, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 StaticScanController staticScanController = new StaticScanController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(staticScanController.getStaticScanSettings(releaseId));
@@ -894,7 +917,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         public String retrieveAuditPreferences(Integer releaseId, Integer assessmentType, Integer frequencyType, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 ReleaseController releaseController = new ReleaseController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(releaseController.getAuditPreferences(releaseId, assessmentType, frequencyType));
@@ -908,7 +931,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         public String retrieveLookupItems(String type, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 LookupItemsController lookupItemsController = new LookupItemsController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(lookupItemsController.getLookupItems(FodEnums.APILookupItemTypes.valueOf(type)));

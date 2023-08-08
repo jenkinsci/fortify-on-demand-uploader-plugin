@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.fodupload.models.response;
 
-public class StartScanResponse {
+import java.io.Serializable;
+
+public class StartScanResponse implements Serializable {
     private boolean success;
     private boolean scanInProgress;
     private int scanId;

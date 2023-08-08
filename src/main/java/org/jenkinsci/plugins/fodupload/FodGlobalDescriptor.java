@@ -1,8 +1,8 @@
 package org.jenkinsci.plugins.fodupload;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.Util;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
@@ -11,6 +11,7 @@ import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jenkinsci.Symbol;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -20,6 +21,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.verb.POST;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import static org.jenkinsci.plugins.fodupload.Utils.FOD_BASEURL_ERROR_MESSAGE;
 import static org.jenkinsci.plugins.fodupload.Utils.FOD_APIURL_ERROR_MESSAGE;
@@ -64,10 +66,9 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
 
     // Maura E. Ardden: 09/15/2022
     // Added setters (all @DataBound) to support Stapler
-
     @DataBoundSetter
     public void setBaseUrl(String baseUrl) {
-        this.baseUrl =  isValidUrl(baseUrl);
+        this.baseUrl = isValidUrl(baseUrl);
     }
 
     @DataBoundSetter
@@ -112,12 +113,12 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
 
 
     public boolean getAuthTypeIsApiKey() {
-        if(globalAuthType == null) return false;
-        return globalAuthType.equals("apiKeyType") ;
+        if (globalAuthType == null) return false;
+        return globalAuthType.equals("apiKeyType");
     }
 
     public boolean getAuthTypeIsPersonalToken() {
-        if(globalAuthType == null) return false;
+        if (globalAuthType == null) return false;
         return globalAuthType.equals("personalAccessTokenType");
     }
 
@@ -125,7 +126,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         return globalAuthType;
     }
 
-    public String getBaseUrl(){
+    public String getBaseUrl() {
         return baseUrl;
     }
 
@@ -264,9 +265,10 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         if (!Utils.isCredential(clientSecret))
             return FormValidation.error("Secret Key is empty or needs to be resaved!");
 
-        testApi = new FodApiConnection(clientId, plainTextClientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
+        testApi = new FodApiConnection(clientId, plainTextClientSecret, baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant", false, null, null);
         return testConnection(testApi);
     }
+
     // Form validation
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unused"})
     @POST
@@ -280,7 +282,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
         /*
 
-        */
+         */
         if (Utils.isNullOrEmpty(isValidUrl(baseUrl)))
             return FormValidation.error(FOD_BASEURL_ERROR_MESSAGE);
         if (Utils.isNullOrEmpty(isValidUrl(apiUrl)))
@@ -292,7 +294,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         if (Utils.isNullOrEmpty(tenantId))
             return FormValidation.error("Tenant ID is null.");
 
-        testApi = new FodApiConnection(tenantId + "\\" + username, plainTextPersonalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
+        testApi = new FodApiConnection(tenantId + "\\" + username, plainTextPersonalAccessToken, baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant", false, null, null);
         return testConnection(testApi);
 
     }
@@ -327,7 +329,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         return doFillStringCredentialsItems();
     }
 
-    FodApiConnection createFodApiConnection() {
+    FodApiConnection createFodApiConnection(boolean executeOnRemoteAgent, Launcher launcher, PrintStream logger) {
 
         if (!Utils.isNullOrEmpty(globalAuthType)) {
 
@@ -340,7 +342,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                     throw new IllegalArgumentException("Client ID is null.");
                 if (Utils.isNullOrEmpty(clientSecret))
                     throw new IllegalArgumentException("Client Secret is null.");
-                return new FodApiConnection(clientId, Utils.retrieveSecretDecryptedValue(clientSecret), baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant");
+                return new FodApiConnection(clientId, Utils.retrieveSecretDecryptedValue(clientSecret), baseUrl, apiUrl, GrantType.CLIENT_CREDENTIALS, "api-tenant", executeOnRemoteAgent, launcher, logger);
             } else if (globalAuthType.equals("personalAccessTokenType")) {
                 if (Utils.isNullOrEmpty(username))
                     throw new IllegalArgumentException("Username is null.");
@@ -348,7 +350,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
                     throw new IllegalArgumentException("Personal Access Token is null.");
                 if (Utils.isNullOrEmpty(tenantId))
                     throw new IllegalArgumentException("Tenant ID is null.");
-                return new FodApiConnection(tenantId + "\\" + username, Utils.retrieveSecretDecryptedValue(personalAccessToken), baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant");
+                return new FodApiConnection(tenantId + "\\" + username, Utils.retrieveSecretDecryptedValue(personalAccessToken), baseUrl, apiUrl, GrantType.PASSWORD, "api-tenant", executeOnRemoteAgent, launcher, logger);
             } else {
                 throw new IllegalArgumentException("Invalid authentication type");
             }
@@ -361,33 +363,25 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
 
     public FormValidation testConnection(FodApiConnection testApi) {
         try {
-            testApi.authenticate();
+            String error = testApi.testConnection();
 
+            if (error != null && !error.isEmpty()) return FormValidation.error(error);
+            return FormValidation.ok("Successfully authenticated to Fortify on Demand.");
         } catch (IOException e) {
             return FormValidation.error("Unable to authenticate with Fortify on Demand. Error Message: " + e.getMessage());
         }
-
-        String token = testApi.getToken();
-
-        if (token == null) {
-            return FormValidation.error("Unable to retrieve authentication token.");
-        }
-
-            return !token.isEmpty() ?
-                FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
-                FormValidation.error("Invalid connection information. Please check your credentials and try again.");
     }
 
-    private ListBoxModel doFillStringCredentialsItems(){
+    private ListBoxModel doFillStringCredentialsItems() {
         ListBoxModel items = CredentialsProvider.listCredentials(
                 StringCredentials.class,
                 Jenkins.get(),
                 ACL.SYSTEM,
                 null,
                 null
-                );
+        );
         return items;
     }
-    
-    
+
+
 }

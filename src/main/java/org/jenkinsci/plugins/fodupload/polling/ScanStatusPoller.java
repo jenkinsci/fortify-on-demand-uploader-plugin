@@ -1,8 +1,6 @@
 package org.jenkinsci.plugins.fodupload.polling;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
 import org.jenkinsci.plugins.fodupload.models.AnalysisStatusTypeEnum;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;

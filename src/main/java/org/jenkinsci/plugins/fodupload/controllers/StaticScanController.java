@@ -7,7 +7,9 @@ import hudson.util.IOUtils;
 import okhttp3.*;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
+import org.jenkinsci.plugins.fodupload.FodApi.ScanPayloadUpload;
 import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.*;
@@ -27,7 +29,6 @@ public class StaticScanController extends ControllerBase {
     private final static int EXPRESS_SCAN_PREFERENCE_ID = 2;
     private final static int EXPRESS_AUDIT_PREFERENCE_ID = 2;
     private final static int MAX_NOTES_LENGTH = 250;
-    private final static int CHUNK_SIZE = 1024 * 1024; //1MB
 
     /**
      * Constructor
@@ -46,23 +47,11 @@ public class StaticScanController extends ControllerBase {
      * @param releaseId     id of release being targeted
      * @param uploadRequest zip file to upload
      * @param notes         notes
-     * at_return true if the scan succeeded
+     *                      at_return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
     public StartScanResponse startStaticScan(Integer releaseId, final JobModel uploadRequest, final String notes) {
-        PostStartScanResponse scanStartedResponse = null;
-        StartScanResponse scanResults = new StartScanResponse();
-
-        File uploadFile = uploadRequest.getPayload();
-        try (FileInputStream fs = new FileInputStream(uploadFile)) {
-            byte[] readByteArray = new byte[CHUNK_SIZE];
-            byte[] sendByteArray;
-            int fragmentNumber = 0;
-            int byteCount;
-            long offset = 0;
-
-            if (apiConnection.getToken() == null) apiConnection.authenticate();
-
+        try {
             println("Getting Assessment");
 
             String projectVersion = "Not Found";
@@ -74,9 +63,9 @@ public class StaticScanController extends ControllerBase {
 
             HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder();
 
-            if (Utils.isNullOrEmpty(uploadRequest.getSelectedReleaseType())) {
+            if (org.jenkinsci.plugins.fodupload.Utils.isNullOrEmpty(uploadRequest.getSelectedReleaseType())) {
                 if (uploadRequest.getIsPipeline()) {
-                    if (!Utils.isNullOrEmpty(uploadRequest.getBsiTokenOriginal()) && releaseId <= 0) {
+                    if (!org.jenkinsci.plugins.fodupload.Utils.isNullOrEmpty(uploadRequest.getBsiTokenOriginal()) && releaseId <= 0) {
                         buildBsiRequest(builder, uploadRequest);
                     } else if ((releaseId == null || releaseId < 1)) releaseId = upsertApplicationAndRelease(uploadRequest);
                     if (releaseId > 0) buildPipelineRequest(builder, releaseId, uploadRequest);
@@ -104,107 +93,24 @@ public class StaticScanController extends ControllerBase {
                     .addQueryParameter("scanTool", "Jenkins")
                     .addQueryParameter("scanToolVersion", projectVersion);
 
-            if (!Utils.isNullOrEmpty(notes)) {
+            if (!org.jenkinsci.plugins.fodupload.Utils.isNullOrEmpty(notes)) {
                 String truncatedNotes = StringUtils.left(notes, MAX_NOTES_LENGTH);
                 builder.addQueryParameter("notes", truncatedNotes);
             }
-            // TODO: Come back and fix the request to set fragNo and offset query parameters
-            String fragUrl = builder.build().toString();
 
-            // Loop through chunks
+            ScanPayloadUpload upload = apiConnection.getScanPayloadUploadInstance(uploadRequest, correlationId, builder.build().toString(), this.logger);
 
-            println("TOTAL FILE SIZE = " + uploadFile.length());
-            println("CHUNK_SIZE = " + CHUNK_SIZE);
-
-            while ((byteCount = fs.read(readByteArray)) != -1) {
-
-                if (byteCount < CHUNK_SIZE) {
-                    sendByteArray = Arrays.copyOf(readByteArray, byteCount);
-                    fragmentNumber = -1;
-                } else {
-                    sendByteArray = readByteArray;
-                }
-
-                MediaType byteArray = MediaType.parse("application/octet-stream");
-                Request request = new Request.Builder()
-                        .addHeader("Authorization", "Bearer " + apiConnection.getToken())
-                        .addHeader("Content-Type", "application/octet-stream")
-                        .addHeader("Accept", "application/json")
-                        .addHeader("CorrelationId", getCorrelationId())
-                        // Add offsets
-                        .url(fragUrl + "&fragNo=" + fragmentNumber++ + "&offset=" + offset)
-                        .post(RequestBody.create(byteArray, sendByteArray))
-                        .build();
-
-                println(getLogTimestamp() + " Uploading fragment " + fragmentNumber);
-                // Get the response
-                Response response = apiConnection.getClient().newCall(request).execute();
-
-                if (response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
-                    String raw = apiConnection.getRawBody(response);
-
-                    if (Utils.isNullOrEmpty(raw)) println(getLogTimestamp() + " Uploading fragment failed, reauthenticating");
-                    else println(getLogTimestamp() + " Uploading fragment failed, reauthenticating \n" + raw);
-                    // Re-authenticate
-                    apiConnection.authenticate();
-                    continue;
-                }
-
-                offset += byteCount;
-
-                if (fragmentNumber % 5 == 0) {
-                    println(getLogTimestamp() + " Upload Status - Fragment No: " + fragmentNumber + ", Bytes sent: " + offset
-                            + " (Response: " + response.code() + ")");
-                }
-
-                if (response.code() != 202) {
-                    String responseJsonStr = IOUtils.toString(response.body().byteStream(), "utf-8");
-
-                    Gson gson = new Gson();
-                    // final response has 200, try to deserialize it
-                    if (response.code() == 200) {
-
-                        scanStartedResponse = gson.fromJson(responseJsonStr, PostStartScanResponse.class);
-                        println(getLogTimestamp() + " Scan " + scanStartedResponse.getScanId() + " uploaded successfully. Total bytes sent: " + offset);
-                        scanResults.uploadSuccessfulScanStarting(scanStartedResponse.getScanId());
-                        return scanResults;
-
-                    } else if (!response.isSuccessful()) { // There was an error along the lines of 'another scan in progress' or something
-                        println(getLogTimestamp() + " An error occurred during the upload.");
-                        GenericErrorResponse errors = gson.fromJson(responseJsonStr, GenericErrorResponse.class);
-
-                        if (errors != null) {
-                            if (errors.toString().contains("Can not start scan another scan is in progress")) {
-                                scanResults.uploadSuccessfulScanNotStarted();
-                            } else {
-                                println(getLogTimestamp() + " Package upload failed for the following reasons: ");
-                                println(errors.toString());
-                                scanResults.uploadNotSuccessful();
-                            }
-                        } else {
-                            if (!Utils.isNullOrEmpty(responseJsonStr)) println(getLogTimestamp() + " Raw response\n" + responseJsonStr);
-                            else println(getLogTimestamp() + " No response body from api");
-                            scanResults.uploadNotSuccessful();
-                        }
-
-                        return scanResults; // if there is an error, get out of loop and mark build unstable
-                    }
-                }
-                response.body().close();
-
-            } // end while
-            println(getLogTimestamp() + " Payload upload complete");
+            return upload.performUpload();
         } catch (Exception e) {
             printStackTrace(e);
+            StartScanResponse scanResults = new StartScanResponse();
+
             scanResults.uploadNotSuccessful();
             return scanResults;
         }
-
-        scanResults.uploadNotSuccessful();
-        return scanResults;
     }
 
-    private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(Utils.getLogTimestampFormat());
 
     private String getLogTimestamp() {
         return dateFormat.format(LocalDateTime.now());
@@ -307,7 +213,7 @@ public class StaticScanController extends ControllerBase {
 
         println("Submitting application and release model");
 
-        Response response = apiConnection.request(request);
+        ResponseContent response = apiConnection.request(request);
 
         if (response.code() < 300) {
             PostReleaseWithUpsertApplicationResponseModel result = apiConnection.parseResponse(response, new TypeToken<PostReleaseWithUpsertApplicationResponseModel>() {
@@ -318,7 +224,7 @@ public class StaticScanController extends ControllerBase {
                 return result.getReleaseId();
             } else throw new Exception("Failed to create application and/or release: \n" + String.join("\n", result.getErrors()));
         } else {
-            throw new Exception("Failed to create application and/or release: \n" + apiConnection.getRawBody(response));
+            throw new Exception("Failed to create application and/or release: \n" + response.bodyContent());
         }
     }
 
@@ -380,9 +286,6 @@ public class StaticScanController extends ControllerBase {
      */
     @Deprecated
     public GetStaticScanSetupResponse getStaticScanSettingsOld(final Integer releaseId) throws IOException {
-        if (apiConnection.getToken() == null)
-            apiConnection.authenticate();
-
         HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
                 .addPathSegments(String.format("/api/v3/releases/%d/static-scans/scan-setup", releaseId));
 
@@ -390,19 +293,18 @@ public class StaticScanController extends ControllerBase {
 
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("Authorization", "Bearer " + apiConnection.getToken())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        Response response = apiConnection.getClient().newCall(request).execute();
+
+        ResponseContent response = apiConnection.request(request);
 
         if (!response.isSuccessful()) {
             return null;
         }
 
-        String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
+        String content = response.bodyContent();
 
         Gson gson = new Gson();
         Type t = new TypeToken<GetStaticScanSetupResponse>() {
@@ -437,16 +339,16 @@ public class StaticScanController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .put(RequestBody.create(MediaType.parse("application/json"), requestContent))
                 .build();
-        Response response = apiConnection.request(request);
+        ResponseContent response = apiConnection.request(request);
 
         if (response.code() < 300) {
             return apiConnection.parseResponse(response, new TypeToken<PutStaticScanSetupResponse>() {
             }.getType());
         } else {
-            String rawBody = apiConnection.getRawBody(response);
+            String rawBody = response.bodyContent();
             List<String> errors = Utils.unexpectedServerResponseErrors();
 
-            if(!rawBody.isEmpty()) errors.add("Raw API response:\n"+rawBody);
+            if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
             else errors.add("API empty response");
 
             return new PutStaticScanSetupResponse(false, null, errors, null);

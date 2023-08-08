@@ -2,7 +2,8 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.reflect.TypeToken;
 import okhttp3.*;
-import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.CreateApplicationModel;
@@ -64,12 +65,12 @@ public class ApplicationsController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        Response resp = apiConnection.request(request);
+        ResponseContent resp = apiConnection.request(request);
 
         if (resp.code() < 300) {
             return apiConnection.parseResponse(resp, new TypeToken<GenericListResponse<ApplicationApiResponse>>() {}.getType());
         } else {
-            String rawBody = apiConnection.getRawBody(resp);
+            String rawBody = resp.bodyContent();
             String msg = String.format("Failed getApplicationList(%s, %d, %d). %s", searchTerm, offset, limit, !rawBody.isEmpty() ? "Raw API response:\n" + rawBody : "API empty response");
 
             throw new IOException(msg);
@@ -85,7 +86,7 @@ public class ApplicationsController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        Response res = apiConnection.request(request);
+        ResponseContent res = apiConnection.request(request);
         if (!res.isSuccessful()) {
             return new Result<>(false, new ArrayList<String>(){ { add("HTTP Error " + res.code()); } }, null);
         }
@@ -103,7 +104,7 @@ public class ApplicationsController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .get()
                 .build();
-        Response res = apiConnection.request(request);
+        ResponseContent res = apiConnection.request(request);
         if (!res.isSuccessful()) {
             return new Result<>(false, new ArrayList<String>(){ { add("HTTP Error " + res.code()); } }, null);
         }
@@ -189,7 +190,7 @@ public class ApplicationsController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .post(RequestBody.create(MediaType.parse("application/json"), requestContent))
                 .build();
-        Response response = apiConnection.request(request);
+        ResponseContent response = apiConnection.request(request);
 
         if (response.isSuccessful()) {
             return apiConnection.parseResponse(response, new TypeToken<CreateApplicationResponse>(){}.getType());
@@ -226,7 +227,7 @@ public class ApplicationsController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .post(RequestBody.create(MediaType.parse("application/json"), requestContent))
                 .build();
-        Response response = apiConnection.request(request);
+        ResponseContent response = apiConnection.request(request);
 
         if (response.isSuccessful()) {
             return apiConnection.parseResponse(response, new TypeToken<CreateMicroserviceResponse>(){}.getType());
@@ -260,7 +261,7 @@ public class ApplicationsController extends ControllerBase {
                 .addHeader("CorrelationId", getCorrelationId())
                 .post(RequestBody.create(MediaType.parse("application/json"), requestContent))
                 .build();
-        Response response = apiConnection.request(request);
+        ResponseContent response = apiConnection.request(request);
 
         if (response.isSuccessful()) {
             return apiConnection.parseResponse(response, new TypeToken<CreateReleaseResponse>(){}.getType());
