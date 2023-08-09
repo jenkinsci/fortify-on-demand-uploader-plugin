@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
-import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
 import org.jenkinsci.plugins.fodupload.models.AnalysisStatusTypeEnum;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;

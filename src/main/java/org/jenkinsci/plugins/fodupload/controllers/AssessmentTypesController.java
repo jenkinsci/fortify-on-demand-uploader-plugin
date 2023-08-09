@@ -3,7 +3,7 @@ package org.jenkinsci.plugins.fodupload.controllers;
 import com.google.gson.reflect.TypeToken;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
-import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.response.AssessmentTypeEntitlement;
 import org.jenkinsci.plugins.fodupload.models.response.GenericListResponse;
 

@@ -1,4 +1,10 @@
 # Changelog
+## Version 7.2 (08-08-2023)
+- Added support for new technology stacks.
+- Added support for remote nodes.
+- Added PATH field for specifying the Fortify ScanCentral SAST client directory.
+- Upgraded libraries to resolve security vulnerabilities.
+
 ## Version 7.1.2 (03-14-2023)
 - Added support for packaging files required for Debricked open source scanning with Fortify ScanCentral SAST.
 - Increased minimum required Jenkins version to 2.289

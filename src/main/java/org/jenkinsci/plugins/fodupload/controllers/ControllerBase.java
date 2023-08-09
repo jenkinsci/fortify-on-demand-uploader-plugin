@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
-import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 
 import java.io.PrintStream;
 

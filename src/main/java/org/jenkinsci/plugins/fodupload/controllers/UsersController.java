@@ -4,7 +4,8 @@ import com.google.gson.reflect.TypeToken;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.jenkinsci.plugins.fodupload.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.models.Result;
 import org.jenkinsci.plugins.fodupload.models.response.CurrentUserSessionResponse;
 
@@ -29,7 +30,7 @@ public class UsersController extends ControllerBase {
                 .get()
                 .build();
 
-        Response res = apiConnection.request(request);
+        ResponseContent res = apiConnection.request(request);
 
         if (!res.isSuccessful()) {
             if (res.code() == 401) {

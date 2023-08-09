@@ -1,16 +1,18 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import hudson.FilePath;
 import org.jenkinsci.plugins.fodupload.BsiTokenParser;
 import org.jenkinsci.plugins.fodupload.Utils;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JobModel {
-
-    private static final BsiTokenParser tokenParser = new BsiTokenParser();
+public class JobModel implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private transient static final BsiTokenParser tokenParser = new BsiTokenParser();
 
     private String releaseId;
     private String bsiTokenOriginal;
@@ -53,7 +55,7 @@ public class JobModel {
     private String microserviceName;
     private Boolean isMicroservice;
 
-    private File payload;
+    private FilePath payload;
 
     /**
      * Build model used to pass values around
@@ -152,11 +154,11 @@ public class JobModel {
         this.isMicroservice = isMicroservice;
     }
 
-    public File getPayload() {
+    public FilePath getPayload() {
         return payload;
     }
 
-    public void setPayload(File payload) {
+    public void setPayload(FilePath payload) {
         this.payload = payload;
     }
 

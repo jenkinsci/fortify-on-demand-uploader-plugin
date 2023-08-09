@@ -2,12 +2,14 @@ package org.jenkinsci.plugins.fodupload;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import okhttp3.*;
-import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.fodupload.FodApi.FormBodyRequest;
+import org.jenkinsci.plugins.fodupload.FodApi.HttpRequest;
+import org.jenkinsci.plugins.fodupload.FodApi.IHttpClient;
+import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,19 +18,24 @@ public class TokenCacheManager {
 
     // delete tokens that are this much close to expiry (in seconds)
     private static int DELETE_TOKEN_BEFORE_SECONDS = 120;
+    private final static HashMap<String, Token> tokens = new HashMap<>();
+    private PrintStream _logger;
 
-    private HashMap<String, Token> tokens;
-
-    public TokenCacheManager() {
-        this.tokens = new HashMap<>();
+    public TokenCacheManager(PrintStream logger) {
+        _logger = logger;
     }
 
-    public synchronized String getToken(OkHttpClient client, String apiUrl, FodEnums.GrantType grantType, String scope, String id, String secret) throws IOException {
+    private void log(String msg) {
+        if (_logger != null) _logger.println(msg);
+    }
+
+    public synchronized String getToken(IHttpClient client, String apiUrl, FodEnums.GrantType grantType, String scope, String id, String secret) throws IOException {
         String key = buildCacheKey(apiUrl, grantType, scope, id, secret);
         clearCache();
 
         if (!tokens.containsKey(key)) {
             Token token = retrieveToken(client, apiUrl, grantType, scope, id, secret);
+
             tokens.put(key, token);
             return token.value;
         }
@@ -41,60 +48,49 @@ public class TokenCacheManager {
     }
 
     private void clearCache() {
-        for (Map.Entry<String,Token> token : tokens.entrySet()) {
+        for (Map.Entry<String, Token> token : tokens.entrySet()) {
             if (isCloseToExpiry(token.getValue())) {
                 tokens.remove(token.getKey());
             }
         }
     }
 
-    private Token retrieveToken(OkHttpClient client, String apiUrl, FodEnums.GrantType grantType, String scope, String id, String secret) throws IOException {
-        RequestBody formBody = null;
+    private Token retrieveToken(IHttpClient client, String apiUrl, FodEnums.GrantType grantType, String scope, String id, String secret) throws IOException {
+        FormBodyRequest request = new FormBodyRequest(apiUrl + "/oauth/token", HttpRequest.Verb.Post);
+
         if (grantType == FodEnums.GrantType.CLIENT_CREDENTIALS) {
-            formBody = new FormBody.Builder()
-                    .add("scope", scope)
-                    .add("grant_type", "client_credentials")
-                    .add("client_id", id)
-                    .add("client_secret", secret)
-                    .build();
+            log("Logging into API with token");
+            request.addValue("scope", scope)
+                    .addValue("grant_type", "client_credentials")
+                    .addValue("client_id", id)
+                    .addValue("client_secret", secret);
         } else if (grantType == FodEnums.GrantType.PASSWORD) {
-            formBody = new FormBody.Builder()
-                    .add("scope", scope)
-                    .add("grant_type", "password")
-                    .add("username", id)
-                    .add("password", secret)
-                    .build();
+            log("Logging into API with PAT");
+            request.addValue("scope", scope)
+                    .addValue("grant_type", "password")
+                    .addValue("username", id)
+                    .addValue("password", secret);
         } else {
             throw new IOException("Invalid Grant Type");
         }
 
-        Request request = new Request.Builder()
-                .url(apiUrl + "/oauth/token")
-                .post(formBody)
-                .build();
-        Response response = client.newCall(request).execute();
+        ResponseContent response = client.execute(request);
 
         if (!response.isSuccessful())
             throw new IOException("Unexpected code " + response);
 
-        ResponseBody body = response.body();
-        if (body == null)
+        String content = response.bodyContent();
+
+        if (content == null || content.isEmpty())
             throw new IOException("Unexpected body to be null");
 
-        InputStream stream = body.byteStream();
-        try {
-            String content = IOUtils.toString(stream, "utf-8");
-            JsonParser parser = new JsonParser();
-            JsonObject obj = parser.parse(content).getAsJsonObject();
+        JsonParser parser = new JsonParser();
+        JsonObject obj = parser.parse(content).getAsJsonObject();
+        Calendar expiryTime = Calendar.getInstance();
 
-            Calendar expiryTime = Calendar.getInstance();
-            expiryTime.add(Calendar.SECOND, obj.get("expires_in").getAsInt());
-            return new Token(obj.get("access_token").getAsString(), expiryTime);
-        }
-        finally {
-            stream.close();
-            body.close();
-        }
+        expiryTime.add(Calendar.SECOND, obj.get("expires_in").getAsInt());
+
+        return new Token(obj.get("access_token").getAsString(), expiryTime);
     }
 
     private Boolean isCloseToExpiry(Token token) {

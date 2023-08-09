@@ -41,7 +41,7 @@
 <!--https://fodtenant/Tools/Downloads-->
 
     <f:section title="Scan Central">
-        <f:entry title="Path" description="Path to the scancentral executable" field="scanCentralPath">
+        <f:entry title="Path" description="Path to the scancentral executable. For agent specific setting, set environment var FOD_SCANCENTRAL" field="scanCentralPath">
             <f:textbox default="" />
         </f:entry>
     </f:section>
