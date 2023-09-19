@@ -1,0 +1,62 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+         xmlns:f="/lib/form">
+    <f:block>
+        <div>
+            <f:section title="Application and Release Options">
+                <f:block>
+                    <f:entry id="releaseTypeSelectList" title="Pick a Release" field="selectedReleaseType"
+                             help="/plugin/fortify-on-demand-uploader/help-slReleaseTypeList.html">
+                        <f:select id="releaseTypeSelectList" />
+                    </f:entry>
+
+                    <f:entry title="Release ID">
+                        <div id="releaseIdSection-entry">
+                            <input type="text" id="releaseIdField" name="releaseId" class="setting-input" style="width: 160px" />
+                        </div>
+                    </f:entry>
+
+                    <f:entry title="Application">
+                        <div id="application-entry" class="spinner-container">
+                            <span tooltip="Select an application" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span class="first-child">
+                                    <a href="#" id="selectedApp"></a>
+                                </span>
+                            </span>
+                            <input type="hidden" name="userSelectedApplication" />
+
+                            <span tooltip="Create a new application" id="createAppSection" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span class="first-child createLink">
+                                    (<a href="#" id="createAppBtn">Create</a>)
+                                </span>
+                            </span>
+                        </div>
+                    </f:entry>
+
+                    <f:entry title="Release">
+                        <div id="release-entry" class="spinner-container">
+                            <span tooltip="Select a release" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span class="first-child">
+                                    <a href="#" id="selectedRelease"></a>
+                                </span>
+                            </span>
+                            <input type="hidden" name="userSelectedRelease" />
+
+                            <span tooltip="Create a new release" id="createReleaseSection" class="yui-button" style="float: unset;vertical-align: bottom;">
+                                <span class="first-child createLink">
+                                    (<a href="#" id="createReleaseBtn">Create</a>)
+                                </span>
+                            </span>
+                        </div>
+                    </f:entry>
+
+                    <f:block>
+                        <div id="appAndReleaseNameErrorView">
+                            <div style="color: red;">Failed to retrieve applications/releases/microservices from the FoD API</div>
+                        </div>
+                    </f:block>
+                </f:block>
+            </f:section>
+        </div>
+    </f:block>
+</j:jelly>

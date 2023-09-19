@@ -264,6 +264,123 @@ class Api {
         });
     }
 
+//-----------Dynamic Scan Settings----------------------------
+
+    getTimeZoneStacks(customAuth) {
+        return new Promise((res, rej) => {
+            let timeZones;
+
+            let ttprom = new Promise((ttres, ttrej) => {
+                this.descriptor.retrieveLookupItems('TimeZones', customAuth, t => {
+                    timeZones = JSON.parse(t.responseJSON);
+                    res(timeZones);
+                    ttres();
+
+                });
+            });
+            console.log(timeZones);
+        });
+    }
+
+    getGeoLocationStacks(customAuth) {
+        return new Promise((res, rej) => {
+            let geoLocations;
+
+            let ttprom = new Promise((ttres, ttrej) => {
+                this.descriptor.retrieveLookupItems('GeoLocations', customAuth, t => {
+                    geoLocations = JSON.parse(t.responseJSON);
+                    res(geoLocations);
+                    ttres();
+                });
+            });
+            console.log(geoLocations);
+        });
+    }
+
+    getDynamicScanSettings(releaseId, customAuth) {
+        return new Promise((res, rej) => {
+            this.descriptor.retrieveDynamicScanSettings(releaseId, customAuth, async t => {
+                const responseJSON = JSON.parse(t.responseJSON);
+                console.log("Dynamic Scan Settings");
+                console.log(responseJSON);
+                return res(responseJSON);
+            });
+        });
+    }
+
+    getDynamicAssessmentTypeEntitlements(isMicroservice, customAuth) {
+        return new Promise((res, rej) => {
+            this.descriptor.retrieveAssessmentTypeEntitlements(isMicroservice, customAuth, async t => {
+                const responseJSON = JSON.parse(t.responseJSON);
+
+                if (responseJSON === null) return res(null);
+                //                    console.log(this._modifyDynamicAssessmentEntitlements(responseJSON));
+                return res(this._modifyDynamicAssessmentEntitlements(responseJSON));
+            });
+        });
+    }
+
+    patchLoginMacroFile(releaseId, customAuth, file) {
+        debugger;
+        return new Promise((res, req) => {
+            let fileReader = new FileReader();
+            let fileContent = fileReader.readAsBinaryString(file);
+            fileReader.onload = () => {
+                fileContent = fileReader.result;
+                alert(fileReader.result);
+                this.descriptor.patchLoginMacroFile(releaseId, customAuth, fileContent, async t => {
+                    const responseJSON = JSON.parse(t.responseJSON);
+                    console.log(responseJSON);
+                    return res(responseJSON);
+                })
+            };
+        });
+    }
+
+//-----------------------Dynamic Scan Settings-------------
+    setDastFileUpload() {
+
+    }
+
+    _modifyDynamicAssessmentEntitlements(responseJSON) {
+        if (Array.isArray(responseJSON) && responseJSON.length > 0) {
+            let assessments = {};
+
+            for (let ae of responseJSON) {
+                if (ae.isRemediation) continue;
+                let assessment = assessments[ae.assessmentTypeId];
+
+                if (!assessment) {
+                    assessment = {
+                        id: ae.assessmentTypeId, name: ae.name, entitlements: {}, entitlementsSorted: []
+                    };
+                    assessments[ae.assessmentTypeId] = assessment;
+                }
+                let entitlement = {
+                    id: ae.entitlementId,
+                    frequency: ae.frequencyType,
+                    frequencyId: ae.frequencyTypeId,
+                    units: ae.units,
+                    unitsAvailable: ae.unitsAvailable,
+                    isBundledAssessment: ae.isBundledAssessment,
+                    parentAssessmentTypeId: ae.parentAssessmentTypeId,
+                    description: ae.entitlementDescription,
+                    sortValue: (ae.frequencyType === 'Subscription' ? 0 : 1).toString() + '_' + ae.entitlementDescription.toLowerCase()
+                };
+
+                assessment.entitlements[ae.entitlementId] = entitlement;
+                assessment.entitlementsSorted.push(entitlement);
+
+            }
+            for (let k of Object.keys(assessments)) {
+                assessments[k].entitlementsSorted = assessments[k].entitlementsSorted.sort((a, b) => a.sortValue < b.sortValue ? -1 : 0);
+            }
+            return assessments;
+        }
+
+        return null;
+    }
+
     //</editor-fold>
 
     isAuthError(err) {

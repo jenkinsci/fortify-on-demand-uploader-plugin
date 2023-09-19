@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:section title="Scan Settings">
+        <f:block>
+
+            <f:entry title="Assessment Type" field="assessmentTypeId">
+                <div id="dastAssessmentTypeForm" class="fode-field spinner-container dast-scan-setting">
+                    <div class="fode-edit jenkins-select">
+                        <select name="assessmentTypeId" id="ddAssessmentType" class="jenkins-select__input">
+                            <option value="0">DAST Automated</option>
+                        </select>
+                    </div>
+                </div>
+            </f:entry>
+
+            <f:entry title="Entitlement" field="userSelectedEntitlement">
+                <div id="dastEntitlementForm" class="fode-field spinner-container dast-scan-setting">
+                    <div class="fode-edit jenkins-select">
+                        <select name="userSelectedEntitlement" id="entitlementSelectList" class="jenkins-select__input">
+                            <option value="-1">Select an Entitlement</option>
+                        </select>
+                    </div>
+                </div>
+            </f:entry>
+
+            <!-- Dynamic Scan Type -->
+            <f:entry field="ScanType" title="Scan Type">
+                <div id="dastScanType" class="fode-field spinner-container dast-scan-type">
+                    <div class="fode-edit jenkins-select">
+                        <select name="selectedScanType" id="scanTypeList" class="jenkins-select__input">
+                            <option value="-1">Select a Scan Type</option>
+                            <option value="Standard">Standard</option>
+                            <option value="Workflow">Workflow-Driven</option>
+                            <option value="API">API</option>
+                        </select>
+                    </div>
+                </div>
+            </f:entry>
+
+            <!-- Dynamic Scan Environment -->
+            <f:entry>
+                <div class="dast-scan-setting dast-standard-scan" id="dast-scan-setting-evn">
+                    <f:entry title="Environment Facing">
+                        <f:select field="dastEnv"/>
+                    </f:entry>
+                </div>
+            </f:entry>
+
+            <!-- TimeZone DropDown -->
+            <f:entry title="TimeZone">
+                <div id="timezone" class="fode-field spinner-container dast-scan-setting">
+                    <div class="fode-edit jenkins-select">
+                        <select name="selectedDynamicTimeZone" id="timeZoneStackSelectList"
+                                class="jenkins-select__input">
+                            <option value="-1">Select a Time Zone</option>
+                        </select>
+                    </div>
+                </div>
+            </f:entry>
+
+            <!-- GeoLocation Stack -->
+            <f:entry title="Geo Location">
+                <div id="geoLocationStack" class="fode-field spinner-container dast-scan-setting">
+                    <div class="fode-edit jenkins-select">
+                        <select name="selectedDynamicGeoLocation" id="geoLocationStackSelectList"
+                                class="jenkins-select__input">
+                            <option value="-1">Select a GeoLocation Stack</option>
+                        </select>
+                    </div>
+                </div>
+            </f:entry>
+
+        </f:block>
+    </f:section>
+
+    <f:section title="Scope">
+        <f:entry title="Dynamic Site URL">
+            <div id="dast-standard-site-url" class="fodeDynamicStandardRowSelector dast-standard-scan">
+                <f:textbox field="webSiteUrl"/>
+            </div>
+        </f:entry>
+        <f:entry title="Scan Policy">
+            <div id="dast-standard-scan-policy" class="dast-scan-setting dast-standard-scan">
+                <f:select field="scanPolicyType"/>
+            </div>
+        </f:entry>
+        <f:entry>
+            <div id="dast-standard-scan-scope" class="dast-scan-setting dast-standard-scan">
+                <f:booleanRadio true="Scan entire host"
+                                false="Restrict scan to URL and subdirectories" field="scanHost">
+
+                </f:booleanRadio>
+            </div>
+
+            <div id="dast-standard-scan-scope-attribute" class="dast-scan-setting dast-standard-scan">
+
+                <f:checkbox title="Allow HTTP(:80) and HTTPS (:443)" field="allowHttp)">
+
+                </f:checkbox>
+                <f:checkbox title="Allow form submission during crawl" field="allowFormSubmissionCrawl">
+
+                </f:checkbox>
+                <f:checkbox title="Enable redundant page detection" field="enableRedundantPageDetection">
+                </f:checkbox>
+            </div>
+        </f:entry>
+        <f:entry title="Exclude URLs">
+            <div id="standardScanTypeExcludeUrlsRow" class="dast-standard-scan">
+                <span>
+                    <input type="text" id="standardScanExcludedUrlText" class="setting-input dast-standard-scan"
+                           placeholder="Exclude URL"/>
+
+                    <input type="button" id="btnAddExcludeUrl" value="Add"
+                           class="btn-add-exclude-url dast-standard-scan"/>
+
+                </span>
+                <ul id="listStandardScanTypeExcludedUrl" name="excludedUrl" class="dast-standard-scan">
+                </ul>
+            </div>
+
+        </f:entry>
+    </f:section>
+
+    <f:section title="Authentication">
+        <f:entry>
+            <div class="dast-standard-scan">
+                <f:optionalBlock name="webSiteNetworkAuthentication" field="weSiteNetworkAuthSetting"
+                                 title="Network Authentication Required"
+                                 checked="${instance.weSiteNetworkAuthSetting}" inline="true">
+
+                    <f:entry title="Network Username" field="webSiteNetworkAuthUserName">
+                        <f:textbox/>
+                    </f:entry>
+
+                    <f:entry title="Network Password" field="webSiteNetworkAuthPassword">
+                        <f:password/>
+                    </f:entry>
+
+                </f:optionalBlock>
+            </div>
+        </f:entry>
+
+        <f:entry>
+            <div class="dast-standard-scan">
+                <f:optionalBlock name="webSiteLoginMacro" field="webSiteLoginMacroSetting"
+                                 title="Login Macro"
+                                 checked="${instance.webSiteLoginMacroSetting}" inline="true">
+
+                    <f:entry
+                            title="Please upload the login macro file. Supported extensions: *.har, *.webmacro, *.burp">
+                        <span>
+                            <input id="loginFileMacro" type="File" name="loginFileMacro"/>
+                            <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
+                        </span>
+                    </f:entry>
+
+                </f:optionalBlock>
+            </div>
+        </f:entry>
+
+    </f:section>
+
+    <f:entry>
+        <div>
+            <input type="textbox" hidden="true" name="entitlementId" id="entitlementId"></input>
+            <input type="textbox" hidden="true" name="entitlementFrequencyId" id="frequencyId"></input>
+            <input type="textbox" hidden="true" name="entitlementFrequencyType" id="entitlementFreqType"></input>
+        </div>
+    </f:entry>
+</j:jelly>

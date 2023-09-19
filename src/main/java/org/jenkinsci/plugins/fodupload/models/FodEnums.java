@@ -1,9 +1,5 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-import org.apache.commons.lang.enums.EnumUtils;
-
-import java.util.Arrays;
-
 public class FodEnums {
 
     public enum APILookupItemTypes {
@@ -308,5 +304,112 @@ public class FodEnums {
         }
 
     }
+
+    public enum DynamicScanFileTypes {
+        OpenAPIDefinition("OpenAPIDefinition"),
+        GraphQLDefinition("GraphQLDefinition"),
+        GRPCDefinition("GRPCDefinition"),
+        WorkflowDrivenMacro("WorkflowDrivenMacro"),
+        LoginMacro("LoginMacro");
+        private final String _val;
+
+        public static DynamicScanFileTypes fromInt(int val) {
+            switch (val) {
+
+                case 6:
+                    return LoginMacro;
+                case 5:
+                    return WorkflowDrivenMacro;
+                case 4:
+                    return GRPCDefinition;
+
+
+                case 3:
+                    return GraphQLDefinition;
+
+
+                case 2:
+                    return OpenAPIDefinition;
+                case 1:
+                    return OpenAPIDefinition;
+
+            }
+            return null;
+        }
+
+        DynamicScanFileTypes(String val) {
+            this._val = val;
+        }
+
+        public String getValue() {
+            return this._val;
+        }
+
+    }
+
+    public enum DastEnvironmentType {
+        Internal,
+        External
+    }
+
+    public enum DastScanType {
+        Standard,
+        Workflow,
+        API
+    }
+
+    public enum DastPolicy {
+        Standard,
+        Critical_and_high,
+        Passive
+    }
+
+    public enum DastReleaseType {
+        UseReleaseId("UseReleaseId"),
+        UseAppAndReleaseName("UseAppAndReleaseName");
+        private final String _val;
+
+        DastReleaseType(String val) {
+            this._val = val;
+        }
+
+        public static DastReleaseType fromInt(int val) {
+            switch (val) {
+                case 2:
+                    return UseAppAndReleaseName;
+                case 1:
+                default:
+                    return UseReleaseId;
+
+            }
+        }
+
+        public String getValue() {
+            return this._val;
+        }
+
+        public int getInteger() {
+            switch (this._val) {
+                case "UseAppAndReleaseName":
+                    return 2;
+                case "UseReleaseId":
+                default:
+                    return 1;
+            }
+        }
+
+        public String toString() {
+            switch (this._val) {
+
+                case "UseAppAndReleaseName":
+                    return "Application and Release Options";
+                case "UseReleaseId":
+                default:
+                    return "Release ID";
+
+            }
+        }
+    }
+
 
 }
