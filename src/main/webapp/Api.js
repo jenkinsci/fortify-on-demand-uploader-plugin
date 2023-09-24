@@ -126,8 +126,10 @@ class Api {
         return new Promise((res, rej) => {
             this.descriptor.retrieveStaticScanSettings(releaseId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
-
-                return res(responseJSON);
+                if (responseJSON !== undefined || null)
+                    return res(responseJSON);
+                else
+                    rej();
             });
         });
     }
@@ -137,8 +139,10 @@ class Api {
             this.descriptor.retrieveAssessmentTypeEntitlements(releaseId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
 
-                if (responseJSON === null) return res(null);
+                if (responseJSON === null || undefined) {
 
+                    rej();
+                }
                 return res(this._mutateAssessmentEntitlements(responseJSON));
             });
         });
@@ -170,7 +174,7 @@ class Api {
         });
     }
 
-    _mutateAssessmentEntitlements(responseJSON){
+    _mutateAssessmentEntitlements(responseJSON) {
         if (Array.isArray(responseJSON) && responseJSON.length > 0) {
             let assessments = {};
 
@@ -218,8 +222,10 @@ class Api {
         return new Promise((res, rej) => {
             this.descriptor.retrieveStaticScanSettings(releaseId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
-
-                return res(responseJSON);
+                if (responseJSON === null || undefined) {
+                    rej();
+                } else
+                    return res(responseJSON);
             });
         });
     }
@@ -275,10 +281,9 @@ class Api {
                     timeZones = JSON.parse(t.responseJSON);
                     res(timeZones);
                     ttres();
-
                 });
             });
-            console.log(timeZones);
+
         });
     }
 
@@ -301,11 +306,29 @@ class Api {
         return new Promise((res, rej) => {
             this.descriptor.retrieveDynamicScanSettings(releaseId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
+
+                if (responseJSON === null || undefined) {
+                    return rej("Error DAST Scan settings not retrieved.");
+                }
                 console.log("Dynamic Scan Settings");
                 console.log(responseJSON);
                 return res(responseJSON);
             });
         });
+    }
+
+    getNetworkAuthType(customAuth) {
+
+        return new Promise((res, reject) => {
+
+            this.descriptor.retrieveLookupItems("NetworkAuthenticationType", customAuth, async result => {
+                if (result === undefined || result.responseJSON === undefined) {
+                    return reject("Error Network Authentication type not retrieved");
+                }
+                return res((JSON.parse(result.responseJSON)));
+            })
+        });
+
     }
 
     getDynamicAssessmentTypeEntitlements(isMicroservice, customAuth) {
@@ -314,7 +337,7 @@ class Api {
                 const responseJSON = JSON.parse(t.responseJSON);
 
                 if (responseJSON === null) return res(null);
-                //                    console.log(this._modifyDynamicAssessmentEntitlements(responseJSON));
+
                 return res(this._modifyDynamicAssessmentEntitlements(responseJSON));
             });
         });
@@ -322,16 +345,19 @@ class Api {
 
     patchLoginMacroFile(releaseId, customAuth, file) {
         debugger;
-        return new Promise((res, req) => {
+        return new Promise((res, reject) => {
             let fileReader = new FileReader();
             let fileContent = fileReader.readAsBinaryString(file);
             fileReader.onload = () => {
                 fileContent = fileReader.result;
-                alert(fileReader.result);
+
                 this.descriptor.patchLoginMacroFile(releaseId, customAuth, fileContent, async t => {
                     const responseJSON = JSON.parse(t.responseJSON);
                     console.log(responseJSON);
-                    return res(responseJSON);
+                    if (responseJSON !== null || undefined)
+                        return res(responseJSON);
+                    else
+                        return reject();
                 })
             };
         });
@@ -381,7 +407,7 @@ class Api {
         return null;
     }
 
-    //</editor-fold>
+//</editor-fold>
 
     isAuthError(err) {
         return err == this.failedToAuthMessage;

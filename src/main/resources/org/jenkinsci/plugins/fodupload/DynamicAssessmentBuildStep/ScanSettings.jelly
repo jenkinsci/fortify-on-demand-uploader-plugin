@@ -74,18 +74,14 @@
 
         </f:block>
     </f:section>
-
+    <!-- Scope Settings -->
     <f:section title="Scope">
         <f:entry title="Dynamic Site URL">
             <div id="dast-standard-site-url" class="fodeDynamicStandardRowSelector dast-standard-scan">
                 <f:textbox field="webSiteUrl"/>
             </div>
         </f:entry>
-        <f:entry title="Scan Policy">
-            <div id="dast-standard-scan-policy" class="dast-scan-setting dast-standard-scan">
-                <f:select field="scanPolicyType"/>
-            </div>
-        </f:entry>
+
         <f:entry>
             <div id="dast-standard-scan-scope" class="dast-scan-setting dast-standard-scan">
                 <f:booleanRadio true="Scan entire host"
@@ -106,7 +102,7 @@
                 </f:checkbox>
             </div>
         </f:entry>
-        <f:entry title="Exclude URLs">
+        <f:entry title="Exclude URLs" field="listStandardScanTypeExcludedUrl">
             <div id="standardScanTypeExcludeUrlsRow" class="dast-standard-scan">
                 <span>
                     <input type="text" id="standardScanExcludedUrlText" class="setting-input dast-standard-scan"
@@ -116,19 +112,42 @@
                            class="btn-add-exclude-url dast-standard-scan"/>
 
                 </span>
-                <ul id="listStandardScanTypeExcludedUrl" name="excludedUrl" class="dast-standard-scan">
+                <ul id="listStandardScanTypeExcludedUrl" name="listStandardScanTypeExcludedUrl"
+                    class="dast-standard-scan">
                 </ul>
             </div>
+        </f:entry>
 
+        <f:entry title="Scan Policy">
+            <div id="dast-standard-scan-policy" class="dast-scan-setting dast-standard-scan">
+                <f:select field="scanPolicyType"/>
+            </div>
+        </f:entry>
+        <f:entry title="Timebox Scan Duration (Hours)">
+            <div id="dast-standard-time-scan-duration" class="dast-scan-setting dast-standard-scan">
+                <f:select field="scanTimeboxScan"/>
+            </div>
         </f:entry>
     </f:section>
 
     <f:section title="Authentication">
         <f:entry>
-            <div class="dast-standard-scan">
-                <f:optionalBlock name="webSiteNetworkAuthentication" field="weSiteNetworkAuthSetting"
+            <div class="dast-scan-auth">
+                <f:optionalBlock name="webSiteNetworkAuthSettingEnabled" field="webSiteNetworkAuthSettingEnabled"
                                  title="Network Authentication Required"
-                                 checked="${instance.weSiteNetworkAuthSetting}" inline="true">
+                                 checked="${instance.webSiteNetworkAuthSettingEnabled}" inline="true">
+
+                    <f:entry title="Network Authentication Type">
+                        <div id="ddlNetworkAuthTypeRow" class="fode-field spinner-container dast-scan-setting">
+                            <div class="fode-edit jenkins-select">
+                                <select name="ddlNetworkAuthType" id="ddlNetworkAuthType"
+                                        class="jenkins-select__input">
+                                    <option value="-1">Select a Network Authentication Type</option>
+                                </select>
+                            </div>
+                        </div>
+                    </f:entry>
+
 
                     <f:entry title="Network Username" field="webSiteNetworkAuthUserName">
                         <f:textbox/>
@@ -143,16 +162,16 @@
         </f:entry>
 
         <f:entry>
-            <div class="dast-standard-scan">
-                <f:optionalBlock name="webSiteLoginMacro" field="webSiteLoginMacroSetting"
+            <div class="dast-scan-auth">
+                <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
                                  title="Login Macro"
-                                 checked="${instance.webSiteLoginMacroSetting}" inline="true">
-
+                                 checked="${instance.webSiteLoginMacroEnabled}" inline="true">
                     <f:entry
                             title="Please upload the login macro file. Supported extensions: *.har, *.webmacro, *.burp">
                         <span>
                             <input id="loginFileMacro" type="File" name="loginFileMacro"/>
                             <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
+                            <input type="label" hidden="true" value="" name="loginMacroId" id="loginMacroId"/>
                         </span>
                     </f:entry>
 

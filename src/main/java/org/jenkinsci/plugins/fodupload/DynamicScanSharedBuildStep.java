@@ -14,7 +14,6 @@ import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.DynamicScanJobModel;
 import org.jenkinsci.plugins.fodupload.models.PutDynamicScanSetupModel;
 import org.jenkinsci.plugins.fodupload.models.StartDynamicScanReqModel;
-import org.jenkinsci.plugins.fodupload.models.response.FodDastApiResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PutDynamicScanSetupResponse;
 import org.jenkinsci.plugins.fodupload.models.response.StartDynamicScanResponse;
 
@@ -37,6 +36,7 @@ public class DynamicScanSharedBuildStep {
     private int scanId;
 
     public DynamicScanSharedBuildStep(boolean overrideGlobalConfig, String username,
+
                                       String personalAccessToken, String tenantId,
                                       String releaseId, String selectedReleaseType,
                                       List<String> webSiteUrl, String dastEnv,
@@ -49,9 +49,9 @@ public class DynamicScanSharedBuildStep {
                                       String userSelectedRelease, String assessmentTypeId,
                                       String entitlementId, String entitlementFrequencyId,
                                       String entitlementFrequencyType, String userSelectedEntitlement,
-                                      String selectedDynamicGeoLocation, boolean webSiteNetworkAuthSetting,
-                                      boolean webSiteLoginMacroSetting
-    ) {
+                                      String selectedDynamicGeoLocation, boolean requireWebSiteNetworkAuth,
+                                      boolean requireWebSiteLoginMacro,
+                                      String networkAuthType) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
 
@@ -68,8 +68,8 @@ public class DynamicScanSharedBuildStep {
                 userSelectedRelease, assessmentTypeId,
                 entitlementId, entitlementFrequencyId,
                 entitlementFrequencyType, userSelectedEntitlement,
-                selectedDynamicGeoLocation, webSiteNetworkAuthSetting,
-                webSiteLoginMacroSetting);
+                selectedDynamicGeoLocation, requireWebSiteNetworkAuth,
+                requireWebSiteLoginMacro, networkAuthType);
 
     }
 
@@ -94,8 +94,10 @@ public class DynamicScanSharedBuildStep {
                                                   String entitlementId, String entitlementFreq, String geoLocationId, String loginMacroId,
                                                   String timeZone, String scanType, String scanPolicy, List<String> webSiteAssessmentUrl,
                                                   boolean allowFrmSubmission, boolean allowSameHostRedirect, boolean restrictDirectories,
-                                                  boolean redundantPageDetection, boolean requireNetworkAuth,
-                                                  String scanEnvironment)
+                                                  boolean redundantPageDetection,String scanEnvironment,
+                                                  boolean requireNetworkAuth, boolean requireLoginMacroAuth,
+                                                  String networkAuthUserName, String networkAuthPassword
+    )
             throws IllegalArgumentException, IOException {
 
         String releaseId = "";
@@ -120,14 +122,17 @@ public class DynamicScanSharedBuildStep {
 
             dynamicScanSetupReqModel.setPolicy(scanPolicy);
             dynamicScanSetupReqModel.setScanType(scanType);
+
             dynamicScanSetupReqModel.setRequiresNetworkAuthentication(requireNetworkAuth);
+
             dynamicScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
-            if ((loginMacroId != "" && loginMacroId != null) && Integer.parseInt(loginMacroId) != 0 || requireNetworkAuth)
+
+            if (requireLoginMacroAuth && (loginMacroId != "" && loginMacroId != null) && Integer.parseInt(loginMacroId) != 0)
                 dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
 
             if (requireNetworkAuth) {
-                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().password = "";
-                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().userName = "";
+                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().password = networkAuthPassword;
+                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().userName = networkAuthUserName;
             }
 
             dynamicScanSetupReqModel.setAllowFormSubmissions(allowFrmSubmission);
@@ -142,16 +147,16 @@ public class DynamicScanSharedBuildStep {
             PutDynamicScanSetupResponse response = dynamicController.putDynamicWebSiteScanSettings(Integer.parseInt(releaseId),
                     dynamicScanSetupReqModel);
 
-//            if (response.isSuccess()) {
-//                System.out.println("Successfully saved settings for release id = " + releaseId);
-//            } else if (response.getErrors() != null && !response.getErrors().isEmpty()) {
-//
-//                String errs = response.getErrors().toString().replace("\n", "\n\t\t");
-//                //String errs = response.getErrors().stream().map(s -> s.replace("\n", "\n\t\t")).collect(Collectors.joining("\n\t"));
-//
-//                System.err.println("Error saving settings for release id = " + releaseId + "\n\t" + errs);
-//                throw new IllegalArgumentException("Failed to save scan settings for release id = " + releaseId);
-//            }
+            if (response.isSuccess()) {
+                System.out.println("Successfully saved settings for release id = " + releaseId);
+            } else if (response.getErrors() != null && !response.getErrors().isEmpty()) {
+
+                String errs = response.getErrors().toString().replace("\n", "\n\t\t");
+                //String errs = response.getErrors().stream().map(s -> s.replace("\n", "\n\t\t")).collect(Collectors.joining("\n\t"));
+
+                System.err.println("Error saving settings for release id = " + releaseId + "\n\t" + errs);
+                throw new IllegalArgumentException("Failed to save scan settings for release id = " + releaseId);
+            }
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {

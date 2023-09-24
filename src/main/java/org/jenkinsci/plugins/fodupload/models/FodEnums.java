@@ -35,7 +35,9 @@ public class FodEnums {
         PassFailReasonTypes,
         DynamicScanWebServiceTypes,
         TechnologyTypes,
-        LanguageLevels
+        LanguageLevels,
+
+        NetworkAuthenticationType
     }
 
     public enum GrantType {CLIENT_CREDENTIALS, PASSWORD}
@@ -358,10 +360,98 @@ public class FodEnums {
         API
     }
 
+    public enum DastTimeBoxScan {
+        four("4"),
+        two("2"),
+        twelve("12"),
+        none("none");
+        private final String _val;
+
+        DastTimeBoxScan(String val) {
+            this._val = val;
+        }
+
+        public int getInteger() {
+            switch (this._val) {
+                case "2":
+                    return 2;
+                case "4":
+                    return 4;
+                case "12":
+                    return 12;
+            }
+            return 0;
+        }
+
+        public static DastTimeBoxScan fromInt(int val) {
+            switch (val) {
+
+                case 12:
+                    return twelve;
+
+                case 4:
+                    return four;
+                case 2:
+                default:
+                    return two;
+            }
+        }
+    }
+
     public enum DastPolicy {
-        Standard,
-        Critical_and_high,
-        Passive
+
+        Standard("Standard"),
+        Critical_and_high("Critical and high"),
+        Passive("Passive");
+
+        private final String _val;
+
+        DastPolicy(String val) {
+            this._val = val;
+        }
+
+        public int getInteger() {
+            switch (this._val) {
+                case "Passive":
+                    return 3;
+                case "Critical_and_high":
+                    return 2;
+                case "Standard":
+                    return 1;
+            }
+            return 0;
+        }
+
+        public static DastPolicy fromInt(int val) {
+            switch (val) {
+
+                case 3:
+                    return Passive;
+
+                case 2:
+                    return Critical_and_high;
+                case 1:
+                default:
+                    return Standard;
+            }
+        }
+
+        public String getValue() {
+            return this._val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "Standard":
+                    return "Standard";
+                case "Critical and high":
+                    return "Critical and high";
+                case "Passive":
+                    return "Passive";
+
+            }
+            return null;
+        }
     }
 
     public enum DastReleaseType {
@@ -410,6 +500,7 @@ public class FodEnums {
             }
         }
     }
+
 
 
 }

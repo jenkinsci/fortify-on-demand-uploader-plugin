@@ -6,6 +6,7 @@ public class DynamicScanJobModel {
 
     private boolean overrideGlobalConfig;
     String username;
+
     String personalAccessToken;
     String tenantId;
     String _releaseId;
@@ -29,6 +30,8 @@ public class DynamicScanJobModel {
     String entitlementFrequencyId;
     String entitlementFrequencyType;
     String userSelectedEntitlement;
+
+    String networkAuthType;
 
     public boolean isOverrideGlobalConfig() {
         return overrideGlobalConfig;
@@ -130,7 +133,12 @@ public class DynamicScanJobModel {
     boolean webSiteNetworkAuthSetting;
     boolean webSiteLoginMacroSetting;
 
-    public DynamicScanJobModel(boolean overrideGlobalConfig, String username, String personalAccessToken, String tenantId, String releaseId, String selectedReleaseType, List<String> webSiteUrl, String dastEnv, String scanPolicyType, boolean scanHost, boolean allowHttp, boolean allowFormSubmissionCrawl, String selectedScanType, String selectedDynamicTimeZone, boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName, String loginFileMacro, String webSiteNetworkAuthPassword, String userSelectedApplication, String userSelectedRelease, String assessmentTypeId, String entitlementId, String entitlementFrequencyId, String entitlementFrequencyType, String userSelectedEntitlement, String selectedDynamicGeoLocation, boolean webSiteNetworkAuthSetting, boolean webSiteLoginMacroSetting) {
+    public DynamicScanJobModel(boolean overrideGlobalConfig, String username, String personalAccessToken,
+                               String tenantId, String releaseId, String selectedReleaseType,
+                               List<String> webSiteUrl, String dastEnv, String scanPolicyType,
+                               boolean scanHost, boolean allowHttp, boolean allowFormSubmissionCrawl,
+                               String selectedScanType, String selectedDynamicTimeZone, boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName, String loginFileMacro, String webSiteNetworkAuthPassword, String userSelectedApplication, String userSelectedRelease, String assessmentTypeId, String entitlementId, String entitlementFrequencyId, String entitlementFrequencyType, String userSelectedEntitlement, String selectedDynamicGeoLocation, boolean webSiteNetworkAuthSetting, boolean webSiteLoginMacroSetting
+       ,String networkAuthType) {
         this._releaseId = userSelectedRelease;
         this.tenantId = tenantId;
         this.overrideGlobalConfig = overrideGlobalConfig;
@@ -160,7 +168,7 @@ public class DynamicScanJobModel {
         this.scanPolicyType = scanPolicyType;
         this.webSiteNetworkAuthUserName = webSiteNetworkAuthUserName;
         this.webSiteNetworkAuthPassword = webSiteNetworkAuthPassword;
-
+        this.networkAuthType = networkAuthType;
     }
 
     public String get_releaseId() {

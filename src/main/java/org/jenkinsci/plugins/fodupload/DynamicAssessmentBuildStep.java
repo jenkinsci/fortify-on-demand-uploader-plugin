@@ -11,6 +11,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.security.CustomClassFilter;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
@@ -23,6 +24,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.verb.POST;
+
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -37,21 +39,23 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
     boolean restrictToDirectoryAndSubdirectories;
 
     @DataBoundConstructor
-    public DynamicAssessmentBuildStep(boolean overrideGlobalConfig, String username,
+    public DynamicAssessmentBuildStep(boolean overrideGlobalConfig, String username, String ddlNetworkAuthType,
                                       String personalAccessToken, String tenantId,
                                       String releaseId, String selectedReleaseType,
                                       List<String> webSiteUrl, String dastEnv,
+                                      List<String> standardScanTypeExcludeUrlsRow,
                                       String scanPolicyType, boolean scanHost,
                                       boolean allowHttp, boolean allowFormSubmissionCrawl,
                                       String selectedScanType, String selectedDynamicTimeZone,
+                                      boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                       boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                      String loginFileMacro, String webSiteNetworkAuthPassword,
+                                      String loginMacroId, String webSiteNetworkAuthPassword,
                                       String userSelectedApplication,
                                       String userSelectedRelease, String assessmentTypeId,
                                       String entitlementId, String entitlementFrequencyId,
                                       String entitlementFrequencyType, String userSelectedEntitlement,
-                                      String selectedDynamicGeoLocation, boolean webSiteNetworkAuthSetting,
-                                      boolean webSiteLoginMacroSetting) throws IllegalArgumentException, IOException {
+                                      String selectedDynamicGeoLocation, String networkAuthType
+    ) throws IllegalArgumentException, IOException {
 
         dynamicSharedUploadBuildStep = new DynamicScanSharedBuildStep(overrideGlobalConfig, username,
                 personalAccessToken, tenantId,
@@ -61,13 +65,13 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 allowHttp, allowFormSubmissionCrawl,
                 selectedScanType, selectedDynamicTimeZone,
                 enableRedundantPageDetection, webSiteNetworkAuthUserName,
-                loginFileMacro, webSiteNetworkAuthPassword,
+                loginMacroId, webSiteNetworkAuthPassword,
                 userSelectedApplication,
                 userSelectedRelease, assessmentTypeId,
                 entitlementId, entitlementFrequencyId,
                 entitlementFrequencyType, userSelectedEntitlement,
-                selectedDynamicGeoLocation, webSiteNetworkAuthSetting,
-                webSiteLoginMacroSetting);
+                selectedDynamicGeoLocation,
+                webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled, networkAuthType);
 
         if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
             if (scanHost)
@@ -76,9 +80,10 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 restrictToDirectoryAndSubdirectories = true;
 
             dynamicSharedUploadBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                    entitlementFrequencyType, selectedDynamicGeoLocation, loginFileMacro, selectedDynamicTimeZone, selectedScanType, scanPolicyType,
-                    webSiteUrl, allowFormSubmissionCrawl, allowSameHostRedirects, restrictToDirectoryAndSubdirectories, enableRedundantPageDetection, webSiteNetworkAuthSetting,
-                    dastEnv);
+                    entitlementFrequencyType, selectedDynamicGeoLocation, loginMacroId, selectedDynamicTimeZone, selectedScanType, scanPolicyType,
+                    webSiteUrl, allowFormSubmissionCrawl, allowSameHostRedirects, restrictToDirectoryAndSubdirectories, enableRedundantPageDetection, dastEnv,
+                    webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword
+            );
         }
 
     }
@@ -86,12 +91,11 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         //Reconstruct the model from get settings,
-
         //Save the settings in Jenkins Config.xml file.
 
         if (dynamicSharedUploadBuildStep.getModel() == null) {
             System.out.println("job model is null");
-            return false;
+            throw new IllegalArgumentException("DAST model not been set");
         }
 
         return true;
@@ -220,10 +224,12 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             job.checkPermission(Item.CONFIGURE);
             return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
         }
+
         @SuppressWarnings("unused")
         public ListBoxModel doFillSelectedReleaseTypeItems() {
             return doFillFromEnum(FodEnums.DastReleaseType.class);
         }
+
         @SuppressWarnings("unused")
         public static ListBoxModel doFillSelectedScanCentralBuildTypeItems() {
             return doFillFromEnum(FodEnums.SelectedScanCentralBuildType.class);
@@ -233,13 +239,20 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
         public static ListBoxModel doFillDastEnvItems() {
             return doFillFromEnum(FodEnums.DastEnvironmentType.class);
         }
+
         @SuppressWarnings("unused")
         public static ListBoxModel doFillScanTypeItems() {
             return doFillFromEnum(FodEnums.DastScanType.class);
         }
+
         @SuppressWarnings("unused")
         public static ListBoxModel doFillScanPolicyTypeItems() {
             return doFillFromEnum(FodEnums.DastPolicy.class);
+        }
+
+        @SuppressWarnings("unused")
+        public static ListBoxModel doFillScanTimeboxScanItems() {
+            return doFillFromEnum(FodEnums.DastTimeBoxScan.class);
         }
 
 
@@ -253,7 +266,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
         @SuppressWarnings("unused")
         public static org.jenkinsci.plugins.fodupload.models.Result<ApplicationApiResponse> customFillUserApplicationById(int applicationId, AuthenticationModel authModel) throws IOException {
-            FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null,null);
+            FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
             ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, null);
 
             return applicationsController.getApplicationById(applicationId);
@@ -273,19 +286,19 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 //            return result;
 //        }
 
-//        public static EntitlementSettings customFillEntitlementSettings(int releaseId, AuthenticationModel authModel) throws IOException {
+        //        public static EntitlementSettings customFillEntitlementSettings(int releaseId, AuthenticationModel authModel) throws IOException {
 //            return new EntitlementSettings(
 //                    1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
 //                    1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
 //                    1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
 //                    1, 1, false);
 //        }
-@SuppressWarnings("unused")
+        @SuppressWarnings("unused")
         @JavaScriptMethod
-        public int patchLoginMacroFile(String releaseId, JSONObject authModelObject, String fileContent) {
+        public int patchLoginMacroFile(String releaseId, JSONObject authModelObject, String fileContent) throws FormValidation {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel,false,null,null);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
 
                 DynamicScanController dynamicScanController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
                 PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
@@ -296,15 +309,17 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
+                throw ex;
             }
-            return -1;
+
         }
+
         @SuppressWarnings("unused")
         @JavaScriptMethod
         public String retrieveLookupItems(String type, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel,false, null,null);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 LookupItemsController lookupItemsController = new LookupItemsController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(lookupItemsController.getLookupItems(FodEnums.APILookupItemTypes.valueOf(type)));
@@ -313,12 +328,13 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 return null;
             }
         }
+
         @SuppressWarnings("unused")
         @JavaScriptMethod
         public String retrieveCurrentUserSession(JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel,false, null, null);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 UsersController usersController = new UsersController(apiConnection, null, Utils.createCorrelationId());
 
                 return Utils.createResponseViewModel(usersController.getCurrentUserSession());
@@ -327,6 +343,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 return null;
             }
         }
+
         @SuppressWarnings("unused")
         @JavaScriptMethod
         public String retrieveReleaseById(int releaseId, JSONObject authModelObject) {
@@ -338,6 +355,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 return null;
             }
         }
+
         @SuppressWarnings("unused")
         public ListBoxModel doFillPersonalAccessTokenItems(@AncestorInPath Job job) {
             return SharedUploadBuildStep.doFillStringCredentialsItems(job);
@@ -348,7 +366,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
         public String retrieveAssessmentTypeEntitlements(Boolean isMicroservice, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel,false, null, null);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 AssessmentTypesController assessmentTypesController = new AssessmentTypesController(apiConnection, null, Utils.createCorrelationId());
                 return Utils.createResponseViewModel(assessmentTypesController.getDynamicAssessmentTypeEntitlements(false));
             } catch (Exception e) {
@@ -356,12 +374,13 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 return null;
             }
         }
+
         @SuppressWarnings("unused")
         @JavaScriptMethod
         public String retrieveStaticScanSettings(Integer releaseId, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
-                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel,false,null,null);
+                FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 DynamicScanController dynamicScanController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
                 return Utils.createResponseViewModel(dynamicScanController.getDynamicScanSettings(releaseId));
             } catch (Exception e) {
@@ -381,6 +400,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 return null;
             }
         }
+
         @SuppressWarnings("unused")
         @JavaScriptMethod
         public String retrieveReleaseList(int selectedApplicationId, int microserviceId, String searchTerm, int offset, int limit, JSONObject authModelObject) {

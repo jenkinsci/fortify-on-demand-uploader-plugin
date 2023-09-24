@@ -29,7 +29,7 @@ class DynamicScanSettings {
         msgElem.show();
     }
 
-    scanTypeVisiblity(isVisible) {
+    scanTypeVisibility(isVisible) {
         if ((isVisible === undefined || null) || isVisible === false) {
 
             jq('.dast-scan-type').each((iterator, element) => {
@@ -51,7 +51,7 @@ class DynamicScanSettings {
             switch (scanType) {
                 case "Standard": {
                     this.standardScanSettingsVisibility(isVisible);
-                    // this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
+                    this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
                     break;
                 }
                 case "API": {
@@ -60,7 +60,7 @@ class DynamicScanSettings {
                 }
                 case "Workflow":
                     this.workflowScanSettingVisibility(isVisible);
-                    //this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
+                    this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
                     break;
                 default:
                     //hide all scan type settings.
@@ -130,7 +130,7 @@ class DynamicScanSettings {
         }
     }
 
-    scanSettingsVisiblity(isVisible) {
+    scanSettingsVisibility(isVisible) {
         debugger;
         if ((isVisible === undefined || null) || isVisible === false) {
             jq('.dast-scan-setting').each((iterator, element) => {
@@ -265,7 +265,7 @@ class DynamicScanSettings {
         debugger;
 
         if (!this.uiLoaded) {
-            this.scanTypeVisiblity(false);
+            this.scanTypeVisibility(false);
             this.scanTypeUserControlVisibility("allTypes", false);
             this.deferredLoadEntitlementSettings = _ => this.loadEntitlementSettings(releaseChangedPayload);
             return;
@@ -297,57 +297,91 @@ class DynamicScanSettings {
             debugger;
 
             let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo())
-                .then(r => this.scanSettings = r);
+                .then(r => this.scanSettings = r).catch((err) => {
+                        console.error("release settings api failed: " + err);
+                        throw err;
+                    }
+                );
 
             let entp = this.api.getAssessmentTypeEntitlements(releaseId, getAuthInfo())
-                .then(r => this.assessments = r);
+                .then(r => this.assessments = r)
+                .catch((err) => {
+                    console.error("entitlement api failed");
+                    throw err;
+                });
 
             let tzs = this.api.getTimeZoneStacks(getAuthInfo())
-                .then(r => this.timeZones = r);
+                .then(r => this.timeZones = r).catch(
+                    (err) => {
+                        console.error("timezone api failed: " + err)
+                        throw err;
+                    }
+                );
 
             let geoLoc = this.api.getGeoLocationStacks(getAuthInfo())
-                .then(r => this.geoLocStacks = r);
+                .then(r => this.geoLocStacks = r)
+                .catch((err) => {
+                    console.error("geoloc api failed: " + err);
+                    throw err;
+                });
 
-            await Promise.all([ssp, entp, tzs, geoLoc]);
+            let networkAuthTypes = this.api.getNetworkAuthType(getAuthInfo()).then(
+                r => this.networkAuthTypes = r
+            ).catch((err) => {
+                console.error(err);
+                throw err;
+            });
 
-            if (this.scanSettings && this.assessments) {
-                let assessmentId = this.scanSettings.assessmentTypeId;
-                let entitlementId = this.scanSettings.entitlementId;
-                let timeZoneId = this.scanSettings.timeZone;
-                let geoLocID = this.scanSettings.geoLocStack;
+            await Promise.all([ssp, entp, tzs, geoLoc, networkAuthTypes])
+                .then(async () => {
 
-                this.populateAssessmentsDropdown();
+                    console.log("success");
 
-                jq('#ddAssessmentType').val(assessmentId);
-                await this.onAssessmentChanged(true);
+                    if (this.scanSettings && this.assessments) {
+                        let assessmentId = this.scanSettings.assessmentTypeId;
+                        let entitlementId = this.scanSettings.entitlementId;
+                        let timeZoneId = this.scanSettings.timeZone;
+                        let geoLocID = this.scanSettings.geoLocStack;
 
-                debugger;
+                        this.populateAssessmentsDropdown();
 
-                jq('#entitlementSelectList').val
-                (getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
+                        jq('#ddAssessmentType').val(assessmentId);
+                        await this.onAssessmentChanged(true);
 
-                jq('#entitlementFreqType').val(this.scanSettings.entitlementFrequencyType);
-                let re = jq('#entitlementFreqType').val()
+                        debugger;
 
-                await this.onEntitlementChanged(false);
+                        jq('#entitlementSelectList').val
+                        (getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
 
-                this.onLoadTimeZone();
-                jq('#timeZoneStackSelectList').val(timeZoneId);
+                        jq('#entitlementFreqType').val(this.scanSettings.entitlementFrequencyType);
+                        let re = jq('#entitlementFreqType').val()
 
+                        await this.onEntitlementChanged(false);
 
-                this.onGeoLocationLoad();
-                jq('#geoLocationStackSelectList').val(geoLocID);
+                        this.onLoadTimeZone();
+                        jq('#timeZoneStackSelectList').val(timeZoneId);
 
-                //Enable scan Type right after assessment Type drop populated.
-                this.scanSettingsVisiblity(true);
-                this.scanTypeVisiblity(true);
-                this.scanTypeUserControlVisibility("allType", false);
+                        this.onNetworkAuthTypeLoad();
+                        jq('#ddlNetworkAuthType').val(networkAuthTypes);
 
-            } else {
-                await this.onAssessmentChanged(false);
-                this.showMessage('Failed to retrieve scan settings from API', true);
-                rows.hide();
-            }
+                        this.onGeoLocationLoad();
+                        jq('#geoLocationStackSelectList').val(geoLocID);
+
+                        //Enable scan Type right after assessment Type drop populated.
+                        this.scanSettingsVisibility(true);
+                        this.scanTypeVisibility(true);
+                        this.scanTypeUserControlVisibility("allType", false);
+
+                    } else {
+                        await this.onAssessmentChanged(false);
+                        this.showMessage('Failed to retrieve scan settings from API', true);
+                        rows.hide();
+                    }
+                })
+                .catch((reason) => {
+                    console.error("error in scan settings: " + reason);
+                })
+
         } else {
             await this.onAssessmentChanged(false);
             if (releaseChangedPayload.mode === DastReleaseSetMode.releaseSelect) this.showMessage('Select a release'); else this.showMessage('Enter a release id');
@@ -372,7 +406,6 @@ class DynamicScanSettings {
                 tsSel.append(`<option value="${at.value}">${at.text}</option>`);
             }
         }
-//        fields.removeClass('spinner');
     }
 
     onGeoLocationLoad() {
@@ -383,14 +416,29 @@ class DynamicScanSettings {
         geoSel.find('option').first().prop('selected', true);
         for (let ts of Object.keys(this.geoLocStacks)) {
             let at = this.geoLocStacks[ts];
-//            console.log(at.value+" "+at.text);
             geoSel.append(`<option value="${at.value}">${at.text}</option>`);
         }
     }
 
-    onScanTypeChanged() {
+    onNetworkAuthTypeLoad() {
+        debugger;
 
-        // alert(jq('#scanTypeList').val());
+        alert("change");
+        let networkAuthType = jq('#ddlNetworkAuthType');
+        networkAuthType.find('option').not(':first').remove();
+        networkAuthType.find('option').first().prop('selected', true);
+        for (let ts of Object.keys(this.networkAuthTypes)) {
+            let at = this.networkAuthTypes[ts];
+            networkAuthType.append(`<option value="${at.value}">${at.text}</option>`);
+        }
+    }
+
+    onNetworkAuthTypeChanged()
+    {
+        alert('changed');
+    }
+
+    onScanTypeChanged() {
 
         let selectedScanType = jq('#scanTypeList').val();
         //Reset All ScanTypes Controls
@@ -403,9 +451,12 @@ class DynamicScanSettings {
 
     onLoginMacroFileUpload() {
         debugger;
+        jq('#webSiteLoginMacro').val(true);
         let loginMacroFile = document.getElementById('loginFileMacro').files[0];
-        this.api.patchLoginMacroFile(this.releaseId, getAuthInfo(), loginMacroFile).then(r => {
-                console.log("File upload success " + r);
+        this.api.patchLoginMacroFile(this.releaseId, getAuthInfo(), loginMacroFile).then(res => {
+                console.log("File upload success " + res);
+                jq('#loginMacroId').val(res)
+
             }
         ).catch((err) => {
                 console.log(err);
@@ -493,6 +544,8 @@ class DynamicScanSettings {
 
         jq('#scanTypeList').change(_ => this.onScanTypeChanged());
 
+        jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
+
         jq('#btnAddExcludeUrl').click(_ => this.onExcludeUrlBtnClick());
 
         jq('#btnUploadLoginMacroFile').click(_ => this.onLoginMacroFileUpload());
@@ -512,4 +565,4 @@ const scanSettings = new DynamicScanSettings();
 
 spinAndWait(() => jq('#selectedRelease').text() !== undefined && jq('#selectedRelease').text() !== '')
     .then(scanSettings.preinit.bind(scanSettings));
-spinAndWait(() => jq('#releaseTypeSelectList').val() !== undefined).then(scanSettings.scanSettingsVisiblity.bind(scanSettings));
+spinAndWait(() => jq('#releaseTypeSelectList').val() !== undefined).then(scanSettings.scanSettingsVisibility.bind(scanSettings));
