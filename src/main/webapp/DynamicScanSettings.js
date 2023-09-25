@@ -349,13 +349,10 @@ class DynamicScanSettings {
                         await this.onAssessmentChanged(true);
 
                         debugger;
-
-                        jq('#entitlementSelectList').val
-                        (getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
+                        jq('#entitlementSelectList').val(getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
 
                         jq('#entitlementFreqType').val(this.scanSettings.entitlementFrequencyType);
-                        let re = jq('#entitlementFreqType').val()
-
+                        alert(jq('#entitlementFreqType').val());
                         await this.onEntitlementChanged(false);
 
                         this.onLoadTimeZone();
@@ -433,8 +430,7 @@ class DynamicScanSettings {
         }
     }
 
-    onNetworkAuthTypeChanged()
-    {
+    onNetworkAuthTypeChanged() {
         alert('changed');
     }
 

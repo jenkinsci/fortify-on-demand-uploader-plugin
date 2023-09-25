@@ -137,13 +137,12 @@ class Api {
     getAssessmentTypeEntitlements(releaseId, customAuth) {
         return new Promise((res, rej) => {
             this.descriptor.retrieveAssessmentTypeEntitlements(releaseId, customAuth, async t => {
-                const responseJSON = JSON.parse(t.responseJSON);
-
-                if (responseJSON === null || undefined) {
-
+                if (t.responseJSON === null || undefined)
                     rej();
+                else {
+                    let responseJSON = JSON.parse(t.responseJSON);
+                    return res(this._mutateAssessmentEntitlements(responseJSON));
                 }
-                return res(this._mutateAssessmentEntitlements(responseJSON));
             });
         });
     }

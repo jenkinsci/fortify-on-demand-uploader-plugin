@@ -21,9 +21,7 @@ public class PutDynamicScanSetupModel {
     private boolean allowSameHostRedirects;
     private boolean restrictToDirectoryAndSubdirectories;
     private boolean enableRedundantPageDetection;
-
     private WebSiteAssessment websiteAssessment;
-
     public class WebSiteAssessment {
         public List<String> urls;
 
@@ -82,9 +80,45 @@ public class PutDynamicScanSetupModel {
 
     //Todo:-Take care the serialization here
     public class NetworkAuthentication {
-        public String userName;
+        public String getUserName() {
+            return userName;
+        }
+
+        public void setUserName(String userName) {
+            this.userName = userName;
+        }
+
+        String userName;
+
+        public boolean isRequireNetworkAuthentication() {
+            return isRequireNetworkAuthentication;
+        }
+
+        public void setRequireNetworkAuthentication(boolean requireNetworkAuthentication) {
+            isRequireNetworkAuthentication = requireNetworkAuthentication;
+        }
+
+        boolean isRequireNetworkAuthentication;
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
 
         public String password;
+
+        public String getNetworkAuthenticationType() {
+            return networkAuthenticationType;
+        }
+
+        public void setNetworkAuthenticationType(String networkAuthenticationType) {
+            this.networkAuthenticationType = networkAuthenticationType;
+        }
+
+        String networkAuthenticationType;
     }
 
 //    private BlackoutEntry[] blockout;

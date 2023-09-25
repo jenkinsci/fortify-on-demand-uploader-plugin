@@ -81,13 +81,14 @@
                 <f:textbox field="webSiteUrl"/>
             </div>
         </f:entry>
-
+        Restrict scan to URL and subdirectories
         <f:entry>
             <div id="dast-standard-scan-scope" class="dast-scan-setting dast-standard-scan">
-                <f:booleanRadio true="Scan entire host"
-                                false="Restrict scan to URL and subdirectories" field="scanHost">
-
+                <f:booleanRadio true="Restrict scan to URL and subdirectories"
+                                false="Scan entire host" field="scanHost">
                 </f:booleanRadio>
+                <!---By default the "Scan entire host" option to be selected so suing booleanRadioButtonControl false gets selected by default.
+                 Handle it backend accordingly -->
             </div>
 
             <div id="dast-standard-scan-scope-attribute" class="dast-scan-setting dast-standard-scan">
@@ -125,14 +126,14 @@
         </f:entry>
         <f:entry title="Timebox Scan Duration (Hours)">
             <div id="dast-standard-time-scan-duration" class="dast-scan-setting dast-standard-scan">
-                <f:select field="scanTimeboxScan"/>
+                <f:select field="scanTimebox"/>
             </div>
         </f:entry>
     </f:section>
 
     <f:section title="Authentication">
         <f:entry>
-            <div class="dast-scan-auth">
+            <div class="dast-scan-setting dast-standard-scan">
                 <f:optionalBlock name="webSiteNetworkAuthSettingEnabled" field="webSiteNetworkAuthSettingEnabled"
                                  title="Network Authentication Required"
                                  checked="${instance.webSiteNetworkAuthSettingEnabled}" inline="true">
@@ -140,7 +141,7 @@
                     <f:entry title="Network Authentication Type">
                         <div id="ddlNetworkAuthTypeRow" class="fode-field spinner-container dast-scan-setting">
                             <div class="fode-edit jenkins-select">
-                                <select name="ddlNetworkAuthType" id="ddlNetworkAuthType"
+                                <select name="selectedNetworkAuthType" id="ddlNetworkAuthType"
                                         class="jenkins-select__input">
                                     <option value="-1">Select a Network Authentication Type</option>
                                 </select>
@@ -162,7 +163,7 @@
         </f:entry>
 
         <f:entry>
-            <div class="dast-scan-auth">
+            <div class="dast-scan-setting dast-standard-scan">
                 <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
                                  title="Login Macro"
                                  checked="${instance.webSiteLoginMacroEnabled}" inline="true">

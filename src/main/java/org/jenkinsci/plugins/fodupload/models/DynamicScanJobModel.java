@@ -134,11 +134,11 @@ public class DynamicScanJobModel {
     boolean webSiteLoginMacroSetting;
 
     public DynamicScanJobModel(boolean overrideGlobalConfig, String username, String personalAccessToken,
-                               String tenantId, String releaseId, String selectedReleaseType,
+                               String tenantId, String releaseId, String selectedReleaseType, String scanTimebox,
                                List<String> webSiteUrl, String dastEnv, String scanPolicyType,
                                boolean scanHost, boolean allowHttp, boolean allowFormSubmissionCrawl,
                                String selectedScanType, String selectedDynamicTimeZone, boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName, String loginFileMacro, String webSiteNetworkAuthPassword, String userSelectedApplication, String userSelectedRelease, String assessmentTypeId, String entitlementId, String entitlementFrequencyId, String entitlementFrequencyType, String userSelectedEntitlement, String selectedDynamicGeoLocation, boolean webSiteNetworkAuthSetting, boolean webSiteLoginMacroSetting
-       ,String networkAuthType) {
+            , String networkAuthType) {
         this._releaseId = userSelectedRelease;
         this.tenantId = tenantId;
         this.overrideGlobalConfig = overrideGlobalConfig;

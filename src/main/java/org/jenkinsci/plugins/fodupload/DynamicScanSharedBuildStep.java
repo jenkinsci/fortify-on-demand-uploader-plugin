@@ -10,10 +10,7 @@ import hudson.util.FormValidation;
 import jenkins.model.GlobalConfiguration;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.controllers.DynamicScanController;
-import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
-import org.jenkinsci.plugins.fodupload.models.DynamicScanJobModel;
-import org.jenkinsci.plugins.fodupload.models.PutDynamicScanSetupModel;
-import org.jenkinsci.plugins.fodupload.models.StartDynamicScanReqModel;
+import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.PutDynamicScanSetupResponse;
 import org.jenkinsci.plugins.fodupload.models.response.StartDynamicScanResponse;
 
@@ -36,7 +33,7 @@ public class DynamicScanSharedBuildStep {
     private int scanId;
 
     public DynamicScanSharedBuildStep(boolean overrideGlobalConfig, String username,
-
+                                      String scanTimebox,
                                       String personalAccessToken, String tenantId,
                                       String releaseId, String selectedReleaseType,
                                       List<String> webSiteUrl, String dastEnv,
@@ -55,7 +52,8 @@ public class DynamicScanSharedBuildStep {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
 
-        model = new DynamicScanJobModel(overrideGlobalConfig,
+
+        model = new DynamicScanJobModel(overrideGlobalConfig, scanTimebox,
                 username, personalAccessToken,
                 tenantId, releaseId, selectedReleaseType,
                 webSiteUrl, dastEnv,
@@ -75,7 +73,7 @@ public class DynamicScanSharedBuildStep {
 
     private FodApiConnection getApiConnection() throws FormValidation {
 
-        return ApiConnectionFactory.createApiConnection(this.getAuthModel(), false, null ,null);
+        return ApiConnectionFactory.createApiConnection(this.getAuthModel(), false, null, null);
     }
 
     public int getScanId() {
@@ -94,9 +92,11 @@ public class DynamicScanSharedBuildStep {
                                                   String entitlementId, String entitlementFreq, String geoLocationId, String loginMacroId,
                                                   String timeZone, String scanType, String scanPolicy, List<String> webSiteAssessmentUrl,
                                                   boolean allowFrmSubmission, boolean allowSameHostRedirect, boolean restrictDirectories,
-                                                  boolean redundantPageDetection,String scanEnvironment,
+                                                  boolean redundantPageDetection, String scanEnvironment,
                                                   boolean requireNetworkAuth, boolean requireLoginMacroAuth,
                                                   String networkAuthUserName, String networkAuthPassword
+            , String ddlNetworkAuthType, String timeboxScan
+
     )
             throws IllegalArgumentException, IOException {
 
@@ -116,13 +116,12 @@ public class DynamicScanSharedBuildStep {
             dynamicScanSetupReqModel.setTimeZone(timeZone);
             dynamicScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
 
-            if (loginMacroId != "" && loginMacroId != null) {
+            if (loginMacroId != "" && loginMacroId != null && requireLoginMacroAuth) {
                 dynamicScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
-            }
 
+            }
             dynamicScanSetupReqModel.setPolicy(scanPolicy);
             dynamicScanSetupReqModel.setScanType(scanType);
-
             dynamicScanSetupReqModel.setRequiresNetworkAuthentication(requireNetworkAuth);
 
             dynamicScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
@@ -131,16 +130,25 @@ public class DynamicScanSharedBuildStep {
                 dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
 
             if (requireNetworkAuth) {
-                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().password = networkAuthPassword;
-                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().userName = networkAuthUserName;
+                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setPassword(networkAuthPassword);
+                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setUserName(networkAuthUserName);
+                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setNetworkAuthenticationType(ddlNetworkAuthType);
+                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setRequireNetworkAuthentication(true);
             }
 
             dynamicScanSetupReqModel.setAllowFormSubmissions(allowFrmSubmission);
             dynamicScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
-            dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(restrictDirectories);
+
+            //If restrictDirectories ==false it points to "Scan entire host"
+            //if true it points to restrict to sub-folders in host because of Jelly:booleanRadioButton.
+            //Don't run refactoring to simplify this.
+            if (!restrictDirectories)
+                dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(false);
+            else
+                dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(true);
+
 
             if (!webSiteAssessmentUrl.isEmpty()) {
-
                 dynamicScanSetupReqModel.setWebSites().urls.addAll(webSiteAssessmentUrl);
             }
 

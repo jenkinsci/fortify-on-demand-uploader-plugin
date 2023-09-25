@@ -396,6 +396,38 @@ public class FodEnums {
                     return two;
             }
         }
+
+        public  static DastTimeBoxScan toInt(String val)
+        {
+            switch (val)
+            {
+                case "four":
+                    return four;
+
+                case"twelve":
+                    return twelve;
+
+                case "two":
+                    return two;
+
+            }
+            return null;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "2":
+                    return "2";
+                case "12":
+                    return "12";
+                case "4":
+                    return "4";
+                default:
+                    return "none";
+
+            }
+
+        }
     }
 
     public enum DastPolicy {
@@ -500,7 +532,6 @@ public class FodEnums {
             }
         }
     }
-
 
 
 }

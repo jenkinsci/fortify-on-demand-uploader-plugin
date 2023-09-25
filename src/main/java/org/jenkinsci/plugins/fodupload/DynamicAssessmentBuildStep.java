@@ -24,7 +24,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.verb.POST;
-
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -39,10 +38,11 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
     boolean restrictToDirectoryAndSubdirectories;
 
     @DataBoundConstructor
-    public DynamicAssessmentBuildStep(boolean overrideGlobalConfig, String username, String ddlNetworkAuthType,
+    public DynamicAssessmentBuildStep(boolean overrideGlobalConfig, String username,
                                       String personalAccessToken, String tenantId,
                                       String releaseId, String selectedReleaseType,
                                       List<String> webSiteUrl, String dastEnv,
+                                      String scanTimebox,
                                       List<String> standardScanTypeExcludeUrlsRow,
                                       String scanPolicyType, boolean scanHost,
                                       boolean allowHttp, boolean allowFormSubmissionCrawl,
@@ -54,10 +54,13 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                       String userSelectedRelease, String assessmentTypeId,
                                       String entitlementId, String entitlementFrequencyId,
                                       String entitlementFrequencyType, String userSelectedEntitlement,
-                                      String selectedDynamicGeoLocation, String networkAuthType
+                                      String selectedDynamicGeoLocation, String selectedNetworkAuthType
     ) throws IllegalArgumentException, IOException {
 
-        dynamicSharedUploadBuildStep = new DynamicScanSharedBuildStep(overrideGlobalConfig, username,
+       // assert FodEnums.DastTimeBoxScan.toInt(scanTimebox) != null;
+        int timebox =FodEnums.DastTimeBoxScan.toInt(scanTimebox).getInteger();
+
+        dynamicSharedUploadBuildStep = new DynamicScanSharedBuildStep(overrideGlobalConfig, username, scanTimebox,
                 personalAccessToken, tenantId,
                 releaseId, selectedReleaseType,
                 webSiteUrl, dastEnv,
@@ -71,7 +74,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 entitlementId, entitlementFrequencyId,
                 entitlementFrequencyType, userSelectedEntitlement,
                 selectedDynamicGeoLocation,
-                webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled, networkAuthType);
+                webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled, selectedNetworkAuthType);
 
         if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
             if (scanHost)
@@ -82,7 +85,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             dynamicSharedUploadBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, selectedDynamicGeoLocation, loginMacroId, selectedDynamicTimeZone, selectedScanType, scanPolicyType,
                     webSiteUrl, allowFormSubmissionCrawl, allowSameHostRedirects, restrictToDirectoryAndSubdirectories, enableRedundantPageDetection, dastEnv,
-                    webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword
+                    webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword ,selectedNetworkAuthType,scanTimebox
             );
         }
 
@@ -251,7 +254,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
         }
 
         @SuppressWarnings("unused")
-        public static ListBoxModel doFillScanTimeboxScanItems() {
+        public static ListBoxModel doFillScanTimeboxItems() {
             return doFillFromEnum(FodEnums.DastTimeBoxScan.class);
         }
 
