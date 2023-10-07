@@ -121,37 +121,47 @@ public class DynamicScanJobModel {
         return selectedDynamicGeoLocation;
     }
 
-    public boolean isWebSiteNetworkAuthSetting() {
-        return webSiteNetworkAuthSetting;
+    public boolean isWebSiteNetworkAuthEnabled() {
+        return webSiteNetworkAuthEnabled;
     }
 
-    public boolean isWebSiteLoginMacroSetting() {
-        return webSiteLoginMacroSetting;
+    public boolean isWebSiteLoginMacroEnabled() {
+        return webSiteLoginMacroEnabled;
     }
 
     String selectedDynamicGeoLocation;
-    boolean webSiteNetworkAuthSetting;
-    boolean webSiteLoginMacroSetting;
+    boolean webSiteNetworkAuthEnabled;
+    boolean webSiteLoginMacroEnabled;
 
-    public DynamicScanJobModel(boolean overrideGlobalConfig, String username, String personalAccessToken,
-                               String tenantId, String releaseId, String selectedReleaseType, String scanTimebox,
-                               List<String> webSiteUrl, String dastEnv, String scanPolicyType,
-                               boolean scanHost, boolean allowHttp, boolean allowFormSubmissionCrawl,
-                               String selectedScanType, String selectedDynamicTimeZone, boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName, String loginFileMacro, String webSiteNetworkAuthPassword, String userSelectedApplication, String userSelectedRelease, String assessmentTypeId, String entitlementId, String entitlementFrequencyId, String entitlementFrequencyType, String userSelectedEntitlement, String selectedDynamicGeoLocation, boolean webSiteNetworkAuthSetting, boolean webSiteLoginMacroSetting
-            , String networkAuthType) {
+    public DynamicScanJobModel(boolean overrideGlobalConfig, String username,
+                               String personalAccessToken, String tenantId,
+                               String releaseId, String selectedReleaseType,
+                               List<String> webSiteUrl, String dastEnv,
+                               String scanTimebox,
+                               List<String> standardScanTypeExcludeUrlsRow,
+                               String scanPolicyType, boolean scanEntireHost, boolean restrictScan,
+                               boolean allowHttp, boolean allowFormSubmissionCrawl,
+                               String selectedScanType, String selectedDynamicTimeZone,
+                               boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
+                               boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
+                               String loginMacroId, String webSiteNetworkAuthPassword,
+                               String userSelectedApplication,
+                               String userSelectedRelease, String assessmentTypeId,
+                               String entitlementId,
+                               String entitlementFrequencyType, String userSelectedEntitlement,
+                               String selectedDynamicGeoLocation, String selectedNetworkAuthType) {
         this._releaseId = userSelectedRelease;
         this.tenantId = tenantId;
         this.overrideGlobalConfig = overrideGlobalConfig;
         this.selectedReleaseType = selectedReleaseType;
         this.userSelectedApplication = userSelectedApplication;
         this.userSelectedRelease = userSelectedRelease;
-        this.webSiteNetworkAuthSetting = webSiteNetworkAuthSetting;
+        this.webSiteNetworkAuthEnabled = webSiteNetworkAuthSettingEnabled;
         this.dastEnv = dastEnv;
-        this.entitlementFrequencyId = entitlementFrequencyId;
         this.assessmentTypeId = assessmentTypeId;
         this.allowFormSubmissionCrawl = allowFormSubmissionCrawl;
         this.allowHttp = allowHttp;
-        this.loginFileMacro = loginFileMacro;
+        this.loginFileMacro = loginMacroId;
         this.username = username;
         this.personalAccessToken = personalAccessToken;
         this.selectedScanType = selectedScanType;
@@ -161,14 +171,13 @@ public class DynamicScanJobModel {
         this.selectedDynamicTimeZone = selectedDynamicTimeZone;
         this.selectedDynamicGeoLocation = selectedDynamicGeoLocation;
         this.entitlementId = entitlementId;
-        this.entitlementFrequencyId = entitlementFrequencyId;
         this.entitlementFrequencyType = entitlementFrequencyType;
         this.enableRedundantPageDetection = enableRedundantPageDetection;
-        this.webSiteLoginMacroSetting = webSiteLoginMacroSetting;
+        this.webSiteLoginMacroEnabled = webSiteLoginMacroEnabled;
         this.scanPolicyType = scanPolicyType;
         this.webSiteNetworkAuthUserName = webSiteNetworkAuthUserName;
         this.webSiteNetworkAuthPassword = webSiteNetworkAuthPassword;
-        this.networkAuthType = networkAuthType;
+        this.networkAuthType = selectedNetworkAuthType;
     }
 
     public String get_releaseId() {

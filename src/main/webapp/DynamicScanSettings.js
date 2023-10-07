@@ -3,6 +3,12 @@ const fodStandardScanTypeClassIdr = ".dast-standard-scan";
 const fodApiScanTypeClassIdr = ".dast-api-scan"
 const fodWorkflowScanTypeClassIdr = ".dast-workflow-scan"
 const dastScanSettingRow = ".dast-scan-setting"
+
+const dastScanTypes = [{"value": 'Standard', "text": 'Standard'}, {
+    "value": 'Workflow-driven',
+    "text": 'Workflow-driven'
+},
+    {"value": 2, "text": 'API'}]
 const dastScanSelectDEfaultValues =
     {
         "WebSiteScan": {"ScanPolicy": "standard"},
@@ -38,7 +44,7 @@ class DynamicScanSettings {
                 tr.addClass('dast-scan-type');
             });
             let ddlScanType = jq('.dast-scan-type');
-            debugger;
+
             ddlScanType.hide();
         } else {
             jq('.dast-scan-type').show();
@@ -46,8 +52,8 @@ class DynamicScanSettings {
     }
 
     scanTypeUserControlVisibility(scanType, isVisible) {
-        debugger;
-        if ((isVisible === undefined || null) || isVisible === false) {
+         debugger;
+        if ((isVisible !== undefined || null) && isVisible === true) {
             switch (scanType) {
                 case "Standard": {
                     this.standardScanSettingsVisibility(isVisible);
@@ -58,9 +64,9 @@ class DynamicScanSettings {
                     this.apiScanSettingVisibility(isVisible);
                     break;
                 }
-                case "Workflow":
+                case "Workflow-driven":
                     this.workflowScanSettingVisibility(isVisible);
-                    this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
+                    this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-workflow-scan-policy")
                     break;
                 default:
                     //hide all scan type settings.
@@ -73,7 +79,7 @@ class DynamicScanSettings {
     }
 
     standardScanSettingsVisibility(isVisible) {
-        debugger;
+
         jq('.dast-standard-scan').each((iterator, element) => {
             let currentElement = jq(element);
             let tr = closestRow(currentElement);
@@ -85,8 +91,8 @@ class DynamicScanSettings {
         } else {
             standardScanSettingRows.show();
         }
-
     }
+
 
     setDefaultValuesForSelectBasedOnScanType(scanType, selectControl) {
         switch (scanType) {
@@ -116,14 +122,14 @@ class DynamicScanSettings {
     }
 
     workflowScanSettingVisibility(isVisible) {
+        debugger;
         jq('.dast-workflow-scan').each((iterator, element) => {
             let currentElement = jq(element);
             let tr = closestRow(currentElement);
-            tr.addClass(fodApiSCanTypeClassIdr);
+            tr.addClass(fodWorkflowScanTypeClassIdr);
         });
         let workflowScanSettingRows = jq('.dast-workflow-scan');
         if ((isVisible === undefined || null) || isVisible === false) {
-
             workflowScanSettingRows.hide();
         } else {
             workflowScanSettingRows.show();
@@ -131,7 +137,7 @@ class DynamicScanSettings {
     }
 
     scanSettingsVisibility(isVisible) {
-        debugger;
+
         if ((isVisible === undefined || null) || isVisible === false) {
             jq('.dast-scan-setting').each((iterator, element) => {
                 let currentElement = jq(element);
@@ -139,7 +145,7 @@ class DynamicScanSettings {
                 tr.addClass('dast-scan-setting');
             });
             let scanSettingsRows = jq('.dast-scan-setting');
-            debugger;
+
             scanSettingsRows.hide();
         } else {
             jq('.dast-scan-setting').show();
@@ -172,7 +178,7 @@ class DynamicScanSettings {
         entsel.find('option,optgroup').remove();
 
         if (at) {
-            debugger;
+
             let available = at.entitlementsSorted.filter(e => e.id > 0);
             let forPurchase = at.entitlementsSorted.filter(e => e.id <= 0);
             let availableGrp = forPurchase.length > 0 ? jq(`<optgroup label="Available Entitlements"></optgroup>`) : entsel;
@@ -197,7 +203,7 @@ class DynamicScanSettings {
     }
 
     async onEntitlementChanged(skipAuditPref) {
-        debugger;
+
         let val = jq('#entitlementSelectList').val();
         let {entitlementId, frequencyId, frequencyType} = parseEntitlementDropdownValue(val);
 
@@ -262,7 +268,6 @@ class DynamicScanSettings {
     }
 
     async loadEntitlementSettings(releaseChangedPayload) {
-        debugger;
 
         if (!this.uiLoaded) {
             this.scanTypeVisibility(false);
@@ -294,7 +299,6 @@ class DynamicScanSettings {
             rows.show();
             jq('.fode-row-bsi').hide();
 
-            debugger;
 
             let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo())
                 .then(r => this.scanSettings = r).catch((err) => {
@@ -348,26 +352,48 @@ class DynamicScanSettings {
                         jq('#ddAssessmentType').val(assessmentId);
                         await this.onAssessmentChanged(true);
 
-                        debugger;
                         jq('#entitlementSelectList').val(getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
 
                         jq('#entitlementFreqType').val(this.scanSettings.entitlementFrequencyType);
-                        alert(jq('#entitlementFreqType').val());
+                        // alert(jq('#entitlementFreqType').val());
                         await this.onEntitlementChanged(false);
 
-                        this.onLoadTimeZone();
                         jq('#timeZoneStackSelectList').val(timeZoneId);
+                        this.onLoadTimeZone();
 
-                        this.onNetworkAuthTypeLoad();
+                        debugger;
+                        /*'set the scan type based on the scan setting get response'*/
+                        this.setScanType();
+                        this.onScanTypeChanged();
+
+                        //Set scan policy from the response.
+                        this.setScanPolicy();
+
+                        debugger;
+                        //ToDo - url will be array from the response ?
+                        /*Set dynamic site URL from response */
+                        jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.urls[0]);
+
+                        /*Set restrict scan value from response to UI */
+                        this.setRestrictScan();
+
+                        /*set allow http(s) */
+                        this.setHttpSettings();
+
+                        /* Set Allow Form Submission*/
+                        this.setFormSubmission();
+
+                        /*Set network settings from response. */
                         jq('#ddlNetworkAuthType').val(networkAuthTypes);
+                        this.onNetworkAuthTypeLoad();
+                        this.setNetworkSettings()
 
-                        this.onGeoLocationLoad();
                         jq('#geoLocationStackSelectList').val(geoLocID);
+                        this.onGeoLocationLoad();
 
                         //Enable scan Type right after assessment Type drop populated.
                         this.scanSettingsVisibility(true);
                         this.scanTypeVisibility(true);
-                        this.scanTypeUserControlVisibility("allType", false);
 
                     } else {
                         await this.onAssessmentChanged(false);
@@ -387,16 +413,47 @@ class DynamicScanSettings {
         fields.removeClass('spinner');
     }
 
+    setNetworkSettings() {
+        if (this.scanSettings.networkAuthenticationSettings != null) {
+            jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
+            jq('#networkPasswordRow').find('input').val(this.scanSettings.networkAuthenticationSettings.password);
+            jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
+        }
+    }
+
+    setScanType() {
+
+        if (this.scanSettings !== undefined && this.scanSettings.websiteAssessment !== null || undefined) {
+            let selectedScanType = dastScanSelectDEfaultValues.WebSiteScan.ScanPolicy
+            let scanSel = jq('#scanTypeList');
+            let currValSelected = false;
+            scanSel.find('option').not(':first').remove();
+            scanSel.find('option').first().prop('selected', true);
+
+            for (let s of Object.keys(dastScanTypes)) {
+                let at = dastScanTypes[s];
+                if (selectedScanType.toLowerCase() === at.text.toLowerCase()) {
+                    currValSelected = true;
+                    scanSel.append(`<option value="${at.value}" selected>${at.text}</option>`);
+                } else {
+                    scanSel.append(`<option value="${at.value}">${at.text}</option>`);
+                }
+            }
+        }
+
+    }
+
+
     onLoadTimeZone() {
 
         let tsSel = jq('#timeZoneStackSelectList');
-        let currVal = tsSel.val();
+        let currVal = this.scanSettings.timeZone;
         let currValSelected = false;
-        // tsSel.find('option').not(':first').remove();
+        tsSel.find('option').not(':first').remove();
         tsSel.find('option').first().prop('selected', true);
         for (let ts of Object.keys(this.timeZones)) {
             let at = this.timeZones[ts];
-            if (currVal === at.value) {
+            if (currVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
                 tsSel.append(`<option value="${at.value}" selected>${at.text}</option>`);
             } else {
@@ -406,7 +463,7 @@ class DynamicScanSettings {
     }
 
     onGeoLocationLoad() {
-        debugger;
+
         let geoSel = jq('#geoLocationStackSelectList');
         console.log(this.geoLocations);
         geoSel.find('option').not(':first').remove();
@@ -420,33 +477,79 @@ class DynamicScanSettings {
     onNetworkAuthTypeLoad() {
         debugger;
 
-        alert("change");
-        let networkAuthType = jq('#ddlNetworkAuthType');
-        networkAuthType.find('option').not(':first').remove();
-        networkAuthType.find('option').first().prop('selected', true);
+        let networkAuthTypeSel = jq('#ddlNetworkAuthType');
+        let currVal = this.scanSettings.networkAuthenticationSettings.networkAuthenticationType
+        let currValSelected = false;
+        networkAuthTypeSel.find('option').not(':first').remove();
+        networkAuthTypeSel.find('option').first().prop('selected', true);
+
         for (let ts of Object.keys(this.networkAuthTypes)) {
             let at = this.networkAuthTypes[ts];
-            networkAuthType.append(`<option value="${at.value}">${at.text}</option>`);
+            if (currVal !== undefined && currVal.toLowerCase() === at.value.toLowerCase()) {
+                currValSelected = true;
+                networkAuthTypeSel.append(`<option value="${at.text}" selected>${at.text}</option>`);
+            } else {
+                networkAuthTypeSel.append(`<option value="${at.text}">${at.text}</option>`);
+            }
         }
-    }
 
-    onNetworkAuthTypeChanged() {
-        alert('changed');
     }
 
     onScanTypeChanged() {
 
-        let selectedScanType = jq('#scanTypeList').val();
-        //Reset All ScanTypes Controls
-        this.scanTypeUserControlVisibility("allTypes", false);
+        let selectedScanTypeValue = jq('#scanTypeList').val();
 
-        if (selectedScanType === "Standard") {
-            this.standardScanSettingsVisibility(true);
+        if (selectedScanTypeValue === null || undefined) {
+            //Reset All ScanTypes Controls
+            this.scanTypeUserControlVisibility(null, false);
+        } else {
+            debugger;
+            this.scanTypeUserControlVisibility(selectedScanTypeValue, true);
+        }
+    }
+
+    setRestrictScan() {
+        if (this.scanSettings !== null && this.scanSettings.restrictToDirectoryAndSubdirectories !== null) {
+            {
+                jq('#restrictScan').prop('checked', this.scanSettings.restrictToDirectoryAndSubdirectories);
+            }
+        }
+    }
+
+    setHttpSettings() {
+        if (this.scanSettings !== undefined && this.scanSettings.allowSameHostRedirects !== undefined) {
+            jq('#allowHttp').prop('checked', this.scanSettings.allowSameHostRedirects);
+        }
+    }
+
+    setFormSubmission() {
+        if (this.scanSettings !== undefined && this.scanSettings.allowFormSubmissions !== null || undefined) {
+            jq('#allowHttp').prop('checked', this.scanSettings.allowFormSubmissionCrawl);
+        }
+    }
+
+    setScanPolicy() {
+        if (this.scanSettings !== undefined && this.scanSettings.policy !== null || undefined) {
+            let selectedScanType =this.scanSettings.policy
+            let scanPolicySel = jq('#scanTypeList');
+            let currValSelected = false;
+            scanPolicySel.find('option').not(':first').remove();
+            scanPolicySel.find('option').first().prop('selected', true);
+
+            for (let s of Object.keys(dastScanTypes)) {
+                let at = dastScanTypes[s];
+                if (selectedScanType.toLowerCase() === at.text.toLowerCase()) {
+                    currValSelected = true;
+                    scanPolicySel.append(`<option value="${at.value}" selected>${at.text}</option>`);
+                } else {
+                    scanPolicySel.append(`<option value="${at.value}">${at.text}</option>`);
+                }
+            }
         }
     }
 
     onLoginMacroFileUpload() {
-        debugger;
+
         jq('#webSiteLoginMacro').val(true);
         let loginMacroFile = document.getElementById('loginFileMacro').files[0];
         this.api.patchLoginMacroFile(this.releaseId, getAuthInfo(), loginMacroFile).then(res => {
@@ -462,7 +565,7 @@ class DynamicScanSettings {
 
 
     onExcludeUrlBtnClick(event, args) {
-        debugger;
+
         //  alert(jq('#standardScanExcludedUrlText').val())
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
         //Add to exclude list
@@ -472,7 +575,7 @@ class DynamicScanSettings {
     }
 
     preinit() {
-        debugger;
+
 
         jq('.fode-field')
             .each((i, e) => {

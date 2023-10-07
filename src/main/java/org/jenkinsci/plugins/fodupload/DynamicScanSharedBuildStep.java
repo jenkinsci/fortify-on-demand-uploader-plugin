@@ -33,41 +33,37 @@ public class DynamicScanSharedBuildStep {
     private int scanId;
 
     public DynamicScanSharedBuildStep(boolean overrideGlobalConfig, String username,
-                                      String scanTimebox,
                                       String personalAccessToken, String tenantId,
                                       String releaseId, String selectedReleaseType,
                                       List<String> webSiteUrl, String dastEnv,
-                                      String scanPolicyType, boolean scanHost,
+                                      String scanTimebox,
+                                      List<String> standardScanTypeExcludeUrlsRow,
+                                      String scanPolicyType, boolean scanEntireHost, boolean restrictScan,
                                       boolean allowHttp, boolean allowFormSubmissionCrawl,
                                       String selectedScanType, String selectedDynamicTimeZone,
+                                      boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                       boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                      String loginFileMacro, String webSiteNetworkAuthPassword,
+                                      String loginMacroId, String webSiteNetworkAuthPassword,
                                       String userSelectedApplication,
                                       String userSelectedRelease, String assessmentTypeId,
                                       String entitlementId, String entitlementFrequencyId,
                                       String entitlementFrequencyType, String userSelectedEntitlement,
-                                      String selectedDynamicGeoLocation, boolean requireWebSiteNetworkAuth,
-                                      boolean requireWebSiteLoginMacro,
-                                      String networkAuthType) {
+                                      String selectedDynamicGeoLocation, String selectedNetworkAuthType) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
 
 
-        model = new DynamicScanJobModel(overrideGlobalConfig, scanTimebox,
-                username, personalAccessToken,
-                tenantId, releaseId, selectedReleaseType,
-                webSiteUrl, dastEnv,
-                scanPolicyType, scanHost,
-                allowHttp, allowFormSubmissionCrawl,
-                selectedScanType, selectedDynamicTimeZone,
-                enableRedundantPageDetection, webSiteNetworkAuthUserName,
-                loginFileMacro, webSiteNetworkAuthPassword,
-                userSelectedApplication,
-                userSelectedRelease, assessmentTypeId,
-                entitlementId, entitlementFrequencyId,
+        model = new DynamicScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
+                releaseId, selectedReleaseType, webSiteUrl
+                , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanEntireHost, restrictScan, allowHttp,
+                allowFormSubmissionCrawl, selectedScanType
+                , selectedDynamicTimeZone, webSiteLoginMacroEnabled,
+                webSiteNetworkAuthSettingEnabled, enableRedundantPageDetection,
+                webSiteNetworkAuthUserName, loginMacroId
+                , webSiteNetworkAuthPassword, userSelectedApplication,
+                userSelectedRelease, assessmentTypeId, entitlementId,
                 entitlementFrequencyType, userSelectedEntitlement,
-                selectedDynamicGeoLocation, requireWebSiteNetworkAuth,
-                requireWebSiteLoginMacro, networkAuthType);
+                selectedDynamicGeoLocation, selectedNetworkAuthType);
 
     }
 
@@ -95,7 +91,7 @@ public class DynamicScanSharedBuildStep {
                                                   boolean redundantPageDetection, String scanEnvironment,
                                                   boolean requireNetworkAuth, boolean requireLoginMacroAuth,
                                                   String networkAuthUserName, String networkAuthPassword
-            , String ddlNetworkAuthType, String timeboxScan
+            , String networkAuthType, String timeboxScan
 
     )
             throws IllegalArgumentException, IOException {
@@ -108,15 +104,15 @@ public class DynamicScanSharedBuildStep {
 
             releaseId = userSelectedRelease;
 
-            PutDynamicScanSetupModel dynamicScanSetupReqModel;
-            dynamicScanSetupReqModel = new PutDynamicScanSetupModel();
+            PutDynamicWebSiteScanSetupModel dynamicScanSetupReqModel;
+            dynamicScanSetupReqModel = new PutDynamicWebSiteScanSetupModel();
             dynamicScanSetupReqModel.setGeoLocationId(Integer.parseInt(geoLocationId)); //Check here for null
             dynamicScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dynamicScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dynamicScanSetupReqModel.setTimeZone(timeZone);
             dynamicScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
 
-            if (loginMacroId != "" && loginMacroId != null && requireLoginMacroAuth) {
+            if (!Objects.equals(loginMacroId, "") && loginMacroId != null && requireLoginMacroAuth) {
                 dynamicScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
 
             }
@@ -126,16 +122,20 @@ public class DynamicScanSharedBuildStep {
 
             dynamicScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (requireLoginMacroAuth && (loginMacroId != "" && loginMacroId != null) && Integer.parseInt(loginMacroId) != 0)
-                dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
-
+            if (requireLoginMacroAuth && (!Objects.equals(loginMacroId, "") && loginMacroId != null))
+                if (Integer.parseInt(loginMacroId) != 0) {
+                    dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
+                }
             if (requireNetworkAuth) {
                 dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setPassword(networkAuthPassword);
                 dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setUserName(networkAuthUserName);
-                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setNetworkAuthenticationType(ddlNetworkAuthType);
+
+                if (networkAuthType != null || networkAuthType != "") {
+                    dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setNetworkAuthenticationType((networkAuthType));
+                }
+
                 dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setRequireNetworkAuthentication(true);
             }
-
             dynamicScanSetupReqModel.setAllowFormSubmissions(allowFrmSubmission);
             dynamicScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
 
@@ -147,23 +147,23 @@ public class DynamicScanSharedBuildStep {
             else
                 dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(true);
 
-
-            if (!webSiteAssessmentUrl.isEmpty()) {
-                dynamicScanSetupReqModel.setWebSites().urls.addAll(webSiteAssessmentUrl);
-            }
+            dynamicScanSetupReqModel.setUrls(webSiteAssessmentUrl.toArray(new String[0]));
 
             PutDynamicScanSetupResponse response = dynamicController.putDynamicWebSiteScanSettings(Integer.parseInt(releaseId),
                     dynamicScanSetupReqModel);
 
-            if (response.isSuccess()) {
+            //ToDo: - Align with response format from Fod API - response been set null when parsing the json content.
+            if (response == null || response.isSuccess()) {
                 System.out.println("Successfully saved settings for release id = " + releaseId);
-            } else if (response.getErrors() != null && !response.getErrors().isEmpty()) {
 
-                String errs = response.getErrors().toString().replace("\n", "\n\t\t");
-                //String errs = response.getErrors().stream().map(s -> s.replace("\n", "\n\t\t")).collect(Collectors.joining("\n\t"));
-
-                System.err.println("Error saving settings for release id = " + releaseId + "\n\t" + errs);
-                throw new IllegalArgumentException("Failed to save scan settings for release id = " + releaseId);
+            } else {
+//                {
+//                    String errs = response.getErrors().toString().replace("\n", "\n\t\t");
+//                    System.err.println("Error saving settings for release id = " + releaseId + "\n\t" + errs);
+//                    //String errs = response.getErrors().stream().map(s -> s.replace("\n", "\n\t\t")).collect(Collectors.joining("\n\t"));
+//                    throw new Exception("Failed to save scan settings for release id: " + releaseId + "err: " + errs);
+//                } else
+                throw new Exception("Failed to save scan settings for release id: " + releaseId);
             }
         } catch (IllegalArgumentException e) {
             throw e;

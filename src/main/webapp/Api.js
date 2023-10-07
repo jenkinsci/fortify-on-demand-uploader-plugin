@@ -219,7 +219,7 @@ class Api {
 
     getReleaseEntitlementSettings(releaseId, customAuth) {
         return new Promise((res, rej) => {
-            this.descriptor.retrieveStaticScanSettings(releaseId, customAuth, async t => {
+            this.descriptor.retrieveDynamicScanSettings(releaseId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
                 if (responseJSON === null || undefined) {
                     rej();

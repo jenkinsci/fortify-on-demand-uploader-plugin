@@ -76,30 +76,40 @@
     </f:section>
     <!-- Scope Settings -->
     <f:section title="Scope">
-        <f:entry title="Dynamic Site URL">
-            <div id="dast-standard-site-url" class="fodeDynamicStandardRowSelector dast-standard-scan">
-                <f:textbox field="webSiteUrl"/>
+        <!-- workflow scan !-->
+        <f:entry title="Please upload the file. Supported extensions: *.har, *.webmacro, *.burp">
+            <div id="dast-workflow-macro-upload" class="dast-scan-setting dast-workflow-scan">
+                <span>
+                    <input id="workflowMacroFile" type="File" name="workflowMacroFile"/>
+                    <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
+                    <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>
+                </span>
             </div>
         </f:entry>
-        Restrict scan to URL and subdirectories
+        <f:entry title="Dynamic Site URL">
+            <div id="dast-standard-site-url" class="dast-scan-setting dast-standard-scan">
+                <f:textbox field="webSiteUrl" name="webSiteUrl"/>
+            </div>
+        </f:entry>
         <f:entry>
-            <div id="dast-standard-scan-scope" class="dast-scan-setting dast-standard-scan">
-                <f:booleanRadio true="Restrict scan to URL and subdirectories"
-                                false="Scan entire host" field="scanHost">
-                </f:booleanRadio>
-                <!---By default the "Scan entire host" option to be selected so suing booleanRadioButtonControl false gets selected by default.
-                 Handle it backend accordingly -->
+            <div id="dast-standard-scan-scope" class="dast-scan-setting dast-standard-scan dast-workflow-scan">
+
+                <f:radio title="Restrict scan to URL directories and subdirectories" id="restrictScan"
+                         name="restrictScan">
+                </f:radio>
+                <f:radio title="Scan entire host" id="scanEntireHost" name="scanEntireHost">
+                </f:radio>
             </div>
 
-            <div id="dast-standard-scan-scope-attribute" class="dast-scan-setting dast-standard-scan">
+            <div id="dast-standard-scan-scope-attribute" class="dast-scan-setting dast-standard-scan dast-workflow-scan">
 
-                <f:checkbox title="Allow HTTP(:80) and HTTPS (:443)" field="allowHttp)">
-
+                <f:checkbox title="Allow HTTP(:80) and HTTPS (:443)" field="allowHttp" id="allowHttp">
                 </f:checkbox>
-                <f:checkbox title="Allow form submission during crawl" field="allowFormSubmissionCrawl">
-
+                <f:checkbox title="Allow form submission during crawl" field="allowFormSubmissionCrawl"
+                            id="allowFormSubmissionCrawl">
                 </f:checkbox>
-                <f:checkbox title="Enable redundant page detection" field="enableRedundantPageDetection">
+                <f:checkbox title="Enable redundant page detection" field="enableRedundantPageDetection"
+                            id="enableRedundantPageDetection">
                 </f:checkbox>
             </div>
         </f:entry>
@@ -120,12 +130,12 @@
         </f:entry>
 
         <f:entry title="Scan Policy">
-            <div id="dast-standard-scan-policy" class="dast-scan-setting dast-standard-scan">
+            <div id="dast-standard-scan-policy" class="dast-scan-setting dast-standard-scan dast-workflow-scan">
                 <f:select field="scanPolicyType"/>
             </div>
         </f:entry>
         <f:entry title="Timebox Scan Duration (Hours)">
-            <div id="dast-standard-time-scan-duration" class="dast-scan-setting dast-standard-scan">
+            <div id="dast-standard-time-scan-duration" class="dast-scan-setting dast-standard-scan dast-workflow-scan">
                 <f:select field="scanTimebox"/>
             </div>
         </f:entry>
@@ -133,29 +143,31 @@
 
     <f:section title="Authentication">
         <f:entry>
-            <div class="dast-scan-setting dast-standard-scan">
+            <div class="dast-scan-setting dast-standard-scan dast-workflow-scan" id="webSiteNetworkAuthSettingEnabledRow">
                 <f:optionalBlock name="webSiteNetworkAuthSettingEnabled" field="webSiteNetworkAuthSettingEnabled"
                                  title="Network Authentication Required"
                                  checked="${instance.webSiteNetworkAuthSettingEnabled}" inline="true">
 
                     <f:entry title="Network Authentication Type">
-                        <div id="ddlNetworkAuthTypeRow" class="fode-field spinner-container dast-scan-setting">
+                        <div id="ddlNetworkAuthTypeRow" class="fode-field spinner-container dast-scan-setting dast-workflow-scan">
                             <div class="fode-edit jenkins-select">
                                 <select name="selectedNetworkAuthType" id="ddlNetworkAuthType"
                                         class="jenkins-select__input">
-                                    <option value="-1">Select a Network Authentication Type</option>
+                                    <option value="0">Select a Network Authentication Type</option>
                                 </select>
                             </div>
                         </div>
                     </f:entry>
 
-
                     <f:entry title="Network Username" field="webSiteNetworkAuthUserName">
-                        <f:textbox/>
+                        <div id="networkUsernameRow">
+                            <f:textbox/>
+                        </div>
                     </f:entry>
-
                     <f:entry title="Network Password" field="webSiteNetworkAuthPassword">
-                        <f:password/>
+                        <div id="networkPasswordRow">
+                            <f:password/>
+                        </div>
                     </f:entry>
 
                 </f:optionalBlock>
@@ -163,7 +175,7 @@
         </f:entry>
 
         <f:entry>
-            <div class="dast-scan-setting dast-standard-scan">
+            <div class="dast-scan-setting dast-standard-scan dast-workflow-scan">
                 <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
                                  title="Login Macro"
                                  checked="${instance.webSiteLoginMacroEnabled}" inline="true">

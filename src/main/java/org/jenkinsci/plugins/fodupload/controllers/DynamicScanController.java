@@ -8,17 +8,19 @@ import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.PatchDastScanFileUploadReq;
-import org.jenkinsci.plugins.fodupload.models.PutDynamicScanSetupModel;
+import org.jenkinsci.plugins.fodupload.models.PutDynamicWebSiteScanSetupModel;
 import org.jenkinsci.plugins.fodupload.models.PutDynamicScanSetupReqModel;
 import org.jenkinsci.plugins.fodupload.models.StartDynamicScanReqModel;
 import org.jenkinsci.plugins.fodupload.models.response.*;
-import org.jenkinsci.plugins.fodupload.models.response.DastScanGetResponse.GetDynamicScanSetupResponse;
+import org.jenkinsci.plugins.fodupload.models.response.DastScanGetResponse.GetDastAutomatedScanSetupResponse;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
+
+import static org.jenkinsci.plugins.fodupload.Config.FodConfig.FodDastApiConstants.DastWebSiteScanPutApi;
 
 
 public class DynamicScanController extends ControllerBase {
@@ -33,14 +35,14 @@ public class DynamicScanController extends ControllerBase {
         super(apiConnection, logger, correlationId);
     }
 
-    public PutDynamicScanSetupResponse putDynamicWebSiteScanSettings(final Integer releaseId, PutDynamicScanSetupModel settings) throws IOException {
+    public PutDynamicScanSetupResponse putDynamicWebSiteScanSettings(final Integer releaseId, PutDynamicWebSiteScanSetupModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
 
         System.out.println("req content " + requestContent);
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
-                .addPathSegments("/api/v3/releases/" + releaseId + "/dynamic-scans/dast-automated-scans/scan-setup");
+                .addPathSegments(String.format(DastWebSiteScanPutApi ,releaseId));
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
@@ -64,11 +66,12 @@ public class DynamicScanController extends ControllerBase {
             if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
             else errors.add("API empty response");
 
-            return new PutDynamicScanSetupResponse(false, errors, rawBody);
+            return apiConnection.parseResponse(response, new TypeToken<PutDynamicScanSetupResponse>() {
+            }.getType());
         }
     }
 
-    public FodDastApiResponse putDynamicWebSiteScanSettings(final Integer releaseId, PutDynamicScanSetupReqModel settings) throws IOException {
+    public FodDastApiResponse putDynamicWorkflowScanSettings(final Integer releaseId, PutDynamicScanSetupReqModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
 
@@ -96,8 +99,8 @@ public class DynamicScanController extends ControllerBase {
 
             if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
             else errors.add("API empty response");
-
-            return new FodDastApiResponse(false, errors, rawBody);
+            return apiConnection.parseResponse(response, new TypeToken<FodDastApiResponse>() {
+            }.getType());
         }
     }
 
@@ -142,7 +145,7 @@ public class DynamicScanController extends ControllerBase {
                     .addHeader("CorrelationId", getCorrelationId())
                     .patch(requestBody).build();
 
-
+            //ToDo:- Require code refactor to align with the error response from Fod API
             ResponseContent response = apiConnection.request(request);
 
             if (response.code() < 300) {
@@ -157,7 +160,7 @@ public class DynamicScanController extends ControllerBase {
                 List<String> errors = Utils.unexpectedServerResponseErrors();
                 if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
                 else errors.add("API empty response");
-                return new PatchDastFileUploadResponse(false, errors, null);
+                return new PatchDastFileUploadResponse(false,errors,rawBody);
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
@@ -202,7 +205,7 @@ public class DynamicScanController extends ControllerBase {
 
     }
 
-    public GetDynamicScanSetupResponse getDynamicScanSettings(final Integer releaseId) throws IOException {
+    public GetDastAutomatedScanSetupResponse getDynamicScanSettings(final Integer releaseId) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodConfig.FodDastApiConstants.DastGetApi, releaseId));
 
@@ -210,7 +213,7 @@ public class DynamicScanController extends ControllerBase {
 
         Request request = new Request.Builder().url(urlBuilder.build()).addHeader("Accept", "application/json").addHeader("CorrelationId", getCorrelationId()).get().build();
 
-        return apiConnection.requestTyped(request, new TypeToken<GetDynamicScanSetupResponse>() {
+        return apiConnection.requestTyped(request, new TypeToken<GetDastAutomatedScanSetupResponse>() {
         }.getType());
     }
 

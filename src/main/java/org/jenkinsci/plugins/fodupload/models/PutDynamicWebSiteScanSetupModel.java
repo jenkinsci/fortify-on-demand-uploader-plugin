@@ -3,7 +3,7 @@ package org.jenkinsci.plugins.fodupload.models;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PutDynamicScanSetupModel {
+public class PutDynamicWebSiteScanSetupModel {
     private int geoLocationId;
     private int assessmentTypeId;
     private int entitlementId;
@@ -21,14 +21,16 @@ public class PutDynamicScanSetupModel {
     private boolean allowSameHostRedirects;
     private boolean restrictToDirectoryAndSubdirectories;
     private boolean enableRedundantPageDetection;
-    private WebSiteAssessment websiteAssessment;
-    public class WebSiteAssessment {
-        public List<String> urls;
 
-        WebSiteAssessment() {
-            urls = new ArrayList<>();
-        }
+    public String[] getUrls() {
+        return Urls;
     }
+
+    public void setUrls(String[] urls) {
+        Urls = urls;
+    }
+
+    private String[] Urls;
 
     public boolean isAllowFormSubmissions() {
         return allowFormSubmissions;
@@ -68,13 +70,6 @@ public class PutDynamicScanSetupModel {
 
     public void setNetworkAuthenticationSettings(NetworkAuthentication networkAuthenticationSettings) {
         this.networkAuthenticationSettings = networkAuthenticationSettings;
-    }
-
-    public WebSiteAssessment setWebSites() {
-        if (websiteAssessment == null)
-            websiteAssessment = new WebSiteAssessment();
-
-        return websiteAssessment;
     }
 
 
@@ -228,7 +223,7 @@ public class PutDynamicScanSetupModel {
     }
 
     //  public PutDynamicScanSetupModel(int geoLocationId, int assessmentTypeId, int entitlementId,String entitlementFrequencyType, String timeZone)
-    public PutDynamicScanSetupModel() {
+    public PutDynamicWebSiteScanSetupModel() {
 
         String jsonArrayString = "[{\"day\":\"Sunday\",\"hourBlocks\":[{\"hour\":3,\"checked\":true}]},{\"day\":\"Monday\",\"hourBlocks\":[{\"hour\":3,\"checked\":true}]},{\"day\":\"Tuesday\",\"hourBlocks\":[{\"hour\":3,\"checked\":true}]},{\"day\":\"Wednesday\",\"hourBlocks\":[{\"hour\":3,\"checked\":true}]},{\"day\":\"Thursday\",\"hourBlocks\":[{\"hour\":3,\"checked\":true}]}]";
 

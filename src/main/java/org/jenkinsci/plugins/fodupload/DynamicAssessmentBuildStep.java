@@ -24,7 +24,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.verb.POST;
+
 import javax.annotation.Nonnull;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.EnumSet;
@@ -44,7 +46,8 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                       List<String> webSiteUrl, String dastEnv,
                                       String scanTimebox,
                                       List<String> standardScanTypeExcludeUrlsRow,
-                                      String scanPolicyType, boolean scanHost,
+                                      String scanPolicyType,boolean restrictScan,
+                                      boolean scanEntireHost,
                                       boolean allowHttp, boolean allowFormSubmissionCrawl,
                                       String selectedScanType, String selectedDynamicTimeZone,
                                       boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
@@ -57,35 +60,33 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                       String selectedDynamicGeoLocation, String selectedNetworkAuthType
     ) throws IllegalArgumentException, IOException {
 
-       // assert FodEnums.DastTimeBoxScan.toInt(scanTimebox) != null;
-        int timebox =FodEnums.DastTimeBoxScan.toInt(scanTimebox).getInteger();
+        // assert FodEnums.DastTimeBoxScan.toInt(scanTimebox) != null;
+        int timebox = FodEnums.DastTimeBoxScan.toInt(scanTimebox).getInteger();
 
-        dynamicSharedUploadBuildStep = new DynamicScanSharedBuildStep(overrideGlobalConfig, username, scanTimebox,
+        dynamicSharedUploadBuildStep = new DynamicScanSharedBuildStep(overrideGlobalConfig, username,
                 personalAccessToken, tenantId,
                 releaseId, selectedReleaseType,
                 webSiteUrl, dastEnv,
-                scanPolicyType, scanHost,
+                scanTimebox,
+                standardScanTypeExcludeUrlsRow,
+                scanPolicyType, scanEntireHost, restrictScan,
                 allowHttp, allowFormSubmissionCrawl,
                 selectedScanType, selectedDynamicTimeZone,
+                webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled,
                 enableRedundantPageDetection, webSiteNetworkAuthUserName,
                 loginMacroId, webSiteNetworkAuthPassword,
                 userSelectedApplication,
                 userSelectedRelease, assessmentTypeId,
                 entitlementId, entitlementFrequencyId,
                 entitlementFrequencyType, userSelectedEntitlement,
-                selectedDynamicGeoLocation,
-                webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled, selectedNetworkAuthType);
+                selectedDynamicGeoLocation, selectedNetworkAuthType);
 
         if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
-            if (scanHost)
-                allowSameHostRedirects = true;
-            else
-                restrictToDirectoryAndSubdirectories = true;
 
             dynamicSharedUploadBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, selectedDynamicGeoLocation, loginMacroId, selectedDynamicTimeZone, selectedScanType, scanPolicyType,
-                    webSiteUrl, allowFormSubmissionCrawl, allowSameHostRedirects, restrictToDirectoryAndSubdirectories, enableRedundantPageDetection, dastEnv,
-                    webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword ,selectedNetworkAuthType,scanTimebox
+                    webSiteUrl, allowFormSubmissionCrawl, scanEntireHost, restrictScan, enableRedundantPageDetection, dastEnv,
+                    webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimebox
             );
         }
 
@@ -302,7 +303,6 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
-
                 DynamicScanController dynamicScanController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
                 PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
                 patchDastScanFileUploadReq.releaseId = releaseId;
@@ -380,12 +380,13 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
-        public String retrieveStaticScanSettings(Integer releaseId, JSONObject authModelObject) {
+        public String retrieveDynamicScanSettings(Integer releaseId, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 DynamicScanController dynamicScanController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
-                return Utils.createResponseViewModel(dynamicScanController.getDynamicScanSettings(releaseId));
+                String result = Utils.createResponseViewModel(dynamicScanController.getDynamicScanSettings(releaseId));
+                return  result;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
