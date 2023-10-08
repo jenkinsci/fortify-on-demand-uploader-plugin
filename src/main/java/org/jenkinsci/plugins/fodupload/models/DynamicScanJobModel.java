@@ -144,7 +144,7 @@ public class DynamicScanJobModel {
                                String selectedScanType, String selectedDynamicTimeZone,
                                boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                               String loginMacroId, String webSiteNetworkAuthPassword,
+                               String loginMacroId,String workflowMacroId, String webSiteNetworkAuthPassword,
                                String userSelectedApplication,
                                String userSelectedRelease, String assessmentTypeId,
                                String entitlementId,

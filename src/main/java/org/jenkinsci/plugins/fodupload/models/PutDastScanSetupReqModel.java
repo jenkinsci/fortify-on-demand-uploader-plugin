@@ -3,7 +3,6 @@ package org.jenkinsci.plugins.fodupload.models;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /*
 {
   "urls": [
@@ -43,10 +42,8 @@ import java.util.List;
     "password": "string"
   }
 }
-
-
  */
-public class PutDynamicScanSetupReqModel {
+public class PutDastScanSetupReqModel {
     private int geoLocationId;
     private int assessmentTypeId;
     private int entitlementId;
@@ -54,7 +51,6 @@ public class PutDynamicScanSetupReqModel {
     private String dynamicScanEnvironmentFacingType;
     private String dynamicScanAuthenticationType;
     private String timeZone;
-    private boolean requiresNetworkAuthentication;
     private String scanType;
     private String policy;
     private int loginMacroFileId;
@@ -65,19 +61,25 @@ public class PutDynamicScanSetupReqModel {
     private boolean restrictToDirectoryAndSubdirectories;
     private boolean enableRedundantPageDetection;
 
-    public String[] Urls;
+    private ExcludeSiteUrl excludeSiteUrl;
 
-
-    private WebSiteAssessment websiteAssessment;
-
-    public class WebSiteAssessment {
+    public class ExcludeSiteUrl {
         public List<String> urls;
 
-        WebSiteAssessment() {
+        ExcludeSiteUrl() {
             urls = new ArrayList<>();
         }
 
     }
+    public String[] Urls;
+    public String[] getUrls() {
+        return Urls;
+    }
+
+    public void setUrls(String[] urls) {
+        Urls = urls;
+    }
+
 
     public boolean isAllowFormSubmissions() {
         return allowFormSubmissions;
@@ -112,29 +114,15 @@ public class PutDynamicScanSetupReqModel {
     }
 
     public NetworkAuthentication getNetworkAuthenticationSettings() {
-        return networkAuthenticationSettings;
+        return new NetworkAuthentication();
     }
 
-    public void setNetworkAuthenticationSettings(NetworkAuthentication networkAuthenticationSettings) {
-        this.networkAuthenticationSettings = networkAuthenticationSettings;
+    public ExcludeSiteUrl setWebSites() {
+        if (excludeSiteUrl == null)
+            excludeSiteUrl = new ExcludeSiteUrl();
+
+        return excludeSiteUrl;
     }
-
-    public WebSiteAssessment setWebSites() {
-        if (websiteAssessment == null)
-            websiteAssessment = new WebSiteAssessment();
-
-        return websiteAssessment;
-    }
-
-
-    //Todo:-Take care the serialization here
-    public class NetworkAuthentication {
-        public String userName;
-
-        public String password;
-    }
-
-    //   private BlackoutEntry[] blockout;
 
     public String getEntitlementFrequencyType() {
         return entitlementFrequencyType;
@@ -192,24 +180,44 @@ public class PutDynamicScanSetupReqModel {
         this.geoLocationId = geoLocationId;
     }
 
-//    public BlackoutEntry[] getBlockout() {
-//        return blockout;
-//    }
-
-//    public void setBlockout(BlackoutEntry[] blackout) {
-//        this.blockout = blackout;
-//    }
-
-    public boolean isRequiresNetworkAuthentication() {
-        return requiresNetworkAuthentication;
-    }
-
-    public void setRequiresNetworkAuthentication(boolean requiresNetworkAuthentication) {
-        this.requiresNetworkAuthentication = requiresNetworkAuthentication;
-
-        if (requiresNetworkAuthentication) {
-            this.setNetworkAuthenticationSettings(new NetworkAuthentication());
+    //Todo:-Take care the serialization here
+    public class NetworkAuthentication {
+        public String getUserName() {
+            return userName;
         }
+
+        public void setUserName(String userName) {
+            this.userName = userName;
+        }
+
+        public String userName;
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String password;
+        private boolean requiresNetworkAuthentication;
+
+        public String getNetworkAuthTypes() {
+            return networkAuthTypes;
+        }
+
+        public void setNetworkAuthTypes(String networkAuthTypes) {
+            this.networkAuthTypes = networkAuthTypes;
+        }
+
+        String networkAuthTypes;
+
+        public void setNetworkAuthenticationRequired(boolean isRequire) {
+            requiresNetworkAuthentication = isRequire;
+
+        }
+
     }
 
     public String getScanType() {
@@ -244,25 +252,7 @@ public class PutDynamicScanSetupReqModel {
         this.requiresSiteAuthentication = requiresSiteAuthentication;
     }
 
-
     //  public PutDynamicScanSetupModel(int geoLocationId, int assessmentTypeId, int entitlementId,String entitlementFrequencyType, String timeZone)
-    public PutDynamicScanSetupReqModel() {
-
-        String jsonArrayString = "[{\"day\":\"Sunday\",\"hourBlocks\":[{\"hour\":3,\"checked\":true}]},{\"day\":\"Monday\",\"hourBlocks\":[{\"hour\":3,\"checked\":true}]},{\"day\":\"Tuesday\",\"hourBlocks\":[{\"hour\":3,\"checked\":true}]},{\"day\":\"Wednesday\",\"hourBlocks\":[{\"hour\":3,\"checked\":true}]},{\"day\":\"Thursday\",\"hourBlocks\":[{\"hour\":3,\"checked\":true}]}]";
-
-//        this.geoLocationId = geoLocationId;
-//        this.assessmentTypeId = assessmentTypeId;
-//        this.entitlementId = entitlementId;
-//        this.entitlementFrequencyType = entitlementFrequencyType;
-//        this.dynamicSiteURL = "http://zero.webappsecurity.com";
-//        this.timeZone = timeZone;
-//        this.dynamicScanAuthenticationType = "NoAuthentication";
-//        this.dynamicScanEnvironmentFacingType = "Internal";
-//        WebSite.Urls.
-//        Gson gson = new Gson();
-//        BlackoutEntry[] blackoutEntries = gson.fromJson(jsonArrayString, BlackoutEntry[].class);
-//        this.blockout = blackoutEntries;
-////        System.out.println(blackoutEntries);
+    public PutDastScanSetupReqModel() {
     }
-
 }
