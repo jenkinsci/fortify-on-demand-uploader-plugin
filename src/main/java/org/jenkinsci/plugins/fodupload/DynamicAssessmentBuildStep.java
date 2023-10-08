@@ -44,13 +44,13 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                       List<String> webSiteUrl, String dastEnv,
                                       String scanTimebox,
                                       List<String> standardScanTypeExcludeUrlsRow,
-                                      String scanPolicyType,boolean restrictScan,
+                                      String scanPolicyType, boolean restrictScan,
                                       boolean scanEntireHost,
                                       boolean allowHttp, boolean allowFormSubmissionCrawl,
                                       String selectedScanType, String selectedDynamicTimeZone,
                                       boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                       boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                      String loginMacroId, String workflowMacroId, String webSiteNetworkAuthPassword,
+                                      String loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
                                       String userSelectedApplication,
                                       String userSelectedRelease, String assessmentTypeId,
                                       String entitlementId, String entitlementFrequencyId,
@@ -72,7 +72,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 selectedScanType, selectedDynamicTimeZone,
                 webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled,
                 enableRedundantPageDetection, webSiteNetworkAuthUserName,
-                loginMacroId,workflowMacroId, webSiteNetworkAuthPassword,
+                loginMacroId, workflowMacroId, allowedHost, webSiteNetworkAuthPassword,
                 userSelectedApplication,
                 userSelectedRelease, assessmentTypeId,
                 entitlementId, entitlementFrequencyId,
@@ -89,17 +89,14 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
         } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
 
             dynamicSharedUploadBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                    entitlementFrequencyType, selectedDynamicGeoLocation, loginMacroId,workflowMacroId, selectedDynamicTimeZone, selectedScanType, scanPolicyType,
+                    entitlementFrequencyType, selectedDynamicGeoLocation, loginMacroId, workflowMacroId, allowedHost, selectedDynamicTimeZone, selectedScanType, scanPolicyType,
                     webSiteUrl, allowFormSubmissionCrawl, scanEntireHost, restrictScan, enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimebox
             );
-        }
-        else if(FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType))
-        {
+        } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
 
-        }
-        else
-            throw  new IllegalArgumentException("Not Valid Dast Scan Type set for releaseId: "+ releaseId);
+        } else
+            throw new IllegalArgumentException("Not Valid Dast Scan Type set for releaseId: " + releaseId);
 
     }
 
@@ -318,8 +315,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
                 patchDastScanFileUploadReq.releaseId = releaseId;
 
-                switch (fileType)
-                {
+                switch (fileType) {
                     case "LoginMacro":
                         patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.LoginMacro;
                         break;
@@ -327,7 +323,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                         patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.WorkflowDrivenMacro;
                         break;
                     default:
-                        throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + releaseId );
+                        throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + releaseId);
                 }
 
                 patchDastScanFileUploadReq.Content = fileContent.getBytes();
@@ -409,7 +405,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 DynamicScanController dynamicScanController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
                 String result = Utils.createResponseViewModel(dynamicScanController.getDynamicScanSettings(releaseId));
-                return  result;
+                return result;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -465,6 +461,6 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 //                    FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
 //                    FormValidation.error("Invalid connection information. Please check your credentials and try again.");
 //        }
-   }
+    }
 
 }

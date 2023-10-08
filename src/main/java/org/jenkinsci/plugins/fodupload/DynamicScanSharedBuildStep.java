@@ -43,7 +43,7 @@ public class DynamicScanSharedBuildStep {
                                       String selectedScanType, String selectedDynamicTimeZone,
                                       boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                       boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                      String loginMacroId, String workflowMacroId, String webSiteNetworkAuthPassword,
+                                      String loginMacroId, String workflowMacroId,String allowedHost, String webSiteNetworkAuthPassword,
                                       String userSelectedApplication,
                                       String userSelectedRelease, String assessmentTypeId,
                                       String entitlementId, String entitlementFrequencyId,
@@ -59,7 +59,7 @@ public class DynamicScanSharedBuildStep {
                 allowFormSubmissionCrawl, selectedScanType
                 , selectedDynamicTimeZone, webSiteLoginMacroEnabled,
                 webSiteNetworkAuthSettingEnabled, enableRedundantPageDetection,
-                webSiteNetworkAuthUserName, loginMacroId, workflowMacroId
+                webSiteNetworkAuthUserName, loginMacroId, workflowMacroId, allowedHost
                 , webSiteNetworkAuthPassword, userSelectedApplication,
                 userSelectedRelease, assessmentTypeId, entitlementId,
                 entitlementFrequencyType, userSelectedEntitlement,
@@ -171,6 +171,7 @@ public class DynamicScanSharedBuildStep {
 
     public void saveReleaseSettingsForWorkflowDrivenScan(String userSelectedRelease, String assessmentTypeID,
                                                          String entitlementId, String entitlementFreq, String geoLocationId, String loginMacroId, String workflowMacroId,
+                                                         String allowedHost,
                                                          String timeZone, String scanType, String scanPolicy, List<String> webSiteAssessmentUrl,
                                                          boolean allowFrmSubmission, boolean allowSameHostRedirect, boolean restrictDirectories,
                                                          boolean redundantPageDetection, String scanEnvironment,
@@ -182,14 +183,9 @@ public class DynamicScanSharedBuildStep {
             throws IllegalArgumentException, IOException {
 
         String releaseId = "";
-
         DynamicScanController dynamicController = new DynamicScanController(getApiConnection(), null, Utils.createCorrelationId());
-
         try {
-
             releaseId = userSelectedRelease;
-
-
             PutDastWorkflowDrivenScanReqModel dastWorkflowScanSetupReqModel;
             dastWorkflowScanSetupReqModel = new PutDastWorkflowDrivenScanReqModel();
             dastWorkflowScanSetupReqModel.setGeoLocationId(Integer.parseInt(geoLocationId)); //Check here for null
@@ -198,10 +194,18 @@ public class DynamicScanSharedBuildStep {
             dastWorkflowScanSetupReqModel.setTimeZone(timeZone);
             dastWorkflowScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
 
+            if (!workflowMacroId.isEmpty() && !allowedHost.isEmpty()) {
+                ToDo:
+                    //vk //use to string format here
+                throw new IllegalArgumentException("Workflow Macro File Id not set for release Id: " + releaseId);
+            } else {
+                dastWorkflowScanSetupReqModel.getWorkflowDrivenMacro().allowedHosts = allowedHost.split(",");
+            }
+
             if (!Objects.equals(loginMacroId, "") && loginMacroId != null && requireLoginMacroAuth) {
                 dastWorkflowScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
-
             }
+
             dastWorkflowScanSetupReqModel.setPolicy(scanPolicy);
             dastWorkflowScanSetupReqModel.setScanType(scanType);
             dastWorkflowScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);

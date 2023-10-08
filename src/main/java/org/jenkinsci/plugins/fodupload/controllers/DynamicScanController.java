@@ -155,16 +155,16 @@ public class DynamicScanController extends ControllerBase {
                 }.getType());
 
             } else {
-                String rawBody = apiConnection.parseResponse(response, new TypeToken<PutDynamicScanSetupResponse>() {
+                String rawBody = apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
                 }.getType());
                 List<String> errors = Utils.unexpectedServerResponseErrors();
                 if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
                 else errors.add("API empty response");
-                return new PatchDastFileUploadResponse(false,errors,rawBody);
+                return new PatchDastFileUploadResponse();
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return new PatchDastFileUploadResponse(false, null, ex.getMessage());
+            return new PatchDastFileUploadResponse();
         }
 
     }
