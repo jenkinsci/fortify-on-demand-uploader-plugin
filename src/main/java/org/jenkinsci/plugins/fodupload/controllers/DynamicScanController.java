@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Objects;
 
 import static org.jenkinsci.plugins.fodupload.Config.FodConfig.FodDastApiConstants.DastWebSiteScanPutApi;
 
@@ -153,6 +154,7 @@ public class DynamicScanController extends ControllerBase {
                 System.out.println("response code: " + response.code());
                 return apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
                 }.getType());
+
 
             } else {
                 String rawBody = apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {

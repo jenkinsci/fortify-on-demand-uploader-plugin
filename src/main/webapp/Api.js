@@ -342,7 +342,7 @@ class Api {
         });
     }
 
-    patchLoginMacroFile(releaseId, customAuth, file) {
+    patchSetupManifestFile(releaseId, customAuth, file,fileType) {
         debugger;
         return new Promise((res, reject) => {
             let fileReader = new FileReader();
@@ -350,11 +350,13 @@ class Api {
             fileReader.onload = () => {
                 fileContent = fileReader.result;
 
-                this.descriptor.patchLoginMacroFile(releaseId, customAuth, fileContent, async t => {
-                    const responseJSON = JSON.parse(t.responseJSON);
-                    console.log(responseJSON);
-                    if (responseJSON !== null || undefined)
-                        return res(responseJSON);
+                this.descriptor.patchSetupManifestFile(releaseId, customAuth, fileContent, fileType,async t => {
+                    console.log(t);
+                    console.log(t.responseJSON);
+                   // const responseJSON = JSON.parse(t.responseJSON);
+                    //console.log(responseJSON);
+                    if (t.responseJSON !== null || undefined)
+                        return res(t.responseJSON);
                     else
                         return reject();
                 })

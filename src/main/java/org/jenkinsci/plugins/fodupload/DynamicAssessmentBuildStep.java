@@ -307,7 +307,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 //        }
         @SuppressWarnings("unused")
         @JavaScriptMethod
-        public int patchSetupManifestFile(String releaseId, JSONObject authModelObject, String fileContent, String fileType) throws FormValidation {
+        public PatchDastFileUploadResponse patchSetupManifestFile(String releaseId, JSONObject authModelObject, String fileContent, String fileType) throws FormValidation {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
@@ -327,7 +327,12 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 }
 
                 patchDastScanFileUploadReq.Content = fileContent.getBytes();
-                return dynamicScanController.PatchDynamicScan(patchDastScanFileUploadReq).getFileId();
+                PatchDastFileUploadResponse response = dynamicScanController.PatchDynamicScan(patchDastScanFileUploadReq);
+
+                if (response.fileId <= 0) {
+                    throw new IllegalArgumentException("At least one host must be selected for releaseId " + releaseId);
+                }
+                return response;
 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());

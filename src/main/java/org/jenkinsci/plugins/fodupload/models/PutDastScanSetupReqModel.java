@@ -58,6 +58,8 @@ public class PutDastScanSetupReqModel {
     private NetworkAuthentication networkAuthenticationSettings;
     private boolean allowFormSubmissions;
     private boolean allowSameHostRedirects;
+
+    public boolean requiresNetworkAuthentication;
     private boolean restrictToDirectoryAndSubdirectories;
     private boolean enableRedundantPageDetection;
 
@@ -71,7 +73,9 @@ public class PutDastScanSetupReqModel {
         }
 
     }
+
     public String[] Urls;
+
     public String[] getUrls() {
         return Urls;
     }
@@ -115,6 +119,10 @@ public class PutDastScanSetupReqModel {
 
     public NetworkAuthentication getNetworkAuthenticationSettings() {
         return new NetworkAuthentication();
+    }
+
+    public void setNetworkAuthenticationSettings(NetworkAuthentication networkAuthenticationSettings) {
+        this.networkAuthenticationSettings = networkAuthenticationSettings;
     }
 
     public ExcludeSiteUrl setWebSites() {
@@ -201,17 +209,17 @@ public class PutDastScanSetupReqModel {
         }
 
         public String password;
-        private boolean requiresNetworkAuthentication;
 
-        public String getNetworkAuthTypes() {
-            return networkAuthTypes;
+
+        public String getNetworkAuthenticationType() {
+            return networkAuthenticationType;
         }
 
-        public void setNetworkAuthTypes(String networkAuthTypes) {
-            this.networkAuthTypes = networkAuthTypes;
+        public void setNetworkAuthenticationType(String networkAuthenticationType) {
+            this.networkAuthenticationType = networkAuthenticationType;
         }
 
-        String networkAuthTypes;
+        public String networkAuthenticationType;
 
         public void setNetworkAuthenticationRequired(boolean isRequire) {
             requiresNetworkAuthentication = isRequire;

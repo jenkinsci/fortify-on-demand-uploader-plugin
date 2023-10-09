@@ -43,7 +43,7 @@ public class DynamicScanSharedBuildStep {
                                       String selectedScanType, String selectedDynamicTimeZone,
                                       boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                       boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                      String loginMacroId, String workflowMacroId,String allowedHost, String webSiteNetworkAuthPassword,
+                                      String loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
                                       String userSelectedApplication,
                                       String userSelectedRelease, String assessmentTypeId,
                                       String entitlementId, String entitlementFrequencyId,
@@ -125,15 +125,18 @@ public class DynamicScanSharedBuildStep {
                     dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
                 }
             if (requireNetworkAuth) {
-                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setPassword(networkAuthPassword);
-                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setUserName(networkAuthUserName);
+                PutDastScanSetupReqModel.NetworkAuthentication networkSetting = dynamicScanSetupReqModel.getNetworkAuthenticationSettings();
+                networkSetting.setPassword(networkAuthPassword);
+                networkSetting.setUserName(networkAuthUserName);
 
                 if (networkAuthType != null || networkAuthType != "") {
-                    dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setNetworkAuthTypes((networkAuthType));
+                    networkSetting.setNetworkAuthenticationType((networkAuthType));
                 } else
                     throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + releaseId);
 
-                dynamicScanSetupReqModel.getNetworkAuthenticationSettings().setNetworkAuthenticationRequired(true);
+                networkSetting.setNetworkAuthenticationRequired(true);
+
+                dynamicScanSetupReqModel.setNetworkAuthenticationSettings(networkSetting);
             }
             dynamicScanSetupReqModel.setAllowFormSubmissions(allowFrmSubmission);
             dynamicScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
@@ -196,7 +199,7 @@ public class DynamicScanSharedBuildStep {
 
             if (!workflowMacroId.isEmpty() && !allowedHost.isEmpty()) {
                 ToDo:
-                    //vk //use to string format here
+                //vk //use to string format here
                 throw new IllegalArgumentException("Workflow Macro File Id not set for release Id: " + releaseId);
             } else {
                 dastWorkflowScanSetupReqModel.getWorkflowDrivenMacro().allowedHosts = allowedHost.split(",");
@@ -219,7 +222,7 @@ public class DynamicScanSharedBuildStep {
                 dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings().setUserName(networkAuthUserName);
 
                 if (networkAuthType != null || networkAuthType != "") {
-                    dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings().setNetworkAuthTypes((networkAuthType));
+                    dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings().setNetworkAuthenticationType((networkAuthType));
                 } else
                     throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + releaseId);
 
