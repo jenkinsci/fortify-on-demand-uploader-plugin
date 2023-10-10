@@ -16,6 +16,8 @@ import org.jenkinsci.plugins.fodupload.models.response.StartDynamicScanResponse;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.sql.Array;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -174,7 +176,7 @@ public class DynamicScanSharedBuildStep {
 
     public void saveReleaseSettingsForWorkflowDrivenScan(String userSelectedRelease, String assessmentTypeID,
                                                          String entitlementId, String entitlementFreq, String geoLocationId, String loginMacroId, String workflowMacroId,
-                                                         String allowedHost,
+                                                         String workflowMacroHosts,
                                                          String timeZone, String scanType, String scanPolicy, List<String> webSiteAssessmentUrl,
                                                          boolean allowFrmSubmission, boolean allowSameHostRedirect, boolean restrictDirectories,
                                                          boolean redundantPageDetection, String scanEnvironment,
@@ -197,36 +199,42 @@ public class DynamicScanSharedBuildStep {
             dastWorkflowScanSetupReqModel.setTimeZone(timeZone);
             dastWorkflowScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
 
-            if (!workflowMacroId.isEmpty() && !allowedHost.isEmpty()) {
+            if (workflowMacroId.isEmpty() || workflowMacroHosts.isEmpty()) {
                 ToDo:
                 //vk //use to string format here
-                throw new IllegalArgumentException("Workflow Macro File Id not set for release Id: " + releaseId);
+                throw new IllegalArgumentException(String.format("WorkflowMacro FileId=%s or WorkflowHost=%s not set for release Id={%s}"
+                        , workflowMacroId, workflowMacroHosts, releaseId));
             } else {
-                dastWorkflowScanSetupReqModel.getWorkflowDrivenMacro().allowedHosts = allowedHost.split(",");
+                //Support for only one file upload. need to add the validation as part of this.
+                dastWorkflowScanSetupReqModel.workflowDrivenMacro = new ArrayList<>();
+                WorkflowDrivenMacro wrkDrivenMacro = new WorkflowDrivenMacro();
+                wrkDrivenMacro.fileId = Integer.parseInt(workflowMacroId);
+                wrkDrivenMacro.allowedHosts=workflowMacroHosts.split(",");
+                dastWorkflowScanSetupReqModel.workflowDrivenMacro.add(wrkDrivenMacro);
             }
-
             if (!Objects.equals(loginMacroId, "") && loginMacroId != null && requireLoginMacroAuth) {
                 dastWorkflowScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
             }
-
             dastWorkflowScanSetupReqModel.setPolicy(scanPolicy);
             dastWorkflowScanSetupReqModel.setScanType(scanType);
             dastWorkflowScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (requireLoginMacroAuth && (!Objects.equals(loginMacroId, "") && loginMacroId != null))
-                if (Integer.parseInt(loginMacroId) != 0) {
-                    dastWorkflowScanSetupReqModel.setRequiresSiteAuthentication(true);
-                }
+//            if (requireLoginMacroAuth && (!Objects.equals(loginMacroId, "") && loginMacroId != null))
+//                if (Integer.parseInt(loginMacroId) != 0) {
+//                    dastWorkflowScanSetupReqModel.setRequiresSiteAuthentication(true);
+//                }
+
             if (requireNetworkAuth) {
-                dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings().setPassword(networkAuthPassword);
-                dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings().setUserName(networkAuthUserName);
+                PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings();
+                networkAuthentication.setPassword(networkAuthPassword);
+                networkAuthentication.setUserName(networkAuthUserName);
 
                 if (networkAuthType != null || networkAuthType != "") {
-                    dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings().setNetworkAuthenticationType((networkAuthType));
+                    networkAuthentication.setNetworkAuthenticationType((networkAuthType));
                 } else
                     throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + releaseId);
-
-                dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings().setNetworkAuthenticationRequired(true);
+                networkAuthentication.setNetworkAuthenticationRequired(true);
+                dastWorkflowScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
             dastWorkflowScanSetupReqModel.setAllowFormSubmissions(allowFrmSubmission);
             dastWorkflowScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
@@ -238,8 +246,6 @@ public class DynamicScanSharedBuildStep {
                 dastWorkflowScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(false);
             else
                 dastWorkflowScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(true);
-
-            dastWorkflowScanSetupReqModel.setUrls(webSiteAssessmentUrl.toArray(new String[0]));
 
             PutDynamicScanSetupResponse response = dynamicController.putDynamicWorkflowDrivenScanSettings(Integer.parseInt(releaseId),
                     dastWorkflowScanSetupReqModel);
@@ -257,8 +263,6 @@ public class DynamicScanSharedBuildStep {
 //                } else
                 throw new Exception("Failed to save scan settings for release id: " + releaseId);
             }
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to save scan settings for release id = " + releaseId, e);
         }

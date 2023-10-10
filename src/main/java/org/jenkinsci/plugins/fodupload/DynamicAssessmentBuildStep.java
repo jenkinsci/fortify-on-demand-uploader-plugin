@@ -50,7 +50,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                       String selectedScanType, String selectedDynamicTimeZone,
                                       boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                       boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                      String loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
+                                      String loginMacroId, String workflowMacroId, String workflowMacroHosts, String webSiteNetworkAuthPassword,
                                       String userSelectedApplication,
                                       String userSelectedRelease, String assessmentTypeId,
                                       String entitlementId, String entitlementFrequencyId,
@@ -72,7 +72,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 selectedScanType, selectedDynamicTimeZone,
                 webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled,
                 enableRedundantPageDetection, webSiteNetworkAuthUserName,
-                loginMacroId, workflowMacroId, allowedHost, webSiteNetworkAuthPassword,
+                loginMacroId, workflowMacroId, workflowMacroHosts, webSiteNetworkAuthPassword,
                 userSelectedApplication,
                 userSelectedRelease, assessmentTypeId,
                 entitlementId, entitlementFrequencyId,
@@ -89,14 +89,14 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
         } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
 
             dynamicSharedUploadBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                    entitlementFrequencyType, selectedDynamicGeoLocation, loginMacroId, workflowMacroId, allowedHost, selectedDynamicTimeZone, selectedScanType, scanPolicyType,
+                    entitlementFrequencyType, selectedDynamicGeoLocation, loginMacroId, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, selectedScanType, scanPolicyType,
                     webSiteUrl, allowFormSubmissionCrawl, scanEntireHost, restrictScan, enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimebox
             );
         } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
 
         } else
-            throw new IllegalArgumentException("Not Valid Dast Scan Type set for releaseId: " + releaseId);
+            throw new IllegalArgumentException("Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
 
     }
 

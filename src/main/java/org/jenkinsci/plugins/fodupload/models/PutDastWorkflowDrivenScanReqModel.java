@@ -1,9 +1,10 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import org.json.JSONPropertyIgnore;
+
+import java.util.List;
+
 public class PutDastWorkflowDrivenScanReqModel extends PutDastScanSetupReqModel {
-    public WorkflowDrivenMacro getWorkflowDrivenMacro() {
-        return new WorkflowDrivenMacro();
-    }
 
     /*
         * "workflowDrivenMacro": [
@@ -14,10 +15,6 @@ public class PutDastWorkflowDrivenScanReqModel extends PutDastScanSetupReqModel 
           ]
         }
       ], */
-    public WorkflowDrivenMacro workflowDrivenMacro;
+    public List<WorkflowDrivenMacro> workflowDrivenMacro;
 
-    public class WorkflowDrivenMacro {
-        public int fileId;
-        public String[] allowedHosts;
-    }
 }

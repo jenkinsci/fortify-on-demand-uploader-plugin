@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.jenkinsci.plugins.fodupload.Config.FodConfig.FodDastApiConstants.DastWebSiteScanPutApi;
-
+import static org.jenkinsci.plugins.fodupload.Config.FodConfig.FodDastApiConstants.DastWorkflowScanPutApi;
 
 public class DynamicScanController extends ControllerBase {
     /**
@@ -76,7 +76,7 @@ public class DynamicScanController extends ControllerBase {
         System.out.println("req content " + requestContent);
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
-                .addPathSegments(String.format(DastWebSiteScanPutApi ,releaseId));
+                .addPathSegments(String.format(DastWorkflowScanPutApi ,releaseId));
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")

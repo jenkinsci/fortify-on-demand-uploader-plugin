@@ -325,10 +325,8 @@ public class FodEnums {
                 case 4:
                     return GRPCDefinition;
 
-
                 case 3:
                     return GraphQLDefinition;
-
 
                 case 2:
                     return OpenAPIDefinition;
@@ -355,9 +353,30 @@ public class FodEnums {
     }
 
     public enum DastScanType {
-        Standard,
-        Workflow,
-        API
+        Standard("Standard"),
+        Workflow("Workflow-Driven"),
+        API("API");
+        private final String _val;
+
+        DastScanType(String val){
+            this._val =val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "Workflow-Driven":
+                    return "Workflow-Driven";
+                case "Standard":
+                    return "Standard";
+                case "API":
+                    return "API";
+                default:
+                    return "none";
+
+            }
+
+        }
+
     }
 
     public enum DastTimeBoxScan {
