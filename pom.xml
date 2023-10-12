@@ -62,6 +62,11 @@
             <name>Aishwarya Kotni</name>
             <email>aishwarya.kotni@microfocus.com</email>
         </developer>
+        <developer>
+            <id>vpasupathi</id>
+            <name>Vivekananthan Pasupathi</name>
+            <email>vpasupathi@opentext.com</email>
+        </developer>
     </developers>
 
     <repositories>

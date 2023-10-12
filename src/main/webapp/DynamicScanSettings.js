@@ -19,6 +19,7 @@ const dastScanSelectDEfaultValues =
         "ApiScan": {"ScanPolicy": "high"}
     }
 
+
 class DynamicScanSettings {
 
     constructor() {
@@ -68,6 +69,7 @@ class DynamicScanSettings {
                 }
                 case "Workflow-driven":
                     this.workflowScanSettingVisibility(isVisible);
+                     this.standardScanSettingsVisibility(false);
                     this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-workflow-scan-policy")
                     break;
                 default:
@@ -354,11 +356,13 @@ class DynamicScanSettings {
                         jq('#ddAssessmentType').val(assessmentId);
                         await this.onAssessmentChanged(true);
 
-                        jq('#entitlementSelectList').val(getEntitlementDropdownValue(entitlementId, this.scanSettings.entitlementFrequencyType));
+                        // jq('#entitlementSelectList').val(getEntitlementDropdownValue(this.scanSettings.entitlementId, this.scanSettings.entitlementFrequencyType));
 
                         jq('#entitlementFreqType').val(this.scanSettings.entitlementFrequencyType);
                         // alert(jq('#entitlementFreqType').val());
                         await this.onEntitlementChanged(false);
+                        debugger;
+                        this.setSelectedEntitlementValue(entp);
 
                         jq('#timeZoneStackSelectList').val(timeZoneId);
                         this.onLoadTimeZone();
@@ -374,7 +378,13 @@ class DynamicScanSettings {
                         debugger;
                         //ToDo - url will be array from the response ?
                         /*Set dynamic site URL from response */
-                        jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.urls[0]);
+
+                        //Set the Website assessment scan type specific settings.
+                        if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
+                            jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.urls[0]);
+                        }
+
+                        this.setWorkflowDrivenScanSetting();
 
                         /*Set restrict scan value from response to UI */
                         this.setRestrictScan();
@@ -418,6 +428,40 @@ class DynamicScanSettings {
         fields.removeClass('spinner');
     }
 
+    setWorkflowDrivenScanSetting() {
+
+        debugger;
+        //only single file upload is allowed from FOD. Todo Iterate the array
+        if (!Object.is(this.scanSettings.workflowdrivenAssessment, undefined)) {
+            if (!Object.is(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro, undefined)) {
+                this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].allowedHosts.forEach((item, index, arr) => {
+                        console.log(item);
+                        jq('#listStandardScanTypeExcludedUrl').append("<li>" + arr[index] + "</li>")
+                    }
+                )
+
+            }
+
+        }
+
+    }
+
+    setSelectedEntitlementValue(entitlements) {
+        debugger;
+        let currValSelected = false;
+        let curVal = getEntitlementDropdownValue(this.scanSettings.entitlementId, this.scanSettings.entitlementFrequencyType);
+        let entitlement = jq('#entitlementSelectList');
+        for (let ts of Object.keys(entitlements)) {
+            let at = this.entp[ts];
+            if (curVal !== undefined && curVal.toLowerCase() === at.value.toLowerCase()) {
+                currValSelected = true;
+                entitlement.append(`<option value="${at.text}" selected>${at.text}</option>`);
+            } else {
+                entitlement.append(`<option value="${at.text}">${at.text}</option>`);
+            }
+        }
+    }
+
     setPatchUploadFileId() {
         debugger;
         if (!Object.is(this.scanSettings.loginMacroFileId, null) &&
@@ -434,10 +478,15 @@ class DynamicScanSettings {
 
     setNetworkSettings() {
         if (!Object.is(this.scanSettings.networkAuthenticationSettings, null)
-         && !Object.is(this.scanSettings.networkAuthenticationSettings, undefined)) {
+            && !Object.is(this.scanSettings.networkAuthenticationSettings, undefined)) {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
             jq('#networkPasswordRow').find('input').val(this.scanSettings.networkAuthenticationSettings.password);
+
             jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
+
+            let np  = jq('#networkPasswordRow').find('input');
+            np.attr('type','password');
+
         }
     }
 
@@ -452,8 +501,7 @@ class DynamicScanSettings {
                 selectedScanType = dastScanTypes.find(v => v.value === "Workflow-driven")
             }
             // Check for API Type
-
-
+            debugger;
             //Set other scan type values in the dropdown.
             let scanSel = jq('#scanTypeList');
             let currValSelected = false;
@@ -462,7 +510,7 @@ class DynamicScanSettings {
 
             for (let s of Object.keys(dastScanTypes)) {
                 let at = dastScanTypes[s];
-                if (selectedScanType!==undefined && (selectedScanType.value.toLowerCase() === at.text.toLowerCase())) {
+                if (selectedScanType !== undefined && (selectedScanType.value.toLowerCase() === at.text.toLowerCase())) {
                     currValSelected = true;
                     scanSel.append(`<option value="${at.value}" selected>${at.text}</option>`);
                 } else {
@@ -509,9 +557,8 @@ class DynamicScanSettings {
 
         let networkAuthTypeSel = jq('#ddlNetworkAuthType');
         let currVal;
-        if(this.scanSettings.networkAuthenticationSettings !== undefined &&
-            this.scanSettings.networkAuthenticationSettings.networkAuthenticationType !==null)
-        {
+        if (this.scanSettings.networkAuthenticationSettings !== undefined &&
+            this.scanSettings.networkAuthenticationSettings.networkAuthenticationType !== null) {
             currVal = this.scanSettings.networkAuthenticationSettings.networkAuthenticationType;
         }
 
@@ -565,9 +612,11 @@ class DynamicScanSettings {
     }
 
     setScanPolicy() {
+
+        debugger;
         if (this.scanSettings !== undefined && this.scanSettings.policy !== null || undefined) {
             let selectedScanType = this.scanSettings.policy
-            let scanPolicySel = jq('#scanTypeList');
+            let scanPolicySel = jq('#dast-standard-scan-policy').find('select');
             let currValSelected = false;
             scanPolicySel.find('option').not(':first').remove();
             scanPolicySel.find('option').first().prop('selected', true);
@@ -598,10 +647,11 @@ class DynamicScanSettings {
             }
         );
     }
-    onNetworkAuthTypeChanged()
-    {
 
+    onNetworkAuthTypeChanged() {
+        // ToDo
     }
+
     onWorkflowMacroFileUpload() {
         debugger;
         let workFlowMacroFile = document.getElementById('workflowMacroFile').files[0];
@@ -610,7 +660,7 @@ class DynamicScanSettings {
                 debugger;
                 //Todo: - check
                 console.log("File upload success " + res);
-                if (res.fileId[0] > 0) {
+                if (res.fileId > 0) {
                     jq('#workflowMacroId').val(res.fileId)
                 } else {
                     throw new Exception("Illegal argument exception,FileId not valid");
@@ -637,6 +687,16 @@ class DynamicScanSettings {
 
             }
         );
+    }
+
+    hostIterator(item, index, arr) {
+        let hosts;
+        if (arr !== null || arr !== undefined) {
+            if (hosts !== null && hosts !== undefined)
+                hosts = hosts + "," + arr[index];
+            else
+                hosts = arr[index];
+        }
     }
 
     onExcludeUrlBtnClick(event, args) {

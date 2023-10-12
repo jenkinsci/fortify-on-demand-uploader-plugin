@@ -10,30 +10,32 @@ package org.jenkinsci.plugins.fodupload.models;
 }
  */
 public class StartDynamicScanReqModel {
-    public void setAssessmentTypeId(int assessmentTypeId) {
-        this.assessmentTypeId = assessmentTypeId;
-    }
 
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
-
-    public void setEntitlementFrequencyType(String entitlementFrequencyType) {
-        this.entitlementFrequencyType = entitlementFrequencyType;
-    }
-
-    int assessmentTypeId;
-
-    public void setEntitlementId(int entitlementId) {
-        this.entitlementId = entitlementId;
-    }
-
-    int entitlementId;
-
-    String startDate;
-
-    String entitlementFrequencyType;
-
-    public void setRemediationScan(boolean remediationScan) {
-    }
+    public int releaseId;
+//    public void setAssessmentTypeId(int assessmentTypeId) {
+//        this.assessmentTypeId = assessmentTypeId;
+//    }
+//
+//    public void setStartDate(String startDate) {
+//        this.startDate = startDate;
+//    }
+//
+//    public void setEntitlementFrequencyType(String entitlementFrequencyType) {
+//        this.entitlementFrequencyType = entitlementFrequencyType;
+//    }
+//
+//    int assessmentTypeId;
+//
+//    public void setEntitlementId(int entitlementId) {
+//        this.entitlementId = entitlementId;
+//    }
+//
+//    int entitlementId;
+//
+//    String startDate;
+//
+//    String entitlementFrequencyType;
+//
+//    public void setRemediationScan(boolean remediationScan) {
+//    }
 }

@@ -9,14 +9,15 @@ import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.*;
-import org.jenkinsci.plugins.fodupload.models.response.DastScanGetResponse.GetDastAutomatedScanSetupResponse;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.GetDastAutomatedScanSetupResponse;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.PostDastStartScanResponse;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDynamicScanSetupResponse;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
-import java.util.Objects;
 
 import static org.jenkinsci.plugins.fodupload.Config.FodConfig.FodDastApiConstants.DastWebSiteScanPutApi;
 import static org.jenkinsci.plugins.fodupload.Config.FodConfig.FodDastApiConstants.DastWorkflowScanPutApi;
@@ -171,30 +172,25 @@ public class DynamicScanController extends ControllerBase {
 
     }
 
-    public StartDynamicScanResponse StartDynamicScan(Integer releaseId, final StartDynamicScanReqModel uploadRequest) throws IOException {
-
-        String requestContent = Json.getInstance().toJson(uploadRequest);
-        System.out.println(requestContent);
+    public PostDastStartScanResponse StartDynamicScan(Integer releaseId) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodConfig.FodDastApiConstants.DastStartScanAPi, releaseId));
-
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
-                .put(RequestBody.create(MediaType.parse("application/json"), requestContent))
+                .post(RequestBody.create(MediaType.parse("application/json"),""))
                 .build();
 
         ResponseContent response = apiConnection.request(request);
-
         if (response.code() < 300) {
 
             System.out.println("response code: " + response.code());
-            return apiConnection.parseResponse(response, new TypeToken<StartDynamicScanResponse>() {
+            return apiConnection.parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
             }.getType());
 
         } else {
-            String rawBody = apiConnection.parseResponse(response, new TypeToken<StartDynamicScanResponse>() {
+            String rawBody = apiConnection.parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
             }.getType());
 
             List<String> errors = Utils.unexpectedServerResponseErrors();
@@ -202,7 +198,7 @@ public class DynamicScanController extends ControllerBase {
             if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
             else errors.add("API empty response");
 
-            return new StartDynamicScanResponse(false, errors,rawBody);
+            return new PostDastStartScanResponse();
         }
 
     }
@@ -214,28 +210,9 @@ public class DynamicScanController extends ControllerBase {
         System.out.println("retrieve dynamic scan settings....");
 
         Request request = new Request.Builder().url(urlBuilder.build()).addHeader("Accept", "application/json").addHeader("CorrelationId", getCorrelationId()).get().build();
-
         return apiConnection.requestTyped(request, new TypeToken<GetDastAutomatedScanSetupResponse>() {
         }.getType());
     }
 
-//    public GetDynamicScanSetupResponse getDynamicScanSettings(final Integer releaseId) throws IOException {
-//
-//        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
-//                .addPathSegments(String.format("/api/v3/releases/%d/dynamic-scans/dast-automated-scans/scan-setup", releaseId));
-//
-//        String url = urlBuilder.build().toString();
-//        System.out.println("retrieve dynamic scan settings....");
-//
-//        Request request = new Request.Builder()
-//                .url(urlBuilder.build())
-//                .addHeader("Accept", "application/json")
-//                .addHeader("CorrelationId", getCorrelationId())
-//                .get()
-//                .build();
-//
-//        return apiConnection.requestTyped(request, new TypeToken<GetDynamicScanSetupResponse>() {
-//        }.getType());
-//    }
 
 }

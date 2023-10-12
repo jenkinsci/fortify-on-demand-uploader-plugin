@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.fodupload.models.response.DastScanGetResponse;
+package org.jenkinsci.plugins.fodupload.models.response.Dast;
 
 public class GraphQl {
     public String Url;

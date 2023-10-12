@@ -11,12 +11,11 @@ import jenkins.model.GlobalConfiguration;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.controllers.DynamicScanController;
 import org.jenkinsci.plugins.fodupload.models.*;
-import org.jenkinsci.plugins.fodupload.models.response.PutDynamicScanSetupResponse;
-import org.jenkinsci.plugins.fodupload.models.response.StartDynamicScanResponse;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDynamicScanSetupResponse;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.PostDastStartScanResponse;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -154,7 +153,7 @@ public class DynamicScanSharedBuildStep {
                     dynamicScanSetupReqModel);
 
             //ToDo: - Align with response format from Fod API - response been set null when parsing the json content.
-            if (response == null || response.isSuccess()) {
+            if (response.getErrors() == null && !response.getErrors().isEmpty()) {
                 System.out.println("Successfully saved settings for release id = " + releaseId);
 
             } else {
@@ -209,7 +208,7 @@ public class DynamicScanSharedBuildStep {
                 dastWorkflowScanSetupReqModel.workflowDrivenMacro = new ArrayList<>();
                 WorkflowDrivenMacro wrkDrivenMacro = new WorkflowDrivenMacro();
                 wrkDrivenMacro.fileId = Integer.parseInt(workflowMacroId);
-                wrkDrivenMacro.allowedHosts=workflowMacroHosts.split(",");
+                wrkDrivenMacro.allowedHosts = workflowMacroHosts.split(",");
                 dastWorkflowScanSetupReqModel.workflowDrivenMacro.add(wrkDrivenMacro);
             }
             if (!Objects.equals(loginMacroId, "") && loginMacroId != null && requireLoginMacroAuth) {
@@ -218,11 +217,6 @@ public class DynamicScanSharedBuildStep {
             dastWorkflowScanSetupReqModel.setPolicy(scanPolicy);
             dastWorkflowScanSetupReqModel.setScanType(scanType);
             dastWorkflowScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
-
-//            if (requireLoginMacroAuth && (!Objects.equals(loginMacroId, "") && loginMacroId != null))
-//                if (Integer.parseInt(loginMacroId) != 0) {
-//                    dastWorkflowScanSetupReqModel.setRequiresSiteAuthentication(true);
-//                }
 
             if (requireNetworkAuth) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings();
@@ -239,9 +233,6 @@ public class DynamicScanSharedBuildStep {
             dastWorkflowScanSetupReqModel.setAllowFormSubmissions(allowFrmSubmission);
             dastWorkflowScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
 
-            //If restrictDirectories ==false it points to "Scan entire host"
-            //if true it points to restrict to sub-folders in host because of Jelly:booleanRadioButton.
-            //Don't run refactoring to simplify this.
             if (!restrictDirectories)
                 dastWorkflowScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(false);
             else
@@ -251,7 +242,7 @@ public class DynamicScanSharedBuildStep {
                     dastWorkflowScanSetupReqModel);
 
             //ToDo: - Align with response format from Fod API - response been set null when parsing the json content.
-            if (response == null || response.isSuccess()) {
+            if (response.getErrors() == null && !response.getErrors().isEmpty()) {
                 System.out.println("Successfully saved settings for release id = " + releaseId);
 
             } else {
@@ -261,7 +252,7 @@ public class DynamicScanSharedBuildStep {
 //                    //String errs = response.getErrors().stream().map(s -> s.replace("\n", "\n\t\t")).collect(Collectors.joining("\n\t"));
 //                    throw new Exception("Failed to save scan settings for release id: " + releaseId + "err: " + errs);
 //                } else
-                throw new Exception("Failed to save scan settings for release id: " + releaseId);
+                throw new Exception(String.format("Failed to save scan settings for release id %d",releaseId));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to save scan settings for release id = " + releaseId, e);
@@ -310,6 +301,7 @@ public class DynamicScanSharedBuildStep {
             }
             logger.println("Correlation Id = " + correlationId);
 
+            //reset model here to pick from scan settings.
             Integer releaseId = Integer.parseInt(model.get_releaseId());
 
             try {
@@ -318,32 +310,16 @@ public class DynamicScanSharedBuildStep {
                 build.setResult(Result.FAILURE);
                 throw new RuntimeException(e);
             }
-
-            StartDynamicScanReqModel startDynamicScanReqModel = new StartDynamicScanReqModel();
-
-            startDynamicScanReqModel.setRemediationScan(model.isEnableRedundantPageDetection());
-            startDynamicScanReqModel.setStartDate("2023-09-19T15:38:33.828Z");
-            startDynamicScanReqModel.setEntitlementId(Integer.parseInt(model.getEntitlementId()));
-            startDynamicScanReqModel.setAssessmentTypeId(Integer.parseInt(model.getAssessmentTypeId()));
-            startDynamicScanReqModel.setEntitlementFrequencyType(model.getEntitlementFrequencyType());
-
             DynamicScanController dynamicController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
-            StartDynamicScanResponse response = dynamicController.StartDynamicScan(releaseId, startDynamicScanReqModel);
+            PostDastStartScanResponse response = dynamicController.StartDynamicScan(releaseId);
 
-            if (response.isSuccess()) {
+            if (response.getErrors() == null && response.getScanId() > 0) {
                 build.setResult(Result.SUCCESS);
+                build.setDescription(String.format("Successfully triggered Dynamic scan for scan id %d", response.getScanId()));
             } else {
                 build.setResult(Result.FAILURE);
+                build.setDescription(String.format("Failed to trigger Dynamic scan for release id %d", releaseId));
             }
-//            if (!model.getIsPipeline() && releaseId == 0 && !model.loadBsiToken()) {
-//                build.setResult(Result.FAILURE);
-//                logger.println("Invalid release ID or BSI Token");
-//                return;
-//            }
-//
-//            if (releaseId > 0 && model.loadBsiToken()) {
-//                logger.println("Warning: The BSI Token will be ignored since Release ID was entered.");
-//            }
 
 
         } catch (IOException e) {

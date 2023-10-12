@@ -42,7 +42,7 @@
             <!-- Dynamic Scan Environment -->
             <f:entry>
                 <div class="dast-scan-setting dast-standard-scan" id="dast-scan-setting-evn">
-                    <f:entry title="Environment Facing">
+                    <f:entry title="Environment Facing" >
                         <f:select field="dastEnv"/>
                     </f:entry>
                 </div>
@@ -76,6 +76,7 @@
     </f:section>
     <!-- Scope Settings -->
     <f:section title="Scope">
+
         <!-- workflow scan !-->
         <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
             <div id="dast-workflow-macro-upload" class="dast-scan-setting dast-workflow-scan">
@@ -83,12 +84,18 @@
                     <input id="workflowMacroFile" type="File" name="workflowMacroFile"/>
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
                     <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>
-                    <input type="label" value="" name="workflowMacroHosts" id="workflowMacroHosts"/>
+                    <input type="label" value="" hidden="true" name="workflowMacroHosts" id="workflowMacroHosts"/>
                 </span>
             </div>
         </f:entry>
+        <f:entry title="Allowed Hosts">
+            <ul id="listStandardScanTypeExcludedUrl" name="lisWorkflowDrivenAllowedHostUrl">
+            </ul>
+        </f:entry>
+        <!--End Workflow Driven-->
+
         <f:entry title="Dynamic Site URL">
-            <div id="dast-standard-site-url" class="dast-scan-setting dast-standard-scan">
+            <div id="dast-standard-site-url" class="dast-standard-scan">
                 <f:textbox field="webSiteUrl" name="webSiteUrl"/>
             </div>
         </f:entry>
@@ -102,7 +109,8 @@
                 </f:radio>
             </div>
 
-            <div id="dast-standard-scan-scope-attribute" class="dast-scan-setting dast-standard-scan dast-workflow-scan">
+            <div id="dast-standard-scan-scope-attribute"
+                 class="dast-scan-setting dast-standard-scan dast-workflow-scan">
 
                 <f:checkbox title="Allow HTTP(:80) and HTTPS (:443)" field="allowHttp" id="allowHttp">
                 </f:checkbox>
@@ -144,13 +152,15 @@
 
     <f:section title="Authentication">
         <f:entry>
-            <div class="dast-scan-setting dast-standard-scan dast-workflow-scan" id="webSiteNetworkAuthSettingEnabledRow">
+            <div class="dast-scan-setting dast-standard-scan dast-workflow-scan"
+                 id="webSiteNetworkAuthSettingEnabledRow">
                 <f:optionalBlock name="webSiteNetworkAuthSettingEnabled" field="webSiteNetworkAuthSettingEnabled"
                                  title="Network Authentication Required"
                                  checked="${instance.webSiteNetworkAuthSettingEnabled}" inline="true">
 
                     <f:entry title="Network Authentication Type">
-                        <div id="ddlNetworkAuthTypeRow" class="fode-field spinner-container dast-scan-setting dast-workflow-scan">
+                        <div id="ddlNetworkAuthTypeRow"
+                             class="fode-field spinner-container dast-scan-setting dast-workflow-scan">
                             <div class="fode-edit jenkins-select">
                                 <select name="selectedNetworkAuthType" id="ddlNetworkAuthType"
                                         class="jenkins-select__input">

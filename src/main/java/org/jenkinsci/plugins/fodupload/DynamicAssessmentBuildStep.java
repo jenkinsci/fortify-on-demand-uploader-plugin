@@ -102,14 +102,11 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        //Reconstruct the model from get settings,
-        //Save the settings in Jenkins Config.xml file.
 
         if (dynamicSharedUploadBuildStep.getModel() == null) {
             System.out.println("job model is null");
             throw new IllegalArgumentException("DAST model not been set");
         }
-
         return true;
     }
 
@@ -298,13 +295,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 //            return result;
 //        }
 
-        //        public static EntitlementSettings customFillEntitlementSettings(int releaseId, AuthenticationModel authModel) throws IOException {
-//            return new EntitlementSettings(
-//                    1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
-//                    1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
-//                    1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
-//                    1, 1, false);
-//        }
+
         @SuppressWarnings("unused")
         @JavaScriptMethod
         public PatchDastFileUploadResponse patchSetupManifestFile(String releaseId, JSONObject authModelObject, String fileContent, String fileType) throws FormValidation {
@@ -409,8 +400,8 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 DynamicScanController dynamicScanController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
-                String result = Utils.createResponseViewModel(dynamicScanController.getDynamicScanSettings(releaseId));
-                return result;
+                return Utils.createResponseViewModel(dynamicScanController.getDynamicScanSettings(releaseId));
+
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;

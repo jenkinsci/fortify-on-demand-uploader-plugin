@@ -11,8 +11,7 @@ public class FodConfig {
         public static String DastApiScanPutApi = "api/v3/releases/%d/dast-automated-scans/api-scan-setup";
         public static String DastWorkflowScanPutApi = "api/v3/releases/%d/dast-automated-scans/workflow-scan-setup";
         public static String DastFileUploadPatchApi = "api/v3/releases/%d/dast-automated-scans/scan-setup/file-upload";
-        public static  String DastStartScanAPi ="/api/v3/releases/%d/dynamic-scans/dast-automated-scans/scan-setup";
-
+        public static  String DastStartScanAPi ="/api/v3/releases/%d/dast-automated-scans/start-scan";
 
     }
 
