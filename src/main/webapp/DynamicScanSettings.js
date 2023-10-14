@@ -1,7 +1,7 @@
 const fodeRowSelector = '.fode-field-row, .fode-field-row-verr';
-const fodStandardScanTypeClassIdr = ".dast-standard-scan";
-const fodApiScanTypeClassIdr = ".dast-api-scan";
-const fodWorkflowScanTypeClassIdr = ".dast-workflow-scan";
+const fodStandardScanTypeClassIdr = "dast-standard-scan";
+const fodApiScanTypeClassIdr = "dast-api-scan";
+const fodWorkflowScanTypeClassIdr = "dast-workflow-scan";
 const dastManifestWorkflowMacroFileUpload = "WorkflowDrivenMacro";
 const dastManifestLoginFileUpload = "LoginMacro";
 
@@ -60,6 +60,7 @@ class DynamicScanSettings {
             switch (scanType) {
                 case "Standard": {
                     this.standardScanSettingsVisibility(isVisible);
+                    this.workflowScanSettingVisibility(false);
                     this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
                     break;
                 }
@@ -69,7 +70,7 @@ class DynamicScanSettings {
                 }
                 case "Workflow-driven":
                     this.workflowScanSettingVisibility(isVisible);
-                     this.standardScanSettingsVisibility(false);
+                    this.standardScanSettingsVisibility(false);
                     this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-workflow-scan-policy")
                     break;
                 default:
@@ -127,12 +128,14 @@ class DynamicScanSettings {
 
     workflowScanSettingVisibility(isVisible) {
         debugger;
+
         jq('.dast-workflow-scan').each((iterator, element) => {
             let currentElement = jq(element);
             let tr = closestRow(currentElement);
             tr.addClass(fodWorkflowScanTypeClassIdr);
         });
         let workflowScanSettingRows = jq('.dast-workflow-scan');
+
         if ((isVisible === undefined || null) || isVisible === false) {
             workflowScanSettingRows.hide();
         } else {
@@ -285,7 +288,7 @@ class DynamicScanSettings {
         rows.hide();
         this.hideMessages();
 
-        if (releaseChangedPayload && releaseChangedPayload.mode === DastReleaseSetMode.bsiToken) {
+        if (releaseChangedPayload && releaseChangedPayload.mode === ReleaseSetMode.bsiToken) {
             this.isBsi = true;
             jq('.fode-row-bsi').show();
             jq('.fode-row-remediation').show();
@@ -436,7 +439,7 @@ class DynamicScanSettings {
             if (!Object.is(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro, undefined)) {
                 this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].allowedHosts.forEach((item, index, arr) => {
                         console.log(item);
-                        jq('#listStandardScanTypeExcludedUrl').append("<li>" + arr[index] + "</li>")
+                        jq('#lisWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'>" + arr[index] + "</li>")
                     }
                 )
 
@@ -587,6 +590,7 @@ class DynamicScanSettings {
             this.scanTypeUserControlVisibility(null, false);
         } else {
             debugger;
+            this.scanTypeUserControlVisibility(null, false);
             this.scanTypeUserControlVisibility(selectedScanTypeValue, true);
         }
     }
@@ -704,7 +708,7 @@ class DynamicScanSettings {
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
         //Add to exclude list
         jq('#listStandardScanTypeExcludedUrl');
-        jq('#listStandardScanTypeExcludedUrl').append("<li>" + excludedUrl + "</li>");
+        jq('#listStandardScanTypeExcludedUrl').append("<li>" +  excludedUrl + "</li>");
         jq('#listStandardScanTypeExcludedUrl').show();
     }
 

@@ -61,16 +61,16 @@
             </f:entry>
 
             <!-- GeoLocation Stack -->
-            <f:entry title="Geo Location">
-                <div id="geoLocationStack" class="fode-field spinner-container dast-scan-setting">
-                    <div class="fode-edit jenkins-select">
-                        <select name="selectedDynamicGeoLocation" id="geoLocationStackSelectList"
-                                class="jenkins-select__input">
-                            <option value="-1">Select a GeoLocation Stack</option>
-                        </select>
-                    </div>
-                </div>
-            </f:entry>
+<!--            <f:entry title="Geo Location">-->
+<!--                <div id="geoLocationStack" class="fode-field spinner-container dast-scan-setting">-->
+<!--                    <div class="fode-edit jenkins-select">-->
+<!--                        <select name="selectedDynamicGeoLocation" id="geoLocationStackSelectList"-->
+<!--                                class="jenkins-select__input">-->
+<!--                            <option value="-1">Select a GeoLocation Stack</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </f:entry>-->
 
         </f:block>
     </f:section>
@@ -81,7 +81,7 @@
         <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
             <div id="dast-workflow-macro-upload" class="dast-scan-setting dast-workflow-scan">
                 <span>
-                    <input id="workflowMacroFile" type="File" name="workflowMacroFile"/>
+                    <input accept=".har,.webmacro,.brup" id="workflowMacroFile"  type="File" name="workflowMacroFile" />
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
                     <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>
                     <input type="label" value="" hidden="true" name="workflowMacroHosts" id="workflowMacroHosts"/>
@@ -89,7 +89,7 @@
             </div>
         </f:entry>
         <f:entry title="Allowed Hosts">
-            <ul id="listStandardScanTypeExcludedUrl" name="lisWorkflowDrivenAllowedHostUrl">
+            <ul id="lisWorkflowDrivenAllowedHostUrl" name="lisWorkflowDrivenAllowedHostUrl" class="dast-workflow-scan">
             </ul>
         </f:entry>
         <!--End Workflow Driven-->
@@ -152,7 +152,7 @@
 
     <f:section title="Authentication">
         <f:entry>
-            <div class="dast-scan-setting dast-standard-scan dast-workflow-scan"
+            <div class="dast-scan-setting"
                  id="webSiteNetworkAuthSettingEnabledRow">
                 <f:optionalBlock name="webSiteNetworkAuthSettingEnabled" field="webSiteNetworkAuthSettingEnabled"
                                  title="Network Authentication Required"
@@ -160,7 +160,7 @@
 
                     <f:entry title="Network Authentication Type">
                         <div id="ddlNetworkAuthTypeRow"
-                             class="fode-field spinner-container dast-scan-setting dast-workflow-scan">
+                             class="fode-field spinner-container dast-scan-setting dast-standard-scan dast-workflow-scan">
                             <div class="fode-edit jenkins-select">
                                 <select name="selectedNetworkAuthType" id="ddlNetworkAuthType"
                                         class="jenkins-select__input">
@@ -186,14 +186,14 @@
         </f:entry>
 
         <f:entry>
-            <div class="dast-scan-setting dast-standard-scan dast-workflow-scan">
+            <div class="dast-standard-scan">
                 <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
                                  title="Login Macro"
                                  checked="${instance.webSiteLoginMacroEnabled}" inline="true">
                     <f:entry
                             title="Please upload the login macro file. Supported extensions: *.har, *.webmacro, *.burp">
                         <span>
-                            <input id="loginFileMacro" type="File" name="loginFileMacro"/>
+                            <input accept=".har,.webmacro,.brup" id="loginFileMacro" type="File" name="loginFileMacro"/>
                             <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
                             <input type="label" hidden="true" value="" name="loginMacroId" id="loginMacroId"/>
 
