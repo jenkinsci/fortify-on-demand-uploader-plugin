@@ -41,7 +41,7 @@
 
         .btn-add-exclude-url
         {
-          margin: 5px;
+        margin: 5px;
         }
         .flex-item {
         margin: 10px;
@@ -68,10 +68,17 @@
     <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/ScanSettings.jelly"
                 class="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"/>
 
+    <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/CreateApplicationForm.jelly"
+                class="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"/>
+
+    <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/CreateReleaseForm.jelly"
+                class="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"/>
+
+
     <!-- Script Section -->
     <script>
         function loadJs() {
-             // Reload all the script again. instead of windows.location.reload.
+            // Reload all the script again. instead of windows.location.reload.
 
         }
 
