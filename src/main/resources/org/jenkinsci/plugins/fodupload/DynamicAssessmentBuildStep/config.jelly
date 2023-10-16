@@ -87,8 +87,8 @@
         <st:bind value="${instance}"/>
     </script>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DynamicScanAppAndReleaseSelection.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DynamicScanApplicationCreationDialog.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelection.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreationDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreationDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelectionDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DynamicScanSettings.js"/>

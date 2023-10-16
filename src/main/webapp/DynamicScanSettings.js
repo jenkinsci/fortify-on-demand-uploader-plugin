@@ -56,11 +56,17 @@ class DynamicScanSettings {
 
     scanTypeUserControlVisibility(scanType, isVisible) {
         debugger;
-        if ((isVisible !== undefined || null) && isVisible === true) {
+        if ((isVisible !== undefined || null)) {
+            this.commonScopeSettingVisibility(false);
+            this.loginMacroSettingsVisibility(false);
+            this.networkAuthSettingVisibility(false);
             switch (scanType) {
+
                 case "Standard": {
-                    this.standardScanSettingsVisibility(isVisible);
+                    this.websiteScanSettingsVisibility(isVisible);
                     this.workflowScanSettingVisibility(false);
+                    this.commonScopeSettingVisibility(isVisible);
+                    this.loginMacroSettingsVisibility(isVisible);
                     this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
                     break;
                 }
@@ -70,12 +76,15 @@ class DynamicScanSettings {
                 }
                 case "Workflow-driven":
                     this.workflowScanSettingVisibility(isVisible);
-                    this.standardScanSettingsVisibility(false);
+                    this.websiteScanSettingsVisibility(false);
+                    this.commonScopeSettingVisibility(isVisible);
+                    this.loginMacroSettingsVisibility(false);
+                    this.networkAuthSettingVisibility(isVisible);
                     this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-workflow-scan-policy")
                     break;
                 default:
                     //hide all scan type settings.
-                    this.standardScanSettingsVisibility(false);
+                    this.websiteScanSettingsVisibility(false);
                     this.apiScanSettingVisibility(false);
                     this.workflowScanSettingVisibility(false);
                     break;
@@ -83,18 +92,47 @@ class DynamicScanSettings {
         }
     }
 
-    standardScanSettingsVisibility(isVisible) {
+    loginMacroSettingsVisibility(isVisible)
+    {
+        let loginMacroSetting = jq('.'+ loginAuthSetting);
+        if ((isVisible === undefined || null) || isVisible === false) {
+            loginMacroSetting.hide();
+        } else {
+            loginMacroSetting.show();
+        }
+    }
+    networkAuthSettingVisibility(isVisible)
+    {
+        let networkAuth = jq('.'+ nwAuthSetting);
+        if ((isVisible === undefined || null) || isVisible === false) {
+            networkAuth.hide();
+        } else {
+            networkAuth.show();
+        }
+    }
 
-        jq('.dast-standard-scan').each((iterator, element) => {
-            let currentElement = jq(element);
-            let tr = closestRow(currentElement);
-            tr.addClass('dast-standard-scan');
-        });
-        let standardScanSettingRows = jq('.dast-standard-scan');
+    websiteScanSettingsVisibility(isVisible) {
+
+        // jq('.'+dastWebSiteSetting').each((iterator, element) => {
+        //     let currentElement = jq(element);
+        //     let tr = closestRow(currentElement);
+        //     tr.addClass('dast-standard-scan');
+        // });
+        let standardScanSettingRows = jq('.'+dastWebSiteSetting);
         if ((isVisible === undefined || null) || isVisible === false) {
             standardScanSettingRows.hide();
         } else {
             standardScanSettingRows.show();
+        }
+    }
+
+    commonScopeSettingVisibility(isVisible)
+    {
+        let commonScopeRows = jq('.'+ dastCommonScopeSetting);
+        if ((isVisible === undefined || null) || isVisible === false) {
+            commonScopeRows.hide();
+        } else {
+            commonScopeRows.show();
         }
     }
 
@@ -129,12 +167,12 @@ class DynamicScanSettings {
     workflowScanSettingVisibility(isVisible) {
         debugger;
 
-        jq('.dast-workflow-scan').each((iterator, element) => {
-            let currentElement = jq(element);
-            let tr = closestRow(currentElement);
-            tr.addClass(fodWorkflowScanTypeClassIdr);
-        });
-        let workflowScanSettingRows = jq('.dast-workflow-scan');
+        // jq('.dast-workflow-scan').each((iterator, element) => {
+        //     let currentElement = jq(element);
+        //     let tr = closestRow(currentElement);
+        //     tr.addClass(fodWorkflowScanTypeClassIdr);
+        // });
+        let workflowScanSettingRows = jq('.'+ dastWorkFlowSetting);
 
         if ((isVisible === undefined || null) || isVisible === false) {
             workflowScanSettingRows.hide();
@@ -146,12 +184,12 @@ class DynamicScanSettings {
     scanSettingsVisibility(isVisible) {
 
         if ((isVisible === undefined || null) || isVisible === false) {
-            jq('.dast-scan-setting').each((iterator, element) => {
-                let currentElement = jq(element);
-                let tr = closestRow(currentElement);
-                tr.addClass('dast-scan-setting');
-            });
-            let scanSettingsRows = jq('.dast-scan-setting');
+            // jq('.dast-scan-setting').each((iterator, element) => {
+            //     // let currentElement = jq(element);
+            //     // let tr = closestRow(currentElement);
+            //     // tr.addClass('dast-scan-setting');
+            // });
+            let scanSettingsRows = jq('.'+ dastWebSiteSetting);
 
             scanSettingsRows.hide();
         } else {
@@ -294,7 +332,7 @@ class DynamicScanSettings {
             jq('.fode-row-remediation').show();
             return;
         }
-
+debugger;
         let releaseId = releaseChangedPayload ? releaseChangedPayload.releaseId : null;
         let fields = jq('.fode-field.spinner-container');
 
@@ -347,6 +385,7 @@ class DynamicScanSettings {
                 .then(async () => {
 
                     console.log("success");
+                    this.scanTypeUserControlVisibility(null, false);
 
                     if (this.scanSettings && this.assessments) {
                         let assessmentId = this.scanSettings.assessmentTypeId;
@@ -425,7 +464,7 @@ class DynamicScanSettings {
 
         } else {
             await this.onAssessmentChanged(false);
-            if (releaseChangedPayload.mode === DastReleaseSetMode.releaseSelect) this.showMessage('Select a release'); else this.showMessage('Enter a release id');
+            if (releaseChangedPayload.mode === ReleaseSetMode.releaseSelect) this.showMessage('Select a release'); else this.showMessage('Enter a release id');
         }
 
         fields.removeClass('spinner');
@@ -456,7 +495,7 @@ class DynamicScanSettings {
         let entitlement = jq('#entitlementSelectList');
         for (let ts of Object.keys(entitlements)) {
             let at = this.entp[ts];
-            if (curVal !== undefined && curVal.toLowerCase() === at.value.toLowerCase()) {
+            if (curVal !== undefined && at.value!==undefined && curVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
                 entitlement.append(`<option value="${at.text}" selected>${at.text}</option>`);
             } else {
@@ -513,7 +552,8 @@ class DynamicScanSettings {
 
             for (let s of Object.keys(dastScanTypes)) {
                 let at = dastScanTypes[s];
-                if (selectedScanType !== undefined && (selectedScanType.value.toLowerCase() === at.text.toLowerCase())) {
+                if (selectedScanType !== undefined
+                    &&  at.text !==undefined &&(selectedScanType.value.toLowerCase() === at.text.toLowerCase())) {
                     currValSelected = true;
                     scanSel.append(`<option value="${at.value}" selected>${at.text}</option>`);
                 } else {
@@ -534,7 +574,7 @@ class DynamicScanSettings {
         tsSel.find('option').first().prop('selected', true);
         for (let ts of Object.keys(this.timeZones)) {
             let at = this.timeZones[ts];
-            if (currVal.toLowerCase() === at.value.toLowerCase()) {
+            if (currVal !==undefined  && at.value !== undefined && currVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
                 tsSel.append(`<option value="${at.value}" selected>${at.text}</option>`);
             } else {
@@ -571,7 +611,7 @@ class DynamicScanSettings {
 
         for (let ts of Object.keys(this.networkAuthTypes)) {
             let at = this.networkAuthTypes[ts];
-            if (currVal !== undefined && currVal.toLowerCase() === at.value.toLowerCase()) {
+            if (currVal !== undefined && at.value!==undefined && currVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
                 networkAuthTypeSel.append(`<option value="${at.text}" selected>${at.text}</option>`);
             } else {
@@ -627,7 +667,7 @@ class DynamicScanSettings {
 
             for (let s of Object.keys(dastScanTypes)) {
                 let at = dastScanTypes[s];
-                if (selectedScanType.toLowerCase() === at.text.toLowerCase()) {
+                if ( at.text !==undefined && selectedScanType !== undefined && selectedScanType.toLowerCase() === at.text.toLowerCase()) {
                     currValSelected = true;
                     scanPolicySel.append(`<option value="${at.value}" selected>${at.text}</option>`);
                 } else {

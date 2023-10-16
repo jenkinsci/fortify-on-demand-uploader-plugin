@@ -227,12 +227,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             return "Fortify on Demand Dynamic Assessment";
         }
 
-        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-        @POST
-        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter("username") String username, @QueryParameter("tenantId") String tenantId, @QueryParameter("personalAccessToken") String personalAccessToken, @AncestorInPath Job job) throws FormValidation {
-            job.checkPermission(Item.CONFIGURE);
-            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
-        }
+
 
         @SuppressWarnings("unused")
         public ListBoxModel doFillSelectedReleaseTypeItems() {
@@ -408,6 +403,28 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             }
         }
 
+        @JavaScriptMethod
+        public String submitCreateApplication(JSONObject formObject, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedCreateApplicationForm.submitCreateApplication(authModel, formObject));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @JavaScriptMethod
+        public String submitCreateRelease(JSONObject formObject, JSONObject authModelObject) {
+            try {
+                AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
+                return Utils.createResponseViewModel(SharedCreateApplicationForm.submitCreateRelease(authModel, formObject));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
         @SuppressWarnings("unused")
         @JavaScriptMethod
         public String retrieveApplicationList(String searchTerm, int offset, int limit, JSONObject authModelObject) {
@@ -432,31 +449,16 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             }
         }
 
-
-//        @POST
-//        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter("username") String username, @QueryParameter("tenantId") String tenantId, @QueryParameter("personalAccessToken") String personalAccessToken, @AncestorInPath Job job) throws IOException {
-//
-//            job.checkPermission(Item.CONFIGURE);
-//            System.out.println(username);
-//            FodApiConnection testApi;
-//            String baseUrl = "https://fodtenant";
-//            String apiUrl = "http://fodapi";
-//            testApi = new FodApiConnection(tenantId + "\\" + username, personalAccessToken, baseUrl, apiUrl, "api-tenant");
-//            try {
-//                testApi.authenticate();
-//            }catch (Exception e){
-//                System.out.println(e);
-//            }
-//
-//            String token= testApi.retrieveToken();
-//            System.out.println(token);
-//            if (token == null) {
-//                return FormValidation.error("Unable to retrieve authentication token.");
-//            }
-//            return !token.isEmpty() ?
-//                    FormValidation.ok("Successfully authenticated to Fortify on Demand.") :
-//                    FormValidation.error("Invalid connection information. Please check your credentials and try again.");
-//        }
+        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+        @POST
+        public FormValidation doTestPersonalAccessTokenConnection(@QueryParameter(SharedUploadBuildStep.USERNAME) final String username,
+                                                                  @QueryParameter(SharedUploadBuildStep.PERSONAL_ACCESS_TOKEN) final String personalAccessToken,
+                                                                  @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId,
+                                                                  @AncestorInPath Job job) throws FormValidation {
+            job.checkPermission(Item.CONFIGURE);
+            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
+        }
     }
+
 
 }

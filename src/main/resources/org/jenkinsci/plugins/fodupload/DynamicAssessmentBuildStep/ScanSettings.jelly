@@ -16,7 +16,7 @@
             </f:entry>
 
             <f:entry title="Entitlement" field="userSelectedEntitlement">
-                <div id="dastEntitlementForm" class="fode-field spinner-container dast-scan-setting">
+                <div id="dastEntitlementForm" class="fode-field spinner-container">
                     <div class="fode-edit jenkins-select">
                         <select name="userSelectedEntitlement" id="entitlementSelectList" class="jenkins-select__input">
                             <option value="-1">Select an Entitlement</option>
@@ -27,7 +27,7 @@
 
             <!-- Dynamic Scan Type -->
             <f:entry field="ScanType" title="Scan Type">
-                <div id="dastScanType" class="fode-field spinner-container dast-scan-type">
+                <div id="dastScanType" class="fode-field spinner-container">
                     <div class="fode-edit jenkins-select">
                         <select name="selectedScanType" id="scanTypeList" class="jenkins-select__input">
                             <option value="-1">Select a Scan Type</option>
@@ -41,7 +41,7 @@
 
             <!-- Dynamic Scan Environment -->
             <f:entry>
-                <div class="dast-scan-setting dast-standard-scan" id="dast-scan-setting-evn">
+                <div class="fode-field spinner-container" id="dast-scan-setting-evn">
                     <f:entry title="Environment Facing" >
                         <f:select field="dastEnv"/>
                     </f:entry>
@@ -50,7 +50,7 @@
 
             <!-- TimeZone DropDown -->
             <f:entry title="TimeZone">
-                <div id="timezone" class="fode-field spinner-container dast-scan-setting">
+                <div id="timezone" class="fode-field spinner-container">
                     <div class="fode-edit jenkins-select">
                         <select name="selectedDynamicTimeZone" id="timeZoneStackSelectList"
                                 class="jenkins-select__input">
@@ -79,7 +79,7 @@
 
         <!-- workflow scan !-->
         <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
-            <div id="dast-workflow-macro-upload" class="dast-scan-setting dast-workflow-scan">
+            <div id="dast-workflow-macro-upload" class="fode-field spinner-container">
                 <span>
                     <input accept=".har,.webmacro,.brup" id="workflowMacroFile"  type="File" name="workflowMacroFile" />
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
@@ -89,18 +89,19 @@
             </div>
         </f:entry>
         <f:entry title="Allowed Hosts">
-            <ul id="lisWorkflowDrivenAllowedHostUrl" name="lisWorkflowDrivenAllowedHostUrl" class="dast-workflow-scan">
+            <ul id="lisWorkflowDrivenAllowedHostUrl" name="lisWorkflowDrivenAllowedHostUrl"
+                class="fode-field spinner-container dast-workflow-scan">
             </ul>
         </f:entry>
         <!--End Workflow Driven-->
 
         <f:entry title="Dynamic Site URL">
-            <div id="dast-standard-site-url" class="dast-standard-scan">
+            <div id="dast-standard-site-url" class="fode-field spinner-container">
                 <f:textbox field="webSiteUrl" name="webSiteUrl"/>
             </div>
         </f:entry>
         <f:entry>
-            <div id="dast-standard-scan-scope" class="dast-scan-setting dast-standard-scan dast-workflow-scan">
+            <div id="dast-common-scope" class="fode-field spinner-container">
 
                 <f:radio title="Restrict scan to URL directories and subdirectories" id="restrictScan"
                          name="restrictScan">
@@ -109,8 +110,8 @@
                 </f:radio>
             </div>
 
-            <div id="dast-standard-scan-scope-attribute"
-                 class="dast-scan-setting dast-standard-scan dast-workflow-scan">
+            <div id="dast-common-scope-attr"
+                 class="fode-field spinner-container">
 
                 <f:checkbox title="Allow HTTP(:80) and HTTPS (:443)" field="allowHttp" id="allowHttp">
                 </f:checkbox>
@@ -123,7 +124,7 @@
             </div>
         </f:entry>
         <f:entry title="Exclude URLs" field="listStandardScanTypeExcludedUrl">
-            <div id="standardScanTypeExcludeUrlsRow" class="dast-standard-scan">
+            <div id="standardScanTypeExcludeUrlsRow" class="fode-field spinner-container">
                 <span>
                     <input type="text" id="standardScanExcludedUrlText" class="setting-input dast-standard-scan"
                            placeholder="Exclude URL"/>
@@ -139,12 +140,12 @@
         </f:entry>
 
         <f:entry title="Scan Policy">
-            <div id="dast-standard-scan-policy" class="dast-scan-setting dast-standard-scan dast-workflow-scan">
+            <div id="dast-standard-scan-policy" class="fode-field spinner-container">
                 <f:select field="scanPolicyType"/>
             </div>
         </f:entry>
         <f:entry title="Timebox Scan Duration (Hours)">
-            <div id="dast-standard-time-scan-duration" class="dast-scan-setting dast-standard-scan dast-workflow-scan">
+            <div id="dast-timeBox-scan" >
                 <f:select field="scanTimebox"/>
             </div>
         </f:entry>
@@ -152,7 +153,7 @@
 
     <f:section title="Authentication">
         <f:entry>
-            <div class="dast-scan-setting"
+            <div class="fode-field spinner-container"
                  id="webSiteNetworkAuthSettingEnabledRow">
                 <f:optionalBlock name="webSiteNetworkAuthSettingEnabled" field="webSiteNetworkAuthSettingEnabled"
                                  title="Network Authentication Required"
@@ -186,7 +187,7 @@
         </f:entry>
 
         <f:entry>
-            <div class="dast-standard-scan">
+            <div class="fode-field spinner-container" id="login-macro-row">
                 <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
                                  title="Login Macro"
                                  checked="${instance.webSiteLoginMacroEnabled}" inline="true">
