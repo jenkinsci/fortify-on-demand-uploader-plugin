@@ -88,7 +88,7 @@
                 </span>
             </div>
         </f:entry>
-        <f:entry title="Allowed Hosts">
+        <f:entry title="Allowed Hosts" >
             <ul id="lisWorkflowDrivenAllowedHostUrl" name="lisWorkflowDrivenAllowedHostUrl"
                 class="fode-field spinner-container dast-workflow-scan">
             </ul>
@@ -133,9 +133,9 @@
                            class="btn-add-exclude-url dast-standard-scan"/>
 
                 </span>
-                <ul id="listStandardScanTypeExcludedUrl" name="listStandardScanTypeExcludedUrl"
+                <ol id="listStandardScanTypeExcludedUrl" name="listStandardScanTypeExcludedUrl"
                     class="dast-standard-scan">
-                </ul>
+                </ol>
             </div>
         </f:entry>
 

@@ -12,7 +12,7 @@ const dastScanTypes = [{"value": 'Standard', "text": 'Standard'}, {
     "text": 'Workflow-driven'
 },
     {"value": 2, "text": 'API'}]
-const dastScanSelectDEfaultValues =
+const dastScanSelectDefaultValues =
     {
         "WebSiteScan": {"ScanPolicy": "standard"},
         "WorkflowDrivenScan": {"ScanPolicy": "standard"},
@@ -140,10 +140,10 @@ class DynamicScanSettings {
     setDefaultValuesForSelectBasedOnScanType(scanType, selectControl) {
         switch (scanType) {
             case "Standard":
-                jq('#' + selectControl).val(dastScanSelectDEfaultValues.WebSiteScan.ScanPolicy);
+                jq('#' + selectControl).val(dastScanSelectDefaultValues.WebSiteScan.ScanPolicy);
                 break;
             case "Workflow":
-                jq('#' + selectControl).val(dastScanSelectDEfaultValues.WorkflowDrivenScan.ScanPolicy);
+                jq('#' + selectControl).val(dastScanSelectDefaultValues.WorkflowDrivenScan.ScanPolicy);
                 break;
         }
 
@@ -469,6 +469,10 @@ debugger;
 
         fields.removeClass('spinner');
     }
+    // called(val)
+    // {
+    //     console.log(val);
+    // }
 
     setWorkflowDrivenScanSetting() {
 
@@ -478,7 +482,8 @@ debugger;
             if (!Object.is(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro, undefined)) {
                 this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].allowedHosts.forEach((item, index, arr) => {
                         console.log(item);
-                        jq('#lisWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'>" + arr[index] + "</li>")
+                        let ident = arr[index];
+                        jq('#lisWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + ident + " ' name='" + ident + "'>" + arr[index] + "</li>")
                     }
                 )
 
@@ -487,6 +492,8 @@ debugger;
         }
 
     }
+
+
 
     setSelectedEntitlementValue(entitlements) {
         debugger;
@@ -722,7 +729,21 @@ debugger;
                         }
                     }
 
-                    jq('#workflowMacroHosts').val(hosts)
+                    jq('#workflowMacroHosts').val(hosts);
+
+                    jq('#lisWorkflowDrivenAllowedHostUrl').empty();
+
+                    debugger;
+                    //set the allowed hosts  html list value
+                    if(hosts!==undefined || null) {
+
+                        let host = hosts.split(',');
+                        host.forEach((item)=>
+                        {
+                            jq('#lisWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'>" +item + "</li>")
+                        })
+
+                    }
                 } else
                     throw new Exception("Invalid hosts info");
             }
@@ -743,13 +764,44 @@ debugger;
         }
     }
 
+    onWorkflowDrivenHostChecked()
+    {
+        debugger;
+      console.log('host');
+
+
+        jq("#lisWorkflowDrivenAllowedHostUrl").each(function(index, item) {
+            if (jq(this).find("input[type=checkbox]").prop("checked")) {
+                console.log("Check box in Checked");
+                console.log(index);
+                console.log(jq(this).val());
+                console.log(jq(this).text());
+                jq('#workflowMacroHosts').val('zero.webappsecurity.com:80');
+                // let v =  jq('#workflowMacroHosts').val();
+                // if(v!== undefined || null) {
+                //     jq('#workflowMacroHosts').val(jq(this).text())
+                // }
+                // else {
+                //     v=v + "," + jq(this).text();
+                //     jq('#workflowMacroHosts').val(v);
+                // }
+            } else if(jq(this).find("input[type=checkbox]").prop("checked",false)) {
+               console.log(index);
+
+               console.log(jq(this).text());
+                let unsel =  jq('#workflowMacroHosts').val();
+                console.log(unsel);
+            }
+        });
+
+    }
     onExcludeUrlBtnClick(event, args) {
         //  alert(jq('#standardScanExcludedUrlText').val())
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
         //Add to exclude list
-        jq('#listStandardScanTypeExcludedUrl');
-        jq('#listStandardScanTypeExcludedUrl').append("<li>" +  excludedUrl + "</li>");
-        jq('#listStandardScanTypeExcludedUrl').show();
+        // jq('#listStandardScanTypeExcludedUrl');
+        // jq('#listStandardScanTypeExcludedUrl').append("<li>" +  excludedUrl + "</li>");
+        // jq('#listStandardScanTypeExcludedUrl').show();
     }
 
     preinit() {
@@ -828,6 +880,7 @@ debugger;
         jq('#btnUploadLoginMacroFile').click(_ => this.onLoginMacroFileUpload());
 
         jq('#btnUploadWorkflowMacroFile').click(_ => this.onWorkflowMacroFileUpload());
+        jq('#lisWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked());
 
         jq('.fode-row-screc').hide();
         this.uiLoaded = true;

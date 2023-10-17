@@ -153,7 +153,7 @@ public class DynamicScanSharedBuildStep {
                     dynamicScanSetupReqModel);
 
             //ToDo: - Align with response format from Fod API - response been set null when parsing the json content.
-            if (response.getErrors() == null && !response.getErrors().isEmpty()) {
+            if (response.isSuccess && response.errors==null) {
                 System.out.println("Successfully saved settings for release id = " + releaseId);
 
             } else {
@@ -192,7 +192,7 @@ public class DynamicScanSharedBuildStep {
             releaseId = userSelectedRelease;
             PutDastWorkflowDrivenScanReqModel dastWorkflowScanSetupReqModel;
             dastWorkflowScanSetupReqModel = new PutDastWorkflowDrivenScanReqModel();
-            dastWorkflowScanSetupReqModel.setGeoLocationId(Integer.parseInt(geoLocationId)); //Check here for null
+           // dastWorkflowScanSetupReqModel.setGeoLocationId(Integer.parseInt(geoLocationId)); //Check here for null
             dastWorkflowScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dastWorkflowScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dastWorkflowScanSetupReqModel.setTimeZone(timeZone);
@@ -242,7 +242,7 @@ public class DynamicScanSharedBuildStep {
                     dastWorkflowScanSetupReqModel);
 
             //ToDo: - Align with response format from Fod API - response been set null when parsing the json content.
-            if (response.getErrors() == null && !response.getErrors().isEmpty()) {
+            if (response.isSuccess && response.errors == null ) {
                 System.out.println("Successfully saved settings for release id = " + releaseId);
 
             } else {
@@ -313,7 +313,7 @@ public class DynamicScanSharedBuildStep {
             DynamicScanController dynamicController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
             PostDastStartScanResponse response = dynamicController.StartDynamicScan(releaseId);
 
-            if (response.getErrors() == null && response.getScanId() > 0) {
+            if (response.errors == null && response.getScanId() > 0) {
                 build.setResult(Result.SUCCESS);
                 build.setDescription(String.format("Successfully triggered Dynamic scan for scan id %d", response.getScanId()));
             } else {

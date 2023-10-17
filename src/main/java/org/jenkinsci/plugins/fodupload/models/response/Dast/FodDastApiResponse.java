@@ -3,19 +3,12 @@ package org.jenkinsci.plugins.fodupload.models.response.Dast;
 import java.util.List;
 
 public class FodDastApiResponse {
-    private List<String> errors;
-    private String messages;
-    public boolean setSuccessStatus(boolean status) {
-        isSuccess =status;
-        return isSuccess;
-    }
+    public List<error> errors;
+    public boolean isSuccess;
+    public int HttpCode;
 
-    private boolean isSuccess;
-
-    public List<String> getErrors() {
-        return this.errors;
-    }
-    public String getMessages() {
-        return messages;
+    public class error {
+        public int errorCode;
+        public String message;
     }
 }

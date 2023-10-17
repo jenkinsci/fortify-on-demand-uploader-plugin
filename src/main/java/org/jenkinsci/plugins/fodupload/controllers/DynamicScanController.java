@@ -2,7 +2,7 @@ package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.reflect.TypeToken;
 import okhttp3.*;
-import org.jenkinsci.plugins.fodupload.Config.FodConfig;
+import org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.Json;
@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
-import static org.jenkinsci.plugins.fodupload.Config.FodConfig.FodDastApiConstants.DastWebSiteScanPutApi;
-import static org.jenkinsci.plugins.fodupload.Config.FodConfig.FodDastApiConstants.DastWorkflowScanPutApi;
+import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiConstants.DastWebSiteScanPutApi;
+import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiConstants.DastWorkflowScanPutApi;
 
 public class DynamicScanController extends ControllerBase {
     /**
@@ -87,20 +87,18 @@ public class DynamicScanController extends ControllerBase {
         ResponseContent response = apiConnection.request(request);
 
         if (response.code() < 300) {
-
             System.out.println("response code: " + response.code());
-            return apiConnection.parseResponse(response, new TypeToken<PutDynamicScanSetupResponse>() {
-            }.getType());
-
+            PutDynamicScanSetupResponse putDynamicScanSetupResponse = new PutDynamicScanSetupResponse();
+            putDynamicScanSetupResponse.HttpCode =response.code();
+            putDynamicScanSetupResponse.isSuccess = response.isSuccessful();
+            return putDynamicScanSetupResponse;
         } else {
             String rawBody = apiConnection.parseResponse(response, new TypeToken<PutDynamicScanSetupResponse>() {
             }.getType());
 
             List<String> errors = Utils.unexpectedServerResponseErrors();
-
             if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
             else errors.add("API empty response");
-
             return apiConnection.parseResponse(response, new TypeToken<PutDynamicScanSetupResponse>() {
             }.getType());
         }
@@ -134,7 +132,7 @@ public class DynamicScanController extends ControllerBase {
 
             HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                     .addQueryParameter("dastFileType", (requestModel.dastFileType.getValue()))
-                    .addPathSegments(String.format(FodConfig.FodDastApiConstants.DastFileUploadPatchApi, Integer.parseInt(requestModel.releaseId)));
+                    .addPathSegments(String.format(FodGlobalConstants.FodDastApiConstants.DastFileUploadPatchApi, Integer.parseInt(requestModel.releaseId)));
 
             RequestBody requestBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
@@ -174,7 +172,7 @@ public class DynamicScanController extends ControllerBase {
 
     public PostDastStartScanResponse StartDynamicScan(Integer releaseId) throws IOException {
 
-        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodConfig.FodDastApiConstants.DastStartScanAPi, releaseId));
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiConstants.DastStartScanAPi, releaseId));
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
@@ -205,7 +203,7 @@ public class DynamicScanController extends ControllerBase {
 
     public GetDastAutomatedScanSetupResponse getDynamicScanSettings(final Integer releaseId) throws IOException {
 
-        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodConfig.FodDastApiConstants.DastGetApi, releaseId));
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiConstants.DastGetApi, releaseId));
 
         System.out.println("retrieve dynamic scan settings....");
 
