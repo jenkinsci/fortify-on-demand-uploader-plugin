@@ -341,13 +341,6 @@ class DynamicScanSettings {
                     }
                 );
 
-            let geoLoc = this.api.getGeoLocationStacks(getAuthInfo())
-                .then(r => this.geoLocStacks = r)
-                .catch((err) => {
-                    console.error("geoloc api failed: " + err);
-                    throw err;
-                });
-
             let networkAuthTypes = this.api.getNetworkAuthType(getAuthInfo()).then(
                 r => this.networkAuthTypes = r
             ).catch((err) => {
@@ -355,7 +348,7 @@ class DynamicScanSettings {
                 throw err;
             });
 
-            await Promise.all([ssp, entp, tzs, geoLoc, networkAuthTypes])
+            await Promise.all([ssp, entp, tzs, networkAuthTypes])
                 .then(async () => {
 
                     this.scanTypeUserControlVisibility('allTypes', false);
@@ -496,8 +489,7 @@ class DynamicScanSettings {
         jq('#networkUsernameRow').find('input').val(undefined);
         jq('#networkPasswordRow').find('input').val(undefined);
         jq('#ddlNetworkAuthType').prop('selected', false);
-        jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').prop('checked', false);
-        // jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('unclick');
+        jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
     }
 
     setScanType() {
