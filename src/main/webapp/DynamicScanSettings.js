@@ -20,7 +20,7 @@ class DynamicScanSettings {
         this.api = new Api(instance, descriptor);
         this.uiLoaded = false;
         this.releaseId = null;
-        this.geoLocStack = {};
+
         subscribeToEvent('releaseChanged', p => this.loadEntitlementSettings(p.detail));
     }
 
@@ -92,7 +92,13 @@ class DynamicScanSettings {
 
     resetAuthSettings() {
         this.resetNetworkSettings();
+        this.resetLoginMacroSettings();
 
+    }
+
+    resetLoginMacroSettings() {
+        jq('#loginMacroId').val(undefined);
+        jq('#webSiteLoginMacroEnabled').find('input:checkbox:first').trigger('click');
     }
 
     loginMacroSettingsVisibility(isVisible) {
@@ -332,7 +338,7 @@ class DynamicScanSettings {
                     console.error("entitlement api failed");
                     throw err;
                 });
-
+           //ToDo- read from constant instead of API
             let tzs = this.api.getTimeZoneStacks(getAuthInfo())
                 .then(r => this.timeZones = r).catch(
                     (err) => {
@@ -340,7 +346,7 @@ class DynamicScanSettings {
                         throw err;
                     }
                 );
-
+            //ToDo- read from constant instead of API
             let networkAuthTypes = this.api.getNetworkAuthType(getAuthInfo()).then(
                 r => this.networkAuthTypes = r
             ).catch((err) => {
@@ -355,7 +361,6 @@ class DynamicScanSettings {
 
                     if (this.scanSettings && this.assessments) {
                         let assessmentId = this.scanSettings.assessmentTypeId;
-                        let entitlementId = this.scanSettings.entitlementId;
                         let timeZoneId = this.scanSettings.timeZone;
                         this.populateAssessmentsDropdown();
 
@@ -375,10 +380,6 @@ class DynamicScanSettings {
                         this.onScanTypeChanged();
                         //Set scan policy from the response.
                         this.setScanPolicy();
-
-
-                        //ToDo - url will be array from the response ?
-                        /*Set dynamic site URL from response */
 
                         //Set the Website assessment scan type specific settings.
                         if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
@@ -488,7 +489,7 @@ class DynamicScanSettings {
 
         jq('#networkUsernameRow').find('input').val(undefined);
         jq('#networkPasswordRow').find('input').val(undefined);
-        jq('#ddlNetworkAuthType').prop('selected', false);
+        jq('#ddlNetworkAuthType').prop('selectedIndex', 0);
         jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
     }
 
@@ -634,10 +635,6 @@ class DynamicScanSettings {
                 console.log(err);
             }
         );
-    }
-
-    onNetworkAuthTypeChanged() {
-        // ToDo
     }
 
     onWorkflowMacroFileUpload() {
@@ -798,8 +795,6 @@ class DynamicScanSettings {
             .change(_ => this.onEntitlementChanged());
 
         jq('#scanTypeList').change(_ => this.onScanTypeChanged());
-
-        jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
 
         jq('#btnAddExcludeUrl').click(_ => this.onExcludeUrlBtnClick());
 
