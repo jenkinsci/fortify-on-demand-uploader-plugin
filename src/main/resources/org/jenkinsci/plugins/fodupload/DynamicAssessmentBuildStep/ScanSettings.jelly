@@ -42,7 +42,7 @@
             <!-- Dynamic Scan Environment -->
             <f:entry>
                 <div class="fode-field spinner-container" id="dast-scan-setting-evn">
-                    <f:entry title="Environment Facing" >
+                    <f:entry title="Environment Facing">
                         <f:select field="dastEnv"/>
                     </f:entry>
                 </div>
@@ -60,18 +60,6 @@
                 </div>
             </f:entry>
 
-            <!-- GeoLocation Stack -->
-<!--            <f:entry title="Geo Location">-->
-<!--                <div id="geoLocationStack" class="fode-field spinner-container dast-scan-setting">-->
-<!--                    <div class="fode-edit jenkins-select">-->
-<!--                        <select name="selectedDynamicGeoLocation" id="geoLocationStackSelectList"-->
-<!--                                class="jenkins-select__input">-->
-<!--                            <option value="-1">Select a GeoLocation Stack</option>-->
-<!--                        </select>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </f:entry>-->
-
         </f:block>
     </f:section>
     <!-- Scope Settings -->
@@ -81,14 +69,14 @@
         <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
             <div id="dast-workflow-macro-upload" class="fode-field spinner-container">
                 <span>
-                    <input accept=".har,.webmacro,.brup" id="workflowMacroFile"  type="File" name="workflowMacroFile" />
+                    <input accept=".har,.webmacro,.brup" id="workflowMacroFile" type="File" name="workflowMacroFile"/>
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
                     <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>
                     <input type="label" value="" hidden="true" name="workflowMacroHosts" id="workflowMacroHosts"/>
                 </span>
             </div>
         </f:entry>
-        <f:entry title="Allowed Hosts" >
+        <f:entry title="Allowed Hosts">
             <ul id="lisWorkflowDrivenAllowedHostUrl" name="lisWorkflowDrivenAllowedHostUrl"
                 class="fode-field spinner-container dast-workflow-scan">
             </ul>
@@ -101,13 +89,10 @@
             </div>
         </f:entry>
         <f:entry>
-            <div id="dast-common-scope" class="fode-field spinner-container">
+            <div id="dast-standard-scan-scope" class="fode-field spinner-container">
+                <f:booleanRadio field="scanScope"  true="Restrict scan to URL directories and subdirectories"
+                                false="Scan entire host"/>
 
-                <f:radio title="Restrict scan to URL directories and subdirectories" id="restrictScan"
-                         name="restrictScan">
-                </f:radio>
-                <f:radio title="Scan entire host" id="scanEntireHost" name="scanEntireHost">
-                </f:radio>
             </div>
 
             <div id="dast-common-scope-attr"
@@ -123,7 +108,7 @@
                 </f:checkbox>
             </div>
         </f:entry>
-        <f:entry title="Exclude URLs" field="listStandardScanTypeExcludedUrl">
+        <f:entry title="Exclude URLs" field="standardScanTypeExcludedUrls">
             <div id="standardScanTypeExcludeUrlsRow" class="fode-field spinner-container">
                 <span>
                     <input type="text" id="standardScanExcludedUrlText" class="setting-input dast-standard-scan"
@@ -145,7 +130,7 @@
             </div>
         </f:entry>
         <f:entry title="Timebox Scan Duration (Hours)">
-            <div id="dast-timeBox-scan" >
+            <div id="dast-timeBox-scan">
                 <f:select field="scanTimebox"/>
             </div>
         </f:entry>
@@ -171,14 +156,14 @@
                         </div>
                     </f:entry>
 
-                    <f:entry title="Network Username" field="webSiteNetworkAuthUserName">
-                        <div id="networkUsernameRow">
-                            <f:textbox/>
+                    <f:entry title="Network Username">
+                        <div id="networkUsernameRow" >
+                            <f:textbox name="webSiteNetworkAuthUserName" />
                         </div>
                     </f:entry>
-                    <f:entry title="Network Password" field="webSiteNetworkAuthPassword">
+                    <f:entry title="Network Password" >
                         <div id="networkPasswordRow">
-                            <f:password/>
+                            <f:password name="webSiteNetworkAuthPassword" />
                         </div>
                     </f:entry>
 

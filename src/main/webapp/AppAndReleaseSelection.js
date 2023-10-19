@@ -9,7 +9,8 @@ const dastWebSiteSetting = 'dast-standard-setting';
 const dastWorkFlowSetting = 'dast-workflow-setting';
 const dastCommonScopeSetting = 'dast-common-scan-scope';
 const nwAuthSetting = 'dast-networkAuth-setting';
-const loginAuthSetting ='dast-login-macro'
+const loginAuthSetting = 'dast-login-macro'
+
 class AppAndReleaseSelection {
 
     constructor() {
@@ -27,8 +28,8 @@ class AppAndReleaseSelection {
         jq('.' + dastWebSiteSetting).hide();
         jq('.' + dastWorkFlowSetting).hide();
         jq('.' + dastCommonScopeSetting).hide();
-        jq('.'+ loginAuthSetting).hide();
-        jq('.'+ nwAuthSetting).hide();
+        jq('.' + loginAuthSetting).hide();
+        jq('.' + nwAuthSetting).hide();
 
     }
 
@@ -302,7 +303,7 @@ class AppAndReleaseSelection {
         const dastTimeZone = closestRow('#timezone');
         const dastWrkFlowMacroUpload = closestRow('#dast-workflow-macro-upload');
         const dastWrkFlowAllowedHost = closestRow('#lisWorkflowDrivenAllowedHostUrl');
-        const dastStandardScope = closestRow('#dast-standard-scan-scope-attribute');
+        const dastStandardScope = closestRow('#dast-standard-scan-scope');
         const dastExcludeUrl = closestRow('#standardScanTypeExcludeUrlsRow');
         const dastWebSiteTimeBoxScan = closestRow('#dast-timeBox-scan');
         const networkAuth = closestRow('#webSiteNetworkAuthSettingEnabledRow')
@@ -330,7 +331,6 @@ class AppAndReleaseSelection {
         loginMacro.addClass(loginAuthSetting);
 
         <!--Scan Specific Scope Sections-->
-        debugger;
         dastWrkFlowMacroUpload.addClass(dastWorkFlowSetting);
         dastWrkFlowAllowedHost.addClass(dastWorkFlowSetting);
         dastExcludeUrl.addClass(dastWebSiteSetting);

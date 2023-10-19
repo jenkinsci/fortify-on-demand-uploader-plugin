@@ -6,18 +6,15 @@ import org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.Json;
-import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.*;
-import org.jenkinsci.plugins.fodupload.models.response.Dast.GetDastAutomatedScanSetupResponse;
-import org.jenkinsci.plugins.fodupload.models.response.Dast.PostDastStartScanResponse;
-import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDynamicScanSetupResponse;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.List;
+import java.util.ArrayList;
 
 import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiConstants.DastWebSiteScanPutApi;
 import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiConstants.DastWorkflowScanPutApi;
@@ -34,14 +31,14 @@ public class DynamicScanController extends ControllerBase {
         super(apiConnection, logger, correlationId);
     }
 
-    public PutDynamicScanSetupResponse putDynamicWebSiteScanSettings(final Integer releaseId, PutDastStandardScanReqModel settings) throws IOException {
+    public PutDastScanSetupResponse putDastWebSiteScanSettings(final Integer releaseId, PutDastWebSiteScanReqModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
 
         System.out.println("req content " + requestContent);
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
-                .addPathSegments(String.format(DastWebSiteScanPutApi ,releaseId));
+                .addPathSegments(String.format(DastWebSiteScanPutApi, releaseId));
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
@@ -50,34 +47,19 @@ public class DynamicScanController extends ControllerBase {
                 .build();
         ResponseContent response = apiConnection.request(request);
 
-        if (response.code() < 300) {
-
-            System.out.println("response code: " + response.code());
-            return apiConnection.parseResponse(response, new TypeToken<PutDynamicScanSetupResponse>() {
-            }.getType());
-
-        } else {
-            String rawBody = apiConnection.parseResponse(response, new TypeToken<PutDynamicScanSetupResponse>() {
-            }.getType());
-
-            List<String> errors = Utils.unexpectedServerResponseErrors();
-
-            if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
-            else errors.add("API empty response");
-
-            return apiConnection.parseResponse(response, new TypeToken<PutDynamicScanSetupResponse>() {
-            }.getType());
-        }
+        PutDastScanSetupResponse putDynamicScanSetupResponse = new PutDastScanSetupResponse();
+        putDynamicScanSetupResponse = (PutDastScanSetupResponse) convertHttpResponseIntoDastApiResponse(response, putDynamicScanSetupResponse);
+        return putDynamicScanSetupResponse;
     }
 
-    public PutDynamicScanSetupResponse putDynamicWorkflowDrivenScanSettings(final Integer releaseId, PutDastWorkflowDrivenScanReqModel settings) throws IOException {
+    public PutDastScanSetupResponse putDastWorkflowDrivenScanSettings(final Integer releaseId, PutDastWorkflowDrivenScanReqModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
 
         System.out.println("req content " + requestContent);
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
-                .addPathSegments(String.format(DastWorkflowScanPutApi ,releaseId));
+                .addPathSegments(String.format(DastWorkflowScanPutApi, releaseId));
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
@@ -85,25 +67,12 @@ public class DynamicScanController extends ControllerBase {
                 .put(RequestBody.create(MediaType.parse("application/json"), requestContent))
                 .build();
         ResponseContent response = apiConnection.request(request);
-
-        if (response.code() < 300) {
-            System.out.println("response code: " + response.code());
-            PutDynamicScanSetupResponse putDynamicScanSetupResponse = new PutDynamicScanSetupResponse();
-            putDynamicScanSetupResponse.HttpCode =response.code();
-            putDynamicScanSetupResponse.isSuccess = response.isSuccessful();
-            return putDynamicScanSetupResponse;
-        } else {
-            String rawBody = apiConnection.parseResponse(response, new TypeToken<PutDynamicScanSetupResponse>() {
-            }.getType());
-
-            List<String> errors = Utils.unexpectedServerResponseErrors();
-            if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
-            else errors.add("API empty response");
-            return apiConnection.parseResponse(response, new TypeToken<PutDynamicScanSetupResponse>() {
-            }.getType());
-        }
+        PutDastScanSetupResponse putDastScanSetupResponse = new PutDastScanSetupResponse();
+        putDastScanSetupResponse = (PutDastScanSetupResponse) convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
+        return putDastScanSetupResponse;
     }
-     public PatchDastFileUploadResponse PatchDynamicScan(PatchDastScanFileUploadReq requestModel) {
+
+    public PatchDastFileUploadResponse PatchDynamicScan(PatchDastScanFileUploadReq requestModel) throws Exception {
 
         try {
 
@@ -120,7 +89,6 @@ public class DynamicScanController extends ControllerBase {
                     temp = File.createTempFile("worflowdriven", requestModel.releaseId);
                     fileName = "WorkflowDriven.webmacro";
                     break;
-
             }
             if (temp == null) {
                 throw new RuntimeException("File upload not available");
@@ -145,29 +113,15 @@ public class DynamicScanController extends ControllerBase {
                     .addHeader("CorrelationId", getCorrelationId())
                     .patch(requestBody).build();
 
-            //ToDo:- Require code refactor to align with the error response from Fod API
             ResponseContent response = apiConnection.request(request);
+            PatchDastFileUploadResponse patchDastFileUploadResponse = new PatchDastFileUploadResponse();
+            patchDastFileUploadResponse = (PatchDastFileUploadResponse) convertHttpResponseIntoDastApiResponse(response, patchDastFileUploadResponse);
+            return patchDastFileUploadResponse;
 
-            if (response.code() < 300) {
-
-                System.out.println("response code: " + response.code());
-                return apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
-                }.getType());
-
-
-            } else {
-                String rawBody = apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
-                }.getType());
-                List<String> errors = Utils.unexpectedServerResponseErrors();
-                if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
-                else errors.add("API empty response");
-                return new PatchDastFileUploadResponse();
-            }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return new PatchDastFileUploadResponse();
+            throw ex;
         }
-
     }
 
     public PostDastStartScanResponse StartDynamicScan(Integer releaseId) throws IOException {
@@ -177,40 +131,53 @@ public class DynamicScanController extends ControllerBase {
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
                 .addHeader("CorrelationId", getCorrelationId())
-                .post(RequestBody.create(MediaType.parse("application/json"),""))
+                .post(RequestBody.create(MediaType.parse("application/json"), ""))
                 .build();
 
         ResponseContent response = apiConnection.request(request);
-        if (response.code() < 300) {
-
-            System.out.println("response code: " + response.code());
-            return apiConnection.parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
-            }.getType());
-
-        } else {
-            String rawBody = apiConnection.parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
-            }.getType());
-
-            List<String> errors = Utils.unexpectedServerResponseErrors();
-
-            if (!rawBody.isEmpty()) errors.add("Raw API response:\n" + rawBody);
-            else errors.add("API empty response");
-
-            return new PostDastStartScanResponse();
-        }
-
+        PostDastStartScanResponse postDastStartScanResponse = new PostDastStartScanResponse();
+        postDastStartScanResponse = (PostDastStartScanResponse) convertHttpResponseIntoDastApiResponse(response, postDastStartScanResponse);
+        return postDastStartScanResponse;
     }
 
-    public GetDastAutomatedScanSetupResponse getDynamicScanSettings(final Integer releaseId) throws IOException {
+    public GetDastScanSettingResponse getDynamicScanSettings(final Integer releaseId) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiConstants.DastGetApi, releaseId));
 
         System.out.println("retrieve dynamic scan settings....");
 
         Request request = new Request.Builder().url(urlBuilder.build()).addHeader("Accept", "application/json").addHeader("CorrelationId", getCorrelationId()).get().build();
-        return apiConnection.requestTyped(request, new TypeToken<GetDastAutomatedScanSetupResponse>() {
+        return apiConnection.requestTyped(request, new TypeToken<GetDastScanSettingResponse>() {
         }.getType());
     }
 
+    private FodDastApiResponse convertHttpResponseIntoDastApiResponse(ResponseContent response, FodDastApiResponse fodApiResponse) throws IOException {
+        if (response.code() < 300) {
+            System.out.println("response code: " + response.code());
+            if (response.bodyContent().isEmpty()) {
+                fodApiResponse.HttpCode = response.code();
+                fodApiResponse.isSuccess = response.isSuccessful();
+                fodApiResponse.reason = response.message();
+            }
+            return fodApiResponse;
+        } else {
+            if (response.bodyContent() == null || response.bodyContent().isEmpty()) {
+                fodApiResponse.isSuccess = false;
+                return parseHttpErrorResponse(response, fodApiResponse);
+            } else
+                return apiConnection.parseResponse(response, new TypeToken<FodDastApiResponse>() {
+                }.getType());
+        }
+    }
+
+    private FodDastApiResponse parseHttpErrorResponse(ResponseContent response, FodDastApiResponse fodApiResponse) {
+        fodApiResponse.HttpCode = response.code();
+        error err = new error();
+        err.errorCode = response.code();
+        err.message = response.message();
+        fodApiResponse.errors = new ArrayList<>();
+        fodApiResponse.errors.add(err);
+        return fodApiResponse;
+    }
 
 }

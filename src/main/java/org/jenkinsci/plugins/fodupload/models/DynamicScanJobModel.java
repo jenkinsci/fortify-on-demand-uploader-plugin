@@ -11,7 +11,7 @@ public class DynamicScanJobModel {
     String tenantId;
     String _releaseId;
     String selectedReleaseType;
-    List<String> webSiteUrl;
+    String webSiteUrl;
     String dastEnv;
     String scanPolicyType;
     boolean scanHost;
@@ -49,7 +49,7 @@ public class DynamicScanJobModel {
         return tenantId;
     }
 
-    public List<String> getWebSiteUrl() {
+    public String getWebSiteUrl() {
         return webSiteUrl;
     }
 
@@ -136,15 +136,15 @@ public class DynamicScanJobModel {
     public DynamicScanJobModel(boolean overrideGlobalConfig, String username,
                                String personalAccessToken, String tenantId,
                                String releaseId, String selectedReleaseType,
-                               List<String> webSiteUrl, String dastEnv,
+                               String webSiteUrl, String dastEnv,
                                String scanTimebox,
-                               List<String> standardScanTypeExcludeUrlsRow,
-                               String scanPolicyType, boolean scanEntireHost, boolean restrictScan,
+                               List<String> standardScanTypeExcludeUrls,
+                               String scanPolicyType, boolean scanScope,
                                boolean allowHttp, boolean allowFormSubmissionCrawl,
                                String selectedScanType, String selectedDynamicTimeZone,
                                boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                               String loginMacroId,String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
+                               String loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
                                String userSelectedApplication,
                                String userSelectedRelease, String assessmentTypeId,
                                String entitlementId,
@@ -165,7 +165,7 @@ public class DynamicScanJobModel {
         this.username = username;
         this.personalAccessToken = personalAccessToken;
         this.selectedScanType = selectedScanType;
-        this.scanHost = scanHost;
+        this.scanHost = scanScope;
         this.webSiteUrl = webSiteUrl;
         this.userSelectedEntitlement = userSelectedEntitlement;
         this.selectedDynamicTimeZone = selectedDynamicTimeZone;

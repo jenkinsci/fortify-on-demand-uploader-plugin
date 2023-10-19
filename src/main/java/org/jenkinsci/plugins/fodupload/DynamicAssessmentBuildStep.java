@@ -34,18 +34,15 @@ import java.util.UUID;
 public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildStep {
 
     DynamicScanSharedBuildStep dynamicSharedUploadBuildStep;
-    boolean allowSameHostRedirects;
-    boolean restrictToDirectoryAndSubdirectories;
 
     @DataBoundConstructor
     public DynamicAssessmentBuildStep(boolean overrideGlobalConfig, String username,
                                       String personalAccessToken, String tenantId,
                                       String releaseId, String selectedReleaseType,
-                                      List<String> webSiteUrl, String dastEnv,
+                                      String webSiteUrl, String dastEnv,
                                       String scanTimebox,
-                                      List<String> standardScanTypeExcludeUrlsRow,
-                                      String scanPolicyType, boolean restrictScan,
-                                      boolean scanEntireHost,
+                                      List<String> standardScanTypeExcludedUrls,
+                                      String scanPolicyType, boolean scanScope,
                                       boolean allowHttp, boolean allowFormSubmissionCrawl,
                                       String selectedScanType, String selectedDynamicTimeZone,
                                       boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
@@ -53,21 +50,18 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                       String loginMacroId, String workflowMacroId, String workflowMacroHosts, String webSiteNetworkAuthPassword,
                                       String userSelectedApplication,
                                       String userSelectedRelease, String assessmentTypeId,
-                                      String entitlementId, String entitlementFrequencyId,
+                                      String entitlementId,
                                       String entitlementFrequencyType, String userSelectedEntitlement,
                                       String selectedDynamicGeoLocation, String selectedNetworkAuthType
     ) throws IllegalArgumentException, IOException {
-
-        // assert FodEnums.DastTimeBoxScan.toInt(scanTimebox) != null;
-        int timebox = FodEnums.DastTimeBoxScan.toInt(scanTimebox).getInteger();
 
         dynamicSharedUploadBuildStep = new DynamicScanSharedBuildStep(overrideGlobalConfig, username,
                 personalAccessToken, tenantId,
                 releaseId, selectedReleaseType,
                 webSiteUrl, dastEnv,
                 scanTimebox,
-                standardScanTypeExcludeUrlsRow,
-                scanPolicyType, scanEntireHost, restrictScan,
+                standardScanTypeExcludedUrls,
+                scanPolicyType, scanScope,
                 allowHttp, allowFormSubmissionCrawl,
                 selectedScanType, selectedDynamicTimeZone,
                 webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled,
@@ -75,25 +69,26 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 loginMacroId, workflowMacroId, workflowMacroHosts, webSiteNetworkAuthPassword,
                 userSelectedApplication,
                 userSelectedRelease, assessmentTypeId,
-                entitlementId, entitlementFrequencyId,
+                entitlementId,
                 entitlementFrequencyType, userSelectedEntitlement,
                 selectedDynamicGeoLocation, selectedNetworkAuthType);
 
         if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
 
             dynamicSharedUploadBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                    entitlementFrequencyType, selectedDynamicGeoLocation, loginMacroId, selectedDynamicTimeZone, selectedScanType, scanPolicyType,
-                    webSiteUrl, allowFormSubmissionCrawl, scanEntireHost, restrictScan, enableRedundantPageDetection, dastEnv,
-                    webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimebox
-            );
+                    entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicyType,
+                    webSiteUrl, allowFormSubmissionCrawl, allowHttp, scanScope, enableRedundantPageDetection, dastEnv,
+                    webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName,
+                    webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimebox);
+
         } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
 
             dynamicSharedUploadBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                    entitlementFrequencyType, selectedDynamicGeoLocation, loginMacroId, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, selectedScanType, scanPolicyType,
-                    webSiteUrl, allowFormSubmissionCrawl, scanEntireHost, restrictScan, enableRedundantPageDetection, dastEnv,
-                    webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimebox
-            );
+                    entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicyType,
+                    allowFormSubmissionCrawl, allowHttp, enableRedundantPageDetection, dastEnv,
+                    webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType);
         } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
+            //API scan setting goes here.
 
         } else
             throw new IllegalArgumentException("Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
@@ -228,7 +223,6 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
         }
 
 
-
         @SuppressWarnings("unused")
         public ListBoxModel doFillSelectedReleaseTypeItems() {
             return doFillFromEnum(FodEnums.DastReleaseType.class);
@@ -276,6 +270,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             return applicationsController.getApplicationById(applicationId);
         }
 
+        //ToDo:- delete this dead code after completing pipeline.
 //        public static GenericListResponse<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, String searchTerm, Integer offset, Integer limit, AuthenticationModel authModel) throws IOException {
 //            FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
 //            ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
@@ -322,9 +317,8 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
-                throw ex;
+                return null;
             }
-
         }
 
         @SuppressWarnings("unused")

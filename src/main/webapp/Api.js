@@ -220,6 +220,9 @@ class Api {
     getReleaseEntitlementSettings(releaseId, customAuth) {
         return new Promise((res, rej) => {
             this.descriptor.retrieveDynamicScanSettings(releaseId, customAuth, async t => {
+                if (t === null || undefined) {
+                    rej();
+                }
                 const responseJSON = JSON.parse(t.responseJSON);
                 if (responseJSON === null || undefined) {
                     rej();
@@ -342,7 +345,7 @@ class Api {
         });
     }
 
-    patchSetupManifestFile(releaseId, customAuth, file,fileType) {
+    patchSetupManifestFile(releaseId, customAuth, file, fileType) {
         debugger;
         return new Promise((res, reject) => {
             let fileReader = new FileReader();
@@ -350,10 +353,10 @@ class Api {
             fileReader.onload = () => {
                 fileContent = fileReader.result;
 
-                this.descriptor.patchSetupManifestFile(releaseId, customAuth, fileContent, fileType,async t => {
+                this.descriptor.patchSetupManifestFile(releaseId, customAuth, fileContent, fileType, async t => {
                     console.log(t);
                     console.log(t.responseJSON);
-                   // const responseJSON = JSON.parse(t.responseJSON);
+                    // const responseJSON = JSON.parse(t.responseJSON);
                     //console.log(responseJSON);
                     if (t.responseJSON !== null || undefined)
                         return res(t.responseJSON);

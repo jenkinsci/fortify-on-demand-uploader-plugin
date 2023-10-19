@@ -7,8 +7,6 @@ public class FodDastApiResponse {
     public boolean isSuccess;
     public int HttpCode;
 
-    public class error {
-        public int errorCode;
-        public String message;
-    }
+    public String reason;
+
 }

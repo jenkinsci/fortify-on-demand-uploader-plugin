@@ -4,7 +4,7 @@ public class API {
 
     public ApiType ApiType;
 
-    public GetDastAutomatedScanSetupResponse.ApiSource ApiSource;
+    public GetDastScanSettingResponse.ApiSource ApiSource;
 
     public OpenApi OpenApi;
 

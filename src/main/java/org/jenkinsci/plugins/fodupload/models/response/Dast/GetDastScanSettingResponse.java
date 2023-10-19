@@ -1,5 +1,5 @@
 package org.jenkinsci.plugins.fodupload.models.response.Dast;
-public class GetDastAutomatedScanSetupResponse {
+public class GetDastScanSettingResponse {
 
     public int assessmentTypeId;
     public int geoLocationId;
