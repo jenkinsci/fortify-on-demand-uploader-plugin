@@ -379,75 +379,7 @@ public class FodEnums {
 
     }
 
-    public enum DastTimeBoxScan {
-        four("4"),
-        two("2"),
-        twelve("12"),
-        none("none");
-        private final String _val;
 
-        DastTimeBoxScan(String val) {
-            this._val = val;
-        }
-
-        public int getInteger() {
-            switch (this._val) {
-                case "2":
-                    return 2;
-                case "4":
-                    return 4;
-                case "12":
-                    return 12;
-            }
-            return 0;
-        }
-
-        public static DastTimeBoxScan fromInt(int val) {
-            switch (val) {
-
-                case 12:
-                    return twelve;
-
-                case 4:
-                    return four;
-                case 2:
-                default:
-                    return two;
-            }
-        }
-
-        public  static DastTimeBoxScan toInt(String val)
-        {
-            switch (val)
-            {
-                case "four":
-                    return four;
-
-                case"twelve":
-                    return twelve;
-
-                case "two":
-                    return two;
-
-            }
-            return null;
-        }
-
-        public String toString() {
-            switch (this._val) {
-                case "2":
-                    return "2";
-                case "12":
-                    return "12";
-                case "4":
-                    return "4";
-                default:
-                    return "none";
-
-            }
-
-        }
-    }
 
     public enum DastPolicy {
 

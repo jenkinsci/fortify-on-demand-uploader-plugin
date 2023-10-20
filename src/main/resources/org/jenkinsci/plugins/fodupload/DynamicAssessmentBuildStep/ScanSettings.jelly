@@ -131,7 +131,8 @@
         </f:entry>
         <f:entry title="Timebox Scan Duration (Hours)">
             <div id="dast-timeBox-scan">
-                <f:select field="scanTimebox"/>
+                <f:textbox field="scanTimebox"/>
+                <t:help tooltip="Non mandate field. But allowed Values are between 1(hr) and 24 (hrs)" />
             </div>
         </f:entry>
     </f:section>

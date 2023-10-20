@@ -367,10 +367,8 @@ class DynamicScanSettings {
                         jq('#ddAssessmentType').val(assessmentId);
                         await this.onAssessmentChanged(true);
 
-                        // jq('#entitlementSelectList').val(getEntitlementDropdownValue(this.scanSettings.entitlementId, this.scanSettings.entitlementFrequencyType));
-
                         jq('#entitlementFreqType').val(this.scanSettings.entitlementFrequencyType);
-                        // alert(jq('#entitlementFreqType').val());
+
                         await this.onEntitlementChanged(false);
                         this.setSelectedEntitlementValue(entp);
                         jq('#timeZoneStackSelectList').val(timeZoneId);

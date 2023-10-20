@@ -248,12 +248,6 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             return doFillFromEnum(FodEnums.DastPolicy.class);
         }
 
-        @SuppressWarnings("unused")
-        public static ListBoxModel doFillScanTimeboxItems() {
-            return doFillFromEnum(FodEnums.DastTimeBoxScan.class);
-        }
-
-
         private static <T extends Enum<T>> ListBoxModel doFillFromEnum(Class<T> enumClass) {
             ListBoxModel items = new ListBoxModel();
             for (T selected : EnumSet.allOf(enumClass)) {

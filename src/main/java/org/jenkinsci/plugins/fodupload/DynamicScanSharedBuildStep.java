@@ -22,7 +22,7 @@ import java.util.Objects;
 
 public class DynamicScanSharedBuildStep {
     private final DynamicScanJobModel model;
-    private AuthenticationModel authModel;
+    private final AuthenticationModel authModel;
 
     public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
     public static final String CLIENT_ID = "clientId";
@@ -112,7 +112,8 @@ public class DynamicScanSharedBuildStep {
                 dynamicScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
             }
 
-            dynamicScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(timeboxScan));
+            if (!timeboxScan.isEmpty())
+                dynamicScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(timeboxScan));
 
             dynamicScanSetupReqModel.setPolicy(scanPolicy);
             dynamicScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
@@ -126,7 +127,7 @@ public class DynamicScanSharedBuildStep {
                 networkSetting.setPassword(networkAuthPassword);
                 networkSetting.setUserName(networkAuthUserName);
 
-                if (networkAuthType != null || networkAuthType != "") {
+                if (!networkAuthType.isEmpty()) {
                     networkSetting.setNetworkAuthenticationType((networkAuthType));
                 } else
                     throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
@@ -204,7 +205,7 @@ public class DynamicScanSharedBuildStep {
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
 
-                if (networkAuthType != null || networkAuthType != "") {
+                if (!networkAuthType.isEmpty()) {
                     networkAuthentication.setNetworkAuthenticationType((networkAuthType));
                 } else
                     throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
