@@ -325,7 +325,7 @@ class DynamicScanSettings {
             rows.show();
             jq('.fode-row-bsi').hide();
 
-            let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo())
+            let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo(),true)
                 .then(r => this.scanSettings = r).catch((err) => {
                         console.error("release settings api failed: " + err);
                         throw err;

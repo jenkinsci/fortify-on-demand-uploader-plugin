@@ -217,18 +217,27 @@ class Api {
         return null;
     }
 
-    getReleaseEntitlementSettings(releaseId, customAuth) {
+    getReleaseEntitlementSettings(releaseId, customAuth, isDast) {
         return new Promise((res, rej) => {
-            this.descriptor.retrieveDynamicScanSettings(releaseId, customAuth, async t => {
-                if (t === null || undefined) {
-                    rej();
-                }
-                const responseJSON = JSON.parse(t.responseJSON);
-                if (responseJSON === null || undefined) {
-                    rej();
-                } else
+            if (isDast) {
+                this.descriptor.retrieveDynamicScanSettings(releaseId, customAuth, async t => {
+                    if (t === null || undefined) {
+                        rej();
+                    }
+                    const responseJSON = JSON.parse(t.responseJSON);
+                    if (responseJSON === null || undefined) {
+                        rej();
+                    } else
+                        return res(responseJSON);
+                });
+            } else {
+                this.descriptor.retrieveStaticScanSettings(releaseId, customAuth, async t => {
+                    const responseJSON = JSON.parse(t.responseJSON);
+
                     return res(responseJSON);
-            });
+                });
+            }
+
         });
     }
 
