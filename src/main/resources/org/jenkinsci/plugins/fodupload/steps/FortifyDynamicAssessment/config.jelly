@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials"
+         xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+         xmlns:f="/lib/form">
+
+    <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+
+    <style>
+        #fodp-error {
+        color: red;
+        }
+
+        .fodp-row-screc {
+        color: red;
+        }
+
+        .fodp-row-screc #technologyScanCentralRec {
+        font-size: 85%
+        }
+
+        .fode-row-hidden {
+        display: none;
+        }
+
+        .spinner select {
+        display: none;
+        }
+
+        .spinner button {
+        display: none;
+        }
+
+        .spinner a {
+        display: none;
+        }
+
+        .spinner input {
+        display: none;
+        }
+
+        .fodp-field-row select.setting-input,
+        .fodp-field-row input.setting-input,
+        .fodp-bound select.setting-input {
+        width: 240px;
+        }
+
+        input.fodp-autoProvAttr {
+        width: 120px !important;
+        }
+
+        ul.fodp-autoProvAttr li {
+
+        }
+
+        #releaseSelection{
+        width: 125px;
+        margin-right: 10px;
+        }
+
+        #releaseSelectionValue{
+        width: calc(100% - 135px);
+        }
+
+        #releaseLookup {
+        margin-left: 110px;
+        }
+
+        #autoProvAttr > li > span {
+        cursor: pointer;
+        margin-right: 25px;
+        }
+
+        #autoProvAttr > li {
+        list-style-type: none;
+        }
+
+        #autoProvOwnerAssignMe {
+        margin-left: 5px;
+        }
+    </style>
+
+
+</j:jelly>

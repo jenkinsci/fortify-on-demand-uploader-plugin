@@ -4,8 +4,6 @@ public class HourBlock {
     private int hour;
     private boolean checked;
 
-    // Constructors, getters, and setters
-
     public int getHour() {
         return hour;
     }

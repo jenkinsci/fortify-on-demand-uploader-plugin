@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+
 import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiConstants.DastWebSiteScanPutApi;
 import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiConstants.DastWorkflowScanPutApi;
 
@@ -68,7 +69,7 @@ public class DynamicScanController extends ControllerBase {
                 .build();
         ResponseContent response = apiConnection.request(request);
         PutDastScanSetupResponse putDastScanSetupResponse = new PutDastScanSetupResponse();
-        putDastScanSetupResponse = (PutDastScanSetupResponse) convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
+        putDastScanSetupResponse = convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
         return putDastScanSetupResponse;
     }
 
@@ -115,7 +116,7 @@ public class DynamicScanController extends ControllerBase {
 
             ResponseContent response = apiConnection.request(request);
             PatchDastFileUploadResponse patchDastFileUploadResponse = new PatchDastFileUploadResponse();
-            patchDastFileUploadResponse = (PatchDastFileUploadResponse) convertHttpResponseIntoDastApiResponse(response, patchDastFileUploadResponse);
+            patchDastFileUploadResponse = convertHttpResponseIntoDastApiResponse(response, patchDastFileUploadResponse);
             return patchDastFileUploadResponse;
 
         } catch (Exception ex) {
@@ -151,33 +152,73 @@ public class DynamicScanController extends ControllerBase {
         }.getType());
     }
 
-    private FodDastApiResponse convertHttpResponseIntoDastApiResponse(ResponseContent response, FodDastApiResponse fodApiResponse) throws IOException {
+    private <T> T convertHttpResponseIntoDastApiResponse(ResponseContent response, T fodApiResponse) throws IOException {
         if (response.code() < 300) {
             System.out.println("response code: " + response.code());
-            if (response.bodyContent().isEmpty()) {
-                fodApiResponse.HttpCode = response.code();
-                fodApiResponse.isSuccess = response.isSuccessful();
-                fodApiResponse.reason = response.message();
-            }
-            return fodApiResponse;
+            return parseHttpSuccessResponse(response, fodApiResponse);
+
         } else {
-            if (response.bodyContent() == null || response.bodyContent().isEmpty()) {
-                fodApiResponse.isSuccess = false;
-                return parseHttpErrorResponse(response, fodApiResponse);
-            } else
-                return apiConnection.parseResponse(response, new TypeToken<FodDastApiResponse>() {
-                }.getType());
+
+           return parseFailureResponse(response, fodApiResponse);
+
         }
     }
 
-    private FodDastApiResponse parseHttpErrorResponse(ResponseContent response, FodDastApiResponse fodApiResponse) {
-        fodApiResponse.HttpCode = response.code();
-        error err = new error();
-        err.errorCode = response.code();
-        err.message = response.message();
-        fodApiResponse.errors = new ArrayList<>();
-        fodApiResponse.errors.add(err);
-        return fodApiResponse;
+    private <T> T parseHttpSuccessResponse(ResponseContent response, Object fodApiResponse) throws IOException {
+        if (response.bodyContent().isEmpty()) {
+            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
+            ((FodDastApiResponse) fodApiResponse).reason = response.message();
+            return (T) fodApiResponse;
+        } else {
+            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
+            return parseHttpBodyResponse(response, fodApiResponse);
+        }
+    }
+
+    private <T> T parseFailureResponse(ResponseContent response, Object fodApiResponse) throws IOException {
+        if (response.bodyContent() == null || response.bodyContent().isEmpty()) {
+            ((FodDastApiResponse) fodApiResponse).isSuccess = false;
+            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).reason = response.message();
+            error err = new error();
+            err.errorCode = response.code();
+            err.message = response.message();
+            ((FodDastApiResponse) fodApiResponse).errors = new ArrayList<>();
+            ((FodDastApiResponse) fodApiResponse).errors.add(err);
+            return (T) fodApiResponse;
+
+        } else {
+            ((FodDastApiResponse) fodApiResponse).isSuccess = false;
+            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            error err = new error();
+            err.errorCode = response.code();
+            err.message = response.message();
+            ((FodDastApiResponse) fodApiResponse).errors = new ArrayList<>();
+            ((FodDastApiResponse) fodApiResponse).errors.add(err);
+            return parseHttpBodyResponse(response, fodApiResponse);
+        }
+    }
+
+    private <T> T parseHttpBodyResponse(ResponseContent response, Object fodApiResponse) throws IOException {
+
+        if (fodApiResponse instanceof PatchDastFileUploadResponse) {
+            return apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
+            }.getType());
+        } else if (fodApiResponse instanceof PutDastScanSetupResponse) {
+            return apiConnection.parseResponse(response, new TypeToken<PutDastScanSetupResponse>() {
+            }.getType());
+        } else if (fodApiResponse instanceof PostDastStartScanResponse) {
+            return apiConnection.parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
+            }.getType());
+        } else {
+
+            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
+            ((FodDastApiResponse) fodApiResponse).reason = response.message();
+            return (T) fodApiResponse;
+        }
     }
 
 }

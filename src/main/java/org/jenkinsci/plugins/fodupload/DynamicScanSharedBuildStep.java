@@ -112,8 +112,13 @@ public class DynamicScanSharedBuildStep {
                 dynamicScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
             }
 
-            if (!timeboxScan.isEmpty())
-                dynamicScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(timeboxScan));
+            try {
+                if (!timeboxScan.isEmpty())
+                    dynamicScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(timeboxScan));
+            } catch (NumberFormatException exception) {
+                // Should warn not throw in front end.
+                throw new IllegalArgumentException(" value for TimeBox Scan");
+            }
 
             dynamicScanSetupReqModel.setPolicy(scanPolicy);
             dynamicScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
