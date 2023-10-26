@@ -55,11 +55,7 @@ public class DynamicScanSharedBuildStep {
 
         model = new DynamicScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
                 releaseId, selectedReleaseType, webSiteUrl
-<<<<<<< .mine
                 , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanScope, selectedScanType
-=======
-                , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanScope,  selectedScanType
->>>>>>> .theirs
                 , selectedDynamicTimeZone, webSiteLoginMacroEnabled,
                 webSiteNetworkAuthSettingEnabled, enableRedundantPageDetection,
                 webSiteNetworkAuthUserName, loginMacroId, workflowMacroId, allowedHost
@@ -143,7 +139,6 @@ public class DynamicScanSharedBuildStep {
 
                 dynamicScanSetupReqModel.setNetworkAuthenticationSettings(networkSetting);
             }
-            dynamicScanSetupReqModel.setAllowFormSubmissions(allowFrmSubmission);
 
             if (scanScope) //if true => Restrict scan to URL directories and subdirectories
                 dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(scanScope);
@@ -218,7 +213,6 @@ public class DynamicScanSharedBuildStep {
                 networkAuthentication.setRequiresNetworkAuthentication(true);
                 dastWorkflowScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
-            dastWorkflowScanSetupReqModel.setAllowFormSubmissions(allowFrmSubmission);
 
             PutDastScanSetupResponse response = dynamicController.putDastWorkflowDrivenScanSettings(Integer.parseInt(userSelectedRelease),
                     dastWorkflowScanSetupReqModel);
