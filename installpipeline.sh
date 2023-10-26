@@ -1,5 +1,5 @@
 hoststr=localhost:8080
-javaexe="~/.jdks/corretto-1.8.0_322/bin/java.exe"
+javaexe="./jdk1.8.0_202/bin/java.exe"
 
 if [ $# -eq 0 ]
 then

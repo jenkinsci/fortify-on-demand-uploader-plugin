@@ -40,7 +40,6 @@ public class DynamicScanSharedBuildStep {
                                       String scanTimebox,
                                       List<String> standardScanTypeExcludeUrlsRow,
                                       String scanPolicyType, boolean scanScope,
-                                      boolean allowHttp, boolean allowFormSubmissionCrawl,
                                       String selectedScanType, String selectedDynamicTimeZone,
                                       boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                       boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
@@ -56,8 +55,7 @@ public class DynamicScanSharedBuildStep {
 
         model = new DynamicScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
                 releaseId, selectedReleaseType, webSiteUrl
-                , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanScope, allowHttp,
-                allowFormSubmissionCrawl, selectedScanType
+                , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanScope,  selectedScanType
                 , selectedDynamicTimeZone, webSiteLoginMacroEnabled,
                 webSiteNetworkAuthSettingEnabled, enableRedundantPageDetection,
                 webSiteNetworkAuthUserName, loginMacroId, workflowMacroId, allowedHost

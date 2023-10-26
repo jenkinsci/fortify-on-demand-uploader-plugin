@@ -140,7 +140,6 @@ public class DynamicScanJobModel {
                                String scanTimebox,
                                List<String> standardScanTypeExcludeUrls,
                                String scanPolicyType, boolean scanScope,
-                               boolean allowHttp, boolean allowFormSubmissionCrawl,
                                String selectedScanType, String selectedDynamicTimeZone,
                                boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,

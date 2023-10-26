@@ -109,19 +109,28 @@ public class DynamicScanController extends ControllerBase {
                             RequestBody.create(MediaType.parse("application/octet-stream"), temp))
                     .build();
 
+
             Request request = new Request.Builder().url(urlBuilder.build())
                     .addHeader("Accept", "application/octet-stream")
                     .addHeader("CorrelationId", getCorrelationId())
                     .patch(requestBody).build();
 
+
             ResponseContent response = apiConnection.request(request);
             PatchDastFileUploadResponse patchDastFileUploadResponse = new PatchDastFileUploadResponse();
             patchDastFileUploadResponse = convertHttpResponseIntoDastApiResponse(response, patchDastFileUploadResponse);
+            try {
+                temp.delete();
+            } catch (SecurityException ex) {
+                //ignore.
+            }
             return patchDastFileUploadResponse;
 
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             throw ex;
+        } finally {
+
         }
     }
 
@@ -159,7 +168,7 @@ public class DynamicScanController extends ControllerBase {
 
         } else {
 
-           return parseFailureResponse(response, fodApiResponse);
+            return parseFailureResponse(response, fodApiResponse);
 
         }
     }

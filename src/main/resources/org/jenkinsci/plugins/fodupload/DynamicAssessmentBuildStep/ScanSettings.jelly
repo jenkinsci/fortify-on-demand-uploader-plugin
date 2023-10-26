@@ -98,11 +98,6 @@
             <div id="dast-common-scope-attr"
                  class="fode-field spinner-container">
 
-                <f:checkbox title="Allow HTTP(:80) and HTTPS (:443)" field="allowHttp" id="allowHttp">
-                </f:checkbox>
-                <f:checkbox title="Allow form submission during crawl" field="allowFormSubmissionCrawl"
-                            id="allowFormSubmissionCrawl">
-                </f:checkbox>
                 <f:checkbox title="Enable redundant page detection" field="enableRedundantPageDetection"
                             id="enableRedundantPageDetection">
                 </f:checkbox>
@@ -184,9 +179,9 @@
                                  title="Login Macro"
                                  checked="${instance.webSiteLoginMacroEnabled}" inline="true">
                     <f:entry
-                            title="Please upload the login macro file. Supported extensions: *.har, *.webmacro, *.burp">
+                            title="Please upload the login macro file. Supported extension: *.webmacro">
                         <span>
-                            <input accept=".har,.webmacro,.brup" id="loginFileMacro" type="File" name="loginFileMacro"/>
+                            <input accept=".webmacro" id="loginFileMacro" type="File" name="loginFileMacro"/>
                             <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
                             <input type="label" hidden="true" value="" name="loginMacroId" id="loginMacroId"/>
 
