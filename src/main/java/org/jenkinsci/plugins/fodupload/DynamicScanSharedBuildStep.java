@@ -55,7 +55,11 @@ public class DynamicScanSharedBuildStep {
 
         model = new DynamicScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
                 releaseId, selectedReleaseType, webSiteUrl
+<<<<<<< .mine
                 , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanScope, selectedScanType
+=======
+                , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanScope,  selectedScanType
+>>>>>>> .theirs
                 , selectedDynamicTimeZone, webSiteLoginMacroEnabled,
                 webSiteNetworkAuthSettingEnabled, enableRedundantPageDetection,
                 webSiteNetworkAuthUserName, loginMacroId, workflowMacroId, allowedHost
