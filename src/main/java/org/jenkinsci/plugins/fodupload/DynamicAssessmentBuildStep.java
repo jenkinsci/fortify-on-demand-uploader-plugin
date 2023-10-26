@@ -43,7 +43,6 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                       String scanTimebox,
                                       List<String> standardScanTypeExcludedUrls,
                                       String scanPolicyType, boolean scanScope,
-                                      boolean allowHttp, boolean allowFormSubmissionCrawl,
                                       String selectedScanType, String selectedDynamicTimeZone,
                                       boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                       boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
@@ -62,7 +61,6 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 scanTimebox,
                 standardScanTypeExcludedUrls,
                 scanPolicyType, scanScope,
-                allowHttp, allowFormSubmissionCrawl,
                 selectedScanType, selectedDynamicTimeZone,
                 webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled,
                 enableRedundantPageDetection, webSiteNetworkAuthUserName,
@@ -77,7 +75,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
             dynamicSharedUploadBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicyType,
-                    webSiteUrl, allowFormSubmissionCrawl, allowHttp, scanScope, enableRedundantPageDetection, dastEnv,
+                    webSiteUrl, scanScope, enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName,
                     webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimebox);
 
@@ -85,7 +83,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
             dynamicSharedUploadBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicyType,
-                    allowFormSubmissionCrawl, allowHttp, enableRedundantPageDetection, dastEnv,
+                     enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType);
         } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
             //API scan setting goes here.

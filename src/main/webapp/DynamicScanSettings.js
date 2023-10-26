@@ -325,7 +325,7 @@ class DynamicScanSettings {
             rows.show();
             jq('.fode-row-bsi').hide();
 
-            let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo(),true)
+            let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo(), true)
                 .then(r => this.scanSettings = r).catch((err) => {
                         console.error("release settings api failed: " + err);
                         throw err;
@@ -338,7 +338,7 @@ class DynamicScanSettings {
                     console.error("entitlement api failed");
                     throw err;
                 });
-           //ToDo- read from constant instead of API
+            //ToDo- read from constant instead of API
             let tzs = this.api.getTimeZoneStacks(getAuthInfo())
                 .then(r => this.timeZones = r).catch(
                     (err) => {
@@ -386,10 +386,7 @@ class DynamicScanSettings {
                         this.setWorkflowDrivenScanSetting();
                         /*Set restrict scan value from response to UI */
                         this.setRestrictScan();
-                        /*set allow http(s) */
-                        this.setHttpSettings();
-                        /* Set Allow Form Submission*/
-                        this.setFormSubmission();
+
                         /*Set network settings from response. */
                         jq('#ddlNetworkAuthType').val(networkAuthTypes);
                         this.onNetworkAuthTypeLoad();
@@ -587,17 +584,6 @@ class DynamicScanSettings {
         }
     }
 
-    setHttpSettings() {
-        if (this.scanSettings !== undefined && this.scanSettings.allowSameHostRedirects !== undefined) {
-            jq('#allowHttp').prop('checked', this.scanSettings.allowSameHostRedirects);
-        }
-    }
-
-    setFormSubmission() {
-        if (this.scanSettings !== undefined && this.scanSettings.allowFormSubmissions !== null || undefined) {
-            jq('#allowHttp').prop('checked', this.scanSettings.allowFormSubmissionCrawl);
-        }
-    }
 
     setScanPolicy() {
 

@@ -40,7 +40,6 @@ public class DynamicScanSharedBuildStep {
                                       String scanTimebox,
                                       List<String> standardScanTypeExcludeUrlsRow,
                                       String scanPolicyType, boolean scanScope,
-                                      boolean allowHttp, boolean allowFormSubmissionCrawl,
                                       String selectedScanType, String selectedDynamicTimeZone,
                                       boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                       boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
@@ -56,8 +55,7 @@ public class DynamicScanSharedBuildStep {
 
         model = new DynamicScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
                 releaseId, selectedReleaseType, webSiteUrl
-                , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanScope, allowHttp,
-                allowFormSubmissionCrawl, selectedScanType
+                , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanScope, selectedScanType
                 , selectedDynamicTimeZone, webSiteLoginMacroEnabled,
                 webSiteNetworkAuthSettingEnabled, enableRedundantPageDetection,
                 webSiteNetworkAuthUserName, loginMacroId, workflowMacroId, allowedHost
@@ -88,7 +86,7 @@ public class DynamicScanSharedBuildStep {
     public void saveReleaseSettingsForWebSiteScan(String userSelectedRelease, String assessmentTypeID,
                                                   String entitlementId, String entitlementFreq, String loginMacroId,
                                                   String timeZone, String scanPolicy, String webSiteAssessmentUrl,
-                                                  boolean allowFrmSubmission, boolean allowSameHostRedirect, boolean scanScope,
+                                                  boolean scanScope,
                                                   boolean redundantPageDetection, String scanEnvironment,
                                                   boolean requireNetworkAuth, boolean requireLoginMacroAuth,
                                                   String networkAuthUserName, String networkAuthPassword
@@ -172,7 +170,6 @@ public class DynamicScanSharedBuildStep {
                                                          String entitlementId, String entitlementFreq, String workflowMacroId,
                                                          String workflowMacroHosts,
                                                          String timeZone, String scanPolicy,
-                                                         boolean allowFrmSubmission, boolean allowSameHostRedirect,
                                                          boolean redundantPageDetection, String scanEnvironment,
                                                          boolean requireNetworkAuth,
                                                          String networkAuthUserName, String networkAuthPassword
