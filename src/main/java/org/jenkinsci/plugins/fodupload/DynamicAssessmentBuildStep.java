@@ -302,9 +302,9 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 patchDastScanFileUploadReq.Content = fileContent.getBytes();
                 PatchDastFileUploadResponse response = dynamicScanController.PatchDynamicScan(patchDastScanFileUploadReq);
 
-                if (response.fileId <= 0) {
-                    throw new IllegalArgumentException("At least one host must be selected for releaseId " + releaseId);
-                }
+//                if (response.fileId <= 0) {
+//                    throw new IllegalArgumentException("At least one host must be selected for releaseId " + releaseId);
+//                }
                 return response;
 
             } catch (Exception ex) {

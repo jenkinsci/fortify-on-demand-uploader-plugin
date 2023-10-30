@@ -356,21 +356,20 @@ class Api {
 
     patchSetupManifestFile(releaseId, customAuth, file, fileType) {
         debugger;
-        return new Promise((res, reject) => {
+        return new Promise((accept, reject) => {
             let fileReader = new FileReader();
             let fileContent = fileReader.readAsBinaryString(file);
             fileReader.onload = () => {
                 fileContent = fileReader.result;
 
-                this.descriptor.patchSetupManifestFile(releaseId, customAuth, fileContent, fileType, async t => {
-                    console.log(t);
-                    console.log(t.responseJSON);
-                    // const responseJSON = JSON.parse(t.responseJSON);
-                    //console.log(responseJSON);
-                    if (t.responseJSON !== null || undefined)
-                        return res(t.responseJSON);
+                this.descriptor.patchSetupManifestFile(releaseId, customAuth, fileContent, fileType, async res => {
+                    console.log(res);
+                    console.log(res.responseJSON);
+
+                    if (res.responseJSON !== null && res.responseJSON.isSuccess ===true)
+                        return accept(res.responseJSON);
                     else
-                        return reject();
+                        return reject(res.responseJSON.reason);
                 })
             };
         });
