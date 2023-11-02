@@ -18,16 +18,7 @@ public class PutDastScanSetupReqModel {
 
     boolean allowSameHostRedirects;
 
-    //ToDo:- Discuss with PM as these are removed from API
-    //    private boolean enableRedundantPageDetection;
-    //
-    //    public boolean isEnableRedundantPageDetection() {
-    //        return enableRedundantPageDetection;
-    //    }
-    //
-    //    public void setEnableRedundantPageDetection(boolean enableRedundantPageDetection) {
-    //        this.enableRedundantPageDetection = enableRedundantPageDetection;
-    //    }
+
 
     public NetworkAuthentication getNetworkAuthenticationSettings() {
         return new NetworkAuthentication();

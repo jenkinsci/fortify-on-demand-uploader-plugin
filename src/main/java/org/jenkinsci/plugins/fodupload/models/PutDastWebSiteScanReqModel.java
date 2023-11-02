@@ -33,7 +33,15 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
         this.dynamicSiteUrl = dynamicSiteUrl;
     }
     private String dynamicSiteUrl;
+    private boolean enableRedundantPageDetection;
 
+    public boolean isEnableRedundantPageDetection() {
+        return enableRedundantPageDetection;
+    }
+
+    public void setEnableRedundantPageDetection(boolean enableRedundantPageDetection) {
+        this.enableRedundantPageDetection = enableRedundantPageDetection;
+    }
     public void setRequiresSiteAuthentication(boolean requiresSiteAuthentication) {
         this.requiresSiteAuthentication = requiresSiteAuthentication;
     }
@@ -50,6 +58,6 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     int timeBoxInHours;
     private ExclusionsList exclusionsList;
     public class ExclusionsList {
-        public String[] value;
+        public String  value;
     }
 }

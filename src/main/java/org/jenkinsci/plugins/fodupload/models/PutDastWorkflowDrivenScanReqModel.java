@@ -15,6 +15,16 @@ public class PutDastWorkflowDrivenScanReqModel extends PutDastScanSetupReqModel 
           ]
         }
       ], */
+
+    private boolean enableRedundantPageDetection;
+
+    public boolean isEnableRedundantPageDetection() {
+        return enableRedundantPageDetection;
+    }
+
+    public void setEnableRedundantPageDetection(boolean enableRedundantPageDetection) {
+        this.enableRedundantPageDetection = enableRedundantPageDetection;
+    }
     public List<WorkflowDrivenMacro> workflowDrivenMacro;
 
 }

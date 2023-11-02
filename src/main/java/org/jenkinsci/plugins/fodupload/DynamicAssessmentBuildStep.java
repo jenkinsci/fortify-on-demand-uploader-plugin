@@ -33,7 +33,7 @@ import java.util.UUID;
 
 public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildStep {
 
-    DynamicScanSharedBuildStep dynamicSharedUploadBuildStep;
+    DynamicScanSharedBuildStep dynamicSharedBuildStep;
 
     @DataBoundConstructor
     public DynamicAssessmentBuildStep(boolean overrideGlobalConfig, String username,
@@ -54,7 +54,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                       String selectedDynamicGeoLocation, String selectedNetworkAuthType
     ) throws IllegalArgumentException, IOException {
 
-        dynamicSharedUploadBuildStep = new DynamicScanSharedBuildStep(overrideGlobalConfig, username,
+        dynamicSharedBuildStep = new DynamicScanSharedBuildStep(overrideGlobalConfig, username,
                 personalAccessToken, tenantId,
                 releaseId, selectedReleaseType,
                 webSiteUrl, dastEnv,
@@ -73,7 +73,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
         if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
 
-            dynamicSharedUploadBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
+            dynamicSharedBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicyType,
                     webSiteUrl, scanScope, enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName,
@@ -81,9 +81,9 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
         } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
 
-            dynamicSharedUploadBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
+            dynamicSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicyType,
-                     enableRedundantPageDetection, dastEnv,
+                    enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType);
         } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
             //API scan setting goes here.
@@ -96,7 +96,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
 
-        if (dynamicSharedUploadBuildStep.getModel() == null) {
+        if (dynamicSharedBuildStep.getModel() == null) {
             System.out.println("job model is null");
             throw new IllegalArgumentException("DAST model not been set");
         }
@@ -116,14 +116,14 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
         }
 
         String correlationId = UUID.randomUUID().toString();
-        dynamicSharedUploadBuildStep.perform(build, workspace, launcher, listener, correlationId);
+        dynamicSharedBuildStep.perform(build, workspace, launcher, listener, correlationId);
 
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
         crossBuildAction.setPreviousStepBuildResult(build.getResult());
 
 
         if (Result.SUCCESS.equals(crossBuildAction.getPreviousStepBuildResult())) {
-            crossBuildAction.setScanId(dynamicSharedUploadBuildStep.getScanId());
+            crossBuildAction.setScanId(dynamicSharedBuildStep.getScanId());
             crossBuildAction.setCorrelationId(correlationId);
         }
         try {
@@ -137,38 +137,38 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
     @SuppressWarnings("unused")
     @JavaScriptMethod
     public String getSelectedReleaseType() {
-        if (dynamicSharedUploadBuildStep != null && dynamicSharedUploadBuildStep.getModel() != null)
-            return dynamicSharedUploadBuildStep.getModel().getSelectedReleaseType();
+        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null)
+            return dynamicSharedBuildStep.getModel().getSelectedReleaseType();
         return "";
     }
 
     @SuppressWarnings("unused")
     @JavaScriptMethod
     public String getReleaseId() {
-        if (dynamicSharedUploadBuildStep != null && dynamicSharedUploadBuildStep.getModel() != null)
-            return dynamicSharedUploadBuildStep.getModel().get_releaseId();
+        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null)
+            return dynamicSharedBuildStep.getModel().get_releaseId();
         else return "";
     }
 
 
     @SuppressWarnings("unused")
     public String getUsername() {
-        if (dynamicSharedUploadBuildStep != null && dynamicSharedUploadBuildStep.getModel() != null)
-            return dynamicSharedUploadBuildStep.getAuthModel().getUsername();
+        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null)
+            return dynamicSharedBuildStep.getAuthModel().getUsername();
         else return "";
     }
 
     @SuppressWarnings("unused")
     public String getPersonalAccessToken() {
-        if (dynamicSharedUploadBuildStep != null && dynamicSharedUploadBuildStep.getModel() != null) {
-            return dynamicSharedUploadBuildStep.getAuthModel().getPersonalAccessToken();
+        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null) {
+            return dynamicSharedBuildStep.getAuthModel().getPersonalAccessToken();
         } else return "";
     }
 
     @SuppressWarnings("unused")
     public String getTenantId() {
-        if (dynamicSharedUploadBuildStep != null && dynamicSharedUploadBuildStep.getModel() != null)
-            return dynamicSharedUploadBuildStep.getAuthModel().getTenantId();
+        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null)
+            return dynamicSharedBuildStep.getAuthModel().getTenantId();
         else {
             return "";
         }
@@ -176,8 +176,8 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
     @SuppressWarnings("unused")
     public boolean getOverrideGlobalConfig() {
-        if (dynamicSharedUploadBuildStep != null && dynamicSharedUploadBuildStep.getModel() != null) {
-            return dynamicSharedUploadBuildStep.getAuthModel().getOverrideGlobalConfig();
+        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null) {
+            return dynamicSharedBuildStep.getAuthModel().getOverrideGlobalConfig();
         }
         return false;
     }
@@ -186,7 +186,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
     @JavaScriptMethod
     public String getUserSelectedRelease() {
         System.out.println("user selected release");
-        return dynamicSharedUploadBuildStep.getModel().getUserSelectedRelease();
+        return dynamicSharedBuildStep.getModel().getUserSelectedRelease();
     }
 
 
@@ -194,7 +194,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
     @JavaScriptMethod
     public String getUserSelectedApplication() {
         System.out.println("user selected application");
-        return dynamicSharedUploadBuildStep.getModel().getUserSelectedApplication();
+        return dynamicSharedBuildStep.getModel().getUserSelectedApplication();
     }
 
     @Override
@@ -220,38 +220,26 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             return "Fortify on Demand Dynamic Assessment";
         }
 
-
         @SuppressWarnings("unused")
         public ListBoxModel doFillSelectedReleaseTypeItems() {
-            return doFillFromEnum(FodEnums.DastReleaseType.class);
-        }
-
-        @SuppressWarnings("unused")
-        public static ListBoxModel doFillSelectedScanCentralBuildTypeItems() {
-            return doFillFromEnum(FodEnums.SelectedScanCentralBuildType.class);
+            return DynamicScanSharedBuildStep.doFillSelectedReleaseTypeItems();
         }
 
         @SuppressWarnings("unused")
         public static ListBoxModel doFillDastEnvItems() {
-            return doFillFromEnum(FodEnums.DastEnvironmentType.class);
+            return DynamicScanSharedBuildStep.doFillDastEnvItems();
+
         }
 
         @SuppressWarnings("unused")
         public static ListBoxModel doFillScanTypeItems() {
-            return doFillFromEnum(FodEnums.DastScanType.class);
+            return DynamicScanSharedBuildStep.doFillScanTypeItems();
+
         }
 
         @SuppressWarnings("unused")
-        public static ListBoxModel doFillScanPolicyTypeItems() {
-            return doFillFromEnum(FodEnums.DastPolicy.class);
-        }
-
-        private static <T extends Enum<T>> ListBoxModel doFillFromEnum(Class<T> enumClass) {
-            ListBoxModel items = new ListBoxModel();
-            for (T selected : EnumSet.allOf(enumClass)) {
-                items.add(new ListBoxModel.Option(selected.toString(), selected.name()));
-            }
-            return items;
+        public static ListBoxModel doFillScanPolicyItems() {
+            return DynamicScanSharedBuildStep.doFillScanPolicyItems();
         }
 
         @SuppressWarnings("unused")
@@ -300,12 +288,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 }
 
                 patchDastScanFileUploadReq.Content = fileContent.getBytes();
-                PatchDastFileUploadResponse response = dynamicScanController.PatchDynamicScan(patchDastScanFileUploadReq);
-
-//                if (response.fileId <= 0) {
-//                    throw new IllegalArgumentException("At least one host must be selected for releaseId " + releaseId);
-//                }
-                return response;
+                return dynamicScanController.PatchDynamicScan(patchDastScanFileUploadReq);
 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
@@ -357,7 +340,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
         @SuppressWarnings("unused")
         public ListBoxModel doFillPersonalAccessTokenItems(@AncestorInPath Job job) {
-            return SharedUploadBuildStep.doFillStringCredentialsItems(job);
+            return DynamicScanSharedBuildStep.doFillStringCredentialsItems(job);
         }
 
         @SuppressWarnings("unused")
@@ -442,7 +425,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId,
                                                                   @AncestorInPath Job job) throws FormValidation {
             job.checkPermission(Item.CONFIGURE);
-            return SharedUploadBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
+            return DynamicScanSharedBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
         }
     }
 

@@ -1,24 +1,36 @@
 package org.jenkinsci.plugins.fodupload;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.*;
 import hudson.model.Result;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import hudson.security.ACL;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
+import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
 import org.jenkinsci.plugins.fodupload.controllers.DynamicScanController;
 import org.jenkinsci.plugins.fodupload.models.*;
+import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDastScanSetupResponse;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.PostDastStartScanResponse;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.verb.POST;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+
+import static org.jenkinsci.plugins.fodupload.Utils.FOD_URL_ERROR_MESSAGE;
+import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
 
 public class DynamicScanSharedBuildStep {
     private final DynamicScanJobModel model;
@@ -32,6 +44,11 @@ public class DynamicScanSharedBuildStep {
     public static final String TENANT_ID = "tenantId";
 
     private int scanId;
+
+    public DynamicScanSharedBuildStep(DynamicScanJobModel model, AuthenticationModel authModel) {
+        this.model = model;
+        this.authModel = authModel;
+    }
 
     public DynamicScanSharedBuildStep(boolean overrideGlobalConfig, String username,
                                       String personalAccessToken, String tenantId,
@@ -104,6 +121,7 @@ public class DynamicScanSharedBuildStep {
             dynamicScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dynamicScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dynamicScanSetupReqModel.setTimeZone(timeZone);
+            dynamicScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
             dynamicScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
 
             if (!Objects.equals(loginMacroId, "") && loginMacroId != null && requireLoginMacroAuth) {
@@ -184,6 +202,7 @@ public class DynamicScanSharedBuildStep {
             dastWorkflowScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dastWorkflowScanSetupReqModel.setTimeZone(timeZone);
             dastWorkflowScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
+            dastWorkflowScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
 
             if (workflowMacroId.isEmpty() || workflowMacroHosts.isEmpty()) {
 
@@ -285,7 +304,7 @@ public class DynamicScanSharedBuildStep {
                 build.setDescription(String.format("Successfully triggered Dynamic scan for scan id %d", response.getScanId()));
             } else {
                 build.setResult(Result.FAILURE);
-                build.setDescription(String.format("Failed to trigger Dynamic scan for release id %d", releaseId));
+                build.setDescription(String.format("Failed to trigger Dynamic scan for release id %d with error %s", releaseId, ""));
             }
 
 
@@ -293,6 +312,152 @@ public class DynamicScanSharedBuildStep {
             build.setResult(Result.FAILURE);
             throw new RuntimeException(e);
         }
+    }
+
+    public static ListBoxModel doFillEntitlementPreferenceItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.EntitlementPreferenceType preferenceType : FodEnums.EntitlementPreferenceType.values()) {
+            items.add(new ListBoxModel.Option(preferenceType.toString(), preferenceType.getValue()));
+        }
+
+        return items;
+    }
+
+    public static ListBoxModel doFillStringCredentialsItems(@AncestorInPath Job job) {
+        job.checkPermission(Item.CONFIGURE);
+        ListBoxModel items = CredentialsProvider.listCredentials(
+                StringCredentials.class,
+                Jenkins.get(),
+                ACL.SYSTEM,
+                null,
+                null
+        );
+
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillDastEnvItems() {
+        return doFillFromEnum(FodEnums.DastEnvironmentType.class);
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillScanTypeItems() {
+        return doFillFromEnum(FodEnums.DastScanType.class);
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillScanPolicyItems() {
+        return doFillFromEnum(FodEnums.DastPolicy.class);
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillInProgressScanActionTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.InProgressScanActionType scanActionType : FodEnums.InProgressScanActionType.values()) {
+            items.add(new ListBoxModel.Option(scanActionType.toString(), scanActionType.getValue()));
+        }
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillInProgressBuildResultTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.InProgressBuildResultType buildResultType : FodEnums.InProgressBuildResultType.values()) {
+            items.add(new ListBoxModel.Option(buildResultType.toString(), buildResultType.getValue()));
+        }
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillSelectedReleaseTypeItems() {
+        ListBoxModel items = new ListBoxModel();
+        for (FodEnums.SelectedReleaseType selectedReleaseType : FodEnums.SelectedReleaseType.values()) {
+            items.add(new ListBoxModel.Option(selectedReleaseType.toString(), selectedReleaseType.getValue()));
+        }
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static ListBoxModel doFillSelectedScanCentralBuildTypeItems() {
+        return doFillFromEnum(FodEnums.SelectedScanCentralBuildType.class);
+    }
+
+    private static <T extends Enum<T>> ListBoxModel doFillFromEnum(Class<T> enumClass) {
+        ListBoxModel items = new ListBoxModel();
+        for (T selected : EnumSet.allOf(enumClass)) {
+            items.add(new ListBoxModel.Option(selected.toString(), selected.name()));
+        }
+        return items;
+    }
+
+    @SuppressWarnings("unused")
+    public static GenericListResponse<ApplicationApiResponse> customFillUserSelectedApplicationList(String searchTerm, int offset, int limit, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
+        ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
+        return applicationController.getApplicationList(searchTerm, offset, limit);
+    }
+
+    public static org.jenkinsci.plugins.fodupload.models.Result<ApplicationApiResponse> customFillUserApplicationById(int applicationId, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
+        ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, null);
+        org.jenkinsci.plugins.fodupload.models.Result<ApplicationApiResponse> result = applicationsController.getApplicationById(applicationId);
+
+        return result;
+    }
+
+    public static List<MicroserviceApiResponse> customFillUserSelectedMicroserviceList(int applicationId, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
+        ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
+        return applicationController.getMicroserviceListByApplication(applicationId);
+    }
+
+    public static GenericListResponse<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, String searchTerm, Integer offset, Integer limit, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
+        ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
+        return applicationController.getReleaseListByApplication(applicationId, microserviceId, searchTerm, offset, limit);
+    }
+
+    public static org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> customFillUserReleaseById(int releaseId, AuthenticationModel authModel) throws IOException {
+        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
+        ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, null);
+        org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> result = applicationsController.getReleaseById(releaseId);
+
+        return result;
+    }
+
+    public static EntitlementSettings customFillEntitlementSettings(int releaseId, AuthenticationModel authModel) throws IOException {
+        return new EntitlementSettings(
+                1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
+                1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
+                1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
+                1, 1, false);
+    }
+
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    @POST
+    public static FormValidation doTestPersonalAccessTokenConnection(final String username,
+                                                                     final String personalAccessToken,
+                                                                     final String tenantId,
+                                                                     @AncestorInPath Job job) throws FormValidation {
+        job.checkPermission(Item.CONFIGURE);
+        FodApiConnection testApi;
+        String baseUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getBaseUrl();
+        String apiUrl = GlobalConfiguration.all().get(FodGlobalDescriptor.class).getApiUrl();
+        String plainTextPersonalAccessToken = Utils.retrieveSecretDecryptedValue(personalAccessToken);
+        if (Utils.isNullOrEmpty(isValidUrl(baseUrl)))
+            return FormValidation.error(FOD_URL_ERROR_MESSAGE);
+        if (Utils.isNullOrEmpty(isValidUrl(apiUrl)))
+            return FormValidation.error(FOD_URL_ERROR_MESSAGE);
+        if (Utils.isNullOrEmpty(username))
+            return FormValidation.error("Username is empty!");
+        if (!Utils.isCredential(personalAccessToken))
+            return FormValidation.error("Personal Access Token is empty!");
+        if (Utils.isNullOrEmpty(tenantId))
+            return FormValidation.error("Tenant ID is null.");
+        testApi = new FodApiConnection(tenantId + "\\" + username, plainTextPersonalAccessToken, baseUrl, apiUrl, FodEnums.GrantType.PASSWORD, "api-tenant", false, null, null);
+        return GlobalConfiguration.all().get(FodGlobalDescriptor.class).testConnection(testApi);
+
     }
 }
 
