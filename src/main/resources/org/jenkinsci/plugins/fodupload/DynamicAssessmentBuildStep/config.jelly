@@ -52,8 +52,8 @@
     <f:section title="Authentication - Select to override global authentication settings">
         <f:optionalBlock name="overrideGlobalConfig" field="overrideGlobalConfig"
                          title="Configure Personal Access Token" inline="true">
-            <st:include page="/org/jenkinsci/plugins/fodupload/StaticAssessmentBuildStep/AuthenticationOverride.jelly"
-                        class="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep"/>
+            <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/AuthenticationOverride.jelly"
+                        class="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"/>
         </f:optionalBlock>
     </f:section>
 

@@ -89,7 +89,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             //API scan setting goes here.
 
         } else
-            throw new IllegalArgumentException("Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
+            throw new IllegalArgumentException("Not a Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
 
     }
 

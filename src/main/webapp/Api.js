@@ -313,21 +313,6 @@ class Api {
         });
     }
 
-    getDynamicScanSettings(releaseId, customAuth) {
-        return new Promise((res, rej) => {
-            this.descriptor.retrieveDynamicScanSettings(releaseId, customAuth, async t => {
-                const responseJSON = JSON.parse(t.responseJSON);
-
-                if (responseJSON === null || undefined) {
-                    return rej("Error DAST Scan settings not retrieved.");
-                }
-                console.log("Dynamic Scan Settings");
-                console.log(responseJSON);
-                return res(responseJSON);
-            });
-        });
-    }
-
     getNetworkAuthType(customAuth) {
 
         return new Promise((res, reject) => {
@@ -340,18 +325,6 @@ class Api {
             })
         });
 
-    }
-
-    getDynamicAssessmentTypeEntitlements(isMicroservice, customAuth) {
-        return new Promise((res, rej) => {
-            this.descriptor.retrieveAssessmentTypeEntitlements(isMicroservice, customAuth, async t => {
-                const responseJSON = JSON.parse(t.responseJSON);
-
-                if (responseJSON === null) return res(null);
-
-                return res(this._modifyDynamicAssessmentEntitlements(responseJSON));
-            });
-        });
     }
 
     patchSetupManifestFile(releaseId, customAuth, file, fileType) {
@@ -376,9 +349,6 @@ class Api {
     }
 
 //-----------------------Dynamic Scan Settings-------------
-    setDastFileUpload() {
-
-    }
 
     _modifyDynamicAssessmentEntitlements(responseJSON) {
         if (Array.isArray(responseJSON) && responseJSON.length > 0) {

@@ -11,7 +11,7 @@ const dastScanSelectDefaultValues =
     {
         "WebSiteScan": {"ScanPolicy": "standard"},
         "WorkflowDrivenScan": {"ScanPolicy": "standard"},
-        "ApiScan": {"ScanPolicy": "high"}
+        "ApiScan": {"ScanPolicy": "API Scan"}
     }
 
 class DynamicScanSettings {
@@ -132,6 +132,7 @@ class DynamicScanSettings {
     }
 
     commonScopeSettingVisibility(isVisible) {
+        let dastCommonScopeSetting = 'dast-common-scan-scope';
         let commonScopeRows = jq('.' + dastCommonScopeSetting);
         if ((isVisible === undefined) || isVisible === false) {
             commonScopeRows.hide();
@@ -146,7 +147,7 @@ class DynamicScanSettings {
             case "Standard":
                 jq('#' + selectControl).val(dastScanSelectDefaultValues.WebSiteScan.ScanPolicy);
                 break;
-            case "Workflow":
+            case "Workflow-driven":
                 jq('#' + selectControl).val(dastScanSelectDefaultValues.WorkflowDrivenScan.ScanPolicy);
                 break;
         }
@@ -439,7 +440,7 @@ class DynamicScanSettings {
 
 
     setSelectedEntitlementValue(entitlements) {
-
+        debugger;
         let currValSelected = false;
         let curVal = getEntitlementDropdownValue(this.scanSettings.entitlementId, this.scanSettings.entitlementFrequencyType);
         let entitlement = jq('#entitlementSelectList');
@@ -586,21 +587,22 @@ class DynamicScanSettings {
 
 
     setScanPolicy() {
-
+        debugger;
         if (this.scanSettings !== undefined && this.scanSettings.policy !== null || undefined) {
-            let selectedScanType = this.scanSettings.policy
+            let selectedScanPolicyType = this.scanSettings.policy;
+            let ScanPolicy = ["Standard", "Critical and high", "Passive", "API Scan"]
             let scanPolicySel = jq('#dast-standard-scan-policy').find('select');
             let currValSelected = false;
             scanPolicySel.find('option').not(':first').remove();
             scanPolicySel.find('option').first().prop('selected', true);
 
-            for (let s of Object.keys(dastScanTypes)) {
-                let at = dastScanTypes[s];
-                if (at.text !== undefined && selectedScanType !== undefined && selectedScanType.toLowerCase() === at.text.toLowerCase()) {
+            for (let p of ScanPolicy) {
+
+                if (selectedScanPolicyType !== undefined && selectedScanPolicyType.toLowerCase() === p.toLowerCase()) {
                     currValSelected = true;
-                    scanPolicySel.append(`<option value="${at.value}" selected>${at.text}</option>`);
+                    scanPolicySel.append(`<option value="${p}" selected>${p}</option>`);
                 } else {
-                    scanPolicySel.append(`<option value="${at.value}">${at.text}</option>`);
+                    scanPolicySel.append(`<option value="${p}">${p}</option>`);
                 }
             }
         }

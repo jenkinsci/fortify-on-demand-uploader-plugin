@@ -67,7 +67,7 @@
 
         <!-- workflow scan !-->
         <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
-            <div id="dast-workflow-macro-upload" class="fode-field spinner-container">
+            <div id="dast-workflow-macro-upload" class="fode-field spinner-container dast-workflow-scan">
                 <span>
                     <input accept=".har,.webmacro,.brup" id="workflowMacroFile" type="File" name="workflowMacroFile"/>
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
@@ -121,7 +121,7 @@
 
         <f:entry title="Scan Policy">
             <div id="dast-standard-scan-policy" class="fode-field spinner-container">
-                <f:select field="scanPolicyType"/>
+                <f:select field="scanPolicy"/>
             </div>
         </f:entry>
         <f:entry>
