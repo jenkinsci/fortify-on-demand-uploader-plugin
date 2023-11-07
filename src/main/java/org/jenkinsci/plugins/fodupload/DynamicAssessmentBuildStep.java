@@ -40,9 +40,9 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                       String personalAccessToken, String tenantId,
                                       String releaseId, String selectedReleaseType,
                                       String webSiteUrl, String dastEnv,
-                                      String scanTimebox,
+                                      String scanTimeBox,
                                       List<String> standardScanTypeExcludedUrls,
-                                      String scanPolicyType, boolean scanScope,
+                                      String scanPolicy, boolean scanScope,
                                       String selectedScanType, String selectedDynamicTimeZone,
                                       boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
                                       boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
@@ -51,16 +51,16 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                       String userSelectedRelease, String assessmentTypeId,
                                       String entitlementId,
                                       String entitlementFrequencyType, String userSelectedEntitlement,
-                                      String selectedDynamicGeoLocation, String selectedNetworkAuthType
+                                      String selectedDynamicGeoLocation, String selectedNetworkAuthType, boolean timeBoxChecked
     ) throws IllegalArgumentException, IOException {
 
         dynamicSharedBuildStep = new DynamicScanSharedBuildStep(overrideGlobalConfig, username,
                 personalAccessToken, tenantId,
                 releaseId, selectedReleaseType,
                 webSiteUrl, dastEnv,
-                scanTimebox,
+                scanTimeBox,
                 standardScanTypeExcludedUrls,
-                scanPolicyType, scanScope,
+                scanPolicy, scanScope,
                 selectedScanType, selectedDynamicTimeZone,
                 webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled,
                 enableRedundantPageDetection, webSiteNetworkAuthUserName,
@@ -69,20 +69,20 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 userSelectedRelease, assessmentTypeId,
                 entitlementId,
                 entitlementFrequencyType, userSelectedEntitlement,
-                selectedDynamicGeoLocation, selectedNetworkAuthType);
+                selectedDynamicGeoLocation, selectedNetworkAuthType ,timeBoxChecked);
 
         if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
 
             dynamicSharedBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                    entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicyType,
+                    entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicy,
                     webSiteUrl, scanScope, enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName,
-                    webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimebox);
+                    webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimeBox);
 
         } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
 
             dynamicSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                    entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicyType,
+                    entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicy,
                     enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType);
         } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {

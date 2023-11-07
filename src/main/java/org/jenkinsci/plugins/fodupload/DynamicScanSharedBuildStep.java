@@ -65,7 +65,8 @@ public class DynamicScanSharedBuildStep {
                                       String userSelectedRelease, String assessmentTypeId,
                                       String entitlementId,
                                       String entitlementFrequencyType, String userSelectedEntitlement,
-                                      String selectedDynamicGeoLocation, String selectedNetworkAuthType) {
+                                      String selectedDynamicGeoLocation, String selectedNetworkAuthType,
+                                      boolean timeBoxChecked) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
 

@@ -127,9 +127,10 @@
         <f:entry>
             <div id="dast-timeBox-scan">
 
-                <f:optionalBlock name="timeBox" title="Timebox Scan Duration (Hours)">
+                <f:optionalBlock field="timeBoxChecked" name="timeBoxChecked" title="Timebox Scan Duration (Hours)"
+                checked="${instance.timeBoxChecked}}" inline="true">
                     <div>
-                        <f:textbox field="scanTimebox"/>
+                        <f:textbox name="scanTimeBox" field="scanTimeBox"  />
                         <t:help tooltip="Allowed Values are between 1(hr) and 24 (hrs)"/>
                     </div>
                 </f:optionalBlock>
