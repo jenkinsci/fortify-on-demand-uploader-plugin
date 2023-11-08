@@ -14,7 +14,7 @@ const dastScanSelectDefaultValues =
         "ApiScan": {"ScanPolicy": "API Scan"}
     }
 
-class DynamicScanSettings {
+class DastScanSettings {
 
     constructor() {
         this.api = new Api(instance, descriptor);
@@ -380,6 +380,8 @@ class DynamicScanSettings {
                         //Set scan policy from the response.
                         this.setScanPolicy();
 
+                        this.setTimeBoxScan();
+
                         //Set the Website assessment scan type specific settings.
                         if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
                             jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.urls[0]);
@@ -449,6 +451,7 @@ class DynamicScanSettings {
             if (curVal !== undefined && at.value !== undefined && curVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
                 entitlement.append(`<option value="${at.text}" selected>${at.text}</option>`);
+                jq('#entitlementId').val(at.text);
             } else {
                 entitlement.append(`<option value="${at.text}">${at.text}</option>`);
             }
@@ -605,6 +608,15 @@ class DynamicScanSettings {
                     scanPolicySel.append(`<option value="${p}">${p}</option>`);
                 }
             }
+        }
+    }
+
+    setTimeBoxScan()
+    {
+        if(this.scanSettings.timeBoxInHours!==undefined)
+        {
+            jq('#scanTimeBox').val(this.scanSettings.timeBoxInHours);
+            jq('#timeBoxChecked').find('input:checkbox:first').trigger('click');
         }
     }
 
@@ -800,7 +812,7 @@ class DynamicScanSettings {
 
 }
 
-const scanSettings = new DynamicScanSettings();
+const scanSettings = new DastScanSettings();
 
 spinAndWait(() => jq('#selectedRelease').text() !== undefined && jq('#selectedRelease').text() !== '')
     .then(scanSettings.preinit.bind(scanSettings));

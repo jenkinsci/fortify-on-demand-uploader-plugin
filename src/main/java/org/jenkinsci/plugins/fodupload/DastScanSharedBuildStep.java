@@ -13,7 +13,7 @@ import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
-import org.jenkinsci.plugins.fodupload.controllers.DynamicScanController;
+import org.jenkinsci.plugins.fodupload.controllers.DastScanController;
 import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDastScanSetupResponse;
@@ -32,8 +32,8 @@ import java.util.Objects;
 import static org.jenkinsci.plugins.fodupload.Utils.FOD_URL_ERROR_MESSAGE;
 import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
 
-public class DynamicScanSharedBuildStep {
-    private final DynamicScanJobModel model;
+public class DastScanSharedBuildStep {
+    private final DastScanJobModel model;
     private final AuthenticationModel authModel;
 
     public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
@@ -45,33 +45,33 @@ public class DynamicScanSharedBuildStep {
 
     private int scanId;
 
-    public DynamicScanSharedBuildStep(DynamicScanJobModel model, AuthenticationModel authModel) {
+    public DastScanSharedBuildStep(DastScanJobModel model, AuthenticationModel authModel) {
         this.model = model;
         this.authModel = authModel;
     }
 
-    public DynamicScanSharedBuildStep(boolean overrideGlobalConfig, String username,
-                                      String personalAccessToken, String tenantId,
-                                      String releaseId, String selectedReleaseType,
-                                      String webSiteUrl, String dastEnv,
-                                      String scanTimebox,
-                                      List<String> standardScanTypeExcludeUrlsRow,
-                                      String scanPolicyType, boolean scanScope,
-                                      String selectedScanType, String selectedDynamicTimeZone,
-                                      boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
-                                      boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                      String loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
-                                      String userSelectedApplication,
-                                      String userSelectedRelease, String assessmentTypeId,
-                                      String entitlementId,
-                                      String entitlementFrequencyType, String userSelectedEntitlement,
-                                      String selectedDynamicGeoLocation, String selectedNetworkAuthType,
-                                      boolean timeBoxChecked) {
+    public DastScanSharedBuildStep(boolean overrideGlobalConfig, String username,
+                                   String personalAccessToken, String tenantId,
+                                   String releaseId, String selectedReleaseType,
+                                   String webSiteUrl, String dastEnv,
+                                   String scanTimebox,
+                                   List<String> standardScanTypeExcludeUrlsRow,
+                                   String scanPolicyType, boolean scanScope,
+                                   String selectedScanType, String selectedDynamicTimeZone,
+                                   boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
+                                   boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
+                                   String loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
+                                   String userSelectedApplication,
+                                   String userSelectedRelease, String assessmentTypeId,
+                                   String entitlementId,
+                                   String entitlementFrequencyType, String userSelectedEntitlement,
+                                   String selectedDynamicGeoLocation, String selectedNetworkAuthType,
+                                   boolean timeBoxChecked) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
 
 
-        model = new DynamicScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
+        model = new DastScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
                 releaseId, selectedReleaseType, webSiteUrl
                 , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanScope, selectedScanType
                 , selectedDynamicTimeZone, webSiteLoginMacroEnabled,
@@ -93,12 +93,46 @@ public class DynamicScanSharedBuildStep {
         return scanId;
     }
 
-    public DynamicScanJobModel getModel() {
+    public DastScanJobModel getModel() {
         return model;
     }
 
     public AuthenticationModel getAuthModel() {
         return authModel;
+    }
+
+    private List<String> ValidateModel(FodApiConnection api, PrintStream logger, String scanType) throws FormValidation {
+
+        try {
+
+            switch (scanType)
+            {
+                case "Standard":
+
+
+
+                    break;
+
+                case "Workflow-driven":
+                    break;
+
+            }
+
+
+        } catch (Exception ex) {
+        }
+        return null;
+    }
+
+    List<String> ValidateStandardScanType(DastScanJobModel model){
+
+        List<String> error = new ArrayList<>();
+        if(model.getWebSiteUrl().isEmpty())
+        {
+            error.add("Invalid Web Site URL");
+
+        }
+        return null;
     }
 
     public void saveReleaseSettingsForWebSiteScan(String userSelectedRelease, String assessmentTypeID,
@@ -113,7 +147,7 @@ public class DynamicScanSharedBuildStep {
     )
             throws IllegalArgumentException, IOException {
 
-        DynamicScanController dynamicController = new DynamicScanController(getApiConnection(), null, Utils.createCorrelationId());
+        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
 
         try {
 
@@ -194,7 +228,7 @@ public class DynamicScanSharedBuildStep {
             , String networkAuthType)
             throws IllegalArgumentException, IOException {
 
-        DynamicScanController dynamicController = new DynamicScanController(getApiConnection(), null, Utils.createCorrelationId());
+        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
         try {
 
             PutDastWorkflowDrivenScanReqModel dastWorkflowScanSetupReqModel;
@@ -297,8 +331,8 @@ public class DynamicScanSharedBuildStep {
                 build.setResult(Result.FAILURE);
                 throw new RuntimeException(e);
             }
-            DynamicScanController dynamicController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
-            PostDastStartScanResponse response = dynamicController.StartDynamicScan(releaseId);
+            DastScanController dynamicController = new DastScanController(apiConnection, null, Utils.createCorrelationId());
+            PostDastStartScanResponse response = dynamicController.StartDastScan(releaseId);
 
             if (response.errors == null && response.getScanId() > 0) {
                 build.setResult(Result.SUCCESS);

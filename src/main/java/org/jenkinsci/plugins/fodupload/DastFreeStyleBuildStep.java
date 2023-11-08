@@ -27,34 +27,33 @@ import org.kohsuke.stapler.verb.POST;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
-public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildStep {
+public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep {
 
-    DynamicScanSharedBuildStep dynamicSharedBuildStep;
+    DastScanSharedBuildStep dynamicSharedBuildStep;
 
     @DataBoundConstructor
-    public DynamicAssessmentBuildStep(boolean overrideGlobalConfig, String username,
-                                      String personalAccessToken, String tenantId,
-                                      String releaseId, String selectedReleaseType,
-                                      String webSiteUrl, String dastEnv,
-                                      String scanTimeBox,
-                                      List<String> standardScanTypeExcludedUrls,
-                                      String scanPolicy, boolean scanScope,
-                                      String selectedScanType, String selectedDynamicTimeZone,
-                                      boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
-                                      boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                      String loginMacroId, String workflowMacroId, String workflowMacroHosts, String webSiteNetworkAuthPassword,
-                                      String userSelectedApplication,
-                                      String userSelectedRelease, String assessmentTypeId,
-                                      String entitlementId,
-                                      String entitlementFrequencyType, String userSelectedEntitlement,
-                                      String selectedDynamicGeoLocation, String selectedNetworkAuthType, boolean timeBoxChecked
+    public DastFreeStyleBuildStep(boolean overrideGlobalConfig, String username,
+                                  String personalAccessToken, String tenantId,
+                                  String releaseId, String selectedReleaseType,
+                                  String webSiteUrl, String dastEnv,
+                                  String scanTimeBox,
+                                  List<String> standardScanTypeExcludedUrls,
+                                  String scanPolicy, boolean scanScope,
+                                  String selectedScanType, String selectedDynamicTimeZone,
+                                  boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
+                                  boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
+                                  String loginMacroId, String workflowMacroId, String workflowMacroHosts, String webSiteNetworkAuthPassword,
+                                  String userSelectedApplication,
+                                  String userSelectedRelease, String assessmentTypeId,
+                                  String entitlementId,
+                                  String entitlementFrequencyType, String userSelectedEntitlement,
+                                  String selectedDynamicGeoLocation, String selectedNetworkAuthType, boolean timeBoxChecked
     ) throws IllegalArgumentException, IOException {
 
-        dynamicSharedBuildStep = new DynamicScanSharedBuildStep(overrideGlobalConfig, username,
+        dynamicSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username,
                 personalAccessToken, tenantId,
                 releaseId, selectedReleaseType,
                 webSiteUrl, dastEnv,
@@ -222,24 +221,24 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
         @SuppressWarnings("unused")
         public ListBoxModel doFillSelectedReleaseTypeItems() {
-            return DynamicScanSharedBuildStep.doFillSelectedReleaseTypeItems();
+            return DastScanSharedBuildStep.doFillSelectedReleaseTypeItems();
         }
 
         @SuppressWarnings("unused")
         public static ListBoxModel doFillDastEnvItems() {
-            return DynamicScanSharedBuildStep.doFillDastEnvItems();
+            return DastScanSharedBuildStep.doFillDastEnvItems();
 
         }
 
         @SuppressWarnings("unused")
         public static ListBoxModel doFillScanTypeItems() {
-            return DynamicScanSharedBuildStep.doFillScanTypeItems();
+            return DastScanSharedBuildStep.doFillScanTypeItems();
 
         }
 
         @SuppressWarnings("unused")
         public static ListBoxModel doFillScanPolicyItems() {
-            return DynamicScanSharedBuildStep.doFillScanPolicyItems();
+            return DastScanSharedBuildStep.doFillScanPolicyItems();
         }
 
         @SuppressWarnings("unused")
@@ -272,7 +271,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
-                DynamicScanController dynamicScanController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
+                DastScanController dastScanController = new DastScanController(apiConnection, null, Utils.createCorrelationId());
                 PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
                 patchDastScanFileUploadReq.releaseId = releaseId;
 
@@ -288,7 +287,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                 }
 
                 patchDastScanFileUploadReq.Content = fileContent.getBytes();
-                return dynamicScanController.PatchDynamicScan(patchDastScanFileUploadReq);
+                return dastScanController.PatchDynamicScan(patchDastScanFileUploadReq);
 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
@@ -340,7 +339,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
 
         @SuppressWarnings("unused")
         public ListBoxModel doFillPersonalAccessTokenItems(@AncestorInPath Job job) {
-            return DynamicScanSharedBuildStep.doFillStringCredentialsItems(job);
+            return DastScanSharedBuildStep.doFillStringCredentialsItems(job);
         }
 
         @SuppressWarnings("unused")
@@ -363,8 +362,8 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
-                DynamicScanController dynamicScanController = new DynamicScanController(apiConnection, null, Utils.createCorrelationId());
-                return Utils.createResponseViewModel(dynamicScanController.getDynamicScanSettings(releaseId));
+                DastScanController dastScanController = new DastScanController(apiConnection, null, Utils.createCorrelationId());
+                return Utils.createResponseViewModel(dastScanController.getDastScanSettings(releaseId));
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -425,7 +424,7 @@ public class DynamicAssessmentBuildStep extends Recorder implements SimpleBuildS
                                                                   @QueryParameter(SharedUploadBuildStep.TENANT_ID) final String tenantId,
                                                                   @AncestorInPath Job job) throws FormValidation {
             job.checkPermission(Item.CONFIGURE);
-            return DynamicScanSharedBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
+            return DastScanSharedBuildStep.doTestPersonalAccessTokenConnection(username, personalAccessToken, tenantId, job);
         }
     }
 

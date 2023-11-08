@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiConstants.DastWebSiteScanPutApi;
 import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiConstants.DastWorkflowScanPutApi;
 
-public class DynamicScanController extends ControllerBase {
+public class DastScanController extends ControllerBase {
     /**
      * Base constructor for all apiConnection controllers
      *
@@ -28,7 +28,7 @@ public class DynamicScanController extends ControllerBase {
      * @param logger        logger object
      * @param correlationId correlation id
      */
-    public DynamicScanController(FodApiConnection apiConnection, PrintStream logger, String correlationId) {
+    public DastScanController(FodApiConnection apiConnection, PrintStream logger, String correlationId) {
         super(apiConnection, logger, correlationId);
     }
 
@@ -134,7 +134,7 @@ public class DynamicScanController extends ControllerBase {
         }
     }
 
-    public PostDastStartScanResponse StartDynamicScan(Integer releaseId) throws IOException {
+    public PostDastStartScanResponse StartDastScan(Integer releaseId) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiConstants.DastStartScanAPi, releaseId));
         Request request = new Request.Builder()
@@ -150,7 +150,7 @@ public class DynamicScanController extends ControllerBase {
         return postDastStartScanResponse;
     }
 
-    public GetDastScanSettingResponse getDynamicScanSettings(final Integer releaseId) throws IOException {
+    public GetDastScanSettingResponse getDastScanSettings(final Integer releaseId) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiConstants.DastGetApi, releaseId));
 

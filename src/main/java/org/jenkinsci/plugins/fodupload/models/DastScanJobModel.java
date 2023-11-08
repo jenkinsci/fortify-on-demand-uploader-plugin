@@ -2,7 +2,7 @@ package org.jenkinsci.plugins.fodupload.models;
 
 import java.util.List;
 
-public class DynamicScanJobModel {
+public class DastScanJobModel {
 
     private boolean overrideGlobalConfig;
     String username;
@@ -133,22 +133,22 @@ public class DynamicScanJobModel {
     boolean webSiteNetworkAuthEnabled;
     boolean webSiteLoginMacroEnabled;
 
-    public DynamicScanJobModel(boolean overrideGlobalConfig, String username,
-                               String personalAccessToken, String tenantId,
-                               String releaseId, String selectedReleaseType,
-                               String webSiteUrl, String dastEnv,
-                               String scanTimebox,
-                               List<String> standardScanTypeExcludeUrls,
-                               String scanPolicyType, boolean scanScope,
-                               String selectedScanType, String selectedDynamicTimeZone,
-                               boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
-                               boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                               String loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
-                               String userSelectedApplication,
-                               String userSelectedRelease, String assessmentTypeId,
-                               String entitlementId,
-                               String entitlementFrequencyType, String userSelectedEntitlement,
-                               String selectedDynamicGeoLocation, String selectedNetworkAuthType) {
+    public DastScanJobModel(boolean overrideGlobalConfig, String username,
+                            String personalAccessToken, String tenantId,
+                            String releaseId, String selectedReleaseType,
+                            String webSiteUrl, String dastEnv,
+                            String scanTimebox,
+                            List<String> standardScanTypeExcludeUrls,
+                            String scanPolicyType, boolean scanScope,
+                            String selectedScanType, String selectedDynamicTimeZone,
+                            boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
+                            boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
+                            String loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
+                            String userSelectedApplication,
+                            String userSelectedRelease, String assessmentTypeId,
+                            String entitlementId,
+                            String entitlementFrequencyType, String userSelectedEntitlement,
+                            String selectedDynamicGeoLocation, String selectedNetworkAuthType) {
         this._releaseId = userSelectedRelease;
         this.tenantId = tenantId;
         this.overrideGlobalConfig = overrideGlobalConfig;
