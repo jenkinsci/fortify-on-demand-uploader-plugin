@@ -26,7 +26,7 @@
         width: 240px;
         }
 
-        div[descriptorid="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"] select {
+        div[descriptorid="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"] select {
         width: 240px;
         }
 
@@ -53,26 +53,26 @@
         <f:optionalBlock name="overrideGlobalConfig" field="overrideGlobalConfig"
                          title="Configure Personal Access Token" inline="true">
             <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/AuthenticationOverride.jelly"
-                        class="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"/>
+                        class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
         </f:optionalBlock>
     </f:section>
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/AppAndReleaseSelection.jelly"
-                class="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"/>
+                class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/AppAndReleaseSelectionForm.jelly"
-                class="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"/>
+                class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/ScanSettings.jelly"
-                class="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"/>
+                class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/CreateApplicationForm.jelly"
-                class="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"/>
+                class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/CreateReleaseForm.jelly"
-                class="org.jenkinsci.plugins.fodupload.DynamicAssessmentBuildStep"/>
+                class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
 
     <!-- Script Section -->
@@ -98,6 +98,6 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreationDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreationDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelectionDialog.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DynamicScanSettings.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastScanSettings.js"/>
 
 </j:jelly>
