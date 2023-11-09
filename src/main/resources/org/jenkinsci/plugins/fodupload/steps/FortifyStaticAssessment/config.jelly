@@ -256,6 +256,10 @@
             </div>
         </f:entry>
 
+        <f:entry  field="test" title="test">
+          <f:textbox/>
+        </f:entry>
+
         <f:entry title="Audit Preference">
             <div id="auditPreferenceForm" class="fodp-field fodp-row-relid-ovr fodp-row-autoProv">
                 <select name="userSelectedAuditPreference" id="auditPreferenceSelect" class="setting-input">

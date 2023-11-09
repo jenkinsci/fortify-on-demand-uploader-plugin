@@ -445,6 +445,7 @@ class PipelineGenerator {
     }
 
     async onReleaseSelectionChanged() {
+        debugger;
         let rs = jq('#releaseSelection').val();
 
         jq('.fodp-row-relid').hide();
