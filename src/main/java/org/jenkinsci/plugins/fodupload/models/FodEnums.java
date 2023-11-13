@@ -312,12 +312,14 @@ public class FodEnums {
         GraphQLDefinition("GraphQLDefinition"),
         GRPCDefinition("GRPCDefinition"),
         WorkflowDrivenMacro("WorkflowDrivenMacro"),
-        LoginMacro("LoginMacro");
+        LoginMacro("LoginMacro"),
+        PostmanCollection("PostmanCollection");
         private final String _val;
 
         public static DynamicScanFileTypes fromInt(int val) {
             switch (val) {
-
+                case 7:
+                    return PostmanCollection;
                 case 6:
                     return LoginMacro;
                 case 5:
@@ -483,6 +485,62 @@ public class FodEnums {
             }
         }
     }
+
+    public enum DastApiType {
+        OpenApi("OpenApi"),
+        Grpc("Grpc"),
+        GraphQL("GraphQL"),
+        Postman("Postman");
+        private final String _val;
+
+        DastApiType(String val){
+            this._val =val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "OpenApi":
+                    return "OpenApi";
+                case "GraphQL":
+                    return "GraphQL";
+                case "Grpc":
+                    return "Grpc";
+                case "Postman":
+                    return "Postman";
+                default:
+                    return "none";
+
+            }
+
+        }
+
+    }
+    public enum ApiSourceType {
+        FileId("FileId"),
+        Url("Url");
+
+        private final String _val;
+
+        ApiSourceType(String val){
+            this._val =val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "FileId":
+                    return "FileId";
+                case "Url":
+                    return "Url";
+                default:
+                    return "none";
+
+            }
+
+        }
+
+    }
+
+
 
 
 }

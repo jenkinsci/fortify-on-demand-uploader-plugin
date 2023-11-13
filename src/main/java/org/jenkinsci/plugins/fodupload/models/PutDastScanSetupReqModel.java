@@ -6,18 +6,6 @@ import java.util.List;
 
 public class PutDastScanSetupReqModel {
 
-    public void setAllowFormSubmissions(boolean allowFormSubmissions) {
-        this.allowFormSubmissions = allowFormSubmissions;
-    }
-
-    boolean allowFormSubmissions;
-
-    public void setAllowSameHostRedirects(boolean allowSameHostRedirects) {
-        this.allowSameHostRedirects = allowSameHostRedirects;
-    }
-
-    boolean allowSameHostRedirects;
-
 
 
     public NetworkAuthentication getNetworkAuthenticationSettings() {
@@ -59,6 +47,11 @@ public class PutDastScanSetupReqModel {
     }
 
     int assessmentTypeId;
+    public void setPolicy(String policy) {
+        this.policy = policy;
+    }
+
+    String policy;
 
     public class NetworkAuthentication {
 
@@ -86,18 +79,11 @@ public class PutDastScanSetupReqModel {
 
         boolean requiresNetworkAuthentication;
 
+
     }
 
-    public void setPolicy(String policy) {
-        this.policy = policy;
-    }
 
-    String policy;
 
-    public void setLoginMacroFileId(int loginMacroFileId) {
-        this.loginMacroFileId = loginMacroFileId;
-    }
 
-    int loginMacroFileId;
 
 }

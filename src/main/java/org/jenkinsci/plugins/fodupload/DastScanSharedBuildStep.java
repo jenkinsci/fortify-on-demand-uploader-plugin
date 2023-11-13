@@ -16,6 +16,7 @@ import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
 import org.jenkinsci.plugins.fodupload.controllers.DastScanController;
 import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.*;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.OpenApi;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDastScanSetupResponse;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.PostDastStartScanResponse;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -44,6 +45,7 @@ public class DastScanSharedBuildStep {
     public static final String TENANT_ID = "tenantId";
 
     private int scanId;
+    private OpenApi openApi;
 
     public DastScanSharedBuildStep(DastScanJobModel model, AuthenticationModel authModel) {
         this.model = model;
@@ -66,7 +68,12 @@ public class DastScanSharedBuildStep {
                                    String entitlementId,
                                    String entitlementFrequencyType, String userSelectedEntitlement,
                                    String selectedDynamicGeoLocation, String selectedNetworkAuthType,
-                                   boolean timeBoxChecked) {
+                                   boolean timeBoxChecked,
+                                  String selectedApiType,
+                                  String openApiRadioSource, String openApiFileSource, String openApiurl, String apiKey,
+                                  String postmanFile,
+                                  String graphQlSource,String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
+                                  String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
 
@@ -80,7 +87,11 @@ public class DastScanSharedBuildStep {
                 , webSiteNetworkAuthPassword, userSelectedApplication,
                 userSelectedRelease, assessmentTypeId, entitlementId,
                 entitlementFrequencyType, userSelectedEntitlement,
-                selectedDynamicGeoLocation, selectedNetworkAuthType);
+                selectedDynamicGeoLocation, selectedNetworkAuthType,
+                selectedApiType,openApiRadioSource,openApiFileSource, openApiurl, apiKey,
+                postmanFile,
+                graphQlSource, graphQlUpload, graphQlUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
+                grpcupload, grpcSchemeType, grpcApiHost, grpcApiServicePath);
 
     }
 
@@ -280,6 +291,236 @@ public class DastScanSharedBuildStep {
             throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
         }
     }
+    public void saveReleaseSettingsForOpenApiScan(String userSelectedRelease, String assessmentTypeID,
+                                                         String entitlementId, String entitlementFreq,
+                                                         String timeZone,
+                                                         boolean allowSameHostRedirect,
+                                                         String scanEnvironment,
+                                                         boolean requireNetworkAuth,
+                                                         String networkAuthUserName, String networkAuthPassword,
+                                                         String networkAuthType,String openApiSourceType, String sourceUrn, String openApiKey)
+            throws IllegalArgumentException, IOException {
+
+        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        try {
+
+            PutDastAutomatedOpenApiReqModel dastOpenApiScanSetupReqModel;
+            dastOpenApiScanSetupReqModel = new PutDastAutomatedOpenApiReqModel();
+            dastOpenApiScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
+            dastOpenApiScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
+            dastOpenApiScanSetupReqModel.setTimeZone(timeZone);
+            dastOpenApiScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
+            dastOpenApiScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
+
+            if (requireNetworkAuth) {
+                PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastOpenApiScanSetupReqModel.getNetworkAuthenticationSettings();
+                networkAuthentication.setPassword(networkAuthPassword);
+                networkAuthentication.setUserName(networkAuthUserName);
+
+                if (!networkAuthType.isEmpty()) {
+                    networkAuthentication.setNetworkAuthenticationType((networkAuthType));
+                } else
+                    throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
+                networkAuthentication.setRequiresNetworkAuthentication(true);
+                dastOpenApiScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
+            }
+            dastOpenApiScanSetupReqModel.setSourceType(openApiSourceType);
+            dastOpenApiScanSetupReqModel.setSourceUrn(sourceUrn);
+            dastOpenApiScanSetupReqModel.setApiKey(openApiKey);
+            if (sourceUrn == null || sourceUrn == "") {
+                throw new IllegalArgumentException(String.format("OpenAPI Source= %s  not set for release Id={%s}"
+                        , sourceUrn, userSelectedRelease));
+            }
+            else {
+                dastOpenApiScanSetupReqModel.SourceUrn = sourceUrn;
+            }
+
+            PutDastScanSetupResponse response = dynamicController.putDastOpenApiScanSettings(Integer.parseInt(userSelectedRelease),
+                    dastOpenApiScanSetupReqModel);
+            if (response.isSuccess && response.errors == null) {
+                System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
+
+            } else {
+                throw new Exception(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)));
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
+        }
+    }
+
+    public void saveReleaseSettingsForGraphQlScan(String userSelectedRelease, String assessmentTypeID,
+                                                  String entitlementId, String entitlementFreq,
+                                                  String timeZone,
+                                                  boolean allowSameHostRedirect,
+                                                  String scanEnvironment,
+                                                  boolean requireNetworkAuth,
+                                                  String networkAuthUserName, String networkAuthPassword,
+                                                  String networkAuthType, String sourceUrn, String sourceType,
+                                                  String schemeType, String host, String servicePath)
+            throws IllegalArgumentException, IOException {
+
+        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        try {
+
+            PutDastAutomatedGraphQlReqModel dastGraphQlScanSetupReqModel;
+            dastGraphQlScanSetupReqModel = new PutDastAutomatedGraphQlReqModel();
+            dastGraphQlScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
+            dastGraphQlScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
+            dastGraphQlScanSetupReqModel.setTimeZone(timeZone);
+            dastGraphQlScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
+            dastGraphQlScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
+
+            if (requireNetworkAuth) {
+                PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastGraphQlScanSetupReqModel.getNetworkAuthenticationSettings();
+                networkAuthentication.setPassword(networkAuthPassword);
+                networkAuthentication.setUserName(networkAuthUserName);
+
+                if (!networkAuthType.isEmpty()) {
+                    networkAuthentication.setNetworkAuthenticationType((networkAuthType));
+                } else
+                    throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
+                networkAuthentication.setRequiresNetworkAuthentication(true);
+                dastGraphQlScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
+            }
+            dastGraphQlScanSetupReqModel.setSourceType(sourceType);
+            dastGraphQlScanSetupReqModel.setSchemeType(schemeType);
+            dastGraphQlScanSetupReqModel.setServicePath(servicePath);
+            dastGraphQlScanSetupReqModel.setHost(host);
+            dastGraphQlScanSetupReqModel.setSourceUrn(sourceUrn);
+
+
+            PutDastScanSetupResponse response = dynamicController.putDastGraphQLScanSettings(Integer.parseInt(userSelectedRelease),
+                    dastGraphQlScanSetupReqModel);
+            if (response.isSuccess && response.errors == null) {
+                System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
+
+            } else {
+                throw new Exception(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)));
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
+        }
+    }
+
+    public void saveReleaseSettingsForGrpcScan(String userSelectedRelease, String assessmentTypeID,
+                                                  String entitlementId, String entitlementFreq,
+                                                  String timeZone,
+                                                  boolean allowSameHostRedirect,
+                                                  String scanEnvironment,
+                                                  boolean requireNetworkAuth,
+                                                  String networkAuthUserName, String networkAuthPassword,
+                                                  String networkAuthType,
+                                                  String grpcFileId, String schemeType, String host, String servicePath)
+            throws IllegalArgumentException, IOException {
+
+        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        try {
+
+            PutDastAutomatedGrpcReqModel dastgrpcScanSetupReqModel;
+            dastgrpcScanSetupReqModel = new PutDastAutomatedGrpcReqModel();
+            dastgrpcScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
+            dastgrpcScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
+            dastgrpcScanSetupReqModel.setTimeZone(timeZone);
+            dastgrpcScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
+            dastgrpcScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
+
+            if (requireNetworkAuth) {
+                PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastgrpcScanSetupReqModel.getNetworkAuthenticationSettings();
+                networkAuthentication.setPassword(networkAuthPassword);
+                networkAuthentication.setUserName(networkAuthUserName);
+
+                if (!networkAuthType.isEmpty()) {
+                    networkAuthentication.setNetworkAuthenticationType((networkAuthType));
+                } else
+                    throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
+                networkAuthentication.setRequiresNetworkAuthentication(true);
+                dastgrpcScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
+            }
+            int fileId = Integer.parseInt(grpcFileId);
+            if (fileId == 0) {
+                throw new IllegalArgumentException(String.format("GRPC Source= %s  not set for release Id={%s}"
+                         ,fileId, userSelectedRelease));
+            }
+            else {
+                dastgrpcScanSetupReqModel.FileId = Integer.parseInt(grpcFileId);
+            }
+
+            PutDastScanSetupResponse response = dynamicController.putDastGrpcScanSettings(Integer.parseInt(userSelectedRelease),
+                    dastgrpcScanSetupReqModel);
+            if (response.isSuccess && response.errors == null) {
+                System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
+
+            } else {
+                throw new Exception(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)));
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
+        }
+    }
+
+    public void saveReleaseSettingsForPostmanScan(String userSelectedRelease, String assessmentTypeID,
+                                                  String entitlementId, String entitlementFreq,
+                                                  String timeZone,
+                                                  boolean allowSameHostRedirect,
+                                                  String scanEnvironment,
+                                                  boolean requireNetworkAuth,
+                                                  String networkAuthUserName, String networkAuthPassword,
+                                                  String networkAuthType, String postmanIdCollection)
+            throws IllegalArgumentException, IOException {
+
+        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        try {
+
+            PutDastAutomatedPostmanReqModel dastPostmanScanSetupReqModel;
+            dastPostmanScanSetupReqModel = new PutDastAutomatedPostmanReqModel();
+            dastPostmanScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
+            dastPostmanScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
+            dastPostmanScanSetupReqModel.setTimeZone(timeZone);
+            dastPostmanScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
+            dastPostmanScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
+
+
+            if (requireNetworkAuth) {
+                PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastPostmanScanSetupReqModel.getNetworkAuthenticationSettings();
+                networkAuthentication.setPassword(networkAuthPassword);
+                networkAuthentication.setUserName(networkAuthUserName);
+
+                if (!networkAuthType.isEmpty()) {
+                    networkAuthentication.setNetworkAuthenticationType((networkAuthType));
+                } else
+                    throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
+                networkAuthentication.setRequiresNetworkAuthentication(true);
+                dastPostmanScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
+            }
+            if (postmanIdCollection == null) {
+                throw new IllegalArgumentException(String.format("Postman Scan - one of the id is  not set for release Id={%s}"
+                        , userSelectedRelease));
+            }
+            else {
+                    dastPostmanScanSetupReqModel.setCollectionFileIds(ConvertStringtoIntArr(postmanIdCollection));
+                }
+
+            PutDastScanSetupResponse response = dynamicController.putDastPostmanScanSettings(Integer.parseInt(userSelectedRelease),
+                    dastPostmanScanSetupReqModel);
+            if (response.isSuccess && response.errors == null) {
+                System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
+
+            } else {
+                throw new Exception(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)));
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
+        }
+    }
+    public int[] ConvertStringtoIntArr(String fileIds) {
+        String[] postmanIds = fileIds.split(",");
+        int[] postmanIdArr = new int[postmanIds.length];
+        for (int i = 0; i < postmanIds.length; i++) {
+            postmanIdArr[i] = Integer.parseInt(postmanIds[i]);
+        }
+       return postmanIdArr;
+    }
+
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build, FilePath workspace,

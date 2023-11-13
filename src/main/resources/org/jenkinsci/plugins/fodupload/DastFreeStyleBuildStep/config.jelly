@@ -76,14 +76,7 @@
 
 
     <!-- Script Section -->
-    <script>
-        function loadJs() {
-            // Reload all the script again. instead of windows.location.reload.
 
-        }
-
-        loadJs();
-    </script>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Common.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Styling.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Auth.js"/>

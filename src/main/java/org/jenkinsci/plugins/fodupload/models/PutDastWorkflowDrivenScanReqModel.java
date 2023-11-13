@@ -5,17 +5,12 @@ import org.json.JSONPropertyIgnore;
 import java.util.List;
 
 public class PutDastWorkflowDrivenScanReqModel extends PutDastScanSetupReqModel {
+    public List<WorkflowDrivenMacro> workflowDrivenMacro;
+    public void setPolicy(String policy) {
+        this.policy = policy;
+    }
 
-    /*
-        * "workflowDrivenMacro": [
-        {
-          "fileId": 0,
-          "allowedHosts": [
-            "string"
-          ]
-        }
-      ], */
-
+    String policy;
     private boolean enableRedundantPageDetection;
 
     public boolean isEnableRedundantPageDetection() {
@@ -25,6 +20,5 @@ public class PutDastWorkflowDrivenScanReqModel extends PutDastScanSetupReqModel 
     public void setEnableRedundantPageDetection(boolean enableRedundantPageDetection) {
         this.enableRedundantPageDetection = enableRedundantPageDetection;
     }
-    public List<WorkflowDrivenMacro> workflowDrivenMacro;
 
 }

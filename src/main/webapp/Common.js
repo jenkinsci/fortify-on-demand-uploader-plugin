@@ -73,7 +73,7 @@ function getEntitlementDropdownValue(id, freqId, freq) {
 }
 
 function parseEntitlementDropdownValue(val) {
-    debugger;
+
     let entitlementId = '';
     let frequencyId = '';
     let frequencyType = '';

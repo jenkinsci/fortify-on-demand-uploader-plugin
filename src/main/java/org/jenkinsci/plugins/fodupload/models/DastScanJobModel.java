@@ -30,8 +30,23 @@ public class DastScanJobModel {
     String entitlementFrequencyId;
     String entitlementFrequencyType;
     String userSelectedEntitlement;
-
     String networkAuthType;
+    String selectedApi;
+    String selectedOpenApiSource;
+    String selectedOpenApiFileSource;
+    String selectedOpenApiurl;
+    String selectedApiKey;
+    String selectedPostmanFile;
+    String selectedGraphQlSource;
+    String selectedGraphQlUpload;
+    String selectedGraphQlUrl;
+    String selectedGraphQLSchemeType;
+    String selectedGraphQlApiHost;
+    String selectedGraphQlApiServicePath;
+    String selectedGrpcupload;
+    String selectedGrpcSchemeType;
+    String selectedGrpcApiHost;
+    String selectedGrpcApiServicePath;
 
     public boolean isOverrideGlobalConfig() {
         return overrideGlobalConfig;
@@ -128,6 +143,22 @@ public class DastScanJobModel {
     public boolean isWebSiteLoginMacroEnabled() {
         return webSiteLoginMacroEnabled;
     }
+    public String getSelectedOpenApiSource(){return selectedOpenApiSource;}
+    public String getSelectedApi(){return selectedApi;}
+    public String getSelectedOpenApiurl(){return selectedOpenApiurl;}
+    public String getSelectedApiKey(){return selectedApiKey;}
+    public String getSelectedOpenApiFileSource(){return selectedOpenApiFileSource;}
+    public String getSelectedPostmanFile(){return selectedPostmanFile;}
+    public String getSelectedGraphQlSource(){return selectedGraphQlSource;}
+    public String getSelectedGraphQlUpload(){return selectedGraphQlUpload;}
+    public String getSelectedGraphQlUrl(){return selectedGraphQlUrl;}
+    public String getSelectedGraphQlApiHost(){return selectedGraphQlApiHost;}
+    public String getSelectedGraphQLSchemeType(){return selectedGraphQLSchemeType;}
+    public String getSelectedGraphQlApiServicePath(){return selectedGraphQlApiServicePath;}
+    public String getSelectedGrpcupload(){return  selectedGrpcupload;}
+    public String getSelectedGrpcApiHost(){return selectedGrpcApiHost;}
+    public String getSelectedGrpcSchemeType(){return selectedGrpcSchemeType;}
+    public String getSelectedGrpcApiServicePath(){return selectedGrpcApiServicePath;}
 
     String selectedDynamicGeoLocation;
     boolean webSiteNetworkAuthEnabled;
@@ -148,7 +179,12 @@ public class DastScanJobModel {
                             String userSelectedRelease, String assessmentTypeId,
                             String entitlementId,
                             String entitlementFrequencyType, String userSelectedEntitlement,
-                            String selectedDynamicGeoLocation, String selectedNetworkAuthType) {
+                               String selectedDynamicGeoLocation, String selectedNetworkAuthType,
+                               String selectedApiType,
+                               String openApiSource, String openApiFileSource, String openApiurl, String apiKey,
+                               String postmanFile,
+                               String graphQlSource,String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
+                               String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath) {
         this._releaseId = userSelectedRelease;
         this.tenantId = tenantId;
         this.overrideGlobalConfig = overrideGlobalConfig;
@@ -177,6 +213,21 @@ public class DastScanJobModel {
         this.webSiteNetworkAuthUserName = webSiteNetworkAuthUserName;
         this.webSiteNetworkAuthPassword = webSiteNetworkAuthPassword;
         this.networkAuthType = selectedNetworkAuthType;
+        this.selectedApi = selectedApiType;
+        this.selectedOpenApiFileSource = openApiFileSource;
+        this.selectedOpenApiSource = openApiSource;
+        this.selectedApiKey = apiKey;
+        this.selectedPostmanFile = postmanFile;
+        this.selectedGraphQlSource = graphQlSource;
+        this.selectedGraphQlUrl = graphQlUrl;
+        this.selectedGraphQlUpload = graphQlUpload;
+        this.selectedGraphQlApiHost = graphQlApiHost;
+        this.selectedGraphQLSchemeType = graphQLSchemeType;
+        this.selectedGraphQlApiServicePath = graphQlApiServicePath;
+        this.selectedGrpcupload = grpcupload;
+        this.selectedGrpcApiHost = grpcApiHost;
+        this.selectedGrpcSchemeType = grpcSchemeType;
+        this.selectedGrpcApiServicePath = grpcApiServicePath;
     }
 
     public String get_releaseId() {
@@ -197,5 +248,7 @@ public class DastScanJobModel {
     public String getUserSelectedRelease() {
         return userSelectedRelease;
     }
+
+    public String getUseSelectedApiType(){return selectedApi;}
 
 }

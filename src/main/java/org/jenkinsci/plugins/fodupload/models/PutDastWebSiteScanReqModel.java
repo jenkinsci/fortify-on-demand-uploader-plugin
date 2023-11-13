@@ -60,4 +60,9 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     public class ExclusionsList {
         public String  value;
     }
+    public void setLoginMacroFileId(int loginMacroFileId) {
+        this.loginMacroFileId = loginMacroFileId;
+    }
+
+    int loginMacroFileId;
 }

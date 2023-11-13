@@ -9,7 +9,9 @@ const dastWebSiteSetting = 'dast-standard-setting';
 const dastWorkFlowSetting = 'dast-workflow-setting';
 const dastCommonScopeSetting = 'dast-common-scan-scope';
 const nwAuthSetting = 'dast-networkAuth-setting';
-const loginAuthSetting = 'dast-login-macro'
+const loginAuthSetting = 'dast-login-macro';
+const dastApiSetting = 'dast-api-setting';
+const dastApiSecificControlls = 'dast-api-specific-controlls';
 
 class AppAndReleaseSelection {
 
@@ -24,12 +26,16 @@ class AppAndReleaseSelection {
         jq('.bsiTokenView').hide();
         jq('.appAndReleaseNameView').hide();
         jq('#appAndReleaseNameErrorView').hide();
+        jq('.openApiSourceControls').hide();
+        jq('.graphQLSourceControls').hide();
         jq('.' + dastScanSetting).hide();
         jq('.' + dastWebSiteSetting).hide();
         jq('.' + dastWorkFlowSetting).hide();
         jq('.' + dastCommonScopeSetting).hide();
         jq('.' + loginAuthSetting).hide();
         jq('.' + nwAuthSetting).hide();
+        jq('.' + dastApiSetting).hide();
+        jq('.' + dastApiSecificControlls).hide();
 
     }
 

@@ -328,7 +328,7 @@ class Api {
     }
 
     patchSetupManifestFile(releaseId, customAuth, file, fileType) {
-        debugger;
+
         return new Promise((accept, reject) => {
             let fileReader = new FileReader();
             let fileContent = fileReader.readAsBinaryString(file);
