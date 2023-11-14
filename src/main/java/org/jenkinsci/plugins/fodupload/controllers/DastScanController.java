@@ -17,8 +17,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 
 
-import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiConstants.DastWebSiteScanPutApi;
-import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiConstants.DastWorkflowScanPutApi;
+import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiEndPoint.DastWebSiteScanPutApi;
+import static org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants.FodDastApiEndPoint.DastWorkflowScanPutApi;
 
 public class DastScanController extends ControllerBase {
     /**
@@ -101,7 +101,7 @@ public class DastScanController extends ControllerBase {
 
             HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                     .addQueryParameter("dastFileType", (requestModel.dastFileType.getValue()))
-                    .addPathSegments(String.format(FodGlobalConstants.FodDastApiConstants.DastFileUploadPatchApi, Integer.parseInt(requestModel.releaseId)));
+                    .addPathSegments(String.format(FodGlobalConstants.FodDastApiEndPoint.DastFileUploadPatchApi, Integer.parseInt(requestModel.releaseId)));
 
             RequestBody requestBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
@@ -136,7 +136,7 @@ public class DastScanController extends ControllerBase {
 
     public PostDastStartScanResponse StartDastScan(Integer releaseId) throws IOException {
 
-        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiConstants.DastStartScanAPi, releaseId));
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiEndPoint.DastStartScanAPi, releaseId));
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
@@ -146,13 +146,13 @@ public class DastScanController extends ControllerBase {
 
         ResponseContent response = apiConnection.request(request);
         PostDastStartScanResponse postDastStartScanResponse = new PostDastStartScanResponse();
-        postDastStartScanResponse = (PostDastStartScanResponse) convertHttpResponseIntoDastApiResponse(response, postDastStartScanResponse);
+        postDastStartScanResponse = convertHttpResponseIntoDastApiResponse(response, postDastStartScanResponse);
         return postDastStartScanResponse;
     }
 
     public GetDastScanSettingResponse getDastScanSettings(final Integer releaseId) throws IOException {
 
-        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiConstants.DastGetApi, releaseId));
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiEndPoint.DastGetApi, releaseId));
 
         System.out.println("retrieve dynamic scan settings....");
 
@@ -180,8 +180,6 @@ public class DastScanController extends ControllerBase {
             ((FodDastApiResponse) fodApiResponse).reason = response.message();
             return (T) fodApiResponse;
         } else {
-            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
-            ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
             return parseHttpBodyResponse(response, fodApiResponse);
         }
     }
@@ -221,6 +219,7 @@ public class DastScanController extends ControllerBase {
         } else if (fodApiResponse instanceof PostDastStartScanResponse) {
             return apiConnection.parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
             }.getType());
+
         } else {
 
             ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();

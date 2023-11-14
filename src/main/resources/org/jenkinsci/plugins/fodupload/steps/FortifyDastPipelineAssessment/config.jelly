@@ -194,10 +194,10 @@
     </f:section>
     <f:section title="Scan Settings">
         <!-- Dynamic Scan Type -->
-        <f:entry title="Scan Typew">
-            <div id="dastScanType" class="fode-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+        <f:entry title="Scan Type">
+            <div id="dastScanType" class="fode-field spinner-container fodp-row-relid-ovr">
                 <div class="fode-edit jenkins-select">
-                    <select name="selectedScanType" id="scanTypeList" class="jenkins-select__input">
+                    <select name="scanType" id="scanTypeList" class="jenkins-select__input">
                         <option value="-1">Select a Scan Type</option>
                         <option value="Standard">Standard</option>
                         <option value="Workflow">Workflow-Driven</option>
@@ -208,7 +208,7 @@
         </f:entry>
         <!-- Dynamic Scan Environment -->
         <f:entry>
-            <div class="fode-field spinner-container fodp-row-relid-ovr fodp-row-autoProv" id="dast-scan-setting-evn">
+            <div class="fode-field spinner-container fodp-row-relid-ovr" id="dast-scan-setting-evn">
                 <f:entry title="Environment Facing">
                     <f:select field="dastEnv"/>
                 </f:entry>
@@ -217,7 +217,7 @@
 
         <!-- TimeZone DropDown -->
         <f:entry title="TimeZone">
-            <div id="timezone" class="fode-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+            <div id="timezone" class="fode-field spinner-container fodp-row-relid-ovr">
                 <div class="fode-edit jenkins-select">
                     <select name="selectedDynamicTimeZone" id="timeZoneStackSelectList"
                             class="jenkins-select__input">
@@ -230,7 +230,7 @@
     <f:section title="Scope">
         <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
             <div id="dast-workflow-macro-upload"
-                 class="fode-field spinner-container fodp-row-relid-ovr fodp-row-autoProv dast-workflow-setting">
+                 class="fode-field spinner-container fodp-row-relid-ovr dast-workflow-setting">
                 <span>
                     <input accept=".har,.webmacro,.brup" id="workflowMacroFile" type="File" name="workflowMacroFile"/>
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
@@ -240,27 +240,27 @@
             </div>
         </f:entry>
         <f:entry title="Allowed Hosts">
-            <ul id="lisWorkflowDrivenAllowedHostUrl" name="lisWorkflowDrivenAllowedHostUrl"
-                class="fode-field spinner-container dast-workflow-setting fodp-row-relid-ovr fodp-row-autoProv">
+            <ul id="listWorkflowDrivenAllowedHostUrl" name="listWorkflowDrivenAllowedHostUrl"
+                class="fode-field spinner-container dast-workflow-setting fodp-row-relid-ovr">
             </ul>
         </f:entry>
 
-        <f:entry title="Dynamic Site URL">
+        <f:entry title="Dynamic Site URL" >
             <div id="dast-standard-site-url"
-                 class="fode-field spinner-container fodp-row-relid-ovr fodp-row-autoProv dast-standard-setting">
+                 class="fode-field spinner-container fodp-row-relid-ovr dast-standard-setting">
                 <f:textbox field="webSiteUrl" name="webSiteUrl"/>
             </div>
         </f:entry>
         <f:entry>
             <div id="dast-standard-scan-scope"
-                 class="fode-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+                 class="fode-field spinner-container fodp-row-relid-ovr">
                 <f:booleanRadio field="scanScope" true="Restrict scan to URL directories and subdirectories"
                                 false="Scan entire host"/>
 
             </div>
 
             <div id="dast-common-scope-attr"
-                 class="fode-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+                 class="fode-field spinner-container fodp-row-relid-ovr">
 
                 <f:checkbox title="Enable redundant page detection" field="enableRedundantPageDetection"
                             id="enableRedundantPageDetection">
@@ -269,33 +269,34 @@
         </f:entry>
 
         <f:entry title="Exclude URLs">
-<!--            <div id="standardScanTypeExcludeUrlsRow"-->
-<!--                 class="fode-field spinner-container fodp-row-relid-ovr fodp-row-autoProv dast-standard-setting">-->
-<!--                <span>-->
-<!--                    <input type="text" id="standardScanExcludedUrlText" class="setting-input"-->
-<!--                           placeholder="Exclude URL"/>-->
+            <div id="standardScanTypeExcludeUrlsRow"
+                 class="fode-field spinner-container fodp-row-relid-ovr dast-standard-setting">
+                <span>
+                    <input type="text" id="standardScanExcludedUrlText" class="setting-input"
+                           placeholder="Exclude URL"/>
 
-<!--                    <input type="button" id="btnAddExcludeUrl" value="Add"-->
-<!--                           class="btn-add-exclude-url"/>-->
+                    <input type="button" id="btnAddExcludeUrl" value="Add"
+                           class="btn-add-exclude-url"/>
 
-<!--                </span>-->
-<!--                <ol id="listStandardScanTypeExcludedUrl" name="listStandardScanTypeExcludedUrl">-->
-<!--                </ol>-->
-<!--            </div>-->
+                </span>
+                <ol id="listStandardScanTypeExcludedUrl" name="listStandardScanTypeExcludedUrl">
+                </ol>
+            </div>
         </f:entry>
 
         <f:entry title="Scan Policy">
             <div id="dast-standard-scan-policy"
-                 class="fode-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+                 class="fode-field spinner-container fodp-row-relid-ovr">
                 <f:select field="scanPolicy"/>
             </div>
         </f:entry>
         <f:entry>
             <div id="dast-timeBox-scan">
 
-                <f:optionalBlock name="timeBox" title="Timebox Scan Duration (Hours)">
+                <f:optionalBlock field="timeBoxChecked" name="timeBoxChecked" title="Timebox Scan Duration (Hours)"
+                                 checked="${instance.timeBoxChecked}}" inline="true">
                     <div>
-                        <f:textbox field="scanTimebox"/>
+                        <f:textbox name="scanTimeBox" field="scanTimeBox"  />
                         <t:help tooltip="Allowed Values are between 1(hr) and 24 (hrs)"/>
                     </div>
                 </f:optionalBlock>
@@ -303,20 +304,71 @@
             </div>
         </f:entry>
         <f:entry>
-            <div>
-                <input type="textbox" hidden="true" name="entitlementId" id="entitlementId"></input>
-                <input type="textbox" hidden="true" name="entitlementFrequencyId" id="frequencyId"></input>
-                <input type="textbox" hidden="true" name="entitlementFrequencyType" id="entitlementFreqType"></input>
+
+        </f:entry>
+    </f:section>
+
+    <f:section title="Authentication">
+        <f:entry>
+            <div class="fode-field spinner-container"
+                 id="webSiteNetworkAuthSettingEnabledRow">
+                <f:optionalBlock name="webSiteNetworkAuthSettingEnabled" field="webSiteNetworkAuthSettingEnabled"
+                                 title="Network Authentication Required"
+                                 checked="${instance.webSiteNetworkAuthSettingEnabled}" inline="true">
+
+                    <f:entry title="Network Authentication Type">
+                        <div id="ddlNetworkAuthTypeRow"
+                             class="fode-field spinner-container dast-scan-setting dast-standard-scan dast-workflow-scan">
+                            <div class="fode-edit jenkins-select">
+                                <select name="selectedNetworkAuthType" id="ddlNetworkAuthType"
+                                        class="jenkins-select__input">
+                                    <option value="0">Select a Network Authentication Type</option>
+                                </select>
+                            </div>
+                        </div>
+                    </f:entry>
+
+                    <f:entry title="Network Username">
+                        <div id="networkUsernameRow">
+                            <f:textbox name="webSiteNetworkAuthUserName"/>
+                        </div>
+                    </f:entry>
+                    <f:entry title="Network Password">
+                        <div id="networkPasswordRow">
+                            <f:password name="webSiteNetworkAuthPassword"/>
+                        </div>
+                    </f:entry>
+
+                </f:optionalBlock>
             </div>
         </f:entry>
+
+        <f:entry>
+            <div class="fode-field spinner-container" id="login-macro-row">
+                <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
+                                 title="Login Macro"
+                                 checked="${instance.webSiteLoginMacroEnabled}" inline="true">
+                    <f:entry
+                            title="Please upload the login macro file. Supported extension: *.webmacro">
+                        <span>
+                            <input accept=".webmacro" id="loginFileMacro" type="File" name="loginFileMacro"/>
+                            <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
+                            <input type="label" hidden="true" value="" name="loginMacroId" id="loginMacroId"/>
+
+                        </span>
+                    </f:entry>
+
+                </f:optionalBlock>
+            </div>
+        </f:entry>
+
     </f:section>
 
     <div id="hiddenFields" class="fode-row-hidden">
         <input type="text" name="releaseId" id="releaseId"/>
-        <input type="text" name="entitlementPreference" id="entitlementPreference"/>
-        <input type="text" name="assessmentType" id="assessmentType"/>
-        <input type="text" name="entitlementId" id="entitlementId"/>
-        <input type="text" name="frequencyId" id="frequencyId"/>
+        <input type="text" hidden="true" name="entitlementId" id="entitlementId"/>
+        <input type="text" hidden="true" name="entitlementFrequency" id="entitlementFrequency"/>
+        <input type="text" name="assessmentTypeId" id="assessmentTypeId"/>
         <input type="text" name="auditPreference" id="auditPreference"/>
         <input type="text" name="username" id="username"/>
         <input type="text" name="personalAccessToken" id="personalAccessToken"/>
@@ -341,7 +393,7 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Styling.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Auth.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DynamicPipelineGenerator.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastPipelineGenerator.js"/>
 
     <!--Script -->
 </j:jelly>

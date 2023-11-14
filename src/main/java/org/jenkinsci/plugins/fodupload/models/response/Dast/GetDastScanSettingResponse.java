@@ -1,4 +1,5 @@
 package org.jenkinsci.plugins.fodupload.models.response.Dast;
+
 public class GetDastScanSettingResponse {
 
     public int assessmentTypeId;
@@ -7,10 +8,12 @@ public class GetDastScanSettingResponse {
     public int entitlementId;
     public String timeZone;
     public DynamicScanEnvironmentFacingTypes dynamicScanEnvironmentFacingType;
+
     public enum DynamicScanEnvironmentFacingTypes {
         Internal,
         External,
     }
+
     public enum EntitlementFrequencyTypes {
         SingleScan,
         Subscription
@@ -42,12 +45,14 @@ public class GetDastScanSettingResponse {
 
     }
 
-    public Policy policy;
-    public Website websiteAssessment;
-    public API apiAssessment;
     public int timeBoxInHours;
+
+    public Policy policy;
+    public websiteAssessment websiteAssessment;
+    public API apiAssessment;
+
     public ExclusionDTO[] exclusionsList;
-    public  WorkflowdrivenAssessment workflowdrivenAssessment;
+    public WorkflowdrivenAssessment workflowdrivenAssessment;
     public int loginMacroFileId;
     public boolean requiresSiteAuthentication;
     public boolean enableRedundantPageDetection;
@@ -56,14 +61,14 @@ public class GetDastScanSettingResponse {
     public boolean restrictToDirectoryAndSubdirectories;
     public boolean requiresNetworkAuthentication;
     public NetworkAuthenticationSettings networkAuthenticationSettings;
-    public enum DayOfWeekTypes
-    {
+
+    public enum DayOfWeekTypes {
         Sunday,
-        Monday ,
+        Monday,
         Tuesday,
-        Wednesday ,
-        Thursday ,
-        Friday ,
+        Wednesday,
+        Thursday,
+        Friday,
         Saturday
     }
 

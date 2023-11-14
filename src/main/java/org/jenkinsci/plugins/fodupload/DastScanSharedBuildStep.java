@@ -11,6 +11,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
 import org.jenkinsci.plugins.fodupload.controllers.DastScanController;
@@ -84,6 +85,29 @@ public class DastScanSharedBuildStep {
 
     }
 
+    public DastScanSharedBuildStep(Boolean overrideGlobalConfig, String username,
+                                   String tenantId, String personalAccessToken, String releaseId,
+                                   String webSiteUrl, String dastEnv, String scanTimebox, Object excludeUrlList,
+                                   String scanPolicy, boolean scanScope, String selectedScanType,
+                                   String selectedDynamicTimeZone, boolean enableRedundantPageDetection, String webSiteUrl1,
+                                   int loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthUserName,
+                                   String webSiteNetworkAuthPassword, String applicationId, String assessmentTypeId, String entitlementId,
+                                   String entitlementFrequencyType, String selectedNetworkAuthType, boolean timeBoxChecked) {
+
+        authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
+        model = new DastScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
+                releaseId,  webSiteUrl
+                , dastEnv, scanTimebox,  scanScope, selectedScanType ,scanPolicy
+                , selectedDynamicTimeZone
+                , enableRedundantPageDetection,
+                webSiteNetworkAuthUserName, loginMacroId, workflowMacroId, allowedHost
+                , webSiteNetworkAuthPassword
+                , assessmentTypeId, entitlementId,
+                entitlementFrequencyType
+                , selectedNetworkAuthType);
+    }
+
+
     private FodApiConnection getApiConnection() throws FormValidation {
 
         return ApiConnectionFactory.createApiConnection(this.getAuthModel(), false, null, null);
@@ -101,47 +125,65 @@ public class DastScanSharedBuildStep {
         return authModel;
     }
 
-    private List<String> ValidateModel(FodApiConnection api, PrintStream logger, String scanType) throws FormValidation {
+    public List<String> ValidateAuthModel(boolean overrideGlobalAuth, String username, String tenantId, String personalAccessToken) throws FormValidation {
+        List<String> errors = new ArrayList<>();
 
-        try {
-
-            switch (scanType)
-            {
-                case "Standard":
-
-
-
-                    break;
-
-                case "Workflow-driven":
-                    break;
-
-            }
-
-
-        } catch (Exception ex) {
+        // Any have value and any don't have value
+        if (overrideGlobalAuth && (Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(tenantId) || Utils.isNullOrEmpty(personalAccessToken))) {
+            errors.add("Personal access token override requires all 3 be provided: username, personalAccessToken, tenantId");
         }
-        return null;
+
+        return errors;
     }
 
-    List<String> ValidateStandardScanType(DastScanJobModel model){
+    public List<String> ValidateModel() throws FormValidation {
+
+
+        List<String> errors = new ArrayList<>();
+
+        //Check for mandate fields based on scan type.
+        if (this.model.getSelectedScanType().isEmpty()) {
+            errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanTypeNotFound);
+        }
+        if (this.model.get_releaseId().isEmpty()) {
+            errors.add(FodGlobalConstants.FodDastValidation.DastPipelineReleaseIdNotFound);
+        }
+        if (this.model.getEntitlementId().isEmpty()) {
+            errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanEntitlementIdNotFound);
+        }
+        switch (this.model.getSelectedScanType()) {
+            case "Standard":
+                // should we have strategy pattern instead of if chaining ?
+                if (this.model.getWebSiteUrl().isEmpty()) {
+                    errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWebSiteUrlNotFound);
+                }
+
+                break;
+            case "Workflow-Driven":
+                break;
+        }
+        return errors;
+
+    }
+
+
+    List<String> ValidateStandardScanType(DastScanJobModel model) {
 
         List<String> error = new ArrayList<>();
-        if(model.getWebSiteUrl().isEmpty())
-        {
+        if (model.getWebSiteUrl().isEmpty()) {
             error.add("Invalid Web Site URL");
 
         }
         return null;
     }
 
-    public void saveReleaseSettingsForWebSiteScan(String userSelectedRelease, String assessmentTypeID,
-                                                  String entitlementId, String entitlementFreq, String loginMacroId,
-                                                  String timeZone, String scanPolicy, String webSiteAssessmentUrl,
-                                                  boolean scanScope,
-                                                  boolean redundantPageDetection, String scanEnvironment,
-                                                  boolean requireNetworkAuth, boolean requireLoginMacroAuth,
-                                                  String networkAuthUserName, String networkAuthPassword
+    public void SaveReleaseSettingsForWebSiteScan(String userSelectedRelease, String assessmentTypeID,
+                                                     String entitlementId, String entitlementFreq, String loginMacroId,
+                                                     String timeZone, String scanPolicy, String webSiteAssessmentUrl,
+                                                     boolean scanScope,
+                                                     boolean redundantPageDetection, String scanEnvironment,
+                                                     boolean requireNetworkAuth, boolean requireLoginMacroAuth,
+                                                     String networkAuthUserName, String networkAuthPassword
             , String networkAuthType, String timeboxScan
 
     )
@@ -164,8 +206,10 @@ public class DastScanSharedBuildStep {
             }
 
             try {
-                if (!timeboxScan.isEmpty())
+                if (timeboxScan!=null &&!timeboxScan.isEmpty())
                     dynamicScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(timeboxScan));
+                else
+                    dynamicScanSetupReqModel.setTimeBoxInHours(null);
             } catch (NumberFormatException exception) {
                 // Should warn not throw in front end.
                 throw new IllegalArgumentException(" value for TimeBox Scan");
@@ -205,6 +249,7 @@ public class DastScanSharedBuildStep {
 
             if (response.isSuccess && response.errors == null) {
                 System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
+
 
             } else {
 
@@ -281,6 +326,50 @@ public class DastScanSharedBuildStep {
         }
     }
 
+    public PatchDastFileUploadResponse PatchSetupManifestFile(String fileContent, String fileType) throws Exception {
+
+        DastScanController dastScanController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
+        patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
+
+        switch (fileType) {
+            case "LoginMacro":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.LoginMacro;
+                break;
+            case "WorkflowDrivenMacro":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.WorkflowDrivenMacro;
+                break;
+            default:
+                throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
+        }
+
+        patchDastScanFileUploadReq.Content = fileContent.getBytes();
+        return dastScanController.PatchDynamicScan(patchDastScanFileUploadReq);
+
+    }
+
+    public PatchDastFileUploadResponse PatchSetupManifestFile(byte[] fileContent, String fileType) throws Exception {
+
+        DastScanController dastScanController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
+        patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
+
+        switch (fileType) {
+            case "LoginMacro":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.LoginMacro;
+                break;
+            case "WorkflowDrivenMacro":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.WorkflowDrivenMacro;
+                break;
+            default:
+                throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
+        }
+
+        patchDastScanFileUploadReq.Content = fileContent;
+        return dastScanController.PatchDynamicScan(patchDastScanFileUploadReq);
+
+    }
+
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build, FilePath workspace,
                         Launcher launcher, TaskListener listener, String correlationId) {
@@ -321,7 +410,7 @@ public class DastScanSharedBuildStep {
                 logger.println("Error: Build Failed or Unstable.  Halting with Fortify on Demand upload.");
                 return;
             }
-            logger.println("Correlation Id = " + correlationId);
+//            logger.println("Correlation Id = " + correlationId);
 
             Integer releaseId = Integer.parseInt(model.get_releaseId());
 
@@ -334,12 +423,15 @@ public class DastScanSharedBuildStep {
             DastScanController dynamicController = new DastScanController(apiConnection, null, Utils.createCorrelationId());
             PostDastStartScanResponse response = dynamicController.StartDastScan(releaseId);
 
-            if (response.errors == null && response.getScanId() > 0) {
+            if (response.errors == null && response.scanId > 0) {
                 build.setResult(Result.SUCCESS);
-                build.setDescription(String.format("Successfully triggered Dynamic scan for scan id %d", response.getScanId()));
+                logger.println(String.format("Fortify On Demand Dynamic Scan Successfully triggered Dynamic scan for scan Id %d ", response.scanId));
+
+                this.scanId = response.scanId;
             } else {
+                logger.println(String.format("Fortify On Demand Dynamic Scan Failed for release Id %d ", releaseId));
                 build.setResult(Result.FAILURE);
-                build.setDescription(String.format("Failed to trigger Dynamic scan for release id %d with error %s", releaseId, ""));
+
             }
 
 

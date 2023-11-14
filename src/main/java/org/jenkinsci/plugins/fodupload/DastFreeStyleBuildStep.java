@@ -32,7 +32,7 @@ import java.util.UUID;
 
 public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep {
 
-    DastScanSharedBuildStep dynamicSharedBuildStep;
+    DastScanSharedBuildStep dastSharedBuildStep;
 
     @DataBoundConstructor
     public DastFreeStyleBuildStep(boolean overrideGlobalConfig, String username,
@@ -53,7 +53,7 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
                                   String selectedDynamicGeoLocation, String selectedNetworkAuthType, boolean timeBoxChecked
     ) throws IllegalArgumentException, IOException {
 
-        dynamicSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username,
+        dastSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username,
                 personalAccessToken, tenantId,
                 releaseId, selectedReleaseType,
                 webSiteUrl, dastEnv,
@@ -72,7 +72,7 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
 
         if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
 
-            dynamicSharedBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
+            dastSharedBuildStep.SaveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicy,
                     webSiteUrl, scanScope, enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName,
@@ -80,7 +80,7 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
 
         } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
 
-            dynamicSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
+            dastSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicy,
                     enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType);
@@ -95,9 +95,17 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
 
-        if (dynamicSharedBuildStep.getModel() == null) {
+        if (dastSharedBuildStep.getModel() == null) {
             System.out.println("job model is null");
             throw new IllegalArgumentException("DAST model not been set");
+        }
+        else
+        {
+            try {
+                dastSharedBuildStep.ValidateModel();
+            } catch (FormValidation e) {
+                throw new RuntimeException(e);
+            }
         }
         return true;
     }
@@ -115,14 +123,14 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
         }
 
         String correlationId = UUID.randomUUID().toString();
-        dynamicSharedBuildStep.perform(build, workspace, launcher, listener, correlationId);
+        dastSharedBuildStep.perform(build, workspace, launcher, listener, correlationId);
 
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
         crossBuildAction.setPreviousStepBuildResult(build.getResult());
 
 
         if (Result.SUCCESS.equals(crossBuildAction.getPreviousStepBuildResult())) {
-            crossBuildAction.setScanId(dynamicSharedBuildStep.getScanId());
+            crossBuildAction.setScanId(dastSharedBuildStep.getScanId());
             crossBuildAction.setCorrelationId(correlationId);
         }
         try {
@@ -136,38 +144,38 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
     @SuppressWarnings("unused")
     @JavaScriptMethod
     public String getSelectedReleaseType() {
-        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null)
-            return dynamicSharedBuildStep.getModel().getSelectedReleaseType();
+        if (dastSharedBuildStep != null && dastSharedBuildStep.getModel() != null)
+            return dastSharedBuildStep.getModel().getSelectedReleaseType();
         return "";
     }
 
     @SuppressWarnings("unused")
     @JavaScriptMethod
     public String getReleaseId() {
-        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null)
-            return dynamicSharedBuildStep.getModel().get_releaseId();
+        if (dastSharedBuildStep != null && dastSharedBuildStep.getModel() != null)
+            return dastSharedBuildStep.getModel().get_releaseId();
         else return "";
     }
 
 
     @SuppressWarnings("unused")
     public String getUsername() {
-        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null)
-            return dynamicSharedBuildStep.getAuthModel().getUsername();
+        if (dastSharedBuildStep != null && dastSharedBuildStep.getModel() != null)
+            return dastSharedBuildStep.getAuthModel().getUsername();
         else return "";
     }
 
     @SuppressWarnings("unused")
     public String getPersonalAccessToken() {
-        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null) {
-            return dynamicSharedBuildStep.getAuthModel().getPersonalAccessToken();
+        if (dastSharedBuildStep != null && dastSharedBuildStep.getModel() != null) {
+            return dastSharedBuildStep.getAuthModel().getPersonalAccessToken();
         } else return "";
     }
 
     @SuppressWarnings("unused")
     public String getTenantId() {
-        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null)
-            return dynamicSharedBuildStep.getAuthModel().getTenantId();
+        if (dastSharedBuildStep != null && dastSharedBuildStep.getModel() != null)
+            return dastSharedBuildStep.getAuthModel().getTenantId();
         else {
             return "";
         }
@@ -175,8 +183,8 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
 
     @SuppressWarnings("unused")
     public boolean getOverrideGlobalConfig() {
-        if (dynamicSharedBuildStep != null && dynamicSharedBuildStep.getModel() != null) {
-            return dynamicSharedBuildStep.getAuthModel().getOverrideGlobalConfig();
+        if (dastSharedBuildStep != null && dastSharedBuildStep.getModel() != null) {
+            return dastSharedBuildStep.getAuthModel().getOverrideGlobalConfig();
         }
         return false;
     }
@@ -185,7 +193,7 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
     @JavaScriptMethod
     public String getUserSelectedRelease() {
         System.out.println("user selected release");
-        return dynamicSharedBuildStep.getModel().getUserSelectedRelease();
+        return dastSharedBuildStep.getModel().getUserSelectedRelease();
     }
 
 
@@ -193,7 +201,7 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
     @JavaScriptMethod
     public String getUserSelectedApplication() {
         System.out.println("user selected application");
-        return dynamicSharedBuildStep.getModel().getUserSelectedApplication();
+        return dastSharedBuildStep.getModel().getUserSelectedApplication();
     }
 
     @Override

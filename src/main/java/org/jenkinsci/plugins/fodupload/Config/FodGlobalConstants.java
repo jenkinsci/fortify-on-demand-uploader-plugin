@@ -5,7 +5,7 @@ public class FodGlobalConstants {
     /*
      %d -> replaces with releaseID at runtime using string.format
      */
-    public static class FodDastApiConstants {
+    public static class FodDastApiEndPoint {
         public final static String DastGetApi = "api/v3/releases/%d/dast-automated-scans/scan-setup";
         public final static String DastWebSiteScanPutApi = "api/v3/releases/%d/dast-automated-scans/website-scan-setup";
         public final static String DastApiScanPutApi = "api/v3/releases/%d/dast-automated-scans/api-scan-setup";
@@ -13,6 +13,23 @@ public class FodGlobalConstants {
         public final static String DastFileUploadPatchApi = "api/v3/releases/%d/dast-automated-scans/scan-setup/file-upload";
         public final static String DastStartScanAPi = "/api/v3/releases/%d/dast-automated-scans/start-scan";
 
+
     }
+    public static  class FodDastValidation
+    {
+        public final static String DastPipelineScanTypeNotFound = "Missing scan type.";
+        public final static String DastPipelineWebSiteUrlNotFound = "Missing Website URL.";
+        public final static String DastPipelineReleaseIdNotFound = "Missing Release Id";
+        public final static String DastPipelineScanEntitlementIdNotFound = "Missing Entitlement Id.";
+        public final static String DastPipelineScanEntitlementTypeNotFound = "Missing Entitlement Type.";
+        public final static String DastPipelineAssessmentIdNotFound = "Missing Assessment Id.";
+        public final static String DastPipelineWorkflowMacroIdNotFound = "Missing Workflow Macro Id.";
+    }
+
+    public static class FodDastErrorMsg
+    {
+
+    }
+
 
 }

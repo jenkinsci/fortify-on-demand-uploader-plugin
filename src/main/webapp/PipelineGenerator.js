@@ -50,6 +50,8 @@ class PipelineGenerator {
     }
 
     async onAssessmentChanged(skipAuditPref) {
+
+      debugger;
         let atval = jq('#assessmentTypeSelect').val();
         let entsel = jq('#entitlementSelect');
         let at = this.assessments ? this.assessments[atval] : null;

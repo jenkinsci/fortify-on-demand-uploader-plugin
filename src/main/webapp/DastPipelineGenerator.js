@@ -21,7 +21,7 @@ const dastCommonScopeSetting = 'dast-common-scan-scope';
 const nwAuthSetting = 'dast-networkAuth-setting';
 const loginAuthSetting = 'dast-login-macro'
 
-class DynamicPipelineGenerator {
+class DastPipelineGenerator {
     constructor() {
         this.api = new Api(null, descriptor);
         this.currentSession = null
@@ -231,6 +231,7 @@ class DynamicPipelineGenerator {
                 .change(_ => this.populateHiddenFields());
             jq('#releaseSelectionValue')
                 .change(_ => this.onReleaseIdChanged());
+
             jq('#assessmentTypeSelect')
                 .change(_ => this.onAssessmentChanged());
             jq('#entitlementSelect')
@@ -254,9 +255,6 @@ class DynamicPipelineGenerator {
                 });
             jq('#overrideReleaseSettings')
                 .change(_ => this.loadEntitlementOptions());
-
-
-
             await this.onReleaseSelectionChanged();
             jq('.fodp-row-screc').hide();
 
@@ -284,17 +282,18 @@ class DynamicPipelineGenerator {
         let freq = null;
         let audit = null;
 
+           debugger;
         if (this.scanSettings) {
             assmt = this.scanSettings.assessmentTypeId;
             entl = this.scanSettings.entitlementId;
             freq = this.scanSettings.entitlementFrequencyType;
-            audit = this.scanSettings.auditPreferenceType;
+             audit = this.scanSettings.auditPreferenceType;
         }
         this.populateAssessmentsDropdown();
         jq('#assessmentTypeSelect').val(assmt);
         await this.onAssessmentChanged(true);
+        debugger;
         jq('#entitlementSelect').val(freq && entl ? getEntitlementDropdownValue(entl, freq) : '');
-        await this.onEntitlementChanged(false);
         jq('#auditPreferenceSelect').val(audit);
     }
 
@@ -307,7 +306,6 @@ class DynamicPipelineGenerator {
         if (this.assessments) {
             for (let k of Object.keys(this.assessments)) {
                 let at = this.assessments[k];
-
                 atsel.append(`<option value="${at.id}">${at.name}</option>`);
             }
         }
@@ -335,7 +333,6 @@ class DynamicPipelineGenerator {
                 this.showMessage('Failed to retrieve auth data');
                 return;
             }
-
             if (this.currentSession && this.currentSession.userId) jq('#autoProvOwnerAssignMe').show();
             else jq('#autoProvOwnerAssignMe').hide();
 
@@ -343,36 +340,31 @@ class DynamicPipelineGenerator {
             jq('#releaseSelectionValue').hide();
             this.autoProvMode = true;
             jq('.fodp-row-autoProv').show();
-
         } else {
             jq('.fodp-row-relid').show();
             jq('#releaseLookup').show();
         }
-
         this.loadEntitlementOptions();
     }
 
     onReleaseIdChanged() {
         debugger;
+         this.releaseId = numberOrNull(jq('#releaseSelectionValue').val());
         if (this.overrideServerSettings) {
-            this.releaseId = numberOrNull(jq('#releaseSelectionValue').val());
-
             if (this.releaseId < 1) this.releaseId = null;
-
             this.loadReleaseEntitlementSettings();
         } else {
-            this.onAssessmentChanged();
+
+            // this.loadReleaseEntitlementSettings();
             this.hideMessages();
-            jq(fodpOverrideRowsSelector).hide();
+             this.fodOverrideRowsVisibility(false);
         }
     }
 
     async loadReleaseEntitlementSettings() {
         debugger;
         let rows = jq(fodpOverrideRowsSelector);
-
         this.hideMessages();
-
         if (!this.releaseId) {
             rows.hide();
             this.showMessage('Enter release id', true);
@@ -380,7 +372,6 @@ class DynamicPipelineGenerator {
         }
 
         let fields = jq('.fodp-field.spinner-container');
-
         fields.addClass('spinner');
         rows.show();
         // ToDo: deal with overlapping calls
@@ -411,7 +402,7 @@ class DynamicPipelineGenerator {
                         await this.setAssessmentsAndSettings();
                         //Set Entitlement
                         this.setSelectedEntitlementValue(entp);
-                        jq('#entitlementFreqType').val(this.scanSettings.entitlementFrequencyType);
+                        jq('#entitlementFrequency').val(this.scanSettings.entitlementFrequencyType);
                         //Set timezone
                         let timeZoneId = this.scanSettings.timeZone;
                         jq('#timeZoneStackSelectList').val(timeZoneId);
@@ -423,12 +414,14 @@ class DynamicPipelineGenerator {
                         this.setScanPolicy();
                         //Set the Website assessment scan type specific settings.
                         if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
-                            jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.urls[0]);
+                            jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.dynamicSiteUrl);
                         }
+
+                        //set timebox scan
+                        this.setTimeBoxScan();
                         this.setWorkflowDrivenScanSetting();
                         /*Set restrict scan value from response to UI */
                         this.setRestrictScan();
-
                         /*Set network settings from response. */
                         jq('#ddlNetworkAuthType').val(networkAuthTypes);
                         this.onNetworkAuthTypeLoad();
@@ -449,7 +442,6 @@ class DynamicPipelineGenerator {
                     console.error("error in scan settings: " + reason);
                 });
         else {
-            this.onAssessmentChanged();
             this.showMessage('Failed to retrieve scan settings from API', true);
             rows.hide();
         }
@@ -506,6 +498,7 @@ class DynamicPipelineGenerator {
             let at = this.entp[ts];
             if (curVal !== undefined && at.value !== undefined && curVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
+                alert('found');
                 entitlement.append(`<option value="${at.text}" selected>${at.text}</option>`);
             } else {
                 entitlement.append(`<option value="${at.text}">${at.text}</option>`);
@@ -549,13 +542,15 @@ class DynamicPipelineGenerator {
         //only single file upload is allowed from FOD. Todo Iterate the array
         if (!Object.is(this.scanSettings.workflowdrivenAssessment, undefined)) {
             if (!Object.is(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro, undefined)) {
-                jq('#lisWorkflowDrivenAllowedHostUrl').empty();
+                jq('#listWorkflowDrivenAllowedHostUrl').empty();
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].fileId);
 
                 this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].allowedHosts.forEach((item, index, arr) => {
                         console.log(item);
-                        let ident = arr[index];
-                        jq('#lisWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + ident + " ' name='" + ident + "'>" + arr[index] + "</li>")
+                        if (arr[index] !== undefined || null) {
+                            jq('#workflowMacroHost').val(arr[index])
+                            jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + arr[index] + " ' name='" + arr[index] + "'>" + arr[index] + "</li>")
+                        }
                     }
                 )
             }
@@ -576,11 +571,14 @@ class DynamicPipelineGenerator {
                     this.commonScopeSettingVisibility(isVisible);
                     this.directoryAndSubdirectoriesScopeVisibility(isVisible);
                     this.loginMacroSettingsVisibility(isVisible);
+                    this.timeboxScanVisibility(isVisible);
+                    this.excludeUrlVisibility(isVisible);
 
                     break;
                 }
                 case "API": {
                     this.apiScanSettingVisibility(isVisible);
+                    this.timeboxScanVisibility(isVisible);
                     break;
                 }
                 case "Workflow-driven":
@@ -590,15 +588,18 @@ class DynamicPipelineGenerator {
                     this.loginMacroSettingsVisibility(false);
                     this.networkAuthSettingVisibility(isVisible);
                     this.directoryAndSubdirectoriesScopeVisibility(false);
+                    this.timeboxScanVisibility(false);
+                    this.excludeUrlVisibility(false);
 
                     break;
                 default:
                     //hide all scan type settings.
                     this.websiteScanSettingsVisibility(false);
+                    this.workflowScanSettingVisibility(false)
                     this.apiScanSettingVisibility(false);
-                    this.workflowScanSettingVisibility(false);
                     this.loginMacroSettingsVisibility(false);
                     this.networkAuthSettingVisibility(false);
+
                     break;
             }
         }
@@ -621,6 +622,27 @@ class DynamicPipelineGenerator {
             loginMacroSetting.hide();
         } else {
             loginMacroSetting.show();
+        }
+    }
+
+    excludeUrlVisibility(isVisible) {
+        if ((isVisible === undefined) || isVisible === false) {
+            jq('#standardScanTypeExcludeUrlsRow').hide();
+            let tr = closestRow('#standardScanTypeExcludeUrlsRow');
+            tr.hide();
+
+        } else {
+            jq('#standardScanTypeExcludeUrlsRow').show();
+            let tr = closestRow('#standardScanTypeExcludeUrlsRow');
+            tr.show();
+        }
+    }
+
+    timeboxScanVisibility(isVisible) {
+        if ((isVisible === undefined) || isVisible === false) {
+            jq('#dast-timeBox-scan').hide();
+        } else {
+            jq('#dast-timeBox-scan').show();
         }
     }
 
@@ -848,14 +870,14 @@ class DynamicPipelineGenerator {
                         }
                     }
 
-                    jq('#workflowMacroHosts').val(hosts);
-                    jq('#lisWorkflowDrivenAllowedHostUrl').empty();
+                    jq('#workflowMacroHost').val(hosts);
+                    jq('#listWorkflowDrivenAllowedHostUrl').empty();
 
                     //set the allowed hosts  html list value
                     if (hosts !== undefined) {
                         let host = hosts.split(',');
                         host.forEach((item) => {
-                            jq('#lisWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'>" + item + "</li>")
+                            jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'>" + item + "</li>")
                         })
                     }
                 } else
@@ -876,7 +898,7 @@ class DynamicPipelineGenerator {
 
     onWorkflowDrivenHostChecked(event) {
 
-        let allowedHost = jq('#workflowMacroHosts').val();
+        let allowedHost = jq('#workflowMacroHost').val();
         if (event.target.checked) {
             let hostToAdd = event.target.name; //name point to the host returned from FOD Patch API
 
@@ -885,7 +907,7 @@ class DynamicPipelineGenerator {
                     allowedHost = allowedHost + "," + hostToAdd;
                 } else
                     allowedHost = hostToAdd;
-                jq('#workflowMacroHosts').val(allowedHost);
+                jq('#workflowMacroHost').val(allowedHost);
             }
         } else {
             if (allowedHost !== undefined || null) {
@@ -899,7 +921,7 @@ class DynamicPipelineGenerator {
                         }
                     }
                 });
-                jq('#workflowMacroHosts').val(hosts.flat());
+                jq('#workflowMacroHost').val(hosts.flat());
             }
         }
     }
@@ -913,7 +935,18 @@ class DynamicPipelineGenerator {
         // jq('#listStandardScanTypeExcludedUrl').show();
     }
 
+      setTimeBoxScan()
+        {
+            if(this.scanSettings.timeBoxInHours!==undefined)
+            {
+              jq('#dast-timeBox-scan').find('input:text:first').val(this.scanSettings.timeBoxInHours);
+               jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
+
+            }
+        }
+
     async onAssessmentChanged(skipAuditPref) {
+         debugger;
         let atval = jq('#assessmentTypeSelect').val();
         let entsel = jq('#entitlementSelect');
         let at = this.assessments ? this.assessments[atval] : null;
@@ -924,7 +957,7 @@ class DynamicPipelineGenerator {
             let available = at.entitlementsSorted.filter(e => e.id > 0);
 
             for (let e of available) {
-                entsel.append(`<option value="${getEntitlementDropdownValue(e.id, e.frequencyId)}">${e.description}</option>`);
+                entsel.append(`<option value="${getEntitlementDropdownValue(e.id, e.frequency)}">${e.description}</option>`);
             }
         }
 
@@ -1008,10 +1041,9 @@ class DynamicPipelineGenerator {
             .each((i, e) => {
                 let jqe = jq(e);
                 let tr = closestRow(jqe);
-
-                tr.addClass(fodpOverrideRowsSelector);
+                tr.addClass('fodp-row-relid-ovr');
                 let vtr = getValidationErrRow(tr);
-                if (vtr) vtr.addClass('fode-field-row-verr');
+                if (vtr) vtr.addClass('fodp-row-relid-ovr');
             });
         if (isVisible) {
 
@@ -1055,16 +1087,16 @@ class DynamicPipelineGenerator {
         let own = '';
 
         //DAST Scan Settings
-        let spo='';
-        let sty ='';
-        let tz =''
-        let scanUrl ='';
-        let scanExUrl =[];
-        let wkMacroFileId ='';
-        let loginMacroFileId =''
-        let pgRed =false;
-        let sEvn ='';
-        let tmBox ='';
+        let spo = '';
+        let sty = '';
+        let tz = ''
+        let scanUrl = '';
+        let scanExUrl = [];
+        let wkMacroFileId = '';
+        let loginMacroFileId = ''
+        let pgRed = false;
+        let sEvn = '';
+        let tmBox = '';
 
 
         if (this.overrideAuth) {
@@ -1126,8 +1158,9 @@ class DynamicPipelineGenerator {
 
         // Entitlement Options
         jq('#entitlementId').val(entId);
-        jq('#frequencyId').val(freqId);
-        jq('#assessmentType').val(at);
+        jq('#entitlementFrequency').val(freqId);
+        //entitlementFrequency
+        jq('#assessmentTypeId').val(at);
         jq('#auditPreference').val(ap);
 
         // Auto Provision
@@ -1143,6 +1176,6 @@ class DynamicPipelineGenerator {
     }
 }
 
-const dynamicPipelineGenerator = new DynamicPipelineGenerator();
+const dynamicPipelineGenerator = new DastPipelineGenerator();
 spinAndWait(() => jq('#releaseSelection').val() !== undefined)
     .then(dynamicPipelineGenerator.preinit.bind(dynamicPipelineGenerator));

@@ -238,13 +238,12 @@ class DastScanSettings {
     }
 
     async onEntitlementChanged(skipAuditPref) {
-
+ debugger;
         let val = jq('#entitlementSelectList').val();
         let {entitlementId, frequencyId, frequencyType} = parseEntitlementDropdownValue(val);
 
         jq('#entitlementId').val(entitlementId);
         jq('#frequencyId').val(frequencyId);
-        jq('#frequencyId').val();
         jq('#entitlementFreqType').val(frequencyType);
         jq('#purchaseEntitlementsForm input').prop('checked', (entitlementId <= 0));
         if (skipAuditPref !== true) await this.loadAuditPrefOptions(jq('#ddAssessmentType').val(), frequencyId);
@@ -662,13 +661,13 @@ class DastScanSettings {
                     }
 
                     jq('#workflowMacroHosts').val(hosts);
-                    jq('#lisWorkflowDrivenAllowedHostUrl').empty();
+                    jq('#listWorkflowDrivenAllowedHostUrl').empty();
 
                     //set the allowed hosts  html list value
                     if (hosts !== undefined) {
                         let host = hosts.split(',');
                         host.forEach((item) => {
-                            jq('#lisWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'>" + item + "</li>")
+                            jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'>" + item + "</li>")
                         })
                     }
                 } else
@@ -799,7 +798,7 @@ class DastScanSettings {
         jq('#btnUploadLoginMacroFile').click(_ => this.onLoginMacroFileUpload());
 
         jq('#btnUploadWorkflowMacroFile').click(_ => this.onWorkflowMacroFileUpload());
-        jq('#lisWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
+        jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
 
         jq('.fode-row-screc').hide();
         this.uiLoaded = true;

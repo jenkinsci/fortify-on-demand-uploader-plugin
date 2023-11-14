@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import jline.internal.Nullable;
+
 /* Request Model For saving website Scan setting
 {
   "dynamicSiteUrl": "string",
@@ -52,10 +54,10 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     }
     private  boolean restrictToDirectoryAndSubdirectories;
 
-    public void setTimeBoxInHours(int timeBoxInHours) {
+    public void setTimeBoxInHours(Integer timeBoxInHours) {
         this.timeBoxInHours = timeBoxInHours;
     }
-    int timeBoxInHours;
+    Integer timeBoxInHours;
     private ExclusionsList exclusionsList;
     public class ExclusionsList {
         public String  value;
