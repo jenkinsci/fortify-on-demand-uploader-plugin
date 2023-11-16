@@ -160,7 +160,7 @@ public class DastScanController extends ControllerBase {
 
         ResponseContent response = apiConnection.request(request);
         PostDastStartScanResponse postDastStartScanResponse = new PostDastStartScanResponse();
-        postDastStartScanResponse = (PostDastStartScanResponse) convertHttpResponseIntoDastApiResponse(response, postDastStartScanResponse);
+        postDastStartScanResponse = convertHttpResponseIntoDastApiResponse(response, postDastStartScanResponse);
         return postDastStartScanResponse;
     }
 
@@ -191,7 +191,7 @@ public class DastScanController extends ControllerBase {
                 .build();
         ResponseContent response = apiConnection.request(request);
         PutDastScanSetupResponse putDastScanSetupResponse = new PutDastScanSetupResponse();
-        putDastScanSetupResponse = (PutDastScanSetupResponse) convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
+        putDastScanSetupResponse =  convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
         return putDastScanSetupResponse;
     }
 
@@ -211,7 +211,7 @@ public class DastScanController extends ControllerBase {
                 .build();
         ResponseContent response = apiConnection.request(request);
         PutDastScanSetupResponse putDastScanSetupResponse = new PutDastScanSetupResponse();
-        putDastScanSetupResponse = (PutDastScanSetupResponse) convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
+        putDastScanSetupResponse =  convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
         return putDastScanSetupResponse;
     }
 
@@ -231,7 +231,7 @@ public class DastScanController extends ControllerBase {
                 .build();
         ResponseContent response = apiConnection.request(request);
         PutDastScanSetupResponse putDastScanSetupResponse = new PutDastScanSetupResponse();
-        putDastScanSetupResponse = (PutDastScanSetupResponse) convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
+        putDastScanSetupResponse =  convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
         return putDastScanSetupResponse;
     }
 
@@ -251,7 +251,7 @@ public class DastScanController extends ControllerBase {
                 .build();
         ResponseContent response = apiConnection.request(request);
         PutDastScanSetupResponse putDastScanSetupResponse = new PutDastScanSetupResponse();
-        putDastScanSetupResponse = (PutDastScanSetupResponse) convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
+        putDastScanSetupResponse =  convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
         return putDastScanSetupResponse;
     }
 
@@ -274,8 +274,6 @@ public class DastScanController extends ControllerBase {
             ((FodDastApiResponse) fodApiResponse).reason = response.message();
             return (T) fodApiResponse;
         } else {
-            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
-            ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
             return parseHttpBodyResponse(response, fodApiResponse);
         }
     }
@@ -307,16 +305,31 @@ public class DastScanController extends ControllerBase {
     private <T> T parseHttpBodyResponse(ResponseContent response, Object fodApiResponse) throws IOException {
 
         if (fodApiResponse instanceof PatchDastFileUploadResponse) {
-            return apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
+            T parsedResponse = apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
             }.getType());
-        } else if (fodApiResponse instanceof PutDastScanSetupResponse) {
-            return apiConnection.parseResponse(response, new TypeToken<PutDastScanSetupResponse>() {
-            }.getType());
-        } else if (fodApiResponse instanceof PostDastStartScanResponse) {
-            return apiConnection.parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
-            }.getType());
-        } else {
+            ((PatchDastFileUploadResponse) parsedResponse).isSuccess = response.isSuccessful();
+            ((PatchDastFileUploadResponse) parsedResponse).HttpCode = response.code();
+            ((PatchDastFileUploadResponse) parsedResponse).reason = response.message();
+            return parsedResponse;
 
+        } else if (fodApiResponse instanceof PutDastScanSetupResponse) {
+            T parsedResponse = apiConnection.parseResponse(response, new TypeToken<PutDastScanSetupResponse>() {
+            }.getType());
+            ((PutDastScanSetupResponse) parsedResponse).isSuccess = response.isSuccessful();
+            ((PutDastScanSetupResponse) parsedResponse).HttpCode = response.code();
+            ((PutDastScanSetupResponse) parsedResponse).reason = response.message();
+            return parsedResponse;
+
+        } else if (fodApiResponse instanceof PostDastStartScanResponse) {
+            T parsedResponse = apiConnection.parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
+            }.getType());
+
+            ((PostDastStartScanResponse) parsedResponse).isSuccess = response.isSuccessful();
+            ((PostDastStartScanResponse) parsedResponse).HttpCode = response.code();
+            ((PostDastStartScanResponse) parsedResponse).reason = response.message();
+            return  parsedResponse;
+
+        } else {
             ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
             ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
             ((FodDastApiResponse) fodApiResponse).reason = response.message();

@@ -308,7 +308,7 @@ class AppAndReleaseSelection {
         const dastEnv = closestRow('#dast-scan-setting-evn')
         const dastTimeZone = closestRow('#timezone');
         const dastWrkFlowMacroUpload = closestRow('#dast-workflow-macro-upload');
-        const dastWrkFlowAllowedHost = closestRow('#lisWorkflowDrivenAllowedHostUrl');
+        const dastWrkFlowAllowedHost = closestRow('#listWorkflowDrivenAllowedHostUrl');
         const dastStandardScope = closestRow('#dast-standard-scan-scope');
         const dastExcludeUrl = closestRow('#standardScanTypeExcludeUrlsRow');
         const dastWebSiteTimeBoxScan = closestRow('#dast-timeBox-scan');

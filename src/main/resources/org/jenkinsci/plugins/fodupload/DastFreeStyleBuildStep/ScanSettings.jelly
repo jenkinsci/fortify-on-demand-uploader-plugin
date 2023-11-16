@@ -222,7 +222,7 @@
             </div>
         </f:entry>
         <f:entry title="Allowed Hosts">
-            <ul id="lisWorkflowDrivenAllowedHostUrl" name="lisWorkflowDrivenAllowedHostUrl"
+            <ul id="listWorkflowDrivenAllowedHostUrl" name="listWorkflowDrivenAllowedHostUrl"
                 class="fode-field spinner-container dast-workflow-scan">
             </ul>
         </f:entry>

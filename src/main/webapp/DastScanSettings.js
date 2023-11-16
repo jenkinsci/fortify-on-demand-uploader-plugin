@@ -62,9 +62,9 @@ class DastScanSettings {
             switch (scanType) {
 
                 case "Standard": {
-                     jq('#' + allPolicyTypes).show();
-                     jq('#' + apiPolicyType).hide();
-                     jq('.redundantPageDetection').show();
+                    jq('#' + allPolicyTypes).show();
+                    jq('#' + apiPolicyType).hide();
+                    jq('.redundantPageDetection').show();
                     this.websiteScanSettingsVisibility(isVisible);
                     this.workflowScanSettingVisibility(false);
                     this.networkAuthSettingVisibility(true);
@@ -80,12 +80,12 @@ class DastScanSettings {
                     jq('#' + apiPolicyType).show();
                     jq('.redundantPageDetection').hide();
                     this.apiScanSettingVisibility(isVisible);
-                     this.commonScopeSettingVisibility(isVisible);
-                     this.networkAuthSettingVisibility(true);
-                     this.loginMacroSettingsVisibility(false);
+                    this.commonScopeSettingVisibility(isVisible);
+                    this.networkAuthSettingVisibility(true);
+                    this.loginMacroSettingsVisibility(false);
                     this.workflowScanSettingVisibility(false);
-                     this.websiteScanSettingsVisibility(false);
-                     this.directoryAndSubdirectoriesScopeVisibility(false);
+                    this.websiteScanSettingsVisibility(false);
+                    this.directoryAndSubdirectoriesScopeVisibility(false);
                     break;
                 }
                 case "Workflow-driven":
@@ -451,13 +451,13 @@ class DastScanSettings {
         //only single file upload is allowed from FOD. Todo Iterate the array
         if (!Object.is(this.scanSettings.workflowdrivenAssessment, undefined)) {
             if (!Object.is(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro, undefined)) {
-                jq('#lisWorkflowDrivenAllowedHostUrl').empty();
+                jq('#listWorkflowDrivenAllowedHostUrl').empty();
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].fileId);
 
                 this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].allowedHosts.forEach((item, index, arr) => {
                         console.log(item);
                         let ident = arr[index];
-                        jq('#lisWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + ident + " ' name='" + ident + "'>" + arr[index] + "</li>")
+                        jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + ident + " ' name='" + ident + "'>" + arr[index] + "</li>")
                     }
                 )
 
@@ -467,7 +467,7 @@ class DastScanSettings {
 
     }
 
-     setApiScanSetting() {
+    setApiScanSetting() {
 
         if (!Object.is(this.scanSettings.apiAssessment, undefined)) {
             if (!Object.is(this.scanSettings.apiAssessment.openAPI, undefined)) {
@@ -484,7 +484,7 @@ class DastScanSettings {
             }
 
         }
-     }
+    }
     setOpenApiSettings(openApiSettings){
 
         jq('#apiTypeList').val('openApi');
@@ -493,26 +493,26 @@ class DastScanSettings {
         jq('#' + inputId).trigger('click');
         jq('#dast-openApi-api-key input').val(openApiSettings.apiKey);
         if(openApiSettings.sourceType == 'Url'){
-        jq('#dast-openApi-url input').val(openApiSettings.sourceUrn);
+            jq('#dast-openApi-url input').val(openApiSettings.sourceUrn);
         }
         else{
-           //ToDo : Write code for showing file name
-         }
+            //ToDo : Write code for showing file name
+        }
     }
     setGraphQlSettings(graphQlSettings){
         jq('#apiTypeList').val('graphQl');
         var inputId = graphQlSettings.sourceType == 'Url' ? 'graphQlInputUrl' : 'graphQlInputFile';
-         this.onApiTypeChanged();
-         jq('#' + inputId).trigger('click');
-         jq('#dast-graphQL-api-host input').val(graphQlSettings.host);
-         jq('#dast-graphQL-api-servicePath input').val(graphQlSettings.servicePath);
-         jq('#dast-graphQL-schemeType input').val(graphQlSettings.schemeType);
-         if(graphQlSettings.sourceType == 'Url'){
-         jq('#dast-graphQL-url input').val(graphQlSettings.sourceUrn);
-         }
-         else{
-          //ToDo : Write code for showing file name
-         }
+        this.onApiTypeChanged();
+        jq('#' + inputId).trigger('click');
+        jq('#dast-graphQL-api-host input').val(graphQlSettings.host);
+        jq('#dast-graphQL-api-servicePath input').val(graphQlSettings.servicePath);
+        jq('#dast-graphQL-schemeType input').val(graphQlSettings.schemeType);
+        if(graphQlSettings.sourceType == 'Url'){
+            jq('#dast-graphQL-url input').val(graphQlSettings.sourceUrn);
+        }
+        else{
+            //ToDo : Write code for showing file name
+        }
     }
     setGrpcSettings(grpcSettings){
         jq('#apiTypeList').val('grpc');
@@ -582,8 +582,8 @@ class DastScanSettings {
             } else if (this.scanSettings.workflowdrivenAssessment !== null && this.scanSettings.workflowdrivenAssessment !== undefined) {
                 selectedScanType = dastScanTypes.find(v => v.value === "Workflow-driven")
             }else if(this.scanSettings.apiAssessment !== null && this.scanSettings.apiAssessment !== undefined){
-                         selectedScanType = dastScanTypes.find(v => v.value === "API")
-                         }
+                selectedScanType = dastScanTypes.find(v => v.value === "API")
+            }
             // Check for API Type
 
             //Set other scan type values in the dropdown.
@@ -745,13 +745,13 @@ class DastScanSettings {
                     }
 
                     jq('#workflowMacroHosts').val(hosts);
-                    jq('#lisWorkflowDrivenAllowedHostUrl').empty();
+                    jq('#listWorkflowDrivenAllowedHostUrl').empty();
 
                     //set the allowed hosts  html list value
                     if (hosts !== undefined) {
                         let host = hosts.split(',');
                         host.forEach((item) => {
-                            jq('#lisWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'>" + item + "</li>")
+                            jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'>" + item + "</li>")
                         })
                     }
                 } else
@@ -762,68 +762,68 @@ class DastScanSettings {
             }
         );
     }
-     onFileUpload(event) {
+    onFileUpload(event) {
 
-            jq('.uploadMessage').text('');
-            let file = null;
-            let fileType = null;
-            let elem = null;
-            let displayMessage = null;
+        jq('.uploadMessage').text('');
+        let file = null;
+        let fileType = null;
+        let elem = null;
+        let displayMessage = null;
 
-            switch(event.target.id){
-           case 'btnUploadOpenApiFile' :
-            file = document.getElementById('openApiFile').files[0];
-            fileType = openApiFileType;
-            elem = jq('#openApiFileId');
-            displayMessage = jq('#openApiUploadMessage');
-            break;
+        switch(event.target.id){
+            case 'btnUploadOpenApiFile' :
+                file = document.getElementById('openApiFile').files[0];
+                fileType = openApiFileType;
+                elem = jq('#openApiFileId');
+                displayMessage = jq('#openApiUploadMessage');
+                break;
 
             case 'btnUploadPostmanFile' :
-            file = document.getElementById('postmanFile').files[0];
-            fileType = postmanFileType;
-            elem = jq('#postmanFileId');
-            displayMessage = jq('#postmanUploadMessage');
-            break;
+                file = document.getElementById('postmanFile').files[0];
+                fileType = postmanFileType;
+                elem = jq('#postmanFileId');
+                displayMessage = jq('#postmanUploadMessage');
+                break;
 
             case 'btnUploadgraphQLFile' :
-            file = document.getElementById('graphQLFile').files[0];
-            fileType = graphQlFileType;
-            elem = jq('#graphQLFileId');
-            displayMessage = jq('#grapgQlUploadMessage');
-            break
+                file = document.getElementById('graphQLFile').files[0];
+                fileType = graphQlFileType;
+                elem = jq('#graphQLFileId');
+                displayMessage = jq('#grapgQlUploadMessage');
+                break
 
             case 'btnUploadgrpcFile' :
-            file = document.getElementById('grpcFile').files[0];
-            fileType = grpcFileType;
-            elem = jq('#grpcFileId');
-            displayMessage = jq('#grpcUploadMessage');
-            break;
+                file = document.getElementById('grpcFile').files[0];
+                fileType = grpcFileType;
+                elem = jq('#grpcFileId');
+                displayMessage = jq('#grpcUploadMessage');
+                break;
             default :
                 throw new Exception("Illegal argument exception,File Type not valid");
-            }
-
-            if(file == null || fileType == null || elem == null){
-            throw new Exception("Illegal argument exception,File Type not valid");
-            }
-
-            this.api.patchSetupManifestFile(this.releaseId, getAuthInfo(), file, fileType).then(res => {
-
-                    //Todo: - check
-                    console.log("File upload success " + res);
-                    if (res.fileId > 0) {
-                        elem.val(res.fileId);
-                        displayMessage.text('Uploaded Successfully !!');
-                    } else {
-                    displayMessage.text('Upload Failed !!');
-                        throw new Exception("Illegal argument exception,FileId not valid");
-                    }
-                }
-            ).catch((err) => {
-                    displayMessage.text('Upload Failed !!');
-                    console.log('err' + err);
-                }
-            );
         }
+
+        if(file == null || fileType == null || elem == null){
+            throw new Exception("Illegal argument exception,File Type not valid");
+        }
+
+        this.api.patchSetupManifestFile(this.releaseId, getAuthInfo(), file, fileType).then(res => {
+
+                //Todo: - check
+                console.log("File upload success " + res);
+                if (res.fileId > 0) {
+                    elem.val(res.fileId);
+                    displayMessage.text('Uploaded Successfully !!');
+                } else {
+                    displayMessage.text('Upload Failed !!');
+                    throw new Exception("Illegal argument exception,FileId not valid");
+                }
+            }
+        ).catch((err) => {
+                displayMessage.text('Upload Failed !!');
+                console.log('err' + err);
+            }
+        );
+    }
 
     directoryAndSubdirectoriesScopeVisibility(isVisible) {
         if (isVisible)
@@ -891,25 +891,25 @@ class DastScanSettings {
         if(id == 'openApiInputFile'){
             jq('.openApiSourceControls').show()
             jq('#dast-api-openApi-upload').show();
-             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
+            jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
         }
         else if(id == 'openApiInputUrl'){
             jq('.openApiSourceControls').show()
             jq('#dast-openApi-url').show();
-             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
+            jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
         }
         else if(id == 'graphQlInputFile'){
             jq('.graphQLSourceControls').show();
             jq('#dast-api-graphQL-upload').show();
-             jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
+            jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
         }
         else if(id == 'graphQlInputUrl'){
             jq('.graphQLSourceControls').show();
             jq('#dast-graphQL-url').show();
-             jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
+            jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
         }
         else{
-               jq('.sourceOptions').prop('checked', false);
+            jq('.sourceOptions').prop('checked', false);
         }
     }
 
@@ -920,37 +920,37 @@ class DastScanSettings {
             this.grpcScanVisibility(false);
             this.graphQlScanVisibility(false);
             this.postmanScanVisibility(false);
-                switch (apiType) {
-                    case "openApi":
-                        this.openApiScanVisibility(isVisible);
+            switch (apiType) {
+                case "openApi":
+                    this.openApiScanVisibility(isVisible);
                     break;
 
-                    case "graphQl":
-                        this.graphQlScanVisibility(isVisible);
+                case "graphQl":
+                    this.graphQlScanVisibility(isVisible);
                     break;
 
-                    case "grpc":
-                        this.grpcScanVisibility(isVisible);
+                case "grpc":
+                    this.grpcScanVisibility(isVisible);
                     break;
 
-                    case "postman":
-                        this.postmanScanVisibility(isVisible);
+                case "postman":
+                    this.postmanScanVisibility(isVisible);
                     break;
 
-                    default:
-                         this.openApiScanVisibility(false);
-                         this.grpcScanVisibility(false);
-                         this.graphQlScanVisibility(false);
-                         this.postmanScanVisibility(false);
+                default:
+                    this.openApiScanVisibility(false);
+                    this.grpcScanVisibility(false);
+                    this.graphQlScanVisibility(false);
+                    this.postmanScanVisibility(false);
                     break;
 
-                }
             }
+        }
     }
     openApiScanVisibility(isVisible) {
-         if (isVisible)
+        if (isVisible)
             jq('#dast-openApi').closest('.tr').show();
-         else
+        else
             jq('#dast-openApi').closest('.tr').hide();
 
         jq('#dast-postman').closest('.tr').hide();
@@ -959,14 +959,14 @@ class DastScanSettings {
     }
 
     graphQlScanVisibility(isVisible) {
-         if (isVisible)
+        if (isVisible)
             jq('#dast-graphQL').closest('.tr').show();
-         else
+        else
             jq('#dast-graphQL').closest('.tr').hide();
 
-            jq('#dast-openApi').closest('.tr').hide()
-            jq('#dast-postman').closest('.tr').hide();
-            jq('#dast-grpc').closest('.tr').hide();
+        jq('#dast-openApi').closest('.tr').hide()
+        jq('#dast-postman').closest('.tr').hide();
+        jq('#dast-grpc').closest('.tr').hide();
     }
 
     grpcScanVisibility(isVisible) {
@@ -981,7 +981,7 @@ class DastScanSettings {
 
     postmanScanVisibility(isVisible) {
         if (isVisible)
-           jq('#dast-postman').closest('.tr').show();
+            jq('#dast-postman').closest('.tr').show();
         else
             jq('#dast-postman').closest('.tr').hide();
         jq('#dast-openApi').closest('.tr').hide()
@@ -991,8 +991,8 @@ class DastScanSettings {
 
     apiScanSettingVisibility(isVisible) {
 
-    let apiScanSettingRows = jq('.'+ dastApiSetting);
-    jq('.' + dastApiSecificControlls).hide();
+        let apiScanSettingRows = jq('.'+ dastApiSetting);
+        jq('.' + dastApiSecificControlls).hide();
         if ((isVisible === undefined || null) || isVisible === false) {
             apiScanSettingRows.hide();
 
@@ -1084,7 +1084,7 @@ class DastScanSettings {
 
         jq('#btnUploadWorkflowMacroFile').click(_ => this.onWorkflowMacroFileUpload());
 
-        jq('#lisWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
+        jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
 
         jq('#apiTypeList').change(_ => this.onApiTypeChanged());
 

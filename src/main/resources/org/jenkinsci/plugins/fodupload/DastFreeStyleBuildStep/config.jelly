@@ -52,26 +52,26 @@
     <f:section title="Authentication - Select to override global authentication settings">
         <f:optionalBlock name="overrideGlobalConfig" field="overrideGlobalConfig"
                          title="Configure Personal Access Token" inline="true">
-            <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/AuthenticationOverride.jelly"
+            <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AuthenticationOverride.jelly"
                         class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
         </f:optionalBlock>
     </f:section>
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/AppAndReleaseSelection.jelly"
+    <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AppAndReleaseSelection.jelly"
                 class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/AppAndReleaseSelectionForm.jelly"
+    <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AppAndReleaseSelectionForm.jelly"
                 class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/ScanSettings.jelly"
+    <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/ScanSettings.jelly"
                 class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/CreateApplicationForm.jelly"
+    <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/CreateApplicationForm.jelly"
                 class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/DynamicAssessmentBuildStep/CreateReleaseForm.jelly"
+    <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/CreateReleaseForm.jelly"
                 class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
 

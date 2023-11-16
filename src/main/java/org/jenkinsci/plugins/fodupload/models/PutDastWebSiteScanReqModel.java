@@ -1,32 +1,5 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-/* Request Model For saving website Scan setting
-{
-  "dynamicSiteUrl": "string",
-  "enableRedundantPageDetection": true,
-  "loginMacroFileId": 0,
-  "requiresSiteAuthentication": true,
-  "exclusionsList": [
-    {
-      "value": "string"
-    }
-  ],
-  "restrictToDirectoryAndSubdirectories": true,
-  "policy": "Standard",
-  "assessmentTypeId": 0,
-  "entitlementId": 0,
-  "entitlementFrequencyType": "SingleScan",
-  "dynamicScanEnvironmentFacingType": "Internal",
-  "timeZone": "string",
-  "timeBoxInHours": 0,
-  "requiresNetworkAuthentication": true,
-  "networkAuthenticationSettings": {
-    "networkAuthenticationType": "Basic",
-    "userName": "string",
-    "password": "string"
-  }
-}
- */
 public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
 
     public void setDynamicSiteUrl(String dynamicSiteUrl) {
@@ -52,10 +25,10 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     }
     private  boolean restrictToDirectoryAndSubdirectories;
 
-    public void setTimeBoxInHours(int timeBoxInHours) {
+    public void setTimeBoxInHours(Integer timeBoxInHours) {
         this.timeBoxInHours = timeBoxInHours;
     }
-    int timeBoxInHours;
+    Integer timeBoxInHours;
     private ExclusionsList exclusionsList;
     public class ExclusionsList {
         public String  value;
