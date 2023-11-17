@@ -138,7 +138,6 @@ public class DastScanSharedBuildStep {
 
     public List<String> ValidateModel() throws FormValidation {
 
-
         List<String> errors = new ArrayList<>();
 
         //Check for mandate fields based on scan type.
@@ -278,6 +277,7 @@ public class DastScanSharedBuildStep {
 
             PutDastWorkflowDrivenScanReqModel dastWorkflowScanSetupReqModel;
             dastWorkflowScanSetupReqModel = new PutDastWorkflowDrivenScanReqModel();
+
             dastWorkflowScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dastWorkflowScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dastWorkflowScanSetupReqModel.setTimeZone(timeZone);
@@ -425,7 +425,7 @@ public class DastScanSharedBuildStep {
 
             if (response.errors == null && response.scanId > 0) {
                 build.setResult(Result.SUCCESS);
-                logger.println(String.format("Fortify On Demand Dynamic Scan Successfully triggered Dynamic scan for scan Id %d ", response.scanId));
+                logger.println(String.format("Fortify On Demand dynamic scan successfully triggered for scan Id %d ", response.scanId));
 
                 this.scanId = response.scanId;
             } else {

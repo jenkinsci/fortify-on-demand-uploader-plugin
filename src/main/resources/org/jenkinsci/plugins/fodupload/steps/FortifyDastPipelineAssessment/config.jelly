@@ -71,7 +71,7 @@
                     </div>
                 </f:entry>
                 <f:entry title="Personal Access Token" field="personalAccessTokenSelect"
-                         help="/plugin/fortify-on-demand-uploader/help-personalAccessToken.html">
+                         help="/plugin/fortify-on-demand-uploader/help-personalAccessToken.html" >
                     <div id="fodp-authPAT">
                         <c:select/>
                     </div>
@@ -195,7 +195,7 @@
     <f:section title="Scan Settings">
         <!-- Dynamic Scan Type -->
         <f:entry title="Scan Type">
-            <div id="dastScanType" class="fode-field spinner-container fodp-row-relid-ovr">
+            <div id="dastScanType" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
                 <div class="fode-edit jenkins-select">
                     <select name="scanType" id="scanTypeList" class="jenkins-select__input">
                         <option value="-1">Select a Scan Type</option>
@@ -208,16 +208,16 @@
         </f:entry>
         <!-- Dynamic Scan Environment -->
         <f:entry>
-            <div class="fode-field spinner-container fodp-row-relid-ovr" id="dast-scan-setting-evn">
+            <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv" id="dast-scan-setting-evn">
                 <f:entry title="Environment Facing">
-                    <f:select field="dastEnv"/>
+                    <f:select field="envFacing"/>
                 </f:entry>
             </div>
         </f:entry>
 
         <!-- TimeZone DropDown -->
         <f:entry title="TimeZone">
-            <div id="timezone" class="fode-field spinner-container fodp-row-relid-ovr">
+            <div id="timezone" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
                 <div class="fode-edit jenkins-select">
                     <select name="selectedDynamicTimeZone" id="timeZoneStackSelectList"
                             class="jenkins-select__input">
@@ -230,7 +230,7 @@
     <f:section title="Scope">
         <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
             <div id="dast-workflow-macro-upload"
-                 class="fode-field spinner-container fodp-row-relid-ovr dast-workflow-setting">
+                 class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv dast-workflow-setting">
                 <span>
                     <input accept=".har,.webmacro,.brup" id="workflowMacroFile" type="File" name="workflowMacroFile"/>
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
@@ -241,26 +241,26 @@
         </f:entry>
         <f:entry title="Allowed Hosts">
             <ul id="listWorkflowDrivenAllowedHostUrl" name="listWorkflowDrivenAllowedHostUrl"
-                class="fode-field spinner-container dast-workflow-setting fodp-row-relid-ovr">
+                class="fodp-field spinner-container dast-workflow-setting fodp-row-relid-ovr fodp-row-autoProv">
             </ul>
         </f:entry>
 
         <f:entry title="Dynamic Site URL" >
             <div id="dast-standard-site-url"
-                 class="fode-field spinner-container fodp-row-relid-ovr dast-standard-setting">
+                 class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv dast-standard-setting">
                 <f:textbox field="webSiteUrl" name="webSiteUrl"/>
             </div>
         </f:entry>
         <f:entry>
             <div id="dast-standard-scan-scope"
-                 class="fode-field spinner-container fodp-row-relid-ovr">
+                 class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
                 <f:booleanRadio field="scanScope" true="Restrict scan to URL directories and subdirectories"
                                 false="Scan entire host"/>
 
             </div>
 
             <div id="dast-common-scope-attr"
-                 class="fode-field spinner-container fodp-row-relid-ovr">
+                 class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
 
                 <f:checkbox title="Enable redundant page detection" field="enableRedundantPageDetection"
                             id="enableRedundantPageDetection">
@@ -270,7 +270,7 @@
 
         <f:entry title="Exclude URLs">
             <div id="standardScanTypeExcludeUrlsRow"
-                 class="fode-field spinner-container fodp-row-relid-ovr dast-standard-setting">
+                 class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv dast-standard-setting">
                 <span>
                     <input type="text" id="standardScanExcludedUrlText" class="setting-input"
                            placeholder="Exclude URL"/>
@@ -286,12 +286,12 @@
 
         <f:entry title="Scan Policy">
             <div id="dast-standard-scan-policy"
-                 class="fode-field spinner-container fodp-row-relid-ovr">
+                 class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
                 <f:select field="scanPolicy"/>
             </div>
         </f:entry>
         <f:entry>
-            <div id="dast-timeBox-scan">
+            <div id="dast-timeBox-scan" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
 
                 <f:optionalBlock field="timeBoxChecked" name="timeBoxChecked" title="Timebox Scan Duration (Hours)"
                                  checked="${instance.timeBoxChecked}}" inline="true">
@@ -310,7 +310,7 @@
 
     <f:section title="Authentication">
         <f:entry>
-            <div class="fode-field spinner-container"
+            <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv"
                  id="webSiteNetworkAuthSettingEnabledRow">
                 <f:optionalBlock name="webSiteNetworkAuthSettingEnabled" field="webSiteNetworkAuthSettingEnabled"
                                  title="Network Authentication Required"
@@ -318,7 +318,7 @@
 
                     <f:entry title="Network Authentication Type">
                         <div id="ddlNetworkAuthTypeRow"
-                             class="fode-field spinner-container dast-scan-setting dast-standard-scan dast-workflow-scan">
+                             class="fodp-field spinner-container dast-scan-setting">
                             <div class="fode-edit jenkins-select">
                                 <select name="selectedNetworkAuthType" id="ddlNetworkAuthType"
                                         class="jenkins-select__input">
@@ -344,7 +344,7 @@
         </f:entry>
 
         <f:entry>
-            <div class="fode-field spinner-container" id="login-macro-row">
+            <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv" id="login-macro-row">
                 <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
                                  title="Login Macro"
                                  checked="${instance.webSiteLoginMacroEnabled}" inline="true">
@@ -386,9 +386,10 @@
     <!--Script-->
 
     <script>
-        var descriptor =
-        <st:bind value="${descriptor}"/>
+        var descriptor =<st:bind value="${descriptor}"/>
     </script>
+
+
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Common.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Styling.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Auth.js"/>

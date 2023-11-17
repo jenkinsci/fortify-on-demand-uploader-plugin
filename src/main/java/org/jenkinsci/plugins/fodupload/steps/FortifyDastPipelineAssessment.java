@@ -8,6 +8,7 @@ import hudson.Launcher;
 import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.fileupload.FileUploadException;
 import org.jenkinsci.plugins.fodupload.ApiConnectionFactory;
@@ -19,6 +20,7 @@ import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.controllers.*;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.response.AssessmentTypeEntitlementsForAutoProv;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.GetDastScanSettingResponse;
 import org.jenkinsci.plugins.fodupload.models.response.GetStaticScanSetupResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -33,6 +35,7 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.verb.POST;
 
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -122,27 +125,27 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     }
 
 
-    public String getWebSiteNetworkAuthUserName() {
-        return webSiteNetworkAuthUserName;
+    public String getNetworkAuthUserName() {
+        return networkAuthUserName;
     }
 
     @DataBoundSetter
-    public void setWebSiteNetworkAuthUserName(String webSiteNetworkAuthUserName) {
-        this.webSiteNetworkAuthUserName = webSiteNetworkAuthUserName;
+    public void setNetworkAuthUserName(String networkAuthUserName) {
+        this.networkAuthUserName = networkAuthUserName;
     }
 
-    private String webSiteNetworkAuthUserName;
+    private String networkAuthUserName;
 
-    public String getSelectedNetworkAuthType() {
-        return selectedNetworkAuthType;
+    public String getNetworkAuthType() {
+        return networkAuthType;
     }
 
     @DataBoundSetter
-    public void setSelectedNetworkAuthType(String selectedNetworkAuthType) {
-        this.selectedNetworkAuthType = selectedNetworkAuthType;
+    public void setNetworkAuthType(String networkAuthType) {
+        this.networkAuthType = networkAuthType;
     }
 
-    private String selectedNetworkAuthType;
+    private String networkAuthType;
 
     public boolean isTimeBoxChecked() {
         return timeBoxChecked;
@@ -176,27 +179,16 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
 
     private String applicationId;
 
-    public String getWebSiteNetworkAuthPassword() {
-        return webSiteNetworkAuthPassword;
+    public String getNetworkAuthPassword() {
+        return networkAuthPassword;
     }
 
     @DataBoundSetter
-    public void setWebSiteNetworkAuthPassword(String webSiteNetworkAuthPassword) {
-        this.webSiteNetworkAuthPassword = webSiteNetworkAuthPassword;
+    public void setNetworkAuthPassword(String networkAuthPassword) {
+        this.networkAuthPassword = networkAuthPassword;
     }
 
-    private String webSiteNetworkAuthPassword;
-
-    public String getAllowedHost() {
-        return allowedHost;
-    }
-
-    @DataBoundSetter
-    public void setAllowedHost(String allowedHost) {
-        this.allowedHost = allowedHost;
-    }
-
-    private String allowedHost;
+    private String networkAuthPassword;
 
     public int getLoginMacroId() {
         ;
@@ -257,6 +249,13 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         this.entitlementFrequency = entitlementFrequency;
     }
 
+    @PostConstruct
+     public final void Init() {
+        System.out.println("post Construct call.");
+
+    }
+
+
     public String getWorkflowMacroHost() {
         return workflowMacroHost;
     }
@@ -266,17 +265,17 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         this.workflowMacroHost = workflowMacroHost;
     }
 
-
-    public String getWorkflowMacroId() {
-        return workflowMacroId;
-    }
-
-    @DataBoundSetter
-    public void setWorkflowMacroId(String workflowMacroId) {
-        this.workflowMacroId = workflowMacroId;
-    }
-
-    private String workflowMacroId;
+//
+//    public String getWorkflowMacroId() {
+//        return workflowMacroId;
+//    }
+//
+//    @DataBoundSetter
+//    public void setWorkflowMacroId(String workflowMacroId) {
+//        this.workflowMacroId = workflowMacroId;
+//    }
+//
+//    private String workflowMacroId;
 
     public String getSelectedDynamicTimeZone() {
         return selectedDynamicTimeZone;
@@ -289,16 +288,17 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
 
     private String selectedDynamicTimeZone;
 
-    public String getDastEnv() {
-        return dastEnv;
+
+    public String getEnvFacing() {
+        return envFacing;
     }
 
     @DataBoundSetter
-    public void setDastEnv(String dastEnv) {
-        this.dastEnv = dastEnv;
+    public void setEnvFacing(String envFacing) {
+        this.envFacing = envFacing;
     }
 
-    private String dastEnv;
+    private String envFacing;
 
     public boolean isEnableRedundantPageDetection() {
         return enableRedundantPageDetection;
@@ -319,7 +319,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     }
 
     private String scanPolicy;
-
 
 
     public String getReleaseId() {
@@ -527,7 +526,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 personalAccessToken,
                 releaseId,
                 webSiteUrl,
-                dastEnv,
+                envFacing,
                 scanTimeBox,
                 null,
                 scanPolicy,
@@ -537,15 +536,15 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 enableRedundantPageDetection,
                 webSiteUrl,
                 loginMacroId,
-                workflowMacroId,
-                allowedHost,
-                webSiteNetworkAuthUserName,
-                webSiteNetworkAuthPassword,
+                "",
+                workflowMacroHost,
+                networkAuthUserName,
+                networkAuthPassword,
                 applicationId,
                 assessmentTypeId,
                 entitlementId,
                 entitlementFrequency,
-                selectedNetworkAuthType,
+                networkAuthType,
                 timeBoxChecked
         );
 
@@ -573,17 +572,14 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         try {
 
 
-            switch (scanType)
-            {
-                case ("Standard"):
-                {
+            switch (scanType) {
+                case ("Standard"): {
                     saveWebSiteScanSettings(dastScanSharedBuildStep);
                     log.printf("Fortify On Demand Dynamic Scan Settings Saved Successfully for release Id %s", releaseId);
                     break;
                 }
-                case "Workflow-driven":
-                {
-
+                case "Workflow-driven": {
+                    saveWorkflowSiteScanSettings(dastScanSharedBuildStep);
                 }
             }
 
@@ -605,15 +601,15 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         return errors;
     }
 
-    private void saveWebSiteScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep ) throws Exception {
-        int loginMacroFileId =0;
+    private void saveWebSiteScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
+        int loginMacroFileId = 0;
         if (requireLoginMacro) {
             Path path = Paths.get(loginMacroFilePath);
             PatchDastFileUploadResponse patchUploadResponse = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(path), "LoginMacro");
 
 
             if (patchUploadResponse == null || !patchUploadResponse.isSuccess) {
-                throw new FileUploadException(String.format("Failed to upload %s for release Id:%s",
+                throw new FileUploadException(String.format("Failed to upload login macro file %s for release Id:%s",
                         loginMacroFilePath, releaseId));
             } else {
                 loginMacroFileId = patchUploadResponse.fileId;
@@ -626,11 +622,31 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 selectedDynamicTimeZone,
                 scanPolicy,
                 webSiteUrl
-                , scanScope, enableRedundantPageDetection, dastEnv
-                , selectedNetworkAuthType != null && !selectedNetworkAuthType.isEmpty(), requireLoginMacro,
-                webSiteNetworkAuthUserName, webSiteNetworkAuthPassword
-                , selectedNetworkAuthType, scanTimeBox);
+                , scanScope, enableRedundantPageDetection, envFacing
+                , networkAuthType != null && !networkAuthType.isEmpty(), requireLoginMacro,
+                networkAuthUserName, networkAuthPassword
+                , networkAuthType, scanTimeBox);
 
+    }
+
+    private void saveWorkflowSiteScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
+        int workflowMacroFileId = 0;
+
+        Path path = Paths.get(workflowMacroFilePath);
+
+        PatchDastFileUploadResponse patchDastFileUploadResponse = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(path), "WorkflowDrivenMacro");
+        if (patchDastFileUploadResponse == null || !patchDastFileUploadResponse.isSuccess) {
+            throw new FileUploadException(String.format("Failed to upload workflow macro file %s for release Id:%s",
+                    workflowMacroFilePath, releaseId));
+        } else {
+            workflowMacroFileId = patchDastFileUploadResponse.fileId;
+        }
+
+        if (workflowMacroHost ==null || workflowMacroHost.isEmpty()) {
+            workflowMacroHost = String.join(",", patchDastFileUploadResponse.hosts);
+        }
+        dastScanSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(releaseId, assessmentTypeId, entitlementId, entitlementFrequency, String.valueOf(workflowMacroFileId), workflowMacroHost,
+                selectedDynamicTimeZone, scanPolicy, enableRedundantPageDetection, envFacing, getNetworkAuthType().isEmpty(), networkAuthUserName, networkAuthPassword, networkAuthType);
     }
 
     @Override
@@ -651,7 +667,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 personalAccessToken,
                 releaseId,
                 webSiteUrl,
-                dastEnv,
+                envFacing,
                 scanTimeBox,
                 null,
                 scanPolicy,
@@ -661,15 +677,15 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 enableRedundantPageDetection,
                 webSiteUrl,
                 loginMacroId,
-                workflowMacroId,
-                allowedHost,
-                webSiteNetworkAuthUserName,
-                webSiteNetworkAuthPassword,
+                "",
+                workflowMacroHost,
+                networkAuthUserName,
+                networkAuthPassword,
                 applicationId,
                 assessmentTypeId,
                 entitlementId,
                 entitlementFrequency,
-                selectedNetworkAuthType,
+                networkAuthType,
                 timeBoxChecked);
         boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
         List<String> errors = null;
@@ -701,18 +717,21 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         //Don't need to use the getAttribute for the class property,
         try {
 
-            switch (scanType)
-            {
-                case ("Standard"):
-                {
+            switch (scanType) {
+                case ("Standard"): {
                     saveWebSiteScanSettings(dastScanSharedBuildStep);
                     log.println(String.format("Fortify On Demand Dynamic Scan Settings Saved Successfully for release Id %s", releaseId));
                     break;
                 }
-                case "WorkflowDrive":
-                {
-
+                case "Workflow-driven": {
+                    saveWorkflowSiteScanSettings(dastScanSharedBuildStep);
+                    log.println(String.format("Fortify On Demand Dynamic Scan Settings Saved Successfully for release Id %s", releaseId));
+                    break;
                 }
+
+                default:
+
+                    throw new IllegalArgumentException("Not a valid scan type");
             }
 
         } catch (Exception ex) {
@@ -764,7 +783,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
 
         }
 
-        public static ListBoxModel doFillDastEnvItems() {
+        public static ListBoxModel doFillEnvFacingItems() {
             return DastScanSharedBuildStep.doFillDastEnvItems();
         }
 
@@ -847,21 +866,11 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
-                ReleaseController releases = new ReleaseController(apiConnection, null, Utils.createCorrelationId());
                 AssessmentTypesController assessments = new AssessmentTypesController(apiConnection, null, Utils.createCorrelationId());
-                Integer relId = releases.getReleaseIdByName(appName.trim(), relName.trim(), isMicroservice, microserviceName);
                 AssessmentTypeEntitlementsForAutoProv result = null;
+                DastScanController dastScanController = new DastScanController(apiConnection, null, Utils.createCorrelationId());
+                return Utils.createResponseViewModel(assessments.getDynamicAssessmentTypeEntitlements(false));
 
-                if (relId == null) {
-                    result = new AssessmentTypeEntitlementsForAutoProv(null, assessments.getStaticAssessmentTypeEntitlements(isMicroservice), null);
-                } else {
-                    StaticScanController staticScanController = new StaticScanController(apiConnection, null, Utils.createCorrelationId());
-                    GetStaticScanSetupResponse settings = staticScanController.getStaticScanSettings(relId);
-
-                    result = new AssessmentTypeEntitlementsForAutoProv(relId, assessments.getStaticAssessmentTypeEntitlements(relId), settings);
-                }
-
-                return Utils.createResponseViewModel(result);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -912,6 +921,8 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 return null;
             }
         }
+
+
 
     }
 

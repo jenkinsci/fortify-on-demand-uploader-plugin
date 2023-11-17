@@ -167,7 +167,6 @@ public class DastScanController extends ControllerBase {
             return parseHttpSuccessResponse(response, fodApiResponse);
 
         } else {
-
             return parseFailureResponse(response, fodApiResponse);
 
         }
@@ -211,11 +210,21 @@ public class DastScanController extends ControllerBase {
     private <T> T parseHttpBodyResponse(ResponseContent response, Object fodApiResponse) throws IOException {
 
         if (fodApiResponse instanceof PatchDastFileUploadResponse) {
-            return apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
+            T parsedResponse = apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
             }.getType());
+            ((PatchDastFileUploadResponse) parsedResponse).isSuccess = response.isSuccessful();
+            ((PatchDastFileUploadResponse) parsedResponse).HttpCode = response.code();
+            ((PatchDastFileUploadResponse) parsedResponse).reason = response.message();
+            return parsedResponse;
+
         } else if (fodApiResponse instanceof PutDastScanSetupResponse) {
-            return apiConnection.parseResponse(response, new TypeToken<PutDastScanSetupResponse>() {
+            T parsedResponse = apiConnection.parseResponse(response, new TypeToken<PutDastScanSetupResponse>() {
             }.getType());
+            ((PutDastScanSetupResponse) parsedResponse).isSuccess = response.isSuccessful();
+            ((PutDastScanSetupResponse) parsedResponse).HttpCode = response.code();
+            ((PutDastScanSetupResponse) parsedResponse).reason = response.message();
+            return parsedResponse;
+
         } else if (fodApiResponse instanceof PostDastStartScanResponse) {
             return apiConnection.parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
             }.getType());

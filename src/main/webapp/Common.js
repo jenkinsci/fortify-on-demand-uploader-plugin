@@ -83,7 +83,10 @@ function parseEntitlementDropdownValue(val) {
 
         if (spl.length === 2) {
             entitlementId = numberOrNull(spl[0]);
-            frequencyId = numberOrNull(spl[1]);
+            if (isNaN(spl[1]))
+                frequencyType = spl[1];
+            else
+                frequencyId = numberOrNull(spl[1]);
         }
         if (spl.length === 3) {
             entitlementId = numberOrNull(spl[0]);
