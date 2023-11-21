@@ -6,12 +6,36 @@ const dastScanTypes = [{"value": 'Standard', "text": 'Standard'}, {
     "value": 'Workflow-driven',
     "text": 'Workflow-driven'
 }];
+const dastScanSetting = 'dast-scan-setting';
+const dastWebSiteSetting = 'dast-standard-setting';
+const dastWorkFlowSetting = 'dast-workflow-setting';
+const dastCommonScopeSetting = 'dast-common-scan-scope';
+const nwAuthSetting = 'dast-networkAuth-setting';
+const loginAuthSetting = 'dast-login-macro'
+
 const dastScanPolicyDefaultValues =
     {
         "WebSiteScan": {"ScanPolicy": "standard"},
         "WorkflowDrivenScan": {"ScanPolicy": "standard"},
         "ApiScan": {"ScanPolicy": "API Scan"}
     }
+const dastAssessmentrow = closestRow('#dastAssessmentTypeForm');
+const dastEntitlementrow = closestRow('#dastEntitlementForm');
+const dastScanTyperow = closestRow('#dastScanType');
+const dastSiteUrlRow = closestRow('#dast-standard-site-url');
+const dastEnv = closestRow('#dast-scan-setting-evn')
+const dastTimeZone = closestRow('#timezone');
+const dastWrkFlowMacroUpload = closestRow('#dast-workflow-macro-upload');
+const dastWrkFlowAllowedHost = closestRow('#listWorkflowDrivenAllowedHostUrl');
+const dastStandardScope = closestRow('#dast-standard-scan-scope');
+const dastExcludeUrl = closestRow('#standardScanTypeExcludeUrlsRow');
+const dastWebSiteTimeBoxScan = closestRow('#dast-timeBox-scan');
+const networkAuth = closestRow('#webSiteNetworkAuthSettingEnabledRow')
+const loginMacro = closestRow('#login-macro-row');
+const commonWebScopeSetting = closestRow('#dast-common-scope');
+const commonWebScopeSettingAttr = closestRow('#dast-common-scope-attr');
+const commonScanPolicy = closestRow('#dast-standard-scan-policy');
+
 class DastPipelineGenerator {
     constructor() {
         this.api = new Api(null, descriptor);
@@ -138,7 +162,7 @@ class DastPipelineGenerator {
         if (setSpinner) apCont.addClass('spinner');
         apSel.find('option').remove();
         assessmentType = numberOrNull(assessmentType);
-            if (!this.autoProvMode && this.releaseId && assessmentType && frequencyType) {
+        if (!this.autoProvMode && this.releaseId && assessmentType && frequencyType) {
             try {
                 let prefs = await this.api.getAuditPreferences(this.releaseId, assessmentType, frequencyType, getAuthInfo());
 
@@ -195,6 +219,26 @@ class DastPipelineGenerator {
     }
 
     async init() {
+        dastEntitlementrow.addClass(dastScanSetting);
+        dastAssessmentrow.addClass(dastScanSetting);
+        dastScanTyperow.addClass(dastScanSetting);
+        dastStandardScope.addClass(dastScanSetting);
+        dastEnv.addClass(dastScanSetting);
+        dastTimeZone.addClass(dastScanSetting);
+        networkAuth.addClass(nwAuthSetting);
+        loginMacro.addClass(loginAuthSetting);
+
+        <!--Scan Specific Scope Sections-->
+        dastWrkFlowMacroUpload.addClass(dastWorkFlowSetting);
+        dastWrkFlowAllowedHost.addClass(dastWorkFlowSetting);
+        dastExcludeUrl.addClass(dastWebSiteSetting);
+        dastSiteUrlRow.addClass(dastWebSiteSetting);
+        dastWebSiteTimeBoxScan.addClass(dastWebSiteSetting);
+        commonWebScopeSetting.addClass(dastCommonScopeSetting);
+        commonWebScopeSettingAttr.addClass(dastCommonScopeSetting);
+        commonScanPolicy.addClass(dastCommonScopeSetting);
+        <!--Scope sections-->
+
         debugger;
         try {
             this.hideMessages();
@@ -261,7 +305,7 @@ class DastPipelineGenerator {
         let val = jq('#entitlementSelect').val();
         let {frequencyType} = parseEntitlementDropdownValue(val);
 
-        if (skipAuditPref !== true) await this.loadAuditPrefOptions(jq('#assessmentTypeSelect').val(), frequencyType);
+        // if (skipAuditPref !== true) await this.loadAuditPrefOptions(jq('#assessmentTypeSelect').val(), frequencyType);
         this.populateHiddenFields();
     }
 
@@ -269,21 +313,17 @@ class DastPipelineGenerator {
         let assmt = null;
         let entl = null;
         let freq = null;
-        let audit = null;
-
-           debugger;
+        debugger;
         if (this.scanSettings) {
             assmt = this.scanSettings.assessmentTypeId;
             entl = this.scanSettings.entitlementId;
             freq = this.scanSettings.entitlementFrequencyType;
-             audit = this.scanSettings.auditPreferenceType;
+
         }
         this.populateAssessmentsDropdown();
         jq('#assessmentTypeSelect').val(assmt);
         await this.onAssessmentChanged(true);
-        debugger;
         jq('#entitlementSelect').val(freq && entl ? getEntitlementDropdownValue(entl, freq) : '');
-        jq('#auditPreferenceSelect').val(audit);
     }
 
     populateAssessmentsDropdown() {
@@ -295,7 +335,8 @@ class DastPipelineGenerator {
         if (this.assessments) {
             for (let k of Object.keys(this.assessments)) {
                 let at = this.assessments[k];
-                atsel.append(`<option value="${at.id}">${at.name}</option>`);
+                if (at !== null)
+                    atsel.append(`<option value="${at.assessmentTypeId}">${at.name}</option>`);
             }
         }
     }
@@ -339,7 +380,6 @@ class DastPipelineGenerator {
             if (this.releaseId < 1) this.releaseId = null;
             this.loadReleaseEntitlementSettings();
         } else {
-
             this.loadReleaseEntitlementSettings();
             this.hideMessages();
             this.fodOverrideRowsVisibility(false);
@@ -426,7 +466,6 @@ class DastPipelineGenerator {
     }
 
     setNetworkSettings() {
-
         if (!Object.is(this.scanSettings.networkAuthenticationSettings, null)
             && !Object.is(this.scanSettings.networkAuthenticationSettings, undefined)) {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
@@ -439,7 +478,6 @@ class DastPipelineGenerator {
 
     scanTypeVisibility(isVisible) {
         if ((isVisible === undefined || null) || isVisible === false) {
-
             jq('.dast-scan-type').each((iterator, element) => {
                 let currentElement = jq(element);
                 let tr = closestRow(currentElement);
@@ -460,7 +498,6 @@ class DastPipelineGenerator {
         }
         if (!Object.is(this.scanSettings.workflowdrivenAssessment, null)
             && this.scanSettings.workflowdrivenAssessment !== undefined) {
-
             if (this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro.fileId > 0)
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro.fileId);
         }
@@ -534,17 +571,15 @@ class DastPipelineGenerator {
             this.commonScopeSettingVisibility(false);
             this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
             switch (scanType) {
-
                 case "Standard": {
                     this.websiteScanSettingsVisibility(isVisible);
                     this.workflowScanSettingVisibility(false);
-                    this.networkAuthSettingVisibility(true);
+                    this.networkAuthSettingVisibility(isVisible);
                     this.commonScopeSettingVisibility(isVisible);
                     this.directoryAndSubdirectoriesScopeVisibility(isVisible);
                     this.loginMacroSettingsVisibility(isVisible);
                     this.timeboxScanVisibility(isVisible);
                     this.excludeUrlVisibility(isVisible);
-
                     break;
                 }
                 case "API": {
@@ -561,8 +596,9 @@ class DastPipelineGenerator {
                     this.directoryAndSubdirectoriesScopeVisibility(false);
                     this.timeboxScanVisibility(false);
                     this.excludeUrlVisibility(false);
-
                     break;
+
+                case "allTypes":
                 default:
                     //hide all scan type settings.
                     this.websiteScanSettingsVisibility(false);
@@ -570,7 +606,11 @@ class DastPipelineGenerator {
                     this.apiScanSettingVisibility(false);
                     this.loginMacroSettingsVisibility(false);
                     this.networkAuthSettingVisibility(false);
-
+                    this.commonScopeSettingVisibility(false);
+                    this.directoryAndSubdirectoriesScopeVisibility(false);
+                    this.loginMacroSettingsVisibility(false);
+                    this.timeboxScanVisibility(false);
+                    this.excludeUrlVisibility(false);
                     break;
             }
         }
@@ -588,13 +628,13 @@ class DastPipelineGenerator {
 
     loginMacroSettingsVisibility(isVisible) {
         let loginMacroSetting = jq('#login-macro-row');
-          let tr = closestRow('#login-macro-row');
+        let tr = closestRow('#login-macro-row');
         if ((isVisible === undefined || null) || isVisible === false) {
             loginMacroSetting.hide();
-              tr.hide();
+            tr.hide();
         } else {
             loginMacroSetting.show();
-              tr.show();
+            tr.show();
         }
     }
 
@@ -631,11 +671,6 @@ class DastPipelineGenerator {
     }
 
     websiteScanSettingsVisibility(isVisible) {
-        jq('.dast-standard-setting').each((iterator, element) => {
-            let currentElement = jq(element);
-            let tr = closestRow(currentElement);
-            tr.addClass('dast-standard-setting');
-        });
         let standardScanSettingRows = jq('.dast-standard-setting');
         if ((isVisible === undefined) || isVisible === false) {
             standardScanSettingRows.hide();
@@ -681,12 +716,6 @@ class DastPipelineGenerator {
     }
 
     workflowScanSettingVisibility(isVisible) {
-        jq('.dast-workflow-setting').each((iterator, element) => {
-            let currentElement = jq(element);
-            let tr = closestRow(currentElement);
-            tr.addClass('dast-workflow-setting');
-        });
-
         let workflowScanSettingRows = jq('.dast-workflow-setting');
         if ((isVisible === undefined || null) || isVisible === false) {
             workflowScanSettingRows.hide();
@@ -905,18 +934,16 @@ class DastPipelineGenerator {
         // jq('#listStandardScanTypeExcludedUrl').show();
     }
 
-      setTimeBoxScan()
-        {
-            if(this.scanSettings.timeBoxInHours!==undefined)
-            {
-              jq('#dast-timeBox-scan').find('input:text:first').val(this.scanSettings.timeBoxInHours);
-               jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
+    setTimeBoxScan() {
+        if (this.scanSettings.timeBoxInHours !== undefined) {
+            jq('#dast-timeBox-scan').find('input:text:first').val(this.scanSettings.timeBoxInHours);
+            jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
 
-            }
         }
+    }
 
     async onAssessmentChanged(skipAuditPref) {
-         debugger;
+        debugger;
         let atval = jq('#assessmentTypeSelect').val();
         let entsel = jq('#entitlementSelect');
         let at = this.assessments ? this.assessments[atval] : null;
@@ -953,21 +980,20 @@ class DastPipelineGenerator {
         debugger;
         if (this.autoProvMode) {
             this.hideMessages();
-
             let appName = jq('#autoProvAppName').val();
             let relName = jq('#autoProvRelName').val();
 
             if (isNullOrEmpty(appName) || isNullOrEmpty(relName)) {
                 this.showMessage('Enter Application and Release names', true);
-                this.fodOverrideRowsVisibility(false);
-            } else if (await this.loadAutoProvEntitlementSettings(appName, relName)) {
-                this.fodOverrideRowsVisibility(true);
-            } else {
-                this.fodOverrideRowsVisibility(false);
+                jq(fodpOverrideRowsSelector).hide();
+            } else
+            {
+                await this.loadAutoProvEntitlementSettings(appName, relName, false, "")
             }
+
         } else {
             this.overrideServerSettings = jq('#overrideReleaseSettings').prop('checked');
-            this.fodOverrideRowsVisibility(true);
+            jq(fodpOverrideRowsSelector).show();
             this.onReleaseIdChanged();
         }
         this.populateHiddenFields();
@@ -975,10 +1001,9 @@ class DastPipelineGenerator {
 
     async loadAutoProvEntitlementSettings(appName, relName) {
         let fields = jq('.fodp-field.spinner-container');
-
         fields.addClass('spinner');
-
-        let assessments = await this.api.getAssessmentTypeEntitlementsForAutoProv(appName, relName, false, undefined, getAuthInfo());
+        debugger;
+        let assessments = await this.api.getAssessmentTypeEntitlementsForAutoProv(appName, relName, false, "", getAuthInfo());
         let fail = () => {
             fields.removeClass('spinner');
             this.onAssessmentChanged();
@@ -987,9 +1012,7 @@ class DastPipelineGenerator {
         };
 
         if (assessments == null) return fail();
-
-        this.assessments = assessments.assessments;
-
+        this.assessments = assessments;
         if (this.assessments) {
             this.scanSettings = assessments.settings;
             this.releaseId = assessments.releaseId;
@@ -997,13 +1020,14 @@ class DastPipelineGenerator {
             this.scanSettings = null;
             this.releaseId = null;
         }
-
         await this.setAssessmentsAndSettings();
-
         fields.removeClass('spinner');
+        if (this.assessments) {
+            debugger;
+            this.scanTypeUserControlVisibility('allTypes', false)
 
-        if (this.assessments) return true;
-        else return fail();
+            return true;
+        } else return fail();
     }
 
     fodOverrideRowsVisibility(isVisible) {
@@ -1016,7 +1040,6 @@ class DastPipelineGenerator {
                 if (vtr) vtr.addClass('fodp-row-relid-ovr');
             });
         if (isVisible) {
-
             jq(fodpOverrideRowsSelector).show();
         } else
             jq(fodpOverrideRowsSelector).hide();
@@ -1054,12 +1077,6 @@ class DastPipelineGenerator {
         let rel = '';
         let sdlc = '';
         let own = '';
-
-        //DAST Scan Settings
-        let scanUrl = '';
-        let scanExUrl = [];
-        let wkMacroFileId = '';
-        let loginMacroFileId = ''
 
         if (this.overrideAuth) {
             un = jq('#usernameField').val();
