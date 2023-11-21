@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+
 public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
 
     public void setDynamicSiteUrl(String dynamicSiteUrl) {
@@ -25,9 +26,11 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     }
     private  boolean restrictToDirectoryAndSubdirectories;
 
+ 
     public void setTimeBoxInHours(Integer timeBoxInHours) {
         this.timeBoxInHours = timeBoxInHours;
     }
+
     Integer timeBoxInHours;
     private ExclusionsList exclusionsList;
     public class ExclusionsList {

@@ -96,6 +96,28 @@ public class DastScanSharedBuildStep {
 
     }
 
+    public DastScanSharedBuildStep(Boolean overrideGlobalConfig, String username,
+                                   String tenantId, String personalAccessToken, String releaseId,
+                                   String webSiteUrl, String dastEnv, String scanTimebox, Object excludeUrlList,
+                                   String scanPolicy, boolean scanScope, String selectedScanType,
+                                   String selectedDynamicTimeZone, boolean enableRedundantPageDetection, String webSiteUrl1,
+                                   int loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthUserName,
+                                   String webSiteNetworkAuthPassword, String applicationId, String assessmentTypeId, String entitlementId,
+                                   String entitlementFrequencyType, String selectedNetworkAuthType, boolean timeBoxChecked) {
+
+        authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
+        model = new DastScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
+                releaseId,  webSiteUrl
+                , dastEnv, scanTimebox,  scanScope, selectedScanType ,scanPolicy
+                , selectedDynamicTimeZone
+                , enableRedundantPageDetection,
+                webSiteNetworkAuthUserName, loginMacroId, workflowMacroId, allowedHost
+                , webSiteNetworkAuthPassword
+                , assessmentTypeId, entitlementId,
+                entitlementFrequencyType
+                , selectedNetworkAuthType);
+    }
+
     private FodApiConnection getApiConnection() throws FormValidation {
 
         return ApiConnectionFactory.createApiConnection(this.getAuthModel(), false, null, null);
@@ -144,7 +166,9 @@ public class DastScanSharedBuildStep {
                 if (this.model.getWebSiteUrl().isEmpty()) {
                     errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWebSiteUrlNotFound);
                 }
+				break;
 
+                case "Workflow-driven":
                 break;
             case "Workflow-Driven":
                 break;
@@ -165,12 +189,12 @@ public class DastScanSharedBuildStep {
     }
 
     public void saveReleaseSettingsForWebSiteScan(String userSelectedRelease, String assessmentTypeID,
-                                                  String entitlementId, String entitlementFreq, String loginMacroId,
-                                                  String timeZone, String scanPolicy, String webSiteAssessmentUrl,
-                                                  boolean scanScope,
-                                                  boolean redundantPageDetection, String scanEnvironment,
-                                                  boolean requireNetworkAuth, boolean requireLoginMacroAuth,
-                                                  String networkAuthUserName, String networkAuthPassword
+                                                     String entitlementId, String entitlementFreq, String loginMacroId,
+                                                     String timeZone, String scanPolicy, String webSiteAssessmentUrl,
+                                                     boolean scanScope,
+                                                     boolean redundantPageDetection, String scanEnvironment,
+                                                     boolean requireNetworkAuth, boolean requireLoginMacroAuth,
+                                                     String networkAuthUserName, String networkAuthPassword
             , String networkAuthType, String timeboxScan
 
     )
@@ -193,6 +217,7 @@ public class DastScanSharedBuildStep {
             }
 
             try {
+                if (!timeboxScan.isEmpty())
                 if (timeboxScan!=null &&!timeboxScan.isEmpty())
                     dynamicScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(timeboxScan));
                 else
@@ -636,11 +661,13 @@ public class DastScanSharedBuildStep {
 
             if (response.errors == null && response.scanId > 0) {
                 build.setResult(Result.SUCCESS);
+                build.setDescription(String.format("Successfully triggered Dynamic scan for scan id %d", response.getScanId()));
                 logger.println(String.format("Fortify On Demand dynamic scan successfully triggered for scan Id %d ", response.scanId));
                 this.scanId = response.scanId;
             } else {
                 logger.println(String.format("Fortify On Demand Dynamic Scan Failed for release Id %d ", releaseId));
                 build.setResult(Result.FAILURE);
+                build.setDescription(String.format("Failed to trigger Dynamic scan for release id %d with error %s", releaseId, ""));
             }
         } catch (IOException e) {
             build.setResult(Result.FAILURE);

@@ -6,7 +6,7 @@ public class DastScanJobModel {
 
     private boolean overrideGlobalConfig;
     String username;
-
+    String timeBoxScan;
     String personalAccessToken;
     String tenantId;
     String _releaseId;
@@ -47,6 +47,38 @@ public class DastScanJobModel {
     String selectedGrpcSchemeType;
     String selectedGrpcApiHost;
     String selectedGrpcApiServicePath;
+
+    public DastScanJobModel(Boolean overrideGlobalConfig, String username, String personalAccessToken, String tenantId, String releaseId,
+                            String webSiteUrl, String dastEnv, String scanTimebox,
+                            boolean scanScope, String selectedScanType, String scanPolicy,
+                            String selectedDynamicTimeZone,
+                            boolean enableRedundantPageDetection,
+                            String webSiteNetworkAuthUserName, int loginMacroId,
+                            String workflowMacroId, String allowedHost,
+                            String webSiteNetworkAuthPassword, String assessmentTypeId,
+                            String entitlementId, String entitlementFrequencyType,
+                            String selectedNetworkAuthType) {
+
+        this._releaseId = releaseId;
+        this.overrideGlobalConfig = overrideGlobalConfig;
+        this.username = username;
+        this.personalAccessToken = personalAccessToken;
+        this.tenantId = tenantId;
+        this.webSiteUrl = webSiteUrl;
+        this.dastEnv = dastEnv;
+        this.timeBoxScan = scanTimebox;
+        this.scanPolicyType = scanPolicy;
+        this.enableRedundantPageDetection = enableRedundantPageDetection;
+        this.selectedDynamicTimeZone = selectedDynamicTimeZone;
+        this.webSiteNetworkAuthPassword = webSiteNetworkAuthPassword;
+        this.webSiteNetworkAuthUserName = webSiteNetworkAuthUserName;
+        this.selectedScanType = selectedScanType;
+        this.assessmentTypeId = assessmentTypeId;
+        this.entitlementId = entitlementId;
+        this.entitlementFrequencyType = entitlementFrequencyType;
+        this.networkAuthType = selectedNetworkAuthType;
+
+    }
 
     public boolean isOverrideGlobalConfig() {
         return overrideGlobalConfig;

@@ -1,3 +1,67 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <?xml version="1.0" encoding="UTF-8"?>
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define"
@@ -241,7 +305,7 @@
             </div>
 
             <div id="dast-common-scope-attr"
-                 class="fode-field spinner-container redundantPageDetection">
+                 class="fode-field spinner-container">
 
                 <f:checkbox title="Enable redundant page detection" field="enableRedundantPageDetection"
                             id="enableRedundantPageDetection">

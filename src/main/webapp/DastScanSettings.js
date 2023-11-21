@@ -269,7 +269,6 @@ class DastScanSettings {
 
         jq('#entitlementId').val(entitlementId);
         jq('#frequencyId').val(frequencyId);
-        jq('#frequencyId').val();
         jq('#entitlementFreqType').val(frequencyType);
         jq('#purchaseEntitlementsForm input').prop('checked', (entitlementId <= 0));
         if (skipAuditPref !== true) await this.loadAuditPrefOptions(jq('#ddAssessmentType').val(), frequencyId);
@@ -1083,6 +1082,8 @@ class DastScanSettings {
         jq('#btnUploadLoginMacroFile').click(_ => this.onLoginMacroFileUpload());
 
         jq('#btnUploadWorkflowMacroFile').click(_ => this.onWorkflowMacroFileUpload());
+   
+        jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
 
         jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
 

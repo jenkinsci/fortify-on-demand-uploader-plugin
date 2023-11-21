@@ -115,7 +115,7 @@ public class DastScanController extends ControllerBase {
 
             HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                     .addQueryParameter("dastFileType", (requestModel.dastFileType.getValue()))
-                    .addPathSegments(String.format(FodGlobalConstants.FodDastApiEndpoint.DastFileUploadPatchApi, Integer.parseInt(requestModel.releaseId)));
+                   .addPathSegments(String.format(FodGlobalConstants.FodDastApiEndPoint.DastFileUploadPatchApi, Integer.parseInt(requestModel.releaseId)));
 
             RequestBody requestBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
@@ -150,7 +150,7 @@ public class DastScanController extends ControllerBase {
 
     public PostDastStartScanResponse StartDastScan(Integer releaseId) throws IOException {
 
-        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiEndpoint.DastStartScanAPi, releaseId));
+              HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiEndPoint.DastStartScanAPi, releaseId));
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .addHeader("Accept", "application/json")
@@ -166,7 +166,8 @@ public class DastScanController extends ControllerBase {
 
     public GetDastScanSettingResponse getDastScanSettings(final Integer releaseId) throws IOException {
 
-        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiEndpoint.DastGetApi, releaseId));
+       
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiEndPoint.DastGetApi, releaseId));
 
         System.out.println("retrieve dynamic scan settings....");
 
@@ -261,7 +262,6 @@ public class DastScanController extends ControllerBase {
             return parseHttpSuccessResponse(response, fodApiResponse);
 
         } else {
-
             return parseFailureResponse(response, fodApiResponse);
 
         }
@@ -321,6 +321,7 @@ public class DastScanController extends ControllerBase {
             return parsedResponse;
 
         } else if (fodApiResponse instanceof PostDastStartScanResponse) {
+            
             T parsedResponse = apiConnection.parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
             }.getType());
 
