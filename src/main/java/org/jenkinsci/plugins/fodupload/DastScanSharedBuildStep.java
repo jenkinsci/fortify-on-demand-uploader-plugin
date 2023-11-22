@@ -661,7 +661,7 @@ public class DastScanSharedBuildStep {
 
             if (response.errors == null && response.scanId > 0) {
                 build.setResult(Result.SUCCESS);
-                build.setDescription(String.format("Successfully triggered Dynamic scan for scan id %d", response.getScanId()));
+                build.setDescription(String.format("Successfully triggered Dynamic scan for scan id %d", response.scanId));
                 logger.println(String.format("Fortify On Demand dynamic scan successfully triggered for scan Id %d ", response.scanId));
                 this.scanId = response.scanId;
             } else {

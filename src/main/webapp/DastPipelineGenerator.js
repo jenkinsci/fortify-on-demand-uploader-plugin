@@ -288,8 +288,12 @@ class DastPipelineGenerator {
                 });
             jq('#overrideReleaseSettings')
                 .change(_ => this.loadEntitlementOptions());
+
             await this.onReleaseSelectionChanged();
+
             jq('.fodp-row-screc').hide();
+
+            //  jq('#workflowMacroFilePath').blur(_ => this.onWorkflowFlowMacroFilePathChange());
 
             this.uiLoaded = true;
         } catch (Error) {
@@ -304,8 +308,6 @@ class DastPipelineGenerator {
     async onEntitlementChanged(skipAuditPref) {
         let val = jq('#entitlementSelect').val();
         let {frequencyType} = parseEntitlementDropdownValue(val);
-
-        // if (skipAuditPref !== true) await this.loadAuditPrefOptions(jq('#assessmentTypeSelect').val(), frequencyType);
         this.populateHiddenFields();
     }
 
@@ -336,7 +338,7 @@ class DastPipelineGenerator {
             for (let k of Object.keys(this.assessments)) {
                 let at = this.assessments[k];
                 if (at !== null)
-                    atsel.append(`<option value="${at.assessmentTypeId}">${at.name}</option>`);
+                    atsel.append(`<option value="${at.id}">${at.name}</option>`);
             }
         }
     }
@@ -385,6 +387,25 @@ class DastPipelineGenerator {
             this.fodOverrideRowsVisibility(false);
         }
     }
+    //     debugger;
+    //     this.releaseId = numberOrNull(jq('#releaseSelectionValue').val());
+    //     if (this.overrideServerSettings) {
+    //         if (this.releaseId < 1) {
+    //             this.releaseId = null
+    //         } else
+    //             this.loadReleaseEntitlementSettings().then(() => {
+    //                     this.fodOverrideRowsVisibility(true);
+    //                 }
+    //             );
+    //     } else {
+    //         this.loadReleaseEntitlementSettings().then(
+    //             () => {
+    //                 this.hideMessages();
+    //                // this.fodOverrideRowsVisibility(false);
+    //             }
+    //         );
+    //     }
+    // }
 
     async loadReleaseEntitlementSettings() {
         debugger;
@@ -674,10 +695,22 @@ class DastPipelineGenerator {
         let standardScanSettingRows = jq('.dast-standard-setting');
         if ((isVisible === undefined) || isVisible === false) {
             standardScanSettingRows.hide();
+            this.resetWebSiteSettingsValues();
         } else {
             standardScanSettingRows.show();
         }
     }
+
+    resetWorkFlowSettingSValues()
+    {
+
+    }
+    resetWebSiteSettingsValues()
+    {
+       jq('[name=webSiteUrl]').val('');
+
+    }
+
 
     commonScopeSettingVisibility(isVisible) {
         let commonScopeRows = jq('.dast-common-scan-scope');
@@ -719,6 +752,7 @@ class DastPipelineGenerator {
         let workflowScanSettingRows = jq('.dast-workflow-setting');
         if ((isVisible === undefined || null) || isVisible === false) {
             workflowScanSettingRows.hide();
+            this.resetWorkFlowSettingSValues();
         } else {
             workflowScanSettingRows.show();
         }
@@ -896,7 +930,7 @@ class DastPipelineGenerator {
     }
 
     onWorkflowDrivenHostChecked(event) {
-
+        debugger;
         let allowedHost = jq('#workflowMacroHost').val();
         if (event.target.checked) {
             let hostToAdd = event.target.name; //name point to the host returned from FOD Patch API
@@ -956,9 +990,11 @@ class DastPipelineGenerator {
             for (let e of available) {
                 entsel.append(`<option value="${getEntitlementDropdownValue(e.id, e.frequency)}">${e.description}</option>`);
             }
+
         }
 
         await this.onEntitlementChanged(skipAuditPref);
+        // ToDo: set to unselected if selected value doesn't exist
     }
 
     async onAuthChanged() {
@@ -1031,6 +1067,7 @@ class DastPipelineGenerator {
     }
 
     fodOverrideRowsVisibility(isVisible) {
+        debugger;
         jq(fodpOverrideRowsSelector)
             .each((i, e) => {
                 let jqe = jq(e);

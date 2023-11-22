@@ -318,7 +318,7 @@
 
                     <f:entry title="Network Authentication Type">
                         <div id="ddlNetworkAuthTypeRow"
-                             class="fodp-field spinner-container dast-scan-setting">
+                             class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
                             <div class="fode-edit jenkins-select">
                                 <select name="selectedNetworkAuthType" id="ddlNetworkAuthType"
                                         class="jenkins-select__input">

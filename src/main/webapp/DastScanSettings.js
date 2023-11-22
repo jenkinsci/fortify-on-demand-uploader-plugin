@@ -1085,8 +1085,6 @@ class DastScanSettings {
    
         jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
 
-        jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
-
         jq('#apiTypeList').change(_ => this.onApiTypeChanged());
 
         jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_=>this.onSourceChange(event.target.id));

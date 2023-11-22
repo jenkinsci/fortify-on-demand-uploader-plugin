@@ -60,10 +60,8 @@
     <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AppAndReleaseSelection.jelly"
                 class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
 
-
     <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AppAndReleaseSelectionForm.jelly"
                 class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
-
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/ScanSettings.jelly"
                 class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
@@ -78,8 +76,9 @@
     <!-- Script Section -->
     <script>
         function loadJs() {
-            // Reload all the script again. instead of windows.location.reload.
 
+    alert('loading');
+    let scriptHolder = document.createElement()
         }
 
         loadJs();

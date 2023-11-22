@@ -261,7 +261,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     }
 
     @DataBoundSetter
-    public void setWorkflowMacroHost(@Nullable String workflowMacroHost) {
+    public void setWorkflowMacroHost(String workflowMacroHost) {
         this.workflowMacroHost = workflowMacroHost;
     }
 
@@ -385,15 +385,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     public void setEntitlementId(String entitlementId) {
         this.entitlementId = entitlementId;
     }
-
-//    public String getSrcLocation() {
-//        return srcLocation;
-//    }
-//
-//    @DataBoundSetter
-//    public void setSrcLocation(String srcLocation) {
-//        this.srcLocation = srcLocation != null ? srcLocation.trim() : "";
-//    }
 
     public String getRemediationScanPreferenceType() {
         return remediationScanPreferenceType;
@@ -616,7 +607,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
             }
         }
 
-        dastScanSharedBuildStep.SaveReleaseSettingsForWebSiteScan(releaseId, assessmentTypeId,
+        dastScanSharedBuildStep.saveReleaseSettingsForWebSiteScan(releaseId, assessmentTypeId,
                 entitlementId
                 , entitlementFrequency, String.valueOf(loginMacroFileId),
                 selectedDynamicTimeZone,
