@@ -71,7 +71,7 @@
                     </div>
                 </f:entry>
                 <f:entry title="Personal Access Token" field="personalAccessTokenSelect"
-                         help="/plugin/fortify-on-demand-uploader/help-personalAccessToken.html" >
+                         help="/plugin/fortify-on-demand-uploader/help-personalAccessToken.html">
                     <div id="fodp-authPAT">
                         <c:select/>
                     </div>
@@ -228,16 +228,27 @@
         </f:entry>
     </f:section>
     <f:section title="Scope">
-        <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
-            <div id="dast-workflow-macro-upload"
-                 class="fodp-field spinner-container fodp-row-relid-ovr">
-                <span>
-                    <input accept=".har,.webmacro,.brup" id="workflowMacroFile" type="File" name="workflowMacroFile"/>
-                    <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
-                    <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>
-                    <input type="label" value="" hidden="true" name="workflowMacroHosts" id="workflowMacroHosts"/>
-                </span>
-            </div>
+        <f:entry>
+        <div id="dast-workflow-macro-upload"
+             class="fodp-field spinner-container fodp-row-relid-ovr">
+            <f:optionalBlock title="Workflow Macro File Uploader" name="workflowUploader" field="workflowUploader">
+
+                <f:entry
+                        title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
+                    <span>
+                        <input accept=".har,.webmacro,.brup" id="workflowMacroFile" type="File"
+                               name="workflowMacroFile"/>
+                        <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
+                        <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>
+                        <input type="label" value="" hidden="true" name="workflowMacroHosts" id="workflowMacroHosts"/>
+                    </span>
+                </f:entry>
+            </f:optionalBlock>
+            <f:entry
+                    title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
+                <f:textbox name="workflowMacroFilePath" field="workflowMacroFilePath"/>
+            </f:entry>
+        </div>
         </f:entry>
         <f:entry title="Allowed Hosts">
             <ul id="listWorkflowDrivenAllowedHostUrl" name="listWorkflowDrivenAllowedHostUrl"
@@ -245,7 +256,7 @@
             </ul>
         </f:entry>
 
-        <f:entry title="Dynamic Site URL" >
+        <f:entry title="Dynamic Site URL">
             <div id="dast-standard-site-url"
                  class="fodp-field spinner-container fodp-row-relid-ovr dast-standard-setting">
                 <f:textbox field="webSiteUrl" name="webSiteUrl"/>
@@ -296,7 +307,7 @@
                 <f:optionalBlock field="timeBoxChecked" name="timeBoxChecked" title="Timebox Scan Duration (Hours)"
                                  checked="${instance.timeBoxChecked}}" inline="true">
                     <div>
-                        <f:textbox name="scanTimeBox" field="scanTimeBox"  />
+                        <f:textbox name="scanTimeBox" field="scanTimeBox"/>
                         <t:help tooltip="Allowed Values are between 1(hr) and 24 (hrs)"/>
                     </div>
                 </f:optionalBlock>
@@ -317,10 +328,9 @@
                                  checked="${instance.webSiteNetworkAuthSettingEnabled}" inline="true">
 
                     <f:entry title="Network Authentication Type">
-                        <div id="ddlNetworkAuthTypeRow"
-                             class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+                        <div id="ddlNetworkAuthTypeRow">
                             <div class="fode-edit jenkins-select">
-                                <select name="selectedNetworkAuthType" id="ddlNetworkAuthType"
+                                <select name="networkAuthType" id="ddlNetworkAuthType"
                                         class="jenkins-select__input">
                                     <option value="0">Select a Network Authentication Type</option>
                                 </select>
@@ -330,12 +340,12 @@
 
                     <f:entry title="Network Username">
                         <div id="networkUsernameRow">
-                            <f:textbox name="webSiteNetworkAuthUserName"/>
+                            <f:textbox name="networkAuthUserName"/>
                         </div>
                     </f:entry>
                     <f:entry title="Network Password">
                         <div id="networkPasswordRow">
-                            <f:password name="webSiteNetworkAuthPassword"/>
+                            <f:password name="networkAuthPassword"/>
                         </div>
                     </f:entry>
 
@@ -386,7 +396,8 @@
     <!--Script-->
 
     <script>
-        var descriptor =<st:bind value="${descriptor}"/>
+        var descriptor =
+        <st:bind value="${descriptor}"/>
     </script>
 
 

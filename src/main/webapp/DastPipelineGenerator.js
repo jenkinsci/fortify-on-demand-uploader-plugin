@@ -379,13 +379,34 @@ class DastPipelineGenerator {
         debugger;
         this.releaseId = numberOrNull(jq('#releaseSelectionValue').val());
         if (this.overrideServerSettings) {
-            if (this.releaseId < 1) this.releaseId = null;
-            this.loadReleaseEntitlementSettings();
+            if (this.releaseId < 1) {
+                this.releaseId = null;
+                return;
+            } else {
+                this.loadReleaseEntitlementSettings().then(
+                    ()=>
+                    {
+                        this.fodOverrideRowsVisibility(true);
+                    }
+                );
+            }
         } else {
-            this.loadReleaseEntitlementSettings();
-            this.hideMessages();
-            this.fodOverrideRowsVisibility(false);
+            if ((this.releaseId !== null) && this.releaseId >1) {
+                this.loadReleaseEntitlementSettings().then(
+                    () => {
+                        this.hideMessages();
+                        this.fodOverrideRowsVisibility(false);
+                    }
+                );
+
+            }
+            else
+            {
+                this.hideMessages();
+                this.fodOverrideRowsVisibility(false);
+            }
         }
+
     }
     //     debugger;
     //     this.releaseId = numberOrNull(jq('#releaseSelectionValue').val());
@@ -703,11 +724,13 @@ class DastPipelineGenerator {
 
     resetWorkFlowSettingSValues()
     {
+      jq('[name=workflowMacroFilePath]').val('');
 
     }
     resetWebSiteSettingsValues()
     {
-       jq('[name=webSiteUrl]').val('');
+       jq('[name=webSiteUrl]').val(null);
+        jq('[name=scanTimeBox]').val(null); //timebox not supported for workflow
 
     }
 

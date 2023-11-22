@@ -73,6 +73,8 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     private String sdlcStatus;
     private boolean enableRedundantPageDetection;
 
+    String networkAuthType;
+
     public String getScanTimeBox() {
         return scanTimeBox;
     }
@@ -145,9 +147,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         this.networkAuthType = networkAuthType;
     }
 
-    private String networkAuthType;
-
-    public boolean isTimeBoxChecked() {
+     public boolean isTimeBoxChecked() {
         return timeBoxChecked;
     }
 

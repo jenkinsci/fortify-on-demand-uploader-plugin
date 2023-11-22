@@ -209,6 +209,7 @@ public class DastScanSharedBuildStep {
             dynamicScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dynamicScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dynamicScanSetupReqModel.setTimeZone(timeZone);
+            dynamicScanSetupReqModel.setPolicy(scanPolicy);
             dynamicScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
             dynamicScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
 

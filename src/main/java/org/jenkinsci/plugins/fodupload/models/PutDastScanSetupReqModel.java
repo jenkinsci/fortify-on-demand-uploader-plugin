@@ -6,8 +6,6 @@ import java.util.List;
 
 public class PutDastScanSetupReqModel {
 
-
-
     public NetworkAuthentication getNetworkAuthenticationSettings() {
         return new NetworkAuthentication();
     }
@@ -47,11 +45,6 @@ public class PutDastScanSetupReqModel {
     }
 
     int assessmentTypeId;
-    public void setPolicy(String policy) {
-        this.policy = policy;
-    }
-
-    String policy;
 
     public class NetworkAuthentication {
 

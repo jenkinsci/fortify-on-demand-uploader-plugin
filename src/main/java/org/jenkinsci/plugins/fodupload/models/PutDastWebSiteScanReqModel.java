@@ -9,6 +9,12 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     private String dynamicSiteUrl;
     private boolean enableRedundantPageDetection;
 
+    public void setPolicy(String policy) {
+        this.policy = policy;
+    }
+
+    String policy;
+
     public boolean isEnableRedundantPageDetection() {
         return enableRedundantPageDetection;
     }
