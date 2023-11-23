@@ -36,6 +36,11 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     public void setLoginMacroFileId(int loginMacroFileId) {
         this.loginMacroFileId = loginMacroFileId;
     }
+    public void setPolicy(String policy) {
+        this.policy = policy;
+    }
+
+    String policy;
 
     int loginMacroFileId;
 }

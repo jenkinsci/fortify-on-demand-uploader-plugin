@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload.FodApi;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
@@ -182,8 +183,15 @@ public class FodApiConnection {
 
         if (content == null)
             throw new IOException("Unexpected body to be null");
+        else {
+            try {
+                return Json.getInstance().fromJson(content, t);
+            } catch (JsonSyntaxException ex) {
+                String bodyContent = "{\"content\":" + content + "}";
+                return Json.getInstance().fromJson(bodyContent, t);
+            }
+        }
 
-        return Json.getInstance().fromJson(content, t);
     }
 
     public ScanPayloadUpload getScanPayloadUploadInstance(JobModel uploadRequest, String correlationId, String fragUrl, PrintStream logger) throws IOException {

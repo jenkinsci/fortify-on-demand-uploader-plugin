@@ -266,10 +266,10 @@
 
         <f:entry title="Scan Policy">
             <div id="dast-standard-scan-policy" class="fode-field spinner-container">
-                <select field="scanPolicy">
+                <select name="scanPolicy" id="scanPolicy">
                     <option value="Standard">Standard</option>
-                    <option value="CriticalsAndHighs">CriticalsAndHighs</option>
-                    <option value="PassiveScan">PassiveScan</option>
+                    <option value="CriticalsAndHighs">Critical And Highs</option>
+                    <option value="PassiveScan">Passive Scan</option>
                 </select>
             </div>
             <div id="dast-api-scan-policy-apiType" class="fode-field spinner-container">

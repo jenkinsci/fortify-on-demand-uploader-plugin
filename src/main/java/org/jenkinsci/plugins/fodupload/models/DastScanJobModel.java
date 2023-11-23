@@ -7,11 +7,22 @@ public class DastScanJobModel {
     private boolean overrideGlobalConfig;
     String username;
 
+    public String getAllowedHost() {
+        return allowedHost;
+    }
+    String allowedHost;
     String personalAccessToken;
     String tenantId;
     String _releaseId;
     String selectedReleaseType;
     String webSiteUrl;
+
+    public int getWorkflowMacroFileId() {
+        return workflowMacroFileId;
+    }
+
+    int workflowMacroFileId;
+
     String dastEnv;
     String scanPolicyType;
     boolean scanHost;
@@ -187,6 +198,8 @@ public class DastScanJobModel {
                                String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath) {
         this._releaseId = userSelectedRelease;
         this.tenantId = tenantId;
+        this.allowedHost =allowedHost;
+        this.workflowMacroFileId = Integer.parseInt(workflowMacroId);
         this.overrideGlobalConfig = overrideGlobalConfig;
         this.selectedReleaseType = selectedReleaseType;
         this.userSelectedApplication = userSelectedApplication;

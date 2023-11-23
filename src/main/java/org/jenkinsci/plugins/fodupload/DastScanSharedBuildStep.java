@@ -145,9 +145,19 @@ public class DastScanSharedBuildStep {
                     errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWebSiteUrlNotFound);
                 }
 
+                if(this.model.getScanPolicyType().isEmpty())
+                    errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
+
                 break;
             case "Workflow-Driven":
-                break;
+
+                if( this.model.getWorkflowMacroFileId() <=0)
+                    errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWorkflowMacroIdNotFound);
+
+                if(this.model.getAllowedHost().isEmpty())
+                    errors.add(FodGlobalConstants.FodDastValidation.DastWorkflowAllowedHostNotFound);
+
+               break;
         }
         return errors;
 
@@ -180,11 +190,17 @@ public class DastScanSharedBuildStep {
 
         try {
 
+            if (!ValidateModel().isEmpty()) {
+                throw new IllegalArgumentException("Failed to save scan settings for release id: " + String.join(", ", ValidateModel()));
+            }
+
             PutDastWebSiteScanReqModel dynamicScanSetupReqModel;
             dynamicScanSetupReqModel = new PutDastWebSiteScanReqModel();
             dynamicScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dynamicScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dynamicScanSetupReqModel.setTimeZone(timeZone);
+            if (scanPolicy !=null && ! scanPolicy.isEmpty())
+                dynamicScanSetupReqModel.setPolicy(scanPolicy);
             dynamicScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
             dynamicScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
 
@@ -199,10 +215,11 @@ public class DastScanSharedBuildStep {
                     dynamicScanSetupReqModel.setTimeBoxInHours(null);
             } catch (NumberFormatException exception) {
                 // Should warn not throw in front end.
-                throw new IllegalArgumentException(" value for TimeBox Scan");
+                throw new IllegalArgumentException(" Invalid value for TimeBox Scan");
             }
+            if(scanPolicy !=null &&! scanPolicy.isEmpty())
+                 dynamicScanSetupReqModel.setPolicy(scanPolicy);
 
-            dynamicScanSetupReqModel.setPolicy(scanPolicy);
             dynamicScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
             if (requireLoginMacroAuth && (!Objects.equals(loginMacroId, "") && loginMacroId != null))
@@ -260,8 +277,13 @@ public class DastScanSharedBuildStep {
             , String networkAuthType)
             throws IllegalArgumentException, IOException {
 
+        if (!ValidateModel().isEmpty()) {
+            throw new IllegalArgumentException("Failed to save scan settings for release id: " + String.join(", ", ValidateModel()));
+        }
         DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
         try {
+
+
 
             PutDastWorkflowDrivenScanReqModel dastWorkflowScanSetupReqModel;
             dastWorkflowScanSetupReqModel = new PutDastWorkflowDrivenScanReqModel();
@@ -269,6 +291,9 @@ public class DastScanSharedBuildStep {
             dastWorkflowScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dastWorkflowScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dastWorkflowScanSetupReqModel.setTimeZone(timeZone);
+            if(scanPolicy !=null && ! scanPolicy.isEmpty())
+                dastWorkflowScanSetupReqModel.setPolicy(scanPolicy);
+
             dastWorkflowScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastWorkflowScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
 
@@ -284,8 +309,9 @@ public class DastScanSharedBuildStep {
                 wrkDrivenMacro.allowedHosts = workflowMacroHosts.split(",");
                 dastWorkflowScanSetupReqModel.workflowDrivenMacro.add(wrkDrivenMacro);
             }
-
-            dastWorkflowScanSetupReqModel.setPolicy(scanPolicy);
+            if(scanPolicy !=null && ! scanPolicy.isEmpty()) {
+                dastWorkflowScanSetupReqModel.setPolicy(scanPolicy);
+            }
             dastWorkflowScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
             if (requireNetworkAuth) {
@@ -639,7 +665,7 @@ public class DastScanSharedBuildStep {
                 logger.println(String.format("Fortify On Demand dynamic scan successfully triggered for scan Id %d ", response.scanId));
                 this.scanId = response.scanId;
             } else {
-                logger.println(String.format("Fortify On Demand Dynamic Scan Failed for release Id %d ", releaseId));
+                logger.println(String.format("Fortify On Demand Dynamic Scan Failed for release Id %d", releaseId));
                 build.setResult(Result.FAILURE);
             }
         } catch (IOException e) {

@@ -28,13 +28,13 @@ class AppAndReleaseSelection {
         jq('#appAndReleaseNameErrorView').hide();
         jq('.openApiSourceControls').hide();
         jq('.graphQLSourceControls').hide();
-        jq('.' + dastScanSetting).hide();
-        jq('.' + dastWebSiteSetting).hide();
-        jq('.' + dastWorkFlowSetting).hide();
-        jq('.' + dastCommonScopeSetting).hide();
-        jq('.' + loginAuthSetting).hide();
-        jq('.' + nwAuthSetting).hide();
-        jq('.' + dastApiSetting).hide();
+        jq('.dast-scan-setting').hide();
+        jq('.dast-standard-setting').hide();
+        jq('.dast-workflow-setting').hide();
+        jq('.dast-common-scan-scope').hide();
+        jq('.dast-login-macro').hide();
+        jq('.dast-networkAuth-setting').hide();
+        jq('.dast-api-setting').hide();
         jq('.' + dastApiSecificControlls).hide();
 
     }

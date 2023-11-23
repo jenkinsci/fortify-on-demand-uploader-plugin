@@ -1,13 +1,10 @@
 const fodeRowSelector = '.fode-field-row, .fode-field-row-verr';
-const fodApiScanTypeClassIdr = "dast-api-scan";
 const dastManifestWorkflowMacroFileUpload = "WorkflowDrivenMacro";
 const dastManifestLoginFileUpload = "LoginMacro";
 const openApiFileType = 'OpenAPIDefinition';
 const grpcFileType = 'GRPCDefinition';
 const graphQlFileType = 'GraphQLDefinition';
 const postmanFileType = 'PostmanCollection';
-const allPolicyTypes = 'dast-standard-scan-policy';
-const apiPolicyType = 'dast-api-scan-policy-apiType'
 const dastScanTypes = [{"value": 'Standard', "text": 'Standard'}, {
     "value": 'Workflow-driven',
     "text": 'Workflow-driven'
@@ -62,8 +59,8 @@ class DastScanSettings {
             switch (scanType) {
 
                 case "Standard": {
-                    jq('#' + allPolicyTypes).show();
-                    jq('#' + apiPolicyType).hide();
+                    jq('#dast-standard-scan-policy').show();
+                    jq('#dast-api-scan-policy-apiType').hide();
                     jq('.redundantPageDetection').show();
                     this.websiteScanSettingsVisibility(isVisible);
                     this.workflowScanSettingVisibility(false);
@@ -76,8 +73,8 @@ class DastScanSettings {
                     break;
                 }
                 case "API": {
-                    jq('#' + allPolicyTypes).hide();
-                    jq('#' + apiPolicyType).show();
+                    jq('#dast-standard-scan-policy').hide();
+                    jq('#dast-api-scan-policy-apiType').show();
                     jq('.redundantPageDetection').hide();
                     this.apiScanSettingVisibility(isVisible);
                     this.commonScopeSettingVisibility(isVisible);
@@ -89,8 +86,8 @@ class DastScanSettings {
                     break;
                 }
                 case "Workflow-driven":
-                    jq('#' + allPolicyTypes).show();
-                    jq('#' + apiPolicyType).hide();
+                    jq('#dast-standard-scan-policy').show();
+                    jq('#dast-api-scan-policy-apiType').hide();
                     jq('.redundantPageDetection').show();
                     this.workflowScanSettingVisibility(isVisible);
                     this.apiScanSettingVisibility(false);
@@ -127,7 +124,7 @@ class DastScanSettings {
     }
 
     loginMacroSettingsVisibility(isVisible) {
-        let loginMacroSetting = jq('.' + loginAuthSetting);
+        let loginMacroSetting = jq('.dast-login-macro');
         if ((isVisible === undefined || null) || isVisible === false) {
             loginMacroSetting.hide();
         } else {
@@ -136,7 +133,7 @@ class DastScanSettings {
     }
 
     networkAuthSettingVisibility(isVisible) {
-        let networkAuth = jq('.' + nwAuthSetting);
+        let networkAuth = jq('.dast-networkAuth-setting');
         if ((isVisible === undefined) || isVisible === false) {
             networkAuth.hide();
             //reset the value here so on changing the scan type the hidden n/w values don't retain the values.
@@ -148,7 +145,7 @@ class DastScanSettings {
 
     websiteScanSettingsVisibility(isVisible) {
 
-        let standardScanSettingRows = jq('.' + dastWebSiteSetting);
+        let standardScanSettingRows = jq('.dast-standard-setting');
         if ((isVisible === undefined) || isVisible === false) {
             standardScanSettingRows.hide();
         } else {
@@ -157,8 +154,7 @@ class DastScanSettings {
     }
 
     commonScopeSettingVisibility(isVisible) {
-        let dastCommonScopeSetting = 'dast-common-scan-scope';
-        let commonScopeRows = jq('.' + dastCommonScopeSetting);
+        let commonScopeRows = jq('.dastCommonScopeSetting');
         if ((isVisible === undefined) || isVisible === false) {
             commonScopeRows.hide();
         } else {
@@ -183,7 +179,7 @@ class DastScanSettings {
         jq('.dast-api-scan').each((iterator, element) => {
             let currentElement = jq(element);
             let tr = closestRow(currentElement);
-            tr.addClass(fodApiScanTypeClassIdr);
+            tr.addClass('dast-api-scan');
         });
         let apiScanSettingRows = jq('.dast-api-scan');
         if ((isVisible === undefined || null) || isVisible === false) {
@@ -195,7 +191,7 @@ class DastScanSettings {
     }
 
     workflowScanSettingVisibility(isVisible) {
-        let workflowScanSettingRows = jq('.' + dastWorkFlowSetting);
+        let workflowScanSettingRows = jq('.dast-workflow-setting');
         if ((isVisible === undefined || null) || isVisible === false) {
             workflowScanSettingRows.hide();
         } else {
@@ -205,7 +201,7 @@ class DastScanSettings {
 
     scanSettingsVisibility(isVisible) {
         if ((isVisible === undefined || null) || isVisible === false) {
-            let scanSettingsRows = jq('.' + dastWebSiteSetting);
+            let scanSettingsRows = jq('.dast-standard-setting');
             scanSettingsRows.hide();
         } else {
             jq('.dast-scan-setting').show();

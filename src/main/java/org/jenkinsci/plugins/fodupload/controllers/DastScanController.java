@@ -291,14 +291,13 @@ public class DastScanController extends ControllerBase {
             return (T) fodApiResponse;
 
         } else {
-            ((FodDastApiResponse) fodApiResponse).isSuccess = false;
-            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            T parsedResponse = parseHttpBodyResponse(response, fodApiResponse);
             error err = new error();
-            err.errorCode = response.code();
-            err.message = response.message();
-            ((FodDastApiResponse) fodApiResponse).errors = new ArrayList<>();
-            ((FodDastApiResponse) fodApiResponse).errors.add(err);
-            return parseHttpBodyResponse(response, fodApiResponse);
+            err.errorCode =  ((FodDastApiResponse) parsedResponse).HttpCode;
+            err.message = ((FodDastApiResponse) parsedResponse).reason;
+            ((FodDastApiResponse) parsedResponse).errors = new ArrayList<>();
+            ((FodDastApiResponse) parsedResponse).errors.add(err);
+            return  parsedResponse;
         }
     }
 
@@ -309,7 +308,7 @@ public class DastScanController extends ControllerBase {
             }.getType());
             ((PatchDastFileUploadResponse) parsedResponse).isSuccess = response.isSuccessful();
             ((PatchDastFileUploadResponse) parsedResponse).HttpCode = response.code();
-            ((PatchDastFileUploadResponse) parsedResponse).reason = response.message();
+            ((PatchDastFileUploadResponse) parsedResponse).reason = response.bodyContent();
             return parsedResponse;
 
         } else if (fodApiResponse instanceof PutDastScanSetupResponse) {
@@ -317,7 +316,7 @@ public class DastScanController extends ControllerBase {
             }.getType());
             ((PutDastScanSetupResponse) parsedResponse).isSuccess = response.isSuccessful();
             ((PutDastScanSetupResponse) parsedResponse).HttpCode = response.code();
-            ((PutDastScanSetupResponse) parsedResponse).reason = response.message();
+            ((PutDastScanSetupResponse) parsedResponse).reason = response.bodyContent();
             return parsedResponse;
 
         } else if (fodApiResponse instanceof PostDastStartScanResponse) {
@@ -326,13 +325,13 @@ public class DastScanController extends ControllerBase {
 
             ((PostDastStartScanResponse) parsedResponse).isSuccess = response.isSuccessful();
             ((PostDastStartScanResponse) parsedResponse).HttpCode = response.code();
-            ((PostDastStartScanResponse) parsedResponse).reason = response.message();
+            ((PostDastStartScanResponse) parsedResponse).reason = response.bodyContent();
             return  parsedResponse;
 
         } else {
             ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
             ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
-            ((FodDastApiResponse) fodApiResponse).reason = response.message();
+            ((FodDastApiResponse) fodApiResponse).reason = response.bodyContent();
             return (T) fodApiResponse;
         }
     }

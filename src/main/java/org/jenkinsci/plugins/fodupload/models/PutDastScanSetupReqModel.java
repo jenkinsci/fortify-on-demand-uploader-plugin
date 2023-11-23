@@ -6,8 +6,6 @@ import java.util.List;
 
 public class PutDastScanSetupReqModel {
 
-
-
     public NetworkAuthentication getNetworkAuthenticationSettings() {
         return new NetworkAuthentication();
     }
@@ -21,38 +19,24 @@ public class PutDastScanSetupReqModel {
     public void setEntitlementFrequencyType(String entitlementFrequencyType) {
         this.entitlementFrequencyType = entitlementFrequencyType;
     }
-
     String entitlementFrequencyType;
-
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
-
     String timeZone;
-
     public void setDynamicScanEnvironmentFacingType(String dynamicScanEnvironmentFacingType) {
         this.dynamicScanEnvironmentFacingType = dynamicScanEnvironmentFacingType;
     }
-
     String dynamicScanEnvironmentFacingType;
-
     public void setEntitlementId(int entitlementId) {
         this.entitlementId = entitlementId;
     }
 
     int entitlementId;
-
     public void setAssessmentTypeId(int assessmentTypeId) {
         this.assessmentTypeId = assessmentTypeId;
     }
-
     int assessmentTypeId;
-    public void setPolicy(String policy) {
-        this.policy = policy;
-    }
-
-    String policy;
-
     public class NetworkAuthentication {
 
         public void setUserName(String userName) {

@@ -27,6 +27,10 @@ public class FodGlobalConstants {
             public final static String DastPipelineScanEntitlementTypeNotFound = "Missing Entitlement Type.";
             public final static String DastPipelineAssessmentIdNotFound = "Missing Assessment Id.";
             public final static String DastPipelineWorkflowMacroIdNotFound = "Missing Workflow Macro Id.";
+
+            public final  static  String DastWorkflowAllowedHostNotFound = "Missing Workflow Allowed Host";
+
+            public final  static  String DastScanPolicyNotFound = "Missing SCan Policy Type";
         }
 
         public static class FodDastErrorMsg
