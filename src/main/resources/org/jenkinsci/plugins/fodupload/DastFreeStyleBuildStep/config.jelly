@@ -46,6 +46,12 @@
         .flex-item {
         margin: 10px;
         }
+        .error-msg {
+        color: red;
+        }
+        .req-field {
+        border: 1px solid red;
+        }
     </style>
 
     <st:adjunct includes="io.jenkins.plugins.jquery3"/>
@@ -92,5 +98,6 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreationDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelectionDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastScanSettings.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastValidation.js"/>
 
 </j:jelly>

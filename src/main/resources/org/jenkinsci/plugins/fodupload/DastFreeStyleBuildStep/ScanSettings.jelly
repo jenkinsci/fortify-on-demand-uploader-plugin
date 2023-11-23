@@ -93,9 +93,10 @@
                     <div class="sourceDetails openApiSourceControls">
                 <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileds">
                     <f:entry field="openApiFileSource" title="Please upload your OpenAPI specification json file. Supported extensions: *.json">
-                            <span>
+                            <span id="openApiUploadContainer" class="fode-field spinner-container" >
                                 <input accept=".json" id="openApiFile"  type="File" name="openApiFile" />
                                 <input type="button" value="Upload" id="btnUploadOpenApiFile" class="dastFileUploadButton"/>
+                                <h6 id="openApiUploadMessage" hidden="true" class="uploadMessage"></h6>
                                 <input type="label" hidden="true"  name="openApiFileId" id="openApiFileId"/>
                                 <span class="uploadMessage" id="openApiUploadMessage" style="color: red;"></span>
                             </span>
@@ -119,9 +120,10 @@
                 <div id="dast-postman" class="apiOptions fode-field spinner-container">
                     <f:entry field="postmanFile" title="Please upload the Postman collection. Supported extensions: *.json">
                         <div id="dast-api-postman-upload" class="fode-field spinner-container sourceDetails">
-                            <span>
+                            <span id="postmanUploadContainer" class="fode-field spinner-container">
                                 <input accept=".json" id="postmanFile"  type="File" name="postmanFile" />
                                 <input type="button" value="Upload" id="btnUploadPostmanFile" class="dastFileUploadButton"/>
+                                <h6 id="postmanUploadMessage" hidden="true" class="uploadMessage"></h6>
                                 <input type="label" hidden="true" name="postmanFileId" id="postmanFileId"/>
                                 <span class="uploadMessage" id="postmanUploadMessage" style="color: red;"></span>
                             </span>
@@ -142,11 +144,11 @@
                     <div class="sourceDetails graphQLSourceControls">
                 <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
                     <f:entry field="graphQlUpload" title="Please upload the introspection query schema file. Supported extensions: *.json">
-                            <span>
+                            <span id="graphQlUploadContainer" class="fode-field spinner-container" >
                                 <input accept=".json" id="graphQLFile"  type="File" name="graphQLFile" />
                                 <input type="button" value="Upload" id="btnUploadgraphQLFile"/>
+                                <h6 id="graphQlUploadMessage" hidden="true" class="uploadMessage"></h6>
                                 <input type="label" hidden="true" name="graphQLFileId" id="graphQLFileId"/>
-                                <span class="uploadMessage" id="grapgQlUploadMessage" style="color: red;"></span>
                             </span>
                     </f:entry>
                 </div>
@@ -178,11 +180,11 @@
                 <div id="dast-grpc" class="apiOptions fode-field spinner-container">
                     <f:entry field="grpcupload" title="Please upload the proto file: *.proto">
                         <div id="dast-grpc-upload" class="fode-field spinner-container">
-                            <span>
+                            <span id="grpcUploadContainer" class="fode-field spinner-container" >
                                 <input accept=".proto" id="grpcFile"  type="File" name="grpcFile" />
                                 <input type="button" value="Upload" id="btnUploadgrpcFile" class="dastFileUploadButton"/>
+                                <h6 id="grpcUploadMessage" hidden="true" class="uploadMessage"></h6>
                                 <input type="label" hidden="true" name="grpcFileId" id="grpcFileId"/>
-                                <span class="uploadMessage" id="grpcUploadMessage" style="color: red;"></span>
                             </span>
                         </div>
                     </f:entry>
@@ -216,6 +218,7 @@
                 <span>
                     <input accept=".har,.webmacro,.brup" id="workflowMacroFile" type="File" name="workflowMacroFile"/>
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
+                    <h6 id="workflowMacroUploadStatusMessage" hidden="true" name="workflowMacroUploadStatusMessage"></h6>
                     <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>
                     <input type="label" value="" hidden="true" name="workflowMacroHosts" id="workflowMacroHosts"/>
                 </span>
@@ -333,11 +336,11 @@
                                  checked="${instance.webSiteLoginMacroEnabled}" inline="true">
                     <f:entry
                             title="Please upload the login macro file. Supported extension: *.webmacro">
-                        <span>
+                        <span id="loginMacroUploadContainer" class="fode-field spinner-container">
                             <input accept=".webmacro" id="loginFileMacro" type="File" name="loginFileMacro"/>
                             <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
+                            <h6 id="loginMacroUploadMessage" hidden="true" name="loginMacroUploadMessage" ></h6>
                             <input type="label" hidden="true" value="" name="loginMacroId" id="loginMacroId"/>
-
                         </span>
                     </f:entry>
 
