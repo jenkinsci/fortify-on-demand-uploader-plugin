@@ -96,6 +96,28 @@ public class DastScanSharedBuildStep {
 
     }
 
+    public DastScanSharedBuildStep(Boolean overrideGlobalConfig, String username,
+                                   String tenantId, String personalAccessToken, String releaseId,
+                                   String webSiteUrl, String dastEnv, String scanTimebox, Object excludeUrlList,
+                                   String scanPolicy, boolean scanScope, String selectedScanType,
+                                   String selectedDynamicTimeZone, boolean enableRedundantPageDetection, String webSiteUrl1,
+                                   int loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthUserName,
+                                   String webSiteNetworkAuthPassword, String applicationId, String assessmentTypeId, String entitlementId,
+                                   String entitlementFrequencyType, String selectedNetworkAuthType, boolean timeBoxChecked) {
+
+        authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
+        model = new DastScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
+                releaseId,  webSiteUrl
+                , dastEnv, scanTimebox,  scanScope, selectedScanType ,scanPolicy
+                , selectedDynamicTimeZone
+                , enableRedundantPageDetection,
+                webSiteNetworkAuthUserName, loginMacroId, workflowMacroId, allowedHost
+                , webSiteNetworkAuthPassword
+                , assessmentTypeId, entitlementId,
+                entitlementFrequencyType
+                , selectedNetworkAuthType);
+    }
+
     private FodApiConnection getApiConnection() throws FormValidation {
 
         return ApiConnectionFactory.createApiConnection(this.getAuthModel(), false, null, null);
@@ -157,7 +179,7 @@ public class DastScanSharedBuildStep {
                 if(this.model.getAllowedHost().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastWorkflowAllowedHostNotFound);
 
-               break;
+                break;
         }
         return errors;
 
@@ -218,7 +240,7 @@ public class DastScanSharedBuildStep {
                 throw new IllegalArgumentException(" Invalid value for TimeBox Scan");
             }
             if(scanPolicy !=null &&! scanPolicy.isEmpty())
-                 dynamicScanSetupReqModel.setPolicy(scanPolicy);
+                dynamicScanSetupReqModel.setPolicy(scanPolicy);
 
             dynamicScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
