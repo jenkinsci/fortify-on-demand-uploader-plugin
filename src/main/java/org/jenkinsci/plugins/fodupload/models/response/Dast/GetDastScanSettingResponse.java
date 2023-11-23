@@ -48,7 +48,7 @@ public class GetDastScanSettingResponse {
     public int timeBoxInHours;
 
     public Policy policy;
-    public websiteAssessment websiteAssessment;
+    public Website websiteAssessment;
     public API apiAssessment;
 
     public ExclusionDTO[] exclusionsList;
