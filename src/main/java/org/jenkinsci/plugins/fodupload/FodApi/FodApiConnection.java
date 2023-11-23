@@ -169,7 +169,8 @@ public class FodApiConnection {
     public <T> T requestTyped(Request request, Type t) throws IOException {
         ResponseContent res = this.request(request);
 
-        return this.parseResponse(res, t);
+       T result =  this.parseResponse(res, t);
+       return  result;
     }
 
     public <T> T requestTyped(HttpRequest request, Type t) throws IOException {
