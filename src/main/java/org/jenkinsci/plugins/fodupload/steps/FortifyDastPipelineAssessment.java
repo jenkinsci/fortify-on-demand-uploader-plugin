@@ -74,6 +74,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     private String sdlcStatus;
     private boolean enableRedundantPageDetection;
 
+
     String networkAuthType;
 
     public java.lang.String getSelectedApiType() {
@@ -114,6 +115,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         return openApiUrl;
     }
 
+@DataBoundSetter
     public void setOpenApiUrl(java.lang.String openApiUrl) {
         this.openApiUrl = openApiUrl;
     }
@@ -825,6 +827,9 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     private void saveApiScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws IOException {
         try {
             if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
+
+                //Path == > read the bytes=> Patch end point
+
                 String sourceUrn = openApiRadioSource.equals("Url") ? openApiUrl : openApiFileId;
                 dastScanSharedBuildStep.saveReleaseSettingsForOpenApiScan(releaseId, assessmentTypeId, entitlementId,
                         entitlementFrequency, selectedDynamicTimeZone,
@@ -890,7 +895,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 enableRedundantPageDetection,
                 webSiteUrl,
                 loginMacroId,
-                "",
+                workflowMacroId,
                 workflowMacroHost,
                 networkAuthUserName,
                 networkAuthPassword,

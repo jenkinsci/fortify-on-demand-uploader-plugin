@@ -245,7 +245,7 @@
                 </f:entry>
             </f:optionalBlock>
             <f:entry
-                    title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
+                    title="Please provide the workflow driven macro file path. Supported extensions: *.har, *.webmacro, *.burp">
                 <f:textbox name="workflowMacroFilePath" field="workflowMacroFilePath"/>
             </f:entry>
         </div>
@@ -333,7 +333,7 @@
                                 </div>
                                 <div id="dast-openApi-url" class="fode-field spinner-container sourceTypeFileds">
                                     <f:entry field="openApiUrlSource" title="Please provide a URL to your OpenAPI specification">
-                                        <f:textbox field="openApiurl" name="openApiUrl"/>
+                                        <f:textbox field="openApiUrl" name="openApiUrl"/>
                                     </f:entry>
                                 </div>
 
@@ -548,7 +548,9 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Styling.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Auth.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastValidation.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastPipelineGenerator.js"/>
+
 
     <!--Script -->
 </j:jelly>
