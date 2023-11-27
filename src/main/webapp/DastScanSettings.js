@@ -396,6 +396,7 @@ class DastScanSettings {
                         this.setSelectedEntitlementValue(entp);
                         jq('#timeZoneStackSelectList').val(timeZoneId);
                         this.onLoadTimeZone();
+                        this.onTimeZoneChanged();
                         /*'set the scan type based on the scan setting get response'*/
                         this.setScanType();
                         this.onScanTypeChanged();
@@ -418,12 +419,15 @@ class DastScanSettings {
                         /*Set network settings from response. */
                         jq('#ddlNetworkAuthType').val(networkAuthTypes);
                         this.onNetworkAuthTypeLoad();
+                        this.onNetworkAuthTypeChanged();
                         this.setNetworkSettings();
                         //Set the PatchUploadManifest File's fileId from get response.
                         this.setPatchUploadFileId();
                         //Enable scan Type right after assessment Type drop populated.
                         this.scanSettingsVisibility(true);
                         this.scanTypeVisibility(true);
+
+                        validateRequiredFields();
 
                     } else {
                         await this.onAssessmentChanged(false);
@@ -656,7 +660,16 @@ class DastScanSettings {
         } else {
 
             this.scanTypeUserControlVisibility(selectedScanTypeValue, true);
+            validateDropdown('#scanTypeList');
         }
+    }
+
+    onTimeZoneChanged() {
+      validateDropdown('#timeZoneStackSelectList');
+    }
+
+    onNetworkAuthTypeChanged() {
+      validateDropdown('#ddlNetworkAuthType');
     }
 
     setRestrictScan() {
@@ -702,14 +715,22 @@ class DastScanSettings {
     onLoginMacroFileUpload() {
         jq('#webSiteLoginMacro').val(true);
         let loginMacroFile = document.getElementById('loginFileMacro').files[0];
+        let ctl='#loginMacroUploadContainer';
+        let msgCtl = '#loginMacroUploadMessage';
+        handleSpinner(ctl, false);
+
         this.api.patchSetupManifestFile(this.releaseId, getAuthInfo(), loginMacroFile, dastManifestLoginFileUpload).then(res => {
 
                 console.log("File upload success " + res);
                 let response = res;
                 jq('#loginMacroId').val(res)
+                handleSpinner(ctl, true);
+                handleUploadStatusMessage(msgCtl, fileUploadSuccess, true);
             }
         ).catch((err) => {
                 console.log(err);
+                handleSpinner(ctl, true);
+                handleUploadStatusMessage(msgCtl, fileUploadFailed, false);
             }
         );
     }
@@ -717,15 +738,23 @@ class DastScanSettings {
     onWorkflowMacroFileUpload() {
 
         let workFlowMacroFile = document.getElementById('workflowMacroFile').files[0];
+        let ctl='#dast-workflow-macro-upload';
+        let msgCtl='#workflowMacroUploadStatusMessage';
+
+        handleSpinner(ctl, false);
 
         this.api.patchSetupManifestFile(this.releaseId, getAuthInfo(), workFlowMacroFile, dastManifestWorkflowMacroFileUpload).then(res => {
 
                 //Todo: - check
                 console.log("File upload success " + res);
+                handleSpinner(ctl, true);
+
                 if (res.fileId > 0) {
                     jq('#workflowMacroId').val(res.fileId)
+                    handleUploadStatusMessage(msgCtl, fileUploadSuccess, true);
                 } else {
                     throw new Exception("Illegal argument exception,FileId not valid");
+                    handleUploadStatusMessage(msgCtl, inValidResponse, false);
                 }
                 if (!Object.is(res.hosts, undefined) && !Object.is(res.hosts, null)) {
                     let hosts = undefined;
@@ -755,11 +784,15 @@ class DastScanSettings {
             }
         ).catch((err) => {
                 console.log('err' + err);
+                handleSpinner(ctl, true);
+                handleUploadStatusMessage(msgCtl, fileUploadFailed, false);
             }
         );
     }
     onFileUpload(event) {
 
+        let uploadContainer = '#' + jq('#'+ event.target.id).closest('span').attr('id');
+        handleSpinner(uploadContainer, false);
         jq('.uploadMessage').text('');
         let file = null;
         let fileType = null;
@@ -785,7 +818,7 @@ class DastScanSettings {
                 file = document.getElementById('graphQLFile').files[0];
                 fileType = graphQlFileType;
                 elem = jq('#graphQLFileId');
-                displayMessage = jq('#grapgQlUploadMessage');
+                displayMessage = jq('#graphQlUploadMessage');
                 break
 
             case 'btnUploadgrpcFile' :
@@ -806,16 +839,19 @@ class DastScanSettings {
 
                 //Todo: - check
                 console.log("File upload success " + res);
+                handleSpinner(uploadContainer, true);
+
                 if (res.fileId > 0) {
                     elem.val(res.fileId);
-                    displayMessage.text('Uploaded Successfully !!');
+                    handleUploadStatusMessage(displayMessage, fileUploadSuccess, true);
                 } else {
-                    displayMessage.text('Upload Failed !!');
+                    handleUploadStatusMessage(displayMessage, fileUploadFailed, false)
                     throw new Exception("Illegal argument exception,FileId not valid");
                 }
             }
         ).catch((err) => {
-                displayMessage.text('Upload Failed !!');
+                handleSpinner(uploadContainer, true);
+                handleUploadStatusMessage(displayMessage, fileUploadFailed, false)
                 console.log('err' + err);
             }
         );
@@ -1086,9 +1122,16 @@ class DastScanSettings {
 
         jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_=>this.onSourceChange(event.target.id));
 
-        jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile').click(_ => this.onFileUpload(event));
+        jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile, #btnUploadgrpcFile').click(_ => this.onFileUpload(event));
 
         jq('.fode-row-screc').hide();
+
+        jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
+
+        jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
+
+        setOnblurEvent();
+
         this.uiLoaded = true;
 
         if (this.deferredLoadEntitlementSettings) {
