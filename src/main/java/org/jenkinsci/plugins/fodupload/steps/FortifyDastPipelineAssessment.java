@@ -19,6 +19,7 @@ import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.controllers.*;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.response.AssessmentTypeEntitlementsForAutoProv;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.GetDastScanSettingResponse;
 import org.jenkinsci.plugins.fodupload.models.response.GetStaticScanSetupResponse;
@@ -74,6 +75,184 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     private boolean enableRedundantPageDetection;
 
     String networkAuthType;
+
+    public java.lang.String getSelectedApiType() {
+        return selectedApiType;
+    }
+
+    @DataBoundSetter
+    public void setSelectedApiType(java.lang.String selectedApiType) {
+        this.selectedApiType = selectedApiType;
+    }
+
+    String selectedApiType;
+
+    public java.lang.String getOpenApiRadioSource() {
+        return openApiRadioSource;
+    }
+
+    @DataBoundSetter
+    public void setOpenApiRadioSource(java.lang.String openApiRadioSource) {
+        this.openApiRadioSource = openApiRadioSource;
+    }
+
+    String openApiRadioSource;
+
+    public java.lang.String getOpenApiFileId() {
+        return openApiFileId;
+    }
+
+    @DataBoundSetter
+
+    public void setOpenApiFileId(java.lang.String openApiFileId) {
+        this.openApiFileId = openApiFileId;
+    }
+
+    String openApiFileId;
+
+    public java.lang.String getOpenApiUrl() {
+        return openApiUrl;
+    }
+
+    public void setOpenApiUrl(java.lang.String openApiUrl) {
+        this.openApiUrl = openApiUrl;
+    }
+
+    String openApiUrl;
+
+    public java.lang.String getOpenApiKey() {
+        return openApiKey;
+    }
+
+    @DataBoundSetter
+
+    public void setOpenApiKey(java.lang.String openApiKey) {
+        this.openApiKey = openApiKey;
+    }
+
+    String openApiKey;
+
+    public java.lang.String getPostmanFileId() {
+        return postmanFileId;
+    }
+
+    @DataBoundSetter
+    public void setPostmanFileId(java.lang.String postmanFileId) {
+        this.postmanFileId = postmanFileId;
+    }
+
+    String postmanFileId;
+
+    public String getGraphQlRadioSource() {
+        return graphQlRadioSource;
+    }
+
+    @DataBoundSetter
+    public void setGraphQlRadioSource(String graphQlRadioSource) {
+        this.graphQlRadioSource = graphQlRadioSource;
+    }
+
+    String graphQlRadioSource;
+
+    public String getGraphQLFileId() {
+        return graphQLFileId;
+    }
+
+    @DataBoundSetter
+    public void setGraphQLFileId(String graphQLFileId) {
+        this.graphQLFileId = graphQLFileId;
+    }
+
+    String graphQLFileId;
+
+    public String getGraphQLUrl() {
+        return graphQLUrl;
+    }
+
+    @DataBoundSetter
+    public void setGraphQLUrl(String graphQLUrl) {
+        this.graphQLUrl = graphQLUrl;
+    }
+
+    String graphQLUrl;
+
+    public String getGraphQLSchemeType() {
+        return graphQLSchemeType;
+    }
+
+    @DataBoundSetter
+    public void setGraphQLSchemeType(String graphQLSchemeType) {
+        this.graphQLSchemeType = graphQLSchemeType;
+    }
+
+    String graphQLSchemeType;
+
+    public String getGraphQlApiHost() {
+        return graphQlApiHost;
+    }
+
+    @DataBoundSetter
+    public void setGraphQlApiHost(String graphQlApiHost) {
+        this.graphQlApiHost = graphQlApiHost;
+    }
+
+    String graphQlApiHost;
+
+    public String getGraphQlApiServicePath() {
+        return graphQlApiServicePath;
+    }
+
+
+    @DataBoundSetter
+    public void setGraphQlApiServicePath(String graphQlApiServicePath) {
+        this.graphQlApiServicePath = graphQlApiServicePath;
+    }
+
+    String graphQlApiServicePath;
+
+    public String getGrpcFileId() {
+        return grpcFileId;
+    }
+
+    @DataBoundSetter
+    public void setGrpcFileId(String grpcFileId) {
+        this.grpcFileId = grpcFileId;
+    }
+
+    String grpcFileId;
+
+    public String getGrpcSchemeType() {
+        return grpcSchemeType;
+    }
+
+    @DataBoundSetter
+    public void setGrpcSchemeType(String grpcSchemeType) {
+        this.grpcSchemeType = grpcSchemeType;
+    }
+
+    String grpcSchemeType;
+
+    public String getGrpcApiHost() {
+        return grpcApiHost;
+    }
+
+    @DataBoundSetter
+    public void setGrpcApiHost(String grpcApiHost) {
+        this.grpcApiHost = grpcApiHost;
+    }
+
+    String grpcApiHost;
+
+    public String getGrpcApiServicePath() {
+        return grpcApiServicePath;
+    }
+
+    @DataBoundSetter
+    public void setGrpcApiServicePath(String grpcApiServicePath) {
+        this.grpcApiServicePath = grpcApiServicePath;
+    }
+
+    String grpcApiServicePath;
 
     public String getScanTimeBox() {
         return scanTimeBox;
@@ -147,7 +326,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         this.networkAuthType = networkAuthType;
     }
 
-     public boolean isTimeBoxChecked() {
+    public boolean isTimeBoxChecked() {
         return timeBoxChecked;
     }
 
@@ -250,7 +429,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     }
 
     @PostConstruct
-     public final void Init() {
+    public final void Init() {
         System.out.println("post Construct call.");
 
     }
@@ -265,17 +444,17 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         this.workflowMacroHost = workflowMacroHost;
     }
 
-//
-//    public String getWorkflowMacroId() {
-//        return workflowMacroId;
-//    }
-//
-//    @DataBoundSetter
-//    public void setWorkflowMacroId(String workflowMacroId) {
-//        this.workflowMacroId = workflowMacroId;
-//    }
-//
-//    private String workflowMacroId;
+
+    public String getWorkflowMacroId() {
+        return workflowMacroId;
+    }
+
+    @DataBoundSetter
+    public void setWorkflowMacroId(String workflowMacroId) {
+        this.workflowMacroId = workflowMacroId;
+    }
+
+    private String workflowMacroId;
 
     public String getSelectedDynamicTimeZone() {
         return selectedDynamicTimeZone;
@@ -527,7 +706,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 enableRedundantPageDetection,
                 webSiteUrl,
                 loginMacroId,
-                "",
+                workflowMacroId,
                 workflowMacroHost,
                 networkAuthUserName,
                 networkAuthPassword,
@@ -561,8 +740,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
             throw new IllegalArgumentException("Invalid arguments: Missing or invalid fields for auto provisioning: " + String.join(", ", errors));
         }
         try {
-
-
             switch (scanType) {
                 case ("Standard"): {
                     saveWebSiteScanSettings(dastScanSharedBuildStep);
@@ -571,14 +748,19 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 }
                 case "Workflow-driven": {
                     saveWorkflowSiteScanSettings(dastScanSharedBuildStep);
+                    break;
+                }
+
+                case "API": {
+
+                    saveApiScanSettings(dastScanSharedBuildStep);
+                    break;
                 }
             }
-
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
         return true;
-
     }
 
     private List<String> ValidateAuthModel(boolean overrideGlobalAuth) throws FormValidation {
@@ -633,11 +815,51 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
             workflowMacroFileId = patchDastFileUploadResponse.fileId;
         }
 
-        if (workflowMacroHost ==null || workflowMacroHost.isEmpty()) {
+        if (workflowMacroHost == null || workflowMacroHost.isEmpty()) {
             workflowMacroHost = String.join(",", patchDastFileUploadResponse.hosts);
         }
         dastScanSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(releaseId, assessmentTypeId, entitlementId, entitlementFrequency, String.valueOf(workflowMacroFileId), workflowMacroHost,
                 selectedDynamicTimeZone, scanPolicy, enableRedundantPageDetection, envFacing, getNetworkAuthType().isEmpty(), networkAuthUserName, networkAuthPassword, networkAuthType);
+    }
+
+    private void saveApiScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws IOException {
+        try {
+            if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
+                String sourceUrn = openApiRadioSource.equals("Url") ? openApiUrl : openApiFileId;
+                dastScanSharedBuildStep.saveReleaseSettingsForOpenApiScan(releaseId, assessmentTypeId, entitlementId,
+                        entitlementFrequency, selectedDynamicTimeZone,
+                        enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
+                        networkAuthUserName, networkAuthPassword, networkAuthType,
+                        openApiRadioSource, sourceUrn, openApiKey);
+
+            }
+            if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
+                String sourceUrn = graphQlRadioSource.equals("Url") ? graphQLUrl : graphQLFileId;
+                dastScanSharedBuildStep.saveReleaseSettingsForGraphQlScan(releaseId, assessmentTypeId, entitlementId,
+                        entitlementFrequency, selectedDynamicTimeZone,
+                        enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
+                        networkAuthUserName, networkAuthPassword, networkAuthType,
+                        sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath);
+
+            } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
+                dastScanSharedBuildStep.saveReleaseSettingsForGrpcScan(releaseId, assessmentTypeId, entitlementId,
+                        entitlementFrequency, selectedDynamicTimeZone,
+                        enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
+                        networkAuthUserName, networkAuthPassword, networkAuthType,
+                        grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
+
+            } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
+                dastScanSharedBuildStep.saveReleaseSettingsForPostmanScan(releaseId, assessmentTypeId, entitlementId,
+                        entitlementFrequency, selectedDynamicTimeZone,
+                        enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
+                        networkAuthUserName, networkAuthPassword, networkAuthType,
+                        postmanFileId);
+            } else {
+                throw new IllegalArgumentException("Not Valid Dast API Scan Type set for releaseId: " + releaseId);
+            }
+        } catch (Exception ex) {
+             throw ex;
+        }
     }
 
     @Override
@@ -719,14 +941,17 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                     log.println(String.format("Fortify On Demand Dynamic Scan Settings Saved Successfully for release Id %s", releaseId));
                     break;
                 }
-
+                case "API": {
+                    saveApiScanSettings(dastScanSharedBuildStep);
+                    log.println(String.format("Fortify On Demand Dynamic Scan Settings Saved Successfully for release Id %s", releaseId));
+                    break;
+                }
                 default:
-
                     throw new IllegalArgumentException("Not a valid scan type");
             }
 
         } catch (Exception ex) {
-            log.println("Fortify On Demand Dynamic Scan Error saving scan settings. Error message: " + ex.toString());
+            log.println("Fortify On Demand Dynamic Scan Error saving scan settings. Error message: " + ex.getMessage());
             throw new RuntimeException(ex);
         }
 
@@ -741,7 +966,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         try {
             build.save();
         } catch (IOException ex) {
-            log.println("Fortify On Demand Dynamic Scan Error saving settings. Error message: " + ex.toString());
+            log.println("Fortify On Demand Dynamic Scan Error saving settings. Error message: " + ex.getMessage());
         }
     }
 
@@ -912,7 +1137,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 return null;
             }
         }
-
 
 
     }

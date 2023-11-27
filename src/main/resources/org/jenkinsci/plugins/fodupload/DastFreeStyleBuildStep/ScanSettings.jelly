@@ -80,7 +80,7 @@
                     </div>
                 </div>
             </f:entry>
-            <div class="dast-api-specific-controlls">
+            <div class="dast-api-specific-controls">
             <f:entry field="openApi">
                 <div id="dast-openApi" class="apiOptions fode-field spinner-container">
                     <f:entry field="openApiSource" >

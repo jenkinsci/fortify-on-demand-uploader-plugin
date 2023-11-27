@@ -867,12 +867,12 @@ class DastScanSettings {
         if (selectedApiTypeValue === null || undefined) {
             //Reset All ScanTypes Controls
             this.apiTypeUserControlVisibility(null, false);
-            jq('.' + dastApiSecificControlls).show();
+            jq('.dast-api-specific-controls').show();
         } else {
 
             this.apiTypeUserControlVisibility(null, false);
             this.apiTypeUserControlVisibility(selectedApiTypeValue, true);
-            jq('.' + dastApiSecificControlls).show();
+            jq('.dast-api-specific-controls').show();
         }
     }
 
@@ -988,7 +988,7 @@ class DastScanSettings {
     apiScanSettingVisibility(isVisible) {
 
         let apiScanSettingRows = jq('.'+ dastApiSetting);
-        jq('.' + dastApiSecificControlls).hide();
+        jq('.' + dastApiSpecificControls).hide();
         if ((isVisible === undefined || null) || isVisible === false) {
             apiScanSettingRows.hide();
 

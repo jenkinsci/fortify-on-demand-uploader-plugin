@@ -11,7 +11,7 @@ const dastCommonScopeSetting = 'dast-common-scan-scope';
 const nwAuthSetting = 'dast-networkAuth-setting';
 const loginAuthSetting = 'dast-login-macro';
 const dastApiSetting = 'dast-api-setting';
-const dastApiSecificControlls = 'dast-api-specific-controlls';
+const dastApiSpecificControls = 'dast-api-specific-controls';
 
 class AppAndReleaseSelection {
 
@@ -35,7 +35,7 @@ class AppAndReleaseSelection {
         jq('.dast-login-macro').hide();
         jq('.dast-networkAuth-setting').hide();
         jq('.dast-api-setting').hide();
-        jq('.' + dastApiSecificControlls).hide();
+        jq('dast-api-specific-controls').hide();
 
     }
 

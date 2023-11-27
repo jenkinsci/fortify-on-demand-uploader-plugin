@@ -54,7 +54,7 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
                                   String selectedApiType,
                                   String openApiRadioSource, String openApiFileId, String openApiUrl, String openApiKey,
                                   String postmanFileId,
-                                  String graphQlRadioSource,String graphQLFileId, String graphQLUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
+                                  String graphQlRadioSource, String graphQLFileId, String graphQLUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
                                   String grpcFileId, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath
 
 
@@ -127,7 +127,7 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
                         webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
                         postmanFileId);
             } else {
-
+                throw new IllegalArgumentException("Not Valid Dast API Scan Type set for releaseId: " + userSelectedRelease);
             }
         } else
             throw new IllegalArgumentException("Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
@@ -141,9 +141,7 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
         if (dastSharedBuildStep.getModel() == null) {
             System.out.println("job model is null");
             throw new IllegalArgumentException("DAST model not been set");
-        }
-        else
-        {
+        } else {
             try {
                 dastSharedBuildStep.ValidateModel();
             } catch (FormValidation e) {
@@ -238,6 +236,7 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
         System.out.println("user selected release");
         return dastSharedBuildStep.getModel().getUserSelectedRelease();
     }
+
     @JavaScriptMethod
     public String getUseSelectedApiType() {
         System.out.println("user selected release");
@@ -460,7 +459,6 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
                 return null;
             }
         }
-
 
 
         @SuppressWarnings("unused")

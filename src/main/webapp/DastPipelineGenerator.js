@@ -5,13 +5,15 @@ const appAttributeKeyValueDelimiter = ':';
 const dastScanTypes = [{"value": 'Standard', "text": 'Standard'}, {
     "value": 'Workflow-driven',
     "text": 'Workflow-driven'
-}];
+},  {"value": 'API', "text": 'API'}];
 const dastScanSetting = 'dast-scan-setting';
 const dastWebSiteSetting = 'dast-standard-setting';
 const dastWorkFlowSetting = 'dast-workflow-setting';
 const dastCommonScopeSetting = 'dast-common-scan-scope';
 const nwAuthSetting = 'dast-networkAuth-setting';
 const loginAuthSetting = 'dast-login-macro'
+
+const dastApiSpecificControls = 'dast-api-specific-controls';
 
 const dastScanPolicyDefaultValues =
     {
@@ -289,6 +291,12 @@ class DastPipelineGenerator {
             jq('#overrideReleaseSettings')
                 .change(_ => this.loadEntitlementOptions());
 
+            jq('#apiTypeList').change(_ => this.onApiTypeChanged());
+
+            jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_=>this.onSourceChange(event.target.id));
+
+            jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile').click(_ => this.onFileUpload(event));
+
             await this.onReleaseSelectionChanged();
 
             jq('.fodp-row-screc').hide();
@@ -477,6 +485,7 @@ class DastPipelineGenerator {
                         //set timebox scan
                         this.setTimeBoxScan();
                         this.setWorkflowDrivenScanSetting();
+                        this.setApiScanSetting();
                         /*Set restrict scan value from response to UI */
                         this.setRestrictScan();
                         /*Set network settings from response. */
@@ -569,9 +578,10 @@ class DastPipelineGenerator {
                 selectedScanType = dastScanTypes.find(v => v.value === "Standard");
             } else if (this.scanSettings.workflowdrivenAssessment !== null && this.scanSettings.workflowdrivenAssessment !== undefined) {
                 selectedScanType = dastScanTypes.find(v => v.value === "Workflow-driven")
+            } else if (this.scanSettings.apiAssessment !== null && this.scanSettings.apiAssessment !== undefined) {
+                selectedScanType = dastScanTypes.find(v => v.value === "API");
             }
-            // Check for API Type
-            //Set other scan type values in the dropdown.
+
             let scanSel = jq('#scanTypeList');
             let currValSelected = false;
             scanSel.find('option').not(':first').remove();
@@ -625,7 +635,16 @@ class DastPipelineGenerator {
                     break;
                 }
                 case "API": {
+                    jq('#dast-standard-scan-policy').hide();
+                    jq('#dast-api-scan-policy-apiType').show();
+                    jq('.redundantPageDetection').hide();
                     this.apiScanSettingVisibility(isVisible);
+                    this.commonScopeSettingVisibility(isVisible);
+                    this.networkAuthSettingVisibility(true);
+                    this.loginMacroSettingsVisibility(false);
+                    this.workflowScanSettingVisibility(false);
+                    this.websiteScanSettingsVisibility(false);
+                    this.directoryAndSubdirectoriesScopeVisibility(false);
                     this.timeboxScanVisibility(isVisible);
                     break;
                 }
@@ -716,8 +735,10 @@ class DastPipelineGenerator {
         let standardScanSettingRows = jq('.dast-standard-setting');
         if ((isVisible === undefined) || isVisible === false) {
             standardScanSettingRows.hide();
+            this.excludeUrlVisibility(false);
             this.resetWebSiteSettingsValues();
         } else {
+            this.excludeUrlVisibility(true);
             standardScanSettingRows.show();
         }
     }
@@ -775,9 +796,12 @@ class DastPipelineGenerator {
         let workflowScanSettingRows = jq('.dast-workflow-setting');
         if ((isVisible === undefined || null) || isVisible === false) {
             workflowScanSettingRows.hide();
+            jq('#dast-workflow-macro-upload').hide();
             this.resetWorkFlowSettingSValues();
         } else {
             workflowScanSettingRows.show();
+            jq('#dast-workflow-macro-upload').show();
+
         }
     }
 
@@ -1105,6 +1129,265 @@ class DastPipelineGenerator {
             jq(fodpOverrideRowsSelector).hide();
     }
 
+    setApiScanSetting() {
+
+        if (!Object.is(this.scanSettings.apiAssessment, undefined)) {
+            if (!Object.is(this.scanSettings.apiAssessment.openAPI, undefined)) {
+                this.setOpenApiSettings(this.scanSettings.apiAssessment.openAPI);
+            }
+            else if(!Object.is(this.scanSettings.apiAssessment.graphQL, undefined)) {
+                this.setGraphQlSettings(this.scanSettings.apiAssessment.graphQL);
+            }
+            else if(!Object.is(this.scanSettings.apiAssessment.gRPC, undefined)) {
+                this.setGrpcSettings(this.scanSettings.apiAssessment.gRPC);
+            }
+            else if(!Object.is(this.scanSettings.apiAssessment.postman, undefined)) {
+                this.setPostmanSettings(this.scanSettings.apiAssessment.postman);
+            }
+
+        }
+    }
+    setOpenApiSettings(openApiSettings){
+
+        jq('#apiTypeList').val('openApi');
+        var inputId = openApiSettings.sourceType == 'Url' ? 'openApiInputUrl' : 'openApiInputFile';
+        this.onApiTypeChanged();
+        jq('#' + inputId).trigger('click');
+        jq('#dast-openApi-api-key input').val(openApiSettings.apiKey);
+        if(openApiSettings.sourceType == 'Url'){
+            jq('#dast-openApi-url input').val(openApiSettings.sourceUrn);
+        }
+        else{
+            //ToDo : Write code for showing file name
+        }
+    }
+    setGraphQlSettings(graphQlSettings){
+        jq('#apiTypeList').val('graphQl');
+        var inputId = graphQlSettings.sourceType == 'Url' ? 'graphQlInputUrl' : 'graphQlInputFile';
+        this.onApiTypeChanged();
+        jq('#' + inputId).trigger('click');
+        jq('#dast-graphQL-api-host input').val(graphQlSettings.host);
+        jq('#dast-graphQL-api-servicePath input').val(graphQlSettings.servicePath);
+        jq('#dast-graphQL-schemeType input').val(graphQlSettings.schemeType);
+        if(graphQlSettings.sourceType == 'Url'){
+            jq('#dast-graphQL-url input').val(graphQlSettings.sourceUrn);
+        }
+        else{
+            //ToDo : Write code for showing file name
+        }
+    }
+    setGrpcSettings(grpcSettings){
+        jq('#apiTypeList').val('grpc');
+        jq('#dast-grpc-api-host input').val(graphQlSettings.host);
+        jq('#dast-grpc-api-servicePath input').val(graphQlSettings.servicePath);
+        jq('#dast-grpc-schemeType input').val(graphQlSettings.schemeType);
+    }
+    setPostmanSettings(postmanSettings){
+        jq('#apiTypeList').val('postman');
+    }
+    apiTypeUserControlVisibility(apiType, isVisible) {
+
+        if ((isVisible !== undefined || null)) {
+            this.openApiScanVisibility(false);
+            this.grpcScanVisibility(false);
+            this.graphQlScanVisibility(false);
+            this.postmanScanVisibility(false);
+            switch (apiType) {
+                case "openApi":
+                    this.openApiScanVisibility(isVisible);
+                    break;
+
+                case "graphQl":
+                    this.graphQlScanVisibility(isVisible);
+                    break;
+
+                case "grpc":
+                    this.grpcScanVisibility(isVisible);
+                    break;
+
+                case "postman":
+                    this.postmanScanVisibility(isVisible);
+                    break;
+
+                default:
+                    this.openApiScanVisibility(false);
+                    this.grpcScanVisibility(false);
+                    this.graphQlScanVisibility(false);
+                    this.postmanScanVisibility(false);
+                    break;
+
+            }
+        }
+    }
+    openApiScanVisibility(isVisible) {
+        if (isVisible)
+            jq('#dast-openApi').closest('.tr').show();
+        else
+            jq('#dast-openApi').closest('.tr').hide();
+
+        jq('#dast-postman').closest('.tr').hide();
+        jq('#dast-graphQL').closest('.tr').hide();
+        jq('#dast-grpc').closest('.tr').hide();
+    }
+
+    graphQlScanVisibility(isVisible) {
+        if (isVisible)
+            jq('#dast-graphQL').closest('.tr').show();
+        else
+            jq('#dast-graphQL').closest('.tr').hide();
+
+        jq('#dast-openApi').closest('.tr').hide()
+        jq('#dast-postman').closest('.tr').hide();
+        jq('#dast-grpc').closest('.tr').hide();
+    }
+
+    grpcScanVisibility(isVisible) {
+        if (isVisible)
+            jq('#dast-grpc').closest('.tr').show();
+        else
+            jq('#dast-grpc').closest('.tr').hide();
+        jq('#dast-openApi').closest('.tr').hide()
+        jq('#dast-postman').closest('.tr').hide();
+        jq('#dast-graphQL').closest('.tr').hide();
+    }
+
+    postmanScanVisibility(isVisible) {
+        if (isVisible)
+            jq('#dast-postman').closest('.tr').show();
+        else
+            jq('#dast-postman').closest('.tr').hide();
+        jq('#dast-openApi').closest('.tr').hide()
+        jq('#dast-graphQL').closest('.tr').hide();
+        jq('#dast-grpc').closest('.tr').hide();
+    }
+
+    apiScanSettingVisibility(isVisible) {
+        let apiScanSettingRows = jq('.dast-api-setting');
+        jq('.dast-api-specific-controls').hide();
+        if ((isVisible === undefined || null) || isVisible === false) {
+            apiScanSettingRows.hide();
+
+        } else {
+            apiScanSettingRows.show();
+        }
+    }
+
+    onFileUpload(event) {
+
+        jq('.uploadMessage').text('');
+        let file = null;
+        let fileType = null;
+        let elem = null;
+        let displayMessage = null;
+
+        switch(event.target.id){
+            case 'btnUploadOpenApiFile' :
+                file = document.getElementById('openApiFile').files[0];
+                fileType = openApiFileType;
+                elem = jq('#openApiFileId');
+                displayMessage = jq('#openApiUploadMessage');
+                break;
+
+            case 'btnUploadPostmanFile' :
+                file = document.getElementById('postmanFile').files[0];
+                fileType = postmanFileType;
+                elem = jq('#postmanFileId');
+                displayMessage = jq('#postmanUploadMessage');
+                break;
+
+            case 'btnUploadgraphQLFile' :
+                file = document.getElementById('graphQLFile').files[0];
+                fileType = graphQlFileType;
+                elem = jq('#graphQLFileId');
+                displayMessage = jq('#grapgQlUploadMessage');
+                break
+
+            case 'btnUploadgrpcFile' :
+                file = document.getElementById('grpcFile').files[0];
+                fileType = grpcFileType;
+                elem = jq('#grpcFileId');
+                displayMessage = jq('#grpcUploadMessage');
+                break;
+            default :
+                throw new Exception("Illegal argument exception,File Type not valid");
+        }
+
+        if(file == null || fileType == null || elem == null){
+            throw new Exception("Illegal argument exception,File Type not valid");
+        }
+
+        this.api.patchSetupManifestFile(this.releaseId, getAuthInfo(), file, fileType).then(res => {
+
+                //Todo: - check
+                console.log("File upload success " + res);
+                if (res.fileId > 0) {
+                    elem.val(res.fileId);
+                    displayMessage.text('Uploaded Successfully !!');
+                } else {
+                    displayMessage.text('Upload Failed !!');
+                    throw new Exception("Illegal argument exception,FileId not valid");
+                }
+            }
+        ).catch((err) => {
+                displayMessage.text('Upload Failed !!');
+                console.log('err' + err);
+            }
+        );
+    }
+
+    onApiTypeChanged() {
+
+        jq('.uploadMessage').text('');
+        this.onSourceChange('none');
+        let selectedApiTypeValue = jq('#apiTypeList').val();
+
+        if (selectedApiTypeValue === null || undefined) {
+            //Reset All ScanTypes Controls
+            this.apiTypeUserControlVisibility(null, false);
+            jq('.dast-api-specific-controls').show();
+        } else {
+
+            this.apiTypeUserControlVisibility(null, false);
+            this.apiTypeUserControlVisibility(selectedApiTypeValue, true);
+            jq('.dast-api-specific-controls').show();
+        }
+    }
+
+    onSourceChange(id){
+
+        jq('.openApiSourceControls').hide();
+        jq('.graphQLSourceControls').hide();
+        jq('.apiOptions').show();
+        jq('.sourceTypeFileds').hide();
+        jq('.uploadMessage').text('');
+
+        if(id === 'openApiInputFile'){
+            jq('.openApiSourceControls').show()
+            jq('#dast-api-openApi-upload').show();
+            jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
+        }
+        else if(id === 'openApiInputUrl'){
+            jq('.openApiSourceControls').show()
+            jq('#dast-openApi-url').show();
+            jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
+        }
+        else if(id === 'graphQlInputFile'){
+            jq('.graphQLSourceControls').show();
+            jq('#dast-api-graphQL-upload').show();
+            jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
+        }
+        else if(id === 'graphQlInputUrl'){
+            jq('.graphQLSourceControls').show();
+            jq('#dast-graphQL-url').show();
+            jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
+        }
+        else{
+            jq('.sourceOptions').prop('checked', false);
+        }
+    }
+
+
+
     populateHiddenFields() {
         // Auth
         let un = '';
@@ -1219,6 +1502,8 @@ class DastPipelineGenerator {
 
     }
 }
+
+
 
 const dynamicPipelineGenerator = new DastPipelineGenerator();
 spinAndWait(() => jq('#releaseSelection').val() !== undefined)

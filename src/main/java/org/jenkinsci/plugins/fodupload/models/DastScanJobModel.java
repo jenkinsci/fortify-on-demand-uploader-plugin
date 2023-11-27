@@ -32,7 +32,7 @@ public class DastScanJobModel {
     String selectedDynamicTimeZone;
     boolean enableRedundantPageDetection;
     String webSiteNetworkAuthUserName;
-    String loginFileMacro;
+    Integer loginFileMacro;
     String webSiteNetworkAuthPassword;
     String userSelectedApplication;
     String userSelectedRelease;
@@ -76,6 +76,8 @@ public class DastScanJobModel {
         this.personalAccessToken = personalAccessToken;
         this.tenantId = tenantId;
         this.webSiteUrl = webSiteUrl;
+        this.workflowMacroFileId = Integer.parseInt(workflowMacroId);
+        this.loginFileMacro = loginMacroId;
         this.dastEnv = dastEnv;
         this.timeBoxScan = scanTimebox;
         this.scanPolicyType = scanPolicy;
@@ -147,7 +149,7 @@ public class DastScanJobModel {
         return webSiteNetworkAuthUserName;
     }
 
-    public String getLoginFileMacro() {
+    public Integer getLoginFileMacro() {
         return loginFileMacro;
     }
 
@@ -241,7 +243,7 @@ public class DastScanJobModel {
         this.assessmentTypeId = assessmentTypeId;
         this.allowFormSubmissionCrawl = allowFormSubmissionCrawl;
         this.allowHttp = allowHttp;
-        this.loginFileMacro = loginMacroId;
+        this.loginFileMacro = Integer.parseInt(loginMacroId);
         this.username = username;
         this.personalAccessToken = personalAccessToken;
         this.selectedScanType = selectedScanType;
