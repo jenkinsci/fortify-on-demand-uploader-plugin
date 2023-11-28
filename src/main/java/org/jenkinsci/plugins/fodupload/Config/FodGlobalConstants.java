@@ -16,6 +16,8 @@ public class FodGlobalConstants {
         public final static String DastGraphQLScanPutApi = "api/v3/releases/%d/dast-automated-scans/graphql-scan-setup";
         public final static String DastPostmanScanPutApi = "api/v3/releases/%d/dast-automated-scans/postman-scan-setup";
     }
+
+
         //ERRORS
 
         public static  class FodDastValidation

@@ -7,9 +7,11 @@ public class DastScanJobModel {
     private boolean overrideGlobalConfig;
     String username;
     String timeBoxScan;
+
     public String getAllowedHost() {
         return allowedHost;
     }
+
     String allowedHost;
     String personalAccessToken;
     String tenantId;
@@ -52,6 +54,8 @@ public class DastScanJobModel {
     String selectedGraphQlUpload;
     String selectedGraphQlUrl;
     String selectedGraphQLSchemeType;
+
+    String loginMacroFilePath;
     String selectedGraphQlApiHost;
     String selectedGraphQlApiServicePath;
     String selectedGrpcupload;
@@ -64,7 +68,7 @@ public class DastScanJobModel {
                             boolean scanScope, String selectedScanType, String scanPolicy,
                             String selectedDynamicTimeZone,
                             boolean enableRedundantPageDetection,
-                            String webSiteNetworkAuthUserName, int loginMacroId,
+                            String webSiteNetworkAuthUserName, String loginMacroFilePath, int loginMacroId,
                             String workflowMacroId, String allowedHost,
                             String webSiteNetworkAuthPassword, String assessmentTypeId,
                             String entitlementId, String entitlementFrequencyType,
@@ -76,7 +80,11 @@ public class DastScanJobModel {
         this.personalAccessToken = personalAccessToken;
         this.tenantId = tenantId;
         this.webSiteUrl = webSiteUrl;
-        this.workflowMacroFileId = Integer.parseInt(workflowMacroId);
+
+        if ( workflowMacroId!=null &&!workflowMacroId.isEmpty()) {
+            this.workflowMacroFileId = Integer.parseInt(workflowMacroId);
+        }
+        this.loginMacroFilePath = loginMacroFilePath;
         this.loginFileMacro = loginMacroId;
         this.dastEnv = dastEnv;
         this.timeBoxScan = scanTimebox;
@@ -188,22 +196,70 @@ public class DastScanJobModel {
     public boolean isWebSiteLoginMacroEnabled() {
         return webSiteLoginMacroEnabled;
     }
-    public String getSelectedOpenApiSource(){return selectedOpenApiSource;}
-    public String getSelectedApi(){return selectedApi;}
-    public String getSelectedOpenApiurl(){return selectedOpenApiurl;}
-    public String getSelectedApiKey(){return selectedApiKey;}
-    public String getSelectedOpenApiFileSource(){return selectedOpenApiFileSource;}
-    public String getSelectedPostmanFile(){return selectedPostmanFile;}
-    public String getSelectedGraphQlSource(){return selectedGraphQlSource;}
-    public String getSelectedGraphQlUpload(){return selectedGraphQlUpload;}
-    public String getSelectedGraphQlUrl(){return selectedGraphQlUrl;}
-    public String getSelectedGraphQlApiHost(){return selectedGraphQlApiHost;}
-    public String getSelectedGraphQLSchemeType(){return selectedGraphQLSchemeType;}
-    public String getSelectedGraphQlApiServicePath(){return selectedGraphQlApiServicePath;}
-    public String getSelectedGrpcupload(){return  selectedGrpcupload;}
-    public String getSelectedGrpcApiHost(){return selectedGrpcApiHost;}
-    public String getSelectedGrpcSchemeType(){return selectedGrpcSchemeType;}
-    public String getSelectedGrpcApiServicePath(){return selectedGrpcApiServicePath;}
+
+    public String getSelectedOpenApiSource() {
+        return selectedOpenApiSource;
+    }
+
+    public String getSelectedApi() {
+        return selectedApi;
+    }
+
+    public String getSelectedOpenApiurl() {
+        return selectedOpenApiurl;
+    }
+
+    public String getSelectedApiKey() {
+        return selectedApiKey;
+    }
+
+    public String getSelectedOpenApiFileSource() {
+        return selectedOpenApiFileSource;
+    }
+
+    public String getSelectedPostmanFile() {
+        return selectedPostmanFile;
+    }
+
+    public String getSelectedGraphQlSource() {
+        return selectedGraphQlSource;
+    }
+
+    public String getSelectedGraphQlUpload() {
+        return selectedGraphQlUpload;
+    }
+
+    public String getSelectedGraphQlUrl() {
+        return selectedGraphQlUrl;
+    }
+
+    public String getSelectedGraphQlApiHost() {
+        return selectedGraphQlApiHost;
+    }
+
+    public String getSelectedGraphQLSchemeType() {
+        return selectedGraphQLSchemeType;
+    }
+
+    public String getSelectedGraphQlApiServicePath() {
+        return selectedGraphQlApiServicePath;
+    }
+
+    public String getSelectedGrpcupload() {
+        return selectedGrpcupload;
+    }
+
+    public String getSelectedGrpcApiHost() {
+        return selectedGrpcApiHost;
+    }
+
+    public String getSelectedGrpcSchemeType() {
+        return selectedGrpcSchemeType;
+    }
+
+    public String getSelectedGrpcApiServicePath() {
+        return selectedGrpcApiServicePath;
+    }
 
     String selectedDynamicGeoLocation;
     boolean webSiteNetworkAuthEnabled;
@@ -228,11 +284,11 @@ public class DastScanJobModel {
                             String selectedApiType,
                             String openApiSource, String openApiFileSource, String openApiurl, String apiKey,
                             String postmanFile,
-                            String graphQlSource,String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
+                            String graphQlSource, String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
                             String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath) {
         this._releaseId = userSelectedRelease;
         this.tenantId = tenantId;
-        this.allowedHost =allowedHost;
+        this.allowedHost = allowedHost;
         this.workflowMacroFileId = Integer.parseInt(workflowMacroId);
         this.overrideGlobalConfig = overrideGlobalConfig;
         this.selectedReleaseType = selectedReleaseType;
@@ -296,6 +352,8 @@ public class DastScanJobModel {
         return userSelectedRelease;
     }
 
-    public String getUseSelectedApiType(){return selectedApi;}
+    public String getUseSelectedApiType() {
+        return selectedApi;
+    }
 
 }

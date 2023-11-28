@@ -356,7 +356,7 @@ public class FodEnums {
 
     public enum DastScanType {
         Standard("Standard"),
-        Workflow("Workflow-Driven"),
+        Workflow("Workflow-driven"),
         API("API");
         private final String _val;
 
@@ -366,8 +366,8 @@ public class FodEnums {
 
         public String toString() {
             switch (this._val) {
-                case "Workflow-Driven":
-                    return "Workflow-Driven";
+                case "Workflow-driven":
+                    return "Workflow-driven";
                 case "Standard":
                     return "Standard";
                 case "API":

@@ -8,7 +8,6 @@ import hudson.Launcher;
 import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.fileupload.FileUploadException;
 import org.jenkinsci.plugins.fodupload.ApiConnectionFactory;
@@ -21,8 +20,6 @@ import org.jenkinsci.plugins.fodupload.controllers.*;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.response.AssessmentTypeEntitlementsForAutoProv;
-import org.jenkinsci.plugins.fodupload.models.response.Dast.GetDastScanSettingResponse;
-import org.jenkinsci.plugins.fodupload.models.response.GetStaticScanSetupResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -35,7 +32,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.verb.POST;
 
-import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.nio.file.Files;
@@ -66,7 +62,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     private String auditPreference;
     private String applicationName;
     private String applicationType;
-    private String workflowMacroHost;
+
     private String releaseName;
     private Integer owner;
     private String attributes;
@@ -115,7 +111,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         return openApiUrl;
     }
 
-@DataBoundSetter
+    @DataBoundSetter
     public void setOpenApiUrl(java.lang.String openApiUrl) {
         this.openApiUrl = openApiUrl;
     }
@@ -268,6 +264,16 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     private String scanTimeBox;
     private boolean requireLoginMacro;
     private String loginMacroFilePath;
+    private String workflowMacroHosts;
+
+    public String getWorkflowMacroHosts() {
+        return this.workflowMacroHosts;
+    }
+
+    @DataBoundSetter
+    public void setWorkflowMacroHosts(String workflowMacroHosts) {
+        this.workflowMacroHosts = workflowMacroHosts;
+    }
 
     public String getWorkflowMacroFilePath() {
         return workflowMacroFilePath;
@@ -289,16 +295,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         this.loginMacroFilePath = loginMacroFilePath;
     }
 
-    public boolean isWorkflowMacroRequired() {
-        return workflowMacroRequired;
-    }
-
-    public void setWorkflowMacroRequired(boolean workflowMacroRequired) {
-        this.workflowMacroRequired = workflowMacroRequired;
-    }
-
-    private boolean workflowMacroRequired;
-
     public boolean isRequireLoginMacro() {
         return requireLoginMacro;
     }
@@ -306,7 +302,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     public void setRequireLoginMacro(boolean requireLoginMacro) {
         this.requireLoginMacro = requireLoginMacro;
     }
-
 
     public String getNetworkAuthUserName() {
         return networkAuthUserName;
@@ -410,10 +405,20 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     private boolean scanScope;
     private String scanType;
 
+    private String workflowMacroId;
+
+    public String getWorkflowMacroId() {
+        return workflowMacroId;
+    }
+
+    @DataBoundSetter
+    public void setWorkflowMacroId(String workflowMacroId) {
+        this.workflowMacroId = workflowMacroId;
+    }
+
     public String getWebSiteUrl() {
         return webSiteUrl;
     }
-
 
     @DataBoundSetter
     public void setWebSiteUrl(String webSiteUrl) {
@@ -436,27 +441,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
 
     }
 
-
-    public String getWorkflowMacroHost() {
-        return workflowMacroHost;
-    }
-
-    @DataBoundSetter
-    public void setWorkflowMacroHost(String workflowMacroHost) {
-        this.workflowMacroHost = workflowMacroHost;
-    }
-
-
-    public String getWorkflowMacroId() {
-        return workflowMacroId;
-    }
-
-    @DataBoundSetter
-    public void setWorkflowMacroId(String workflowMacroId) {
-        this.workflowMacroId = workflowMacroId;
-    }
-
-    private String workflowMacroId;
 
     public String getSelectedDynamicTimeZone() {
         return selectedDynamicTimeZone;
@@ -709,7 +693,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 webSiteUrl,
                 loginMacroId,
                 workflowMacroId,
-                workflowMacroHost,
+                workflowMacroHosts,
                 networkAuthUserName,
                 networkAuthPassword,
                 applicationId,
@@ -778,10 +762,11 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
 
     private void saveWebSiteScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
         int loginMacroFileId = 0;
-        if (requireLoginMacro) {
-            Path path = Paths.get(loginMacroFilePath);
-            PatchDastFileUploadResponse patchUploadResponse = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(path), "LoginMacro");
 
+        if (loginMacroFilePath != null && !loginMacroFilePath.isEmpty() && loginMacroFilePath.length() > 1) {
+            Path path = Paths.get(loginMacroFilePath);
+            //add file validation here.
+            PatchDastFileUploadResponse patchUploadResponse = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(path), "LoginMacro");
 
             if (patchUploadResponse == null || !patchUploadResponse.isSuccess) {
                 throw new FileUploadException(String.format("Failed to upload login macro file %s for release Id:%s",
@@ -805,22 +790,26 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     }
 
     private void saveWorkflowSiteScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
-        int workflowMacroFileId = 0;
 
-        Path path = Paths.get(workflowMacroFilePath);
+        if (!this.workflowMacroFilePath.isEmpty() && this.workflowMacroFilePath.length() > 2) {
 
-        PatchDastFileUploadResponse patchDastFileUploadResponse = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(path), "WorkflowDrivenMacro");
-        if (patchDastFileUploadResponse == null || !patchDastFileUploadResponse.isSuccess) {
-            throw new FileUploadException(String.format("Failed to upload workflow macro file %s for release Id:%s",
-                    workflowMacroFilePath, releaseId));
-        } else {
-            workflowMacroFileId = patchDastFileUploadResponse.fileId;
+            int workflowMacroFileId = 0;
+
+            Path path = Paths.get(this.workflowMacroFilePath);
+
+            PatchDastFileUploadResponse patchDastFileUploadResponse = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(path), "WorkflowDrivenMacro");
+            if (patchDastFileUploadResponse == null || !patchDastFileUploadResponse.isSuccess) {
+                throw new FileUploadException(String.format("Failed to upload workflow macro file %s for release Id:%s",
+                        this.workflowMacroFilePath, releaseId));
+            } else {
+                this.workflowMacroId = String.valueOf(patchDastFileUploadResponse.fileId);
+            }
+
+            if (this.workflowMacroHosts == null || this.workflowMacroHosts.isEmpty()) {
+                this.workflowMacroHosts = String.join(",", patchDastFileUploadResponse.hosts);
+            }
         }
-
-        if (workflowMacroHost == null || workflowMacroHost.isEmpty()) {
-            workflowMacroHost = String.join(",", patchDastFileUploadResponse.hosts);
-        }
-        dastScanSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(releaseId, assessmentTypeId, entitlementId, entitlementFrequency, String.valueOf(workflowMacroFileId), workflowMacroHost,
+        dastScanSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(releaseId, assessmentTypeId, entitlementId, entitlementFrequency, workflowMacroId, this.workflowMacroHosts,
                 selectedDynamicTimeZone, scanPolicy, enableRedundantPageDetection, envFacing, getNetworkAuthType().isEmpty(), networkAuthUserName, networkAuthPassword, networkAuthType);
     }
 
@@ -863,7 +852,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 throw new IllegalArgumentException("Not Valid Dast API Scan Type set for releaseId: " + releaseId);
             }
         } catch (Exception ex) {
-             throw ex;
+            throw ex;
         }
     }
 
@@ -879,32 +868,39 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         log.println("Fortify on Demand Upload Running...");
         build.addAction(new CrossBuildAction());
 
-        DastScanSharedBuildStep dastScanSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig,
-                username,
-                tenantId,
-                personalAccessToken,
-                releaseId,
-                webSiteUrl,
-                envFacing,
-                scanTimeBox,
-                null,
-                scanPolicy,
-                scanScope,
-                scanType,
-                selectedDynamicTimeZone,
-                enableRedundantPageDetection,
-                webSiteUrl,
-                loginMacroId,
-                workflowMacroId,
-                workflowMacroHost,
-                networkAuthUserName,
-                networkAuthPassword,
-                applicationId,
-                assessmentTypeId,
-                entitlementId,
-                entitlementFrequency,
-                networkAuthType,
-                timeBoxChecked);
+        DastScanSharedBuildStep dastScanSharedBuildStep = null;
+
+        if (Objects.equals(scanType, FodEnums.DastScanType.Standard.toString()) || Objects.equals(scanType, FodEnums.DastScanType.Workflow.toString())) {
+            dastScanSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig,
+                    username,
+                    tenantId,
+                    personalAccessToken,
+                    releaseId,
+                    webSiteUrl,
+                    envFacing,
+                    scanTimeBox,
+                    null,
+                    scanPolicy,
+                    scanScope,
+                    scanType,
+                    selectedDynamicTimeZone,
+                    enableRedundantPageDetection,
+                    loginMacroFilePath,
+                    loginMacroId,
+                    workflowMacroId,
+                    workflowMacroHosts,
+                    networkAuthUserName,
+                    networkAuthPassword,
+                    applicationId,
+                    assessmentTypeId,
+                    entitlementId,
+                    entitlementFrequency,
+                    networkAuthType,
+                    timeBoxChecked);
+        } else if (Objects.equals(scanType, FodEnums.DastScanType.API.toString())) {
+
+            //initialize API
+        }
         boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
         List<String> errors = null;
 
@@ -917,6 +913,9 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                         personalAccessToken,
                         tenantId);
 
+            }
+            if (dastScanSharedBuildStep == null) {
+                throw new RuntimeException("Failed to initialize DAST Job model");
             }
             errors = dastScanSharedBuildStep.ValidateModel();
         } catch (FormValidation e) {

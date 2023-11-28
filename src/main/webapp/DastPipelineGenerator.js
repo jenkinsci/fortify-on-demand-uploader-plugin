@@ -5,7 +5,7 @@ const appAttributeKeyValueDelimiter = ':';
 const dastScanTypes = [{"value": 'Standard', "text": 'Standard'}, {
     "value": 'Workflow-driven',
     "text": 'Workflow-driven'
-},  {"value": 'API', "text": 'API'}];
+}, {"value": 'API', "text": 'API'}];
 const dastScanSetting = 'dast-scan-setting';
 const dastWebSiteSetting = 'dast-standard-setting';
 const dastWorkFlowSetting = 'dast-workflow-setting';
@@ -271,6 +271,9 @@ class DastPipelineGenerator {
                 .change(_ => this.onAssessmentChanged());
             jq('#entitlementSelect')
                 .change(_ => this.onEntitlementChanged());
+
+            jq('#btnAddExcludeUrl').click(_ => this.onExcludeUrlBtnClick());
+
             // jq('#autoProvAttrAdd')
             //     .click(_ => this.onAddAppAttribute());
             jq('#autoProvAttrKey')
@@ -293,9 +296,11 @@ class DastPipelineGenerator {
 
             jq('#apiTypeList').change(_ => this.onApiTypeChanged());
 
-            jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_=>this.onSourceChange(event.target.id));
+            jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_ => this.onSourceChange(event.target.id));
 
             jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile').click(_ => this.onFileUpload(event));
+
+            jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
 
             await this.onReleaseSelectionChanged();
 
@@ -392,14 +397,13 @@ class DastPipelineGenerator {
                 return;
             } else {
                 this.loadReleaseEntitlementSettings().then(
-                    ()=>
-                    {
+                    () => {
                         this.fodOverrideRowsVisibility(true);
                     }
                 );
             }
         } else {
-            if ((this.releaseId !== null) && this.releaseId >1) {
+            if ((this.releaseId !== null) && this.releaseId > 1) {
                 this.loadReleaseEntitlementSettings().then(
                     () => {
                         this.hideMessages();
@@ -407,15 +411,14 @@ class DastPipelineGenerator {
                     }
                 );
 
-            }
-            else
-            {
+            } else {
                 this.hideMessages();
                 this.fodOverrideRowsVisibility(false);
             }
         }
 
     }
+
     //     debugger;
     //     this.releaseId = numberOrNull(jq('#releaseSelectionValue').val());
     //     if (this.overrideServerSettings) {
@@ -601,19 +604,48 @@ class DastPipelineGenerator {
     }
 
     setWorkflowDrivenScanSetting() {
+
+        debugger;
         //only single file upload is allowed from FOD. Todo Iterate the array
         if (!Object.is(this.scanSettings.workflowdrivenAssessment, undefined)) {
             if (!Object.is(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro, undefined)) {
+                debugger;
                 jq('#listWorkflowDrivenAllowedHostUrl').empty();
+                jq('#workflowMacroHosts').val(undefined);
+
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].fileId);
+
                 this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].allowedHosts.forEach((item, index, arr) => {
+
                         console.log(item);
                         if (arr[index] !== undefined || null) {
-                            jq('#workflowMacroHost').val(arr[index])
-                            jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + arr[index] + " ' name='" + arr[index] + "'>" + arr[index] + "</li>")
+
+                            jq('#listWorkflowDrivenAllowedHostUrl').
+                            append("<li>" + "<input type='checkbox' id=' " + arr[index] +
+                                " ' checked='checked' name='" + arr[index] + "'>" + arr[index] + "</li>");
+
+                            if (jq('#workflowMacroHosts').val() === null || undefined) {
+                                jq('#workflowMacroHosts').val(arr[index]);
+                            } else {
+                                debugger;
+                                let host = jq('#workflowMacroHosts').val();
+                                if (host !== null || undefined) {
+
+                                    if (host !== '')
+                                        host = host + "," + arr[index];
+                                    else
+                                        host = arr[index];
+
+                                    jq('#workflowMacroHosts').val(host);
+
+                                }
+                            }
                         }
+
                     }
-                )
+
+                );
+
             }
         }
     }
@@ -743,14 +775,13 @@ class DastPipelineGenerator {
         }
     }
 
-    resetWorkFlowSettingSValues()
-    {
-      jq('[name=workflowMacroFilePath]').val('');
+    resetWorkFlowSettingSValues() {
+        jq('[name=workflowMacroFilePath]').val('');
 
     }
-    resetWebSiteSettingsValues()
-    {
-       jq('[name=webSiteUrl]').val(null);
+
+    resetWebSiteSettingsValues() {
+        jq('[name=webSiteUrl]').val(null);
         jq('[name=scanTimeBox]').val(null); //timebox not supported for workflow
 
     }
@@ -978,8 +1009,11 @@ class DastPipelineGenerator {
 
     onWorkflowDrivenHostChecked(event) {
         debugger;
-        let allowedHost = jq('#workflowMacroHost').val();
+        let allowedHost = jq('#workflowMacroHosts').val();
+
         if (event.target.checked) {
+
+            debugger;
             let hostToAdd = event.target.name; //name point to the host returned from FOD Patch API
 
             if (allowedHost !== undefined || null) {
@@ -987,10 +1021,11 @@ class DastPipelineGenerator {
                     allowedHost = allowedHost + "," + hostToAdd;
                 } else
                     allowedHost = hostToAdd;
-                jq('#workflowMacroHost').val(allowedHost);
+                jq('#workflowMacroHosts').val(allowedHost);
             }
         } else {
             if (allowedHost !== undefined || null) {
+                debugger;
                 let hosts = allowedHost.split(',');
                 hosts.forEach((entry) => {
                     if (entry === event.target.name) {
@@ -1001,18 +1036,18 @@ class DastPipelineGenerator {
                         }
                     }
                 });
-                jq('#workflowMacroHost').val(hosts.flat());
+                jq('#workflowMacroHosts').val(hosts.flat());
             }
         }
     }
 
     onExcludeUrlBtnClick(event, args) {
-        //  alert(jq('#standardScanExcludedUrlText').val())
+        alert(jq('#standardScanExcludedUrlText').val())
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
         //Add to exclude list
-        // jq('#listStandardScanTypeExcludedUrl');
-        // jq('#listStandardScanTypeExcludedUrl').append("<li>" +  excludedUrl + "</li>");
-        // jq('#listStandardScanTypeExcludedUrl').show();
+        jq('#listStandardScanTypeExcludedUrl');
+        jq('#listStandardScanTypeExcludedUrl').append("<li>" + "<input type='checkbox' id= " + excludedUrl + " checked='checked' onclick='onExcludeUrlItemSelect()'> + excludedUrl + </li>");
+        jq('#listStandardScanTypeExcludedUrl').show();
     }
 
     setTimeBoxScan() {
@@ -1021,6 +1056,11 @@ class DastPipelineGenerator {
             jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
 
         }
+    }
+
+    onExcludeUrlItemSelect() {
+
+        alert(this);
     }
 
     async onAssessmentChanged(skipAuditPref) {
@@ -1069,8 +1109,7 @@ class DastPipelineGenerator {
             if (isNullOrEmpty(appName) || isNullOrEmpty(relName)) {
                 this.showMessage('Enter Application and Release names', true);
                 jq(fodpOverrideRowsSelector).hide();
-            } else
-            {
+            } else {
                 await this.loadAutoProvEntitlementSettings(appName, relName, false, "")
             }
 
@@ -1134,34 +1173,32 @@ class DastPipelineGenerator {
         if (!Object.is(this.scanSettings.apiAssessment, undefined)) {
             if (!Object.is(this.scanSettings.apiAssessment.openAPI, undefined)) {
                 this.setOpenApiSettings(this.scanSettings.apiAssessment.openAPI);
-            }
-            else if(!Object.is(this.scanSettings.apiAssessment.graphQL, undefined)) {
+            } else if (!Object.is(this.scanSettings.apiAssessment.graphQL, undefined)) {
                 this.setGraphQlSettings(this.scanSettings.apiAssessment.graphQL);
-            }
-            else if(!Object.is(this.scanSettings.apiAssessment.gRPC, undefined)) {
+            } else if (!Object.is(this.scanSettings.apiAssessment.gRPC, undefined)) {
                 this.setGrpcSettings(this.scanSettings.apiAssessment.gRPC);
-            }
-            else if(!Object.is(this.scanSettings.apiAssessment.postman, undefined)) {
+            } else if (!Object.is(this.scanSettings.apiAssessment.postman, undefined)) {
                 this.setPostmanSettings(this.scanSettings.apiAssessment.postman);
             }
 
         }
     }
-    setOpenApiSettings(openApiSettings){
+
+    setOpenApiSettings(openApiSettings) {
 
         jq('#apiTypeList').val('openApi');
         var inputId = openApiSettings.sourceType == 'Url' ? 'openApiInputUrl' : 'openApiInputFile';
         this.onApiTypeChanged();
         jq('#' + inputId).trigger('click');
         jq('#dast-openApi-api-key input').val(openApiSettings.apiKey);
-        if(openApiSettings.sourceType == 'Url'){
+        if (openApiSettings.sourceType == 'Url') {
             jq('#dast-openApi-url input').val(openApiSettings.sourceUrn);
-        }
-        else{
+        } else {
             //ToDo : Write code for showing file name
         }
     }
-    setGraphQlSettings(graphQlSettings){
+
+    setGraphQlSettings(graphQlSettings) {
         jq('#apiTypeList').val('graphQl');
         var inputId = graphQlSettings.sourceType == 'Url' ? 'graphQlInputUrl' : 'graphQlInputFile';
         this.onApiTypeChanged();
@@ -1169,22 +1206,24 @@ class DastPipelineGenerator {
         jq('#dast-graphQL-api-host input').val(graphQlSettings.host);
         jq('#dast-graphQL-api-servicePath input').val(graphQlSettings.servicePath);
         jq('#dast-graphQL-schemeType input').val(graphQlSettings.schemeType);
-        if(graphQlSettings.sourceType == 'Url'){
+        if (graphQlSettings.sourceType == 'Url') {
             jq('#dast-graphQL-url input').val(graphQlSettings.sourceUrn);
-        }
-        else{
+        } else {
             //ToDo : Write code for showing file name
         }
     }
-    setGrpcSettings(grpcSettings){
+
+    setGrpcSettings(grpcSettings) {
         jq('#apiTypeList').val('grpc');
         jq('#dast-grpc-api-host input').val(graphQlSettings.host);
         jq('#dast-grpc-api-servicePath input').val(graphQlSettings.servicePath);
         jq('#dast-grpc-schemeType input').val(graphQlSettings.schemeType);
     }
-    setPostmanSettings(postmanSettings){
+
+    setPostmanSettings(postmanSettings) {
         jq('#apiTypeList').val('postman');
     }
+
     apiTypeUserControlVisibility(apiType, isVisible) {
 
         if ((isVisible !== undefined || null)) {
@@ -1219,6 +1258,7 @@ class DastPipelineGenerator {
             }
         }
     }
+
     openApiScanVisibility(isVisible) {
         if (isVisible)
             jq('#dast-openApi').closest('.tr').show();
@@ -1280,7 +1320,7 @@ class DastPipelineGenerator {
         let elem = null;
         let displayMessage = null;
 
-        switch(event.target.id){
+        switch (event.target.id) {
             case 'btnUploadOpenApiFile' :
                 file = document.getElementById('openApiFile').files[0];
                 fileType = openApiFileType;
@@ -1312,7 +1352,7 @@ class DastPipelineGenerator {
                 throw new Exception("Illegal argument exception,File Type not valid");
         }
 
-        if(file == null || fileType == null || elem == null){
+        if (file == null || fileType == null || elem == null) {
             throw new Exception("Illegal argument exception,File Type not valid");
         }
 
@@ -1353,7 +1393,7 @@ class DastPipelineGenerator {
         }
     }
 
-    onSourceChange(id){
+    onSourceChange(id) {
 
         jq('.openApiSourceControls').hide();
         jq('.graphQLSourceControls').hide();
@@ -1361,31 +1401,26 @@ class DastPipelineGenerator {
         jq('.sourceTypeFileds').hide();
         jq('.uploadMessage').text('');
 
-        if(id === 'openApiInputFile'){
+        if (id === 'openApiInputFile') {
             jq('.openApiSourceControls').show()
             jq('#dast-api-openApi-upload').show();
             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
-        }
-        else if(id === 'openApiInputUrl'){
+        } else if (id === 'openApiInputUrl') {
             jq('.openApiSourceControls').show()
             jq('#dast-openApi-url').show();
             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
-        }
-        else if(id === 'graphQlInputFile'){
+        } else if (id === 'graphQlInputFile') {
             jq('.graphQLSourceControls').show();
             jq('#dast-api-graphQL-upload').show();
             jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
-        }
-        else if(id === 'graphQlInputUrl'){
+        } else if (id === 'graphQlInputUrl') {
             jq('.graphQLSourceControls').show();
             jq('#dast-graphQL-url').show();
             jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
-        }
-        else{
+        } else {
             jq('.sourceOptions').prop('checked', false);
         }
     }
-
 
 
     populateHiddenFields() {
@@ -1502,7 +1537,6 @@ class DastPipelineGenerator {
 
     }
 }
-
 
 
 const dynamicPipelineGenerator = new DastPipelineGenerator();
