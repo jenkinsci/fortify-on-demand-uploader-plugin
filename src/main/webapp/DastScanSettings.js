@@ -448,7 +448,7 @@ class DastScanSettings {
     }
 
     setWorkflowDrivenScanSetting() {
-        //only single file upload is allowed from FOD. Todo Iterate the array
+
         if (!Object.is(this.scanSettings.workflowdrivenAssessment, undefined)) {
             if (!Object.is(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro, undefined)) {
                 jq('#listWorkflowDrivenAllowedHostUrl').empty();
@@ -457,7 +457,24 @@ class DastScanSettings {
                 this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].allowedHosts.forEach((item, index, arr) => {
                         console.log(item);
                         let ident = arr[index];
-                        jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + ident + " ' name='" + ident + "'>" + arr[index] + "</li>")
+                        jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'" +
+                            " id=' " + ident + " ' name='" + ident + "'>" + arr[index] + "</li>");
+                        if (jq('#workflowMacroHosts').val() === null || undefined) {
+                            jq('#workflowMacroHosts').val(arr[index]);
+                        } else {
+                            debugger;
+                            let host = jq('#workflowMacroHosts').val();
+                            if (host !== null || undefined) {
+
+                                if (host !== '')
+                                    host = host + "," + arr[index];
+                                else
+                                    host = arr[index];
+
+                                jq('#workflowMacroHosts').val(host);
+
+                            }
+                        }
                     }
                 )
 

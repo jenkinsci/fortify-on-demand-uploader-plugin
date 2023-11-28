@@ -523,7 +523,7 @@
                             <f:textbox name="loginMacroFilePath" field="loginMacroFilePath"/>
                             <!--                            <input accept=".webmacro" id="loginFileMacro" type="File" name="loginFileMacro"/>-->
                             <!--                            <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>-->
-                            <input type="label" hidden="true" value="" name="loginMacroId" id="loginMacroId"/>
+                            <input type="label" hidden="true" value="" name="loginMacroFileId" id="loginMacroFileId"/>
 
                         </span>
                     </f:entry>
@@ -550,8 +550,7 @@
         <input type="text" name="attributes" id="attributes"/>
         <input type="text" name="businessCriticality" id="businessCriticality"/>
         <input type="text" name="sdlcStatus" id="sdlcStatus"/>
-        <input type="text" name="loginMacroFileId" id="loginMacroFileId"/>
-        <input type="text" name="workflowMacroHosts" id="workflowMacroHosts"/>
+         <input type="text" name="workflowMacroHosts" id="workflowMacroHosts"/>
         <input type="text" name="workflowMacroId" id="workflowMacroId"/>
     </div>
     <!--Script-->

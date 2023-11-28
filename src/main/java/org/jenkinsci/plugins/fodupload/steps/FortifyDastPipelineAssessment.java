@@ -49,6 +49,17 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     @Deprecated
     private Boolean overrideGlobalConfig;
     private String username;
+
+    public String getLoginMacroFileId() {
+        return loginMacroFileId;
+    }
+
+    @DataBoundSetter
+    public void setLoginMacroFileId(String loginMacroFileId) {
+        this.loginMacroFileId = loginMacroFileId;
+    }
+
+    private String loginMacroFileId;
     private String personalAccessToken;
     private String tenantId;
     private String webSiteUrl;
@@ -366,17 +377,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
 
     private String networkAuthPassword;
 
-    public int getLoginMacroId() {
-        ;
-        return loginMacroId;
-    }
-
-    @DataBoundSetter
-    public void setLoginMacroId(int loginMacroId) {
-        this.loginMacroId = loginMacroId;
-    }
-
-    private int loginMacroId;
     private DastScanSharedBuildStep dastScanSharedBuildStep;
 
     @DataBoundConstructor
@@ -691,7 +691,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 selectedDynamicTimeZone,
                 enableRedundantPageDetection,
                 webSiteUrl,
-                loginMacroId,
+                Integer.parseInt(loginMacroFileId),
                 workflowMacroId,
                 workflowMacroHosts,
                 networkAuthUserName,
@@ -761,7 +761,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     }
 
     private void saveWebSiteScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
-        int loginMacroFileId = 0;
 
         if (loginMacroFilePath != null && !loginMacroFilePath.isEmpty() && loginMacroFilePath.length() > 1) {
             Path path = Paths.get(loginMacroFilePath);
@@ -772,7 +771,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 throw new FileUploadException(String.format("Failed to upload login macro file %s for release Id:%s",
                         loginMacroFilePath, releaseId));
             } else {
-                loginMacroFileId = patchUploadResponse.fileId;
+                this.loginMacroFileId = String.valueOf(patchUploadResponse.fileId);
             }
         }
 
@@ -886,7 +885,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                     selectedDynamicTimeZone,
                     enableRedundantPageDetection,
                     loginMacroFilePath,
-                    loginMacroId,
+                    Integer.parseInt(loginMacroFileId),
                     workflowMacroId,
                     workflowMacroHosts,
                     networkAuthUserName,

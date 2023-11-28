@@ -482,9 +482,7 @@ class DastPipelineGenerator {
                         //Set scan policy from the response.
                         this.setScanPolicy();
                         //Set the Website assessment scan type specific settings.
-                        if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
-                            jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.dynamicSiteUrl);
-                        }
+                       this.setWebSiteScanSetting();
                         //set timebox scan
                         this.setTimeBoxScan();
                         this.setWorkflowDrivenScanSetting();
@@ -603,6 +601,17 @@ class DastPipelineGenerator {
         }
     }
 
+    setWebSiteScanSetting()
+    {
+        debugger;
+        if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
+            jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.dynamicSiteUrl);
+            jq('#loginMacroFileId').val(this.scanSettings.loginMacroFileId);
+
+        }
+
+
+    }
     setWorkflowDrivenScanSetting() {
 
         debugger;
@@ -620,8 +629,7 @@ class DastPipelineGenerator {
                         console.log(item);
                         if (arr[index] !== undefined || null) {
 
-                            jq('#listWorkflowDrivenAllowedHostUrl').
-                            append("<li>" + "<input type='checkbox' id=' " + arr[index] +
+                            jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + arr[index] +
                                 " ' checked='checked' name='" + arr[index] + "'>" + arr[index] + "</li>");
 
                             if (jq('#workflowMacroHosts').val() === null || undefined) {
@@ -643,7 +651,6 @@ class DastPipelineGenerator {
                         }
 
                     }
-
                 );
 
             }
@@ -777,6 +784,9 @@ class DastPipelineGenerator {
 
     resetWorkFlowSettingSValues() {
         jq('[name=workflowMacroFilePath]').val('');
+        jq('[name=workflowMacroHosts]').val('');
+        jq('[name=workflowMacroId]').val('');
+
 
     }
 
@@ -1042,11 +1052,12 @@ class DastPipelineGenerator {
     }
 
     onExcludeUrlBtnClick(event, args) {
-        alert(jq('#standardScanExcludedUrlText').val())
+       // alert(jq('#standardScanExcludedUrlText').val())
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
         //Add to exclude list
         jq('#listStandardScanTypeExcludedUrl');
-        jq('#listStandardScanTypeExcludedUrl').append("<li>" + "<input type='checkbox' id= " + excludedUrl + " checked='checked' onclick='onExcludeUrlItemSelect()'> + excludedUrl + </li>");
+       // jq('#listStandardScanTypeExcludedUrl').append("<li>" + "<input type='checkbox' id= " + excludedUrl + "checked='checked'> + excludedUrl + </li>");
+        jq('#listStandardScanTypeExcludedUrl').append("<li>" +  excludedUrl + "</li>");
         jq('#listStandardScanTypeExcludedUrl').show();
     }
 
