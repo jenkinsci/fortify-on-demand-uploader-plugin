@@ -435,10 +435,75 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         this.entitlementFrequency = entitlementFrequency;
     }
 
+    /*
+    PostConstruct method invokes finally after all the get and set properties invoked.
+    So we don't need to save as part of build perform function.
+    But whenever the scan settings got update through portal, Then there would be discrepancy when the Scripts not updated through the
+    Script generator.
+     */
     @PostConstruct
-    public final void Init() {
-        System.out.println("post Construct call.");
+    public final void SaveScanSettings() throws Exception {
 
+        try {
+            DastScanSharedBuildStep dastScanSharedBuildStep = null;
+
+            if (Objects.equals(scanType, FodEnums.DastScanType.Standard.toString()) || Objects.equals(scanType, FodEnums.DastScanType.Workflow.toString())) {
+                dastScanSharedBuildStep = new DastScanSharedBuildStep(
+                        overrideGlobalConfig,
+                        username,
+                        tenantId,
+                        personalAccessToken,
+                        releaseId,
+                        webSiteUrl,
+                        envFacing,
+                        scanTimeBox,
+                        null,
+                        scanPolicy,
+                        scanScope,
+                        scanType,
+                        selectedDynamicTimeZone,
+                        enableRedundantPageDetection,
+                        webSiteUrl,
+                        Integer.parseInt(loginMacroFileId),
+                        workflowMacroId,
+                        workflowMacroHosts,
+                        networkAuthUserName,
+                        networkAuthPassword,
+                        applicationId,
+                        assessmentTypeId,
+                        entitlementId,
+                        entitlementFrequency,
+                        networkAuthType,
+                        timeBoxChecked
+                );
+            }
+
+            if (dastScanSharedBuildStep == null) {
+                throw new RuntimeException("DastScanSharedBuildStep Object not set");
+            }
+
+            List<String> errors = dastScanSharedBuildStep.ValidateModel();
+
+            if (!errors.isEmpty()) {
+                throw new IllegalArgumentException("Missing or invalid fields: " + String.join(", ", errors));
+            }
+
+            switch (this.scanType) {
+                case "Standard":
+                    saveWebSiteScanSettings(dastScanSharedBuildStep);
+                    break;
+                case "Workflow-driven":
+                    saveWorkflowSiteScanSettings(dastScanSharedBuildStep);
+                    break;
+
+                case "API":
+                    break;
+            }
+
+
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
 
@@ -785,7 +850,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 , networkAuthType != null && !networkAuthType.isEmpty(), requireLoginMacro,
                 networkAuthUserName, networkAuthPassword
                 , networkAuthType, scanTimeBox);
-
     }
 
     private void saveWorkflowSiteScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
@@ -870,6 +934,12 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         DastScanSharedBuildStep dastScanSharedBuildStep = null;
 
         if (Objects.equals(scanType, FodEnums.DastScanType.Standard.toString()) || Objects.equals(scanType, FodEnums.DastScanType.Workflow.toString())) {
+
+            int loginFileId = 0;
+            if (!loginMacroFileId.isEmpty()) {
+                loginFileId = Integer.parseInt(loginMacroFileId);
+            }
+
             dastScanSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig,
                     username,
                     tenantId,
@@ -885,7 +955,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                     selectedDynamicTimeZone,
                     enableRedundantPageDetection,
                     loginMacroFilePath,
-                    Integer.parseInt(loginMacroFileId),
+                    loginFileId,
                     workflowMacroId,
                     workflowMacroHosts,
                     networkAuthUserName,
@@ -898,7 +968,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                     timeBoxChecked);
         } else if (Objects.equals(scanType, FodEnums.DastScanType.API.toString())) {
 
-            //initialize API
+            //initialize dastScanSharedBuildStep overload for API here.
         }
         boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
         List<String> errors = null;
@@ -929,35 +999,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         } catch (IOException ex) {
             log.println("Error saving settings. Error message: " + ex.toString());
         }
-
-        //Don't need to use the getAttribute for the class property,
-        try {
-
-            switch (scanType) {
-                case ("Standard"): {
-                    saveWebSiteScanSettings(dastScanSharedBuildStep);
-                    log.println(String.format("Fortify On Demand Dynamic Scan Settings Saved Successfully for release Id %s", releaseId));
-                    break;
-                }
-                case "Workflow-driven": {
-                    saveWorkflowSiteScanSettings(dastScanSharedBuildStep);
-                    log.println(String.format("Fortify On Demand Dynamic Scan Settings Saved Successfully for release Id %s", releaseId));
-                    break;
-                }
-                case "API": {
-                    saveApiScanSettings(dastScanSharedBuildStep);
-                    log.println(String.format("Fortify On Demand Dynamic Scan Settings Saved Successfully for release Id %s", releaseId));
-                    break;
-                }
-                default:
-                    throw new IllegalArgumentException("Not a valid scan type");
-            }
-
-        } catch (Exception ex) {
-            log.println("Fortify On Demand Dynamic Scan Error saving scan settings. Error message: " + ex.getMessage());
-            throw new RuntimeException(ex);
-        }
-
         dastScanSharedBuildStep.perform(build, workspace, launcher, listener, correlationId);
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
         crossBuildAction.setPreviousStepBuildResult(build.getResult());
@@ -972,7 +1013,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
             log.println("Fortify On Demand Dynamic Scan Error saving settings. Error message: " + ex.getMessage());
         }
     }
-
 
     @Extension
     public static class DescriptorImpl extends StepDescriptor {

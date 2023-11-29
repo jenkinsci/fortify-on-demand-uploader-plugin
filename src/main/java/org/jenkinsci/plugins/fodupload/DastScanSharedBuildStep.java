@@ -173,7 +173,7 @@ public class DastScanSharedBuildStep {
                 break;
             case "Workflow-Driven":
 
-                if (this.model.getWorkflowMacroFileId() <= 0 )
+                if (this.model.getWorkflowMacroFileId() <= 0)
                     errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWorkflowMacroIdNotFound);
 
                 if (this.model.getAllowedHost().isEmpty())
@@ -228,7 +228,7 @@ public class DastScanSharedBuildStep {
             dynamicScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
             dynamicScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
 
-            if (loginMacroId != null && !loginMacroId.isEmpty() ) {
+            if (loginMacroId != null && !loginMacroId.isEmpty()) {
                 dynamicScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
             }
 
@@ -319,7 +319,7 @@ public class DastScanSharedBuildStep {
             dastWorkflowScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastWorkflowScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
 
-            if (workflowMacroId.isEmpty() || Integer.parseInt(workflowMacroId) <=0 || workflowMacroHosts.isEmpty()) {
+            if (workflowMacroId.isEmpty() || Integer.parseInt(workflowMacroId) <= 0 || workflowMacroHosts.isEmpty()) {
 
                 throw new IllegalArgumentException(String.format("WorkflowMacro FileId=%s or WorkflowHost=%s not set for release Id={%s}"
                         , workflowMacroId, workflowMacroHosts, userSelectedRelease));
@@ -781,6 +781,7 @@ public class DastScanSharedBuildStep {
         return applicationController.getApplicationList(searchTerm, offset, limit);
     }
 
+    @SuppressWarnings("unused")
     public static org.jenkinsci.plugins.fodupload.models.Result<ApplicationApiResponse> customFillUserApplicationById(int applicationId, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
         ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, null);
@@ -788,19 +789,14 @@ public class DastScanSharedBuildStep {
 
         return result;
     }
-
-    public static List<MicroserviceApiResponse> customFillUserSelectedMicroserviceList(int applicationId, AuthenticationModel authModel) throws IOException {
-        FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
-        ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
-        return applicationController.getMicroserviceListByApplication(applicationId);
-    }
-
+    @SuppressWarnings("unused")
     public static GenericListResponse<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, String searchTerm, Integer offset, Integer limit, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
         ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
         return applicationController.getReleaseListByApplication(applicationId, microserviceId, searchTerm, offset, limit);
     }
 
+    @SuppressWarnings("unused")
     public static org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> customFillUserReleaseById(int releaseId, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
         ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, null);
@@ -808,7 +804,7 @@ public class DastScanSharedBuildStep {
 
         return result;
     }
-
+    @SuppressWarnings("unused")
     public static EntitlementSettings customFillEntitlementSettings(int releaseId, AuthenticationModel authModel) throws IOException {
         return new EntitlementSettings(
                 1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
