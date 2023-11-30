@@ -55,17 +55,15 @@ public class DastScanSharedBuildStep {
 
     public DastScanSharedBuildStep(boolean overrideGlobalConfig, String username,
                                    String personalAccessToken, String tenantId,
-                                   String releaseId, String selectedReleaseType,
-                                   String webSiteUrl, String dastEnv,
+                                   String releaseId,
+                                   String dastEnv,
                                    String scanTimebox,
-                                   List<String> standardScanTypeExcludeUrlsRow,
                                    String scanPolicyType, boolean scanScope,
-                                   String selectedScanType, String selectedDynamicTimeZone,
-                                   boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
-                                   boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                   String loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
+                                   String selectedScanType, String selectedDynamicTimeZone, boolean isNetworkAuthRequired,
+                                   String networkAuthUserName,
+                                   String networkAuthPassword,
                                    String userSelectedApplication,
-                                   String userSelectedRelease, String assessmentTypeId,
+                                   String assessmentTypeId,
                                    String entitlementId,
                                    String entitlementFrequencyType, String userSelectedEntitlement,
                                    String selectedDynamicGeoLocation, String selectedNetworkAuthType,
@@ -77,16 +75,12 @@ public class DastScanSharedBuildStep {
                                    String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
-
-
         model = new DastScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
-                releaseId, selectedReleaseType, webSiteUrl
-                , dastEnv, scanTimebox, standardScanTypeExcludeUrlsRow, scanPolicyType, scanScope, selectedScanType
-                , selectedDynamicTimeZone, webSiteLoginMacroEnabled,
-                webSiteNetworkAuthSettingEnabled, enableRedundantPageDetection,
-                webSiteNetworkAuthUserName, loginMacroId, workflowMacroId, allowedHost
-                , webSiteNetworkAuthPassword, userSelectedApplication,
-                userSelectedRelease, assessmentTypeId, entitlementId,
+                releaseId, dastEnv, scanTimebox, scanPolicyType, scanScope, selectedScanType
+                , selectedDynamicTimeZone, isNetworkAuthRequired,
+                networkAuthUserName
+                , networkAuthPassword, userSelectedApplication
+                , assessmentTypeId, entitlementId,
                 entitlementFrequencyType, userSelectedEntitlement,
                 selectedDynamicGeoLocation, selectedNetworkAuthType,
                 selectedApiType, openApiRadioSource, openApiFileSource, openApiurl, apiKey,

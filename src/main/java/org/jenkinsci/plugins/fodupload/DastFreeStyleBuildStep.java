@@ -37,10 +37,10 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
     @DataBoundConstructor
     public DastFreeStyleBuildStep(boolean overrideGlobalConfig, String username,
                                   String personalAccessToken, String tenantId,
-                                  String releaseId, String selectedReleaseType,
+                                  String selectedReleaseType,
                                   String webSiteUrl, String dastEnv,
                                   String scanTimeBox,
-                                  List<String> standardScanTypeExcludedUrls,
+                                  List<String> listStandardScanTypeExcludedUrl,
                                   String scanPolicy, boolean scanScope,
                                   String selectedScanType, String selectedDynamicTimeZone,
                                   boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
@@ -57,29 +57,41 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
                                   String graphQlRadioSource, String graphQLFileId, String graphQLUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
                                   String grpcFileId, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath
 
-
     ) throws IllegalArgumentException, IOException {
 
-        dastSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username,
-                personalAccessToken, tenantId,
-                releaseId, selectedReleaseType,
-                webSiteUrl, dastEnv,
-                scanTimeBox,
-                standardScanTypeExcludedUrls,
-                scanPolicy, scanScope,
-                selectedScanType, selectedDynamicTimeZone,
-                webSiteLoginMacroEnabled, webSiteNetworkAuthSettingEnabled,
-                enableRedundantPageDetection, webSiteNetworkAuthUserName,
-                loginMacroId, workflowMacroId, workflowMacroHosts, webSiteNetworkAuthPassword,
-                userSelectedApplication,
-                userSelectedRelease, assessmentTypeId,
-                entitlementId,
-                entitlementFrequencyType, userSelectedEntitlement,
-                selectedDynamicGeoLocation, selectedNetworkAuthType, timeBoxChecked,
-                selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
-                postmanFileId,
-                graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
+
+        if (selectedScanType.equals(FodEnums.DastScanType.Workflow.toString()) || selectedScanType.equals(FodEnums.DastScanType.Standard.toString())) {
+            dastSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username, tenantId,
+                    personalAccessToken, userSelectedRelease,
+                    webSiteUrl, dastEnv,
+                    scanTimeBox,
+                    listStandardScanTypeExcludedUrl,
+                    scanPolicy, scanScope,
+                    selectedScanType, selectedDynamicTimeZone, enableRedundantPageDetection, null,
+                    loginMacroId.isEmpty() ? 0 : Integer.parseInt(loginMacroId), workflowMacroId, workflowMacroHosts,
+                    webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, userSelectedApplication,
+                    assessmentTypeId, entitlementId, entitlementFrequencyType, selectedNetworkAuthType, timeBoxChecked
+            );
+
+        } else if (selectedScanType.equals(FodEnums.DastScanType.API.toString())) {
+            dastSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username,
+                    personalAccessToken, tenantId,
+                    userSelectedRelease,
+                    dastEnv,
+                    scanTimeBox,
+                    scanPolicy, scanScope,
+                    selectedScanType, selectedDynamicTimeZone,
+                    webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword,
+                    userSelectedApplication, assessmentTypeId, entitlementId,
+                    entitlementFrequencyType, userSelectedEntitlement,
+                    selectedDynamicGeoLocation, selectedNetworkAuthType,
+                    timeBoxChecked, selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
+                    postmanFileId,
+                    graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
+                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
+        } else {
+            throw new IllegalArgumentException("Invalid Scan Type");
+        }
 
         if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
 

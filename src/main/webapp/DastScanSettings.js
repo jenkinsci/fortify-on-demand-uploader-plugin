@@ -724,10 +724,13 @@ class DastScanSettings {
 
     setTimeBoxScan() {
         if (this.scanSettings.timeBoxInHours !== undefined) {
-            jq('#scanTimeBox').val(this.scanSettings.timeBoxInHours);
-            if (jq('#timeBoxChecked').find('input:checkbox:first').prop('checked') === false) {
-                jq('#timeBoxChecked').find('input:checkbox:first').trigger('click');
+
+            debugger;
+            jq('#dast-timeBox-scan').find('input:text:first').val(this.scanSettings.timeBoxInHours);
+            if (jq('#dast-timeBox-scan').find('input:checkbox:first').prop('checked') === false) {
+                jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
             }
+
         }
     }
 
@@ -740,11 +743,15 @@ class DastScanSettings {
 
         this.api.patchSetupManifestFile(this.releaseId, getAuthInfo(), loginMacroFile, dastManifestLoginFileUpload).then(res => {
 
-                console.log("File upload success " + res);
-                let response = res;
-                jq('#loginMacroId').val(res)
-                handleSpinner(ctl, true);
-                handleUploadStatusMessage(msgCtl, fileUploadSuccess, true);
+                if (res.fileId > 0) {
+                    jq('#loginMacroId').val(res.fileId);
+                    handleSpinner(ctl, true);
+                    handleUploadStatusMessage(msgCtl, fileUploadSuccess, true);
+                } else {
+                    throw new Exception("Illegal argument exception,FileId not valid");
+                    console.log(res.reason);
+                    handleUploadStatusMessage(msgCtl, inValidResponse + "error =" + res.message, false);
+                }
             }
         ).catch((err) => {
                 console.log(err);
@@ -773,7 +780,7 @@ class DastScanSettings {
                     handleUploadStatusMessage(msgCtl, fileUploadSuccess, true);
                 } else {
                     throw new Exception("Illegal argument exception,FileId not valid");
-                    handleUploadStatusMessage(msgCtl, inValidResponse, false);
+                    handleUploadStatusMessage(msgCtl, inValidResponse + "error =" + res.message, false);
                 }
                 if (!Object.is(res.hosts, undefined) && !Object.is(res.hosts, null)) {
                     let hosts = undefined;
@@ -940,19 +947,19 @@ class DastScanSettings {
         jq('.sourceTypeFileds').hide();
         jq('.uploadMessage').text('');
 
-        if (id == 'openApiInputFile') {
+        if (id === 'openApiInputFile') {
             jq('.openApiSourceControls').show()
             jq('#dast-api-openApi-upload').show();
             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
-        } else if (id == 'openApiInputUrl') {
+        } else if (id === 'openApiInputUrl') {
             jq('.openApiSourceControls').show()
             jq('#dast-openApi-url').show();
             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
-        } else if (id == 'graphQlInputFile') {
+        } else if (id === 'graphQlInputFile') {
             jq('.graphQLSourceControls').show();
             jq('#dast-api-graphQL-upload').show();
             jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
-        } else if (id == 'graphQlInputUrl') {
+        } else if (id === 'graphQlInputUrl') {
             jq('.graphQLSourceControls').show();
             jq('#dast-graphQL-url').show();
             jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
@@ -1051,12 +1058,11 @@ class DastScanSettings {
     }
 
     onExcludeUrlBtnClick(event, args) {
-        //  alert(jq('#standardScanExcludedUrlText').val())
+        debugger;
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
-        //Add to exclude list
-        // jq('#listStandardScanTypeExcludedUrl');
-        // jq('#listStandardScanTypeExcludedUrl').append("<li>" +  excludedUrl + "</li>");
-        // jq('#listStandardScanTypeExcludedUrl').show();
+        jq('#listStandardScanTypeExcludedUrl');
+        jq('#listStandardScanTypeExcludedUrl').append("<li>" + excludedUrl + "</li>");
+        jq('#listStandardScanTypeExcludedUrl').show();
     }
 
     preinit() {
@@ -1160,8 +1166,46 @@ class DastScanSettings {
 
 }
 
-const scanSettings = new DastScanSettings();
+const
+    scanSettings = new DastScanSettings();
 
-spinAndWait(() => jq('#selectedRelease').text() !== undefined && jq('#selectedRelease').text() !== '')
-    .then(scanSettings.preinit.bind(scanSettings));
-spinAndWait(() => jq('#releaseTypeSelectList').val() !== undefined).then(scanSettings.scanSettingsVisibility.bind(scanSettings));
+spinAndWait(
+    () =>
+
+        jq(
+            '#selectedRelease'
+        ).text()
+
+        !==
+        undefined
+        &&
+
+        jq(
+            '#selectedRelease'
+        ).text()
+
+        !==
+        ''
+)
+    .then(scanSettings
+
+        .preinit
+        .bind(scanSettings)
+    )
+;
+
+spinAndWait(
+    () =>
+
+        jq(
+            '#releaseTypeSelectList'
+        ).val()
+
+        !==
+        undefined
+).then(scanSettings
+
+    .scanSettingsVisibility
+    .bind(scanSettings)
+)
+;

@@ -251,7 +251,7 @@
                 </f:checkbox>
             </div>
         </f:entry>
-        <f:entry title="Exclude URLs" field="standardScanTypeExcludedUrls">
+        <f:entry title="Exclude URLs">
             <div id="standardScanTypeExcludeUrlsRow" class="fode-field spinner-container">
                 <span>
                     <input type="text" id="standardScanExcludedUrlText" class="setting-input dast-standard-scan"
@@ -340,7 +340,7 @@
                             <input accept=".webmacro" id="loginFileMacro" type="File" name="loginFileMacro"/>
                             <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
                             <h6 id="loginMacroUploadMessage" hidden="true" name="loginMacroUploadMessage" ></h6>
-                            <input type="label" hidden="true" value="" name="loginMacroId" id="loginMacroId"/>
+                            <input type="text" hidden="true"  name="loginMacroId" id="loginMacroId"/>
                         </span>
                     </f:entry>
 

@@ -273,17 +273,16 @@ public class DastScanJobModel {
 
     public DastScanJobModel(boolean overrideGlobalConfig, String username,
                             String personalAccessToken, String tenantId,
-                            String releaseId, String selectedReleaseType,
-                            String webSiteUrl, String dastEnv,
+                            String releaseId,
+                            String dastEnv,
                             String scanTimebox,
-                            List<String> standardScanTypeExcludeUrls,
                             String scanPolicyType, boolean scanScope,
                             String selectedScanType, String selectedDynamicTimeZone,
-                            boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
-                            boolean enableRedundantPageDetection, String networkAuthUserName,
-                            String loginMacroId, String workflowMacroId, String allowedHost, String networkAuthPassword,
+                            boolean networkAuthSettingEnabled,
+                           String networkAuthUserName,
+                           String networkAuthPassword,
                             String userSelectedApplication,
-                            String userSelectedRelease, String assessmentTypeId,
+                           String assessmentTypeId,
                             String entitlementId,
                             String entitlementFrequencyType, String userSelectedEntitlement,
                             String selectedDynamicGeoLocation, String selectedNetworkAuthType,
@@ -292,32 +291,22 @@ public class DastScanJobModel {
                             String postmanFile,
                             String graphQlSource, String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
                             String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath) {
-        this._releaseId = userSelectedRelease;
+        this._releaseId = releaseId;
         this.tenantId = tenantId;
-        this.allowedHost = allowedHost;
-        this.workflowMacroFileId = Integer.parseInt(workflowMacroId);
         this.overrideGlobalConfig = overrideGlobalConfig;
-        this.selectedReleaseType = selectedReleaseType;
         this.userSelectedApplication = userSelectedApplication;
-        this.userSelectedRelease = userSelectedRelease;
-        this.webSiteNetworkAuthEnabled = webSiteNetworkAuthSettingEnabled;
+        this.webSiteNetworkAuthEnabled = networkAuthSettingEnabled;
         this.dastEnv = dastEnv;
         this.assessmentTypeId = assessmentTypeId;
-        this.allowFormSubmissionCrawl = allowFormSubmissionCrawl;
-        this.allowHttp = allowHttp;
-        this.loginFileMacro = Integer.parseInt(loginMacroId);
         this.username = username;
         this.personalAccessToken = personalAccessToken;
         this.selectedScanType = selectedScanType;
         this.scanHost = scanScope;
-        this.webSiteUrl = webSiteUrl;
         this.userSelectedEntitlement = userSelectedEntitlement;
         this.selectedDynamicTimeZone = selectedDynamicTimeZone;
         this.selectedDynamicGeoLocation = selectedDynamicGeoLocation;
         this.entitlementId = entitlementId;
         this.entitlementFrequencyType = entitlementFrequencyType;
-        this.enableRedundantPageDetection = enableRedundantPageDetection;
-        this.webSiteLoginMacroEnabled = webSiteLoginMacroEnabled;
         this.scanPolicyType = scanPolicyType;
         this.networkAuthUserName = networkAuthUserName;
         this.networkAuthPassword = networkAuthPassword;

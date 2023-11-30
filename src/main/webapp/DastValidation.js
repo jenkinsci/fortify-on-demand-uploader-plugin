@@ -1,6 +1,6 @@
 const fileUploadSuccess = "File uploaded successfully."
 const fileUploadFailed = "File upload failed. Please try again!"
-const inValidResponse = "Invalid response. Please try again!";
+const inValidResponse = "Invalid response,";
 
 
 const requiredFields = ['webSiteUrl',
