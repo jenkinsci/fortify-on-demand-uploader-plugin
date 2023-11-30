@@ -33,9 +33,13 @@ public class DastScanJobModel {
     String selectedScanType;
     String selectedDynamicTimeZone;
     boolean enableRedundantPageDetection;
-    String webSiteNetworkAuthUserName;
+    String networkAuthUserName;
     Integer loginFileMacro;
-    String webSiteNetworkAuthPassword;
+    String networkAuthPassword;
+
+
+     String networkAuthType;
+
     String userSelectedApplication;
     String userSelectedRelease;
     String assessmentTypeId;
@@ -43,7 +47,6 @@ public class DastScanJobModel {
     String entitlementFrequencyId;
     String entitlementFrequencyType;
     String userSelectedEntitlement;
-    String networkAuthType;
     String selectedApi;
     String selectedOpenApiSource;
     String selectedOpenApiFileSource;
@@ -68,9 +71,9 @@ public class DastScanJobModel {
                             boolean scanScope, String selectedScanType, String scanPolicy,
                             String selectedDynamicTimeZone,
                             boolean enableRedundantPageDetection,
-                            String webSiteNetworkAuthUserName, String loginMacroFilePath, int loginMacroId,
+                            String networkAuthUserName, String loginMacroFilePath, int loginMacroId,
                             String workflowMacroId, String allowedHost,
-                            String webSiteNetworkAuthPassword, String assessmentTypeId,
+                            String networkAuthPassword, String assessmentTypeId,
                             String entitlementId, String entitlementFrequencyType,
                             String selectedNetworkAuthType) {
 
@@ -91,8 +94,8 @@ public class DastScanJobModel {
         this.scanPolicyType = scanPolicy;
         this.enableRedundantPageDetection = enableRedundantPageDetection;
         this.selectedDynamicTimeZone = selectedDynamicTimeZone;
-        this.webSiteNetworkAuthPassword = webSiteNetworkAuthPassword;
-        this.webSiteNetworkAuthUserName = webSiteNetworkAuthUserName;
+        this.networkAuthPassword = networkAuthPassword;
+        this.networkAuthUserName = networkAuthUserName;
         this.selectedScanType = selectedScanType;
         this.assessmentTypeId = assessmentTypeId;
         this.entitlementId = entitlementId;
@@ -141,6 +144,9 @@ public class DastScanJobModel {
         return allowFormSubmissionCrawl;
     }
 
+    public String getNetworkAuthType() {
+        return networkAuthType;
+    }
     public String getSelectedScanType() {
         return selectedScanType;
     }
@@ -153,16 +159,16 @@ public class DastScanJobModel {
         return enableRedundantPageDetection;
     }
 
-    public String getWebSiteNetworkAuthUserName() {
-        return webSiteNetworkAuthUserName;
+    public String getNetworkAuthUserName() {
+        return networkAuthUserName;
     }
 
     public Integer getLoginFileMacro() {
         return loginFileMacro;
     }
 
-    public String getWebSiteNetworkAuthPassword() {
-        return webSiteNetworkAuthPassword;
+    public String getNetworkAuthPassword() {
+        return networkAuthPassword;
     }
 
     public String getAssessmentTypeId() {
@@ -274,8 +280,8 @@ public class DastScanJobModel {
                             String scanPolicyType, boolean scanScope,
                             String selectedScanType, String selectedDynamicTimeZone,
                             boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
-                            boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                            String loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthPassword,
+                            boolean enableRedundantPageDetection, String networkAuthUserName,
+                            String loginMacroId, String workflowMacroId, String allowedHost, String networkAuthPassword,
                             String userSelectedApplication,
                             String userSelectedRelease, String assessmentTypeId,
                             String entitlementId,
@@ -313,8 +319,8 @@ public class DastScanJobModel {
         this.enableRedundantPageDetection = enableRedundantPageDetection;
         this.webSiteLoginMacroEnabled = webSiteLoginMacroEnabled;
         this.scanPolicyType = scanPolicyType;
-        this.webSiteNetworkAuthUserName = webSiteNetworkAuthUserName;
-        this.webSiteNetworkAuthPassword = webSiteNetworkAuthPassword;
+        this.networkAuthUserName = networkAuthUserName;
+        this.networkAuthPassword = networkAuthPassword;
         this.networkAuthType = selectedNetworkAuthType;
         this.selectedApi = selectedApiType;
         this.selectedOpenApiFileSource = openApiFileSource;

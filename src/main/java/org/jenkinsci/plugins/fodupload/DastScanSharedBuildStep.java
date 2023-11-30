@@ -150,7 +150,6 @@ public class DastScanSharedBuildStep {
 
         List<String> errors = new ArrayList<>();
 
-
         //Check for mandate fields based on scan type.
         if (this.model.getSelectedScanType().isEmpty()) {
             errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanTypeNotFound);
@@ -160,6 +159,20 @@ public class DastScanSharedBuildStep {
         }
         if (this.model.getEntitlementId().isEmpty()) {
             errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanEntitlementIdNotFound);
+        }
+
+        if (getModel().isWebSiteNetworkAuthEnabled()) {
+            if (getModel().getNetworkAuthPassword().isEmpty()) {
+                errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkPasswordNotFound);
+            } else if (getModel().getNetworkAuthUserName().isEmpty()) {
+
+                errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkUserNameNotFound);
+
+            } else if (getModel().getNetworkAuthType().isEmpty()) {
+
+                errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkAuthTypeNotFound);
+
+            }
         }
         switch (this.model.getSelectedScanType()) {
             case "Standard":
@@ -243,25 +256,21 @@ public class DastScanSharedBuildStep {
             }
             if (scanPolicy != null && !scanPolicy.isEmpty())
                 dynamicScanSetupReqModel.setPolicy(scanPolicy);
-
             dynamicScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (requireLoginMacroAuth && (!Objects.equals(loginMacroId, "") && loginMacroId != null))
+            if (requireLoginMacroAuth && (!Objects.equals(loginMacroId, "") && loginMacroId != null)) {
                 if (Integer.parseInt(loginMacroId) != 0) {
                     dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
                 }
-            if (requireNetworkAuth) {
+            }
+
+            if (!networkAuthType.isEmpty() && !networkAuthPassword.isEmpty()
+                    && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkSetting = dynamicScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkSetting.setPassword(networkAuthPassword);
                 networkSetting.setUserName(networkAuthUserName);
-
-                if (!networkAuthType.isEmpty()) {
-                    networkSetting.setNetworkAuthenticationType((networkAuthType));
-                } else
-                    throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
-
                 networkSetting.setRequiresNetworkAuthentication(true);
-
+                networkSetting.setNetworkAuthenticationType(networkAuthType);
                 dynamicScanSetupReqModel.setNetworkAuthenticationSettings(networkSetting);
             }
 
@@ -336,16 +345,13 @@ public class DastScanSharedBuildStep {
             }
             dastWorkflowScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (requireNetworkAuth) {
+            if (!networkAuthType.isEmpty() && !networkAuthPassword.isEmpty()
+                    && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
-
-                if (!networkAuthType.isEmpty()) {
-                    networkAuthentication.setNetworkAuthenticationType((networkAuthType));
-                } else
-                    throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
                 networkAuthentication.setRequiresNetworkAuthentication(true);
+                networkAuthentication.setNetworkAuthenticationType(networkAuthType);
                 dastWorkflowScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
 
@@ -427,15 +433,11 @@ public class DastScanSharedBuildStep {
             dastOpenApiScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastOpenApiScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (requireNetworkAuth) {
+            if (!networkAuthPassword.isEmpty() && !networkAuthUserName.isEmpty() && !networkAuthType.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastOpenApiScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
-
-                if (!networkAuthType.isEmpty()) {
-                    networkAuthentication.setNetworkAuthenticationType((networkAuthType));
-                } else
-                    throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
+                networkAuthentication.setNetworkAuthenticationType((networkAuthType));
                 networkAuthentication.setRequiresNetworkAuthentication(true);
                 dastOpenApiScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
@@ -484,15 +486,11 @@ public class DastScanSharedBuildStep {
             dastGraphQlScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastGraphQlScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (requireNetworkAuth) {
+            if (!networkAuthType.isEmpty() && !networkAuthPassword.isEmpty() && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastGraphQlScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
-
-                if (!networkAuthType.isEmpty()) {
-                    networkAuthentication.setNetworkAuthenticationType((networkAuthType));
-                } else
-                    throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
+                networkAuthentication.setNetworkAuthenticationType((networkAuthType));
                 networkAuthentication.setRequiresNetworkAuthentication(true);
                 dastGraphQlScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
@@ -537,15 +535,11 @@ public class DastScanSharedBuildStep {
             dastgrpcScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastgrpcScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (requireNetworkAuth) {
+            if (!networkAuthPassword.isEmpty() && !networkAuthType.isEmpty() && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastgrpcScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
-
-                if (!networkAuthType.isEmpty()) {
-                    networkAuthentication.setNetworkAuthenticationType((networkAuthType));
-                } else
-                    throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
+                networkAuthentication.setNetworkAuthenticationType((networkAuthType));
                 networkAuthentication.setRequiresNetworkAuthentication(true);
                 dastgrpcScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
@@ -592,15 +586,11 @@ public class DastScanSharedBuildStep {
             dastPostmanScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
 
-            if (requireNetworkAuth) {
+            if (!networkAuthPassword.isEmpty() && !networkAuthType.isEmpty() && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastPostmanScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
-
-                if (!networkAuthType.isEmpty()) {
-                    networkAuthentication.setNetworkAuthenticationType((networkAuthType));
-                } else
-                    throw new IllegalArgumentException("Network Auth Type not set for releaseId: " + userSelectedRelease);
+                networkAuthentication.setNetworkAuthenticationType((networkAuthType));
                 networkAuthentication.setRequiresNetworkAuthentication(true);
                 dastPostmanScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
@@ -789,6 +779,7 @@ public class DastScanSharedBuildStep {
 
         return result;
     }
+
     @SuppressWarnings("unused")
     public static GenericListResponse<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, String searchTerm, Integer offset, Integer limit, AuthenticationModel authModel) throws IOException {
         FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
@@ -804,6 +795,7 @@ public class DastScanSharedBuildStep {
 
         return result;
     }
+
     @SuppressWarnings("unused")
     public static EntitlementSettings customFillEntitlementSettings(int releaseId, AuthenticationModel authModel) throws IOException {
         return new EntitlementSettings(

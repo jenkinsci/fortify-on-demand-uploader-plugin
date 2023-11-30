@@ -230,7 +230,7 @@
     <f:section title="Scope">
         <f:entry>
             <div id="dast-workflow-macro-upload"
-                 class="fodp-field spinner-container fodp-row-relid-ovr">
+                 class="fodp-field spinner-container fodp-row-relid-ovr dast-workflow-setting">
                 <f:optionalBlock title="Workflow Macro File Uploader" name="workflowUploader" field="workflowUploader">
 
                     <f:entry
@@ -252,7 +252,7 @@
         </f:entry>
         <f:entry title="Allowed Hosts">
             <ul id="listWorkflowDrivenAllowedHostUrl" name="listWorkflowDrivenAllowedHostUrl"
-                class="fodp-field spinner-container dast-workflow-setting fodp-row-relid-ovr">
+                class="fodp-field spinner-container fodp-row-relid-ovr dast-workflow-setting">
             </ul>
         </f:entry>
         <f:entry title="Dynamic Site URL">

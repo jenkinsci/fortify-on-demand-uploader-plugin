@@ -24,15 +24,20 @@ public class FodGlobalConstants {
         {
             public final static String DastPipelineScanTypeNotFound = "Missing scan type.";
             public final static String DastPipelineWebSiteUrlNotFound = "Missing Website URL.";
-            public final static String DastPipelineReleaseIdNotFound = "Missing Release Id";
+            public final static String DastPipelineReleaseIdNotFound = "Missing Release Id.";
             public final static String DastPipelineScanEntitlementIdNotFound = "Missing Entitlement Id.";
             public final static String DastPipelineScanEntitlementTypeNotFound = "Missing Entitlement Type.";
             public final static String DastPipelineAssessmentIdNotFound = "Missing Assessment Id.";
             public final static String DastPipelineWorkflowMacroIdNotFound = "Missing Workflow Macro Id.";
 
-            public final  static  String DastWorkflowAllowedHostNotFound = "Missing Workflow Allowed Host";
+            public final  static  String DastWorkflowAllowedHostNotFound = "Missing Workflow Allowed Host.";
 
-            public final  static  String DastScanPolicyNotFound = "Missing SCan Policy Type";
+            public final  static  String DastScanPolicyNotFound = "Missing Scan Policy Type.";
+
+            public final  static  String DastScanNetworkUserNameNotFound = "Missing NetworkWork Authentication User Name.";
+            public final  static  String DastScanNetworkPasswordNotFound = "NetworkWork Authentication Password not set.";
+
+            public final  static  String DastScanNetworkAuthTypeNotFound = "Missing NetworkWork Authentication Type.";
         }
 
         public static class FodDastErrorMsg

@@ -30,6 +30,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+import org.kohsuke.stapler.interceptor.JsonOutputFilter;
 import org.kohsuke.stapler.verb.POST;
 
 import javax.annotation.PostConstruct;
@@ -448,6 +449,12 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
             DastScanSharedBuildStep dastScanSharedBuildStep = null;
 
             if (Objects.equals(scanType, FodEnums.DastScanType.Standard.toString()) || Objects.equals(scanType, FodEnums.DastScanType.Workflow.toString())) {
+
+                int loginFileId = 0;
+                if (!loginMacroFileId.isEmpty()) {
+                    loginFileId = Integer.parseInt(loginMacroFileId);
+                }
+
                 dastScanSharedBuildStep = new DastScanSharedBuildStep(
                         overrideGlobalConfig,
                         username,
@@ -464,7 +471,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                         selectedDynamicTimeZone,
                         enableRedundantPageDetection,
                         webSiteUrl,
-                        Integer.parseInt(loginMacroFileId),
+                        loginFileId,
                         workflowMacroId,
                         workflowMacroHosts,
                         networkAuthUserName,
@@ -497,6 +504,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                     break;
 
                 case "API":
+                    saveApiScanSettings(dastScanSharedBuildStep);
                     break;
             }
 

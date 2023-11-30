@@ -489,34 +489,32 @@ class DastScanSettings {
         if (!Object.is(this.scanSettings.apiAssessment, undefined)) {
             if (!Object.is(this.scanSettings.apiAssessment.openAPI, undefined)) {
                 this.setOpenApiSettings(this.scanSettings.apiAssessment.openAPI);
-            }
-            else if(!Object.is(this.scanSettings.apiAssessment.graphQL, undefined)) {
+            } else if (!Object.is(this.scanSettings.apiAssessment.graphQL, undefined)) {
                 this.setGraphQlSettings(this.scanSettings.apiAssessment.graphQL);
-            }
-            else if(!Object.is(this.scanSettings.apiAssessment.gRPC, undefined)) {
+            } else if (!Object.is(this.scanSettings.apiAssessment.gRPC, undefined)) {
                 this.setGrpcSettings(this.scanSettings.apiAssessment.gRPC);
-            }
-            else if(!Object.is(this.scanSettings.apiAssessment.postman, undefined)) {
+            } else if (!Object.is(this.scanSettings.apiAssessment.postman, undefined)) {
                 this.setPostmanSettings(this.scanSettings.apiAssessment.postman);
             }
 
         }
     }
-    setOpenApiSettings(openApiSettings){
+
+    setOpenApiSettings(openApiSettings) {
 
         jq('#apiTypeList').val('openApi');
         var inputId = openApiSettings.sourceType == 'Url' ? 'openApiInputUrl' : 'openApiInputFile';
         this.onApiTypeChanged();
         jq('#' + inputId).trigger('click');
         jq('#dast-openApi-api-key input').val(openApiSettings.apiKey);
-        if(openApiSettings.sourceType == 'Url'){
+        if (openApiSettings.sourceType == 'Url') {
             jq('#dast-openApi-url input').val(openApiSettings.sourceUrn);
-        }
-        else{
+        } else {
             //ToDo : Write code for showing file name
         }
     }
-    setGraphQlSettings(graphQlSettings){
+
+    setGraphQlSettings(graphQlSettings) {
         jq('#apiTypeList').val('graphQl');
         var inputId = graphQlSettings.sourceType == 'Url' ? 'graphQlInputUrl' : 'graphQlInputFile';
         this.onApiTypeChanged();
@@ -524,22 +522,24 @@ class DastScanSettings {
         jq('#dast-graphQL-api-host input').val(graphQlSettings.host);
         jq('#dast-graphQL-api-servicePath input').val(graphQlSettings.servicePath);
         jq('#dast-graphQL-schemeType input').val(graphQlSettings.schemeType);
-        if(graphQlSettings.sourceType == 'Url'){
+        if (graphQlSettings.sourceType == 'Url') {
             jq('#dast-graphQL-url input').val(graphQlSettings.sourceUrn);
-        }
-        else{
+        } else {
             //ToDo : Write code for showing file name
         }
     }
-    setGrpcSettings(grpcSettings){
+
+    setGrpcSettings(grpcSettings) {
         jq('#apiTypeList').val('grpc');
         jq('#dast-grpc-api-host input').val(graphQlSettings.host);
         jq('#dast-grpc-api-servicePath input').val(graphQlSettings.servicePath);
         jq('#dast-grpc-schemeType input').val(graphQlSettings.schemeType);
     }
-    setPostmanSettings(postmanSettings){
+
+    setPostmanSettings(postmanSettings) {
         jq('#apiTypeList').val('postman');
     }
+
     setSelectedEntitlementValue(entitlements) {
 
         let currValSelected = false;
@@ -577,7 +577,9 @@ class DastScanSettings {
             && !Object.is(this.scanSettings.networkAuthenticationSettings, undefined)) {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
             jq('#networkPasswordRow').find('input').val(this.scanSettings.networkAuthenticationSettings.password);
-            jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
+            if (jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').prop('checked') === false) {
+                jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
+            }
             let np = jq('#networkPasswordRow').find('input');
             np.attr('type', 'password');
         }
@@ -598,7 +600,7 @@ class DastScanSettings {
                 selectedScanType = dastScanTypes.find(v => v.value === "Standard");
             } else if (this.scanSettings.workflowdrivenAssessment !== null && this.scanSettings.workflowdrivenAssessment !== undefined) {
                 selectedScanType = dastScanTypes.find(v => v.value === "Workflow-driven")
-            }else if(this.scanSettings.apiAssessment !== null && this.scanSettings.apiAssessment !== undefined){
+            } else if (this.scanSettings.apiAssessment !== null && this.scanSettings.apiAssessment !== undefined) {
                 selectedScanType = dastScanTypes.find(v => v.value === "API")
             }
             // Check for API Type
@@ -668,7 +670,7 @@ class DastScanSettings {
     onScanTypeChanged() {
 
         this.resetAuthSettings();
-        jq('#apiTypeList').prop('selectedIndex',0);
+        jq('#apiTypeList').prop('selectedIndex', 0);
         let selectedScanTypeValue = jq('#scanTypeList').val();
 
         if (selectedScanTypeValue === null || undefined) {
@@ -682,11 +684,11 @@ class DastScanSettings {
     }
 
     onTimeZoneChanged() {
-      validateDropdown('#timeZoneStackSelectList');
+        validateDropdown('#timeZoneStackSelectList');
     }
 
     onNetworkAuthTypeChanged() {
-      validateDropdown('#ddlNetworkAuthType');
+        validateDropdown('#ddlNetworkAuthType');
     }
 
     setRestrictScan() {
@@ -720,19 +722,19 @@ class DastScanSettings {
         }
     }
 
-    setTimeBoxScan()
-    {
-        if(this.scanSettings.timeBoxInHours!==undefined)
-        {
+    setTimeBoxScan() {
+        if (this.scanSettings.timeBoxInHours !== undefined) {
             jq('#scanTimeBox').val(this.scanSettings.timeBoxInHours);
-            jq('#timeBoxChecked').find('input:checkbox:first').trigger('click');
+            if (jq('#timeBoxChecked').find('input:checkbox:first').prop('checked') === false) {
+                jq('#timeBoxChecked').find('input:checkbox:first').trigger('click');
+            }
         }
     }
 
     onLoginMacroFileUpload() {
         jq('#webSiteLoginMacro').val(true);
         let loginMacroFile = document.getElementById('loginFileMacro').files[0];
-        let ctl='#loginMacroUploadContainer';
+        let ctl = '#loginMacroUploadContainer';
         let msgCtl = '#loginMacroUploadMessage';
         handleSpinner(ctl, false);
 
@@ -755,8 +757,8 @@ class DastScanSettings {
     onWorkflowMacroFileUpload() {
 
         let workFlowMacroFile = document.getElementById('workflowMacroFile').files[0];
-        let ctl='#dast-workflow-macro-upload';
-        let msgCtl='#workflowMacroUploadStatusMessage';
+        let ctl = '#dast-workflow-macro-upload';
+        let msgCtl = '#workflowMacroUploadStatusMessage';
 
         handleSpinner(ctl, false);
 
@@ -806,9 +808,10 @@ class DastScanSettings {
             }
         );
     }
+
     onFileUpload(event) {
 
-        let uploadContainer = '#' + jq('#'+ event.target.id).closest('span').attr('id');
+        let uploadContainer = '#' + jq('#' + event.target.id).closest('span').attr('id');
         handleSpinner(uploadContainer, false);
         jq('.uploadMessage').text('');
         let file = null;
@@ -816,7 +819,7 @@ class DastScanSettings {
         let elem = null;
         let displayMessage = null;
 
-        switch(event.target.id){
+        switch (event.target.id) {
             case 'btnUploadOpenApiFile' :
                 file = document.getElementById('openApiFile').files[0];
                 fileType = openApiFileType;
@@ -848,7 +851,7 @@ class DastScanSettings {
                 throw new Exception("Illegal argument exception,File Type not valid");
         }
 
-        if(file == null || fileType == null || elem == null){
+        if (file == null || fileType == null || elem == null) {
             throw new Exception("Illegal argument exception,File Type not valid");
         }
 
@@ -929,7 +932,7 @@ class DastScanSettings {
         }
     }
 
-    onSourceChange(id){
+    onSourceChange(id) {
 
         jq('.openApiSourceControls').hide();
         jq('.graphQLSourceControls').hide();
@@ -937,27 +940,23 @@ class DastScanSettings {
         jq('.sourceTypeFileds').hide();
         jq('.uploadMessage').text('');
 
-        if(id == 'openApiInputFile'){
+        if (id == 'openApiInputFile') {
             jq('.openApiSourceControls').show()
             jq('#dast-api-openApi-upload').show();
             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
-        }
-        else if(id == 'openApiInputUrl'){
+        } else if (id == 'openApiInputUrl') {
             jq('.openApiSourceControls').show()
             jq('#dast-openApi-url').show();
             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
-        }
-        else if(id == 'graphQlInputFile'){
+        } else if (id == 'graphQlInputFile') {
             jq('.graphQLSourceControls').show();
             jq('#dast-api-graphQL-upload').show();
             jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
-        }
-        else if(id == 'graphQlInputUrl'){
+        } else if (id == 'graphQlInputUrl') {
             jq('.graphQLSourceControls').show();
             jq('#dast-graphQL-url').show();
             jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
-        }
-        else{
+        } else {
             jq('.sourceOptions').prop('checked', false);
         }
     }
@@ -996,6 +995,7 @@ class DastScanSettings {
             }
         }
     }
+
     openApiScanVisibility(isVisible) {
         if (isVisible)
             jq('#dast-openApi').closest('.tr').show();
@@ -1040,7 +1040,7 @@ class DastScanSettings {
 
     apiScanSettingVisibility(isVisible) {
 
-        let apiScanSettingRows = jq('.'+ dastApiSetting);
+        let apiScanSettingRows = jq('.' + dastApiSetting);
         jq('.' + dastApiSpecificControls).hide();
         if ((isVisible === undefined || null) || isVisible === false) {
             apiScanSettingRows.hide();
@@ -1137,7 +1137,7 @@ class DastScanSettings {
 
         jq('#apiTypeList').change(_ => this.onApiTypeChanged());
 
-        jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_=>this.onSourceChange(event.target.id));
+        jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_ => this.onSourceChange(event.target.id));
 
         jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile, #btnUploadgrpcFile').click(_ => this.onFileUpload(event));
 

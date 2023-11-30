@@ -482,7 +482,7 @@ class DastPipelineGenerator {
                         //Set scan policy from the response.
                         this.setScanPolicy();
                         //Set the Website assessment scan type specific settings.
-                       this.setWebSiteScanSetting();
+                        this.setWebSiteScanSetting();
                         //set timebox scan
                         this.setTimeBoxScan();
                         this.setWorkflowDrivenScanSetting();
@@ -522,7 +522,10 @@ class DastPipelineGenerator {
             && !Object.is(this.scanSettings.networkAuthenticationSettings, undefined)) {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
             jq('#networkPasswordRow').find('input').val(this.scanSettings.networkAuthenticationSettings.password);
-            jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
+            debugger;
+            if (jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').prop('checked') === false) {
+                jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
+            }
             let np = jq('#networkPasswordRow').find('input');
             np.attr('type', 'password');
         }
@@ -601,8 +604,7 @@ class DastPipelineGenerator {
         }
     }
 
-    setWebSiteScanSetting()
-    {
+    setWebSiteScanSetting() {
         debugger;
         if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
             jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.dynamicSiteUrl);
@@ -612,6 +614,7 @@ class DastPipelineGenerator {
 
 
     }
+
     setWorkflowDrivenScanSetting() {
 
         debugger;
@@ -1052,19 +1055,22 @@ class DastPipelineGenerator {
     }
 
     onExcludeUrlBtnClick(event, args) {
-       // alert(jq('#standardScanExcludedUrlText').val())
+        // alert(jq('#standardScanExcludedUrlText').val())
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
         //Add to exclude list
         jq('#listStandardScanTypeExcludedUrl');
-       // jq('#listStandardScanTypeExcludedUrl').append("<li>" + "<input type='checkbox' id= " + excludedUrl + "checked='checked'> + excludedUrl + </li>");
-        jq('#listStandardScanTypeExcludedUrl').append("<li>" +  excludedUrl + "</li>");
+        // jq('#listStandardScanTypeExcludedUrl').append("<li>" + "<input type='checkbox' id= " + excludedUrl + "checked='checked'> + excludedUrl + </li>");
+        jq('#listStandardScanTypeExcludedUrl').append("<li>" + excludedUrl + "</li>");
         jq('#listStandardScanTypeExcludedUrl').show();
     }
 
     setTimeBoxScan() {
         if (this.scanSettings.timeBoxInHours !== undefined) {
+            debugger;
             jq('#dast-timeBox-scan').find('input:text:first').val(this.scanSettings.timeBoxInHours);
-            jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
+            if (jq('#dast-timeBox-scan').find('input:checkbox:first').prop('checked') === false) {
+                jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
+            }
 
         }
     }
