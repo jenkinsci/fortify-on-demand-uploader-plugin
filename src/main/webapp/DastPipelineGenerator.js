@@ -1417,18 +1417,21 @@ class DastPipelineGenerator {
         jq('.apiOptions').show();
         jq('.sourceTypeFileds').hide();
         jq('.uploadMessage').text('');
-
+        jq('#dast-openApi-filePath').hide();
+         jq('.graphQlFilePath').hide();
         if (id === 'openApiInputFile') {
             jq('.openApiSourceControls').show()
-            jq('#dast-api-openApi-upload').show();
+            jq('#dast-api-openApi-upload').hide();
+            jq('#dast-openApi-filePath').show();
             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
         } else if (id === 'openApiInputUrl') {
             jq('.openApiSourceControls').show()
             jq('#dast-openApi-url').show();
             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
         } else if (id === 'graphQlInputFile') {
+         jq('.graphQlFilePath').show();
             jq('.graphQLSourceControls').show();
-            jq('#dast-api-graphQL-upload').show();
+            jq('#dast-api-graphQL-upload').hide();
             jq('#graphQlRadioSource').val(jq('#' + event.target.id).val());
         } else if (id === 'graphQlInputUrl') {
             jq('.graphQLSourceControls').show();

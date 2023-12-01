@@ -59,34 +59,31 @@ public class DastScanSharedBuildStep {
                                    String dastEnv,
                                    String scanTimebox,
                                    String scanPolicyType, boolean scanScope,
-                                   String selectedScanType, String selectedDynamicTimeZone, boolean isNetworkAuthRequired,
+                                   String selectedScanType, String selectedDynamicTimeZone,
                                    String networkAuthUserName,
                                    String networkAuthPassword,
                                    String userSelectedApplication,
                                    String assessmentTypeId,
                                    String entitlementId,
                                    String entitlementFrequencyType, String userSelectedEntitlement,
-                                   String selectedDynamicGeoLocation, String selectedNetworkAuthType,
                                    boolean timeBoxChecked,
                                    String selectedApiType,
                                    String openApiRadioSource, String openApiFileSource, String openApiurl, String apiKey,
                                    String postmanFile,
                                    String graphQlSource, String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
-                                   String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath) {
+                                   String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
         model = new DastScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
                 releaseId, dastEnv, scanTimebox, scanPolicyType, scanScope, selectedScanType
-                , selectedDynamicTimeZone, isNetworkAuthRequired,
-                networkAuthUserName
+                , selectedDynamicTimeZone, networkAuthUserName
                 , networkAuthPassword, userSelectedApplication
                 , assessmentTypeId, entitlementId,
                 entitlementFrequencyType, userSelectedEntitlement,
-                selectedDynamicGeoLocation, selectedNetworkAuthType,
                 selectedApiType, openApiRadioSource, openApiFileSource, openApiurl, apiKey,
                 postmanFile,
                 graphQlSource, graphQlUpload, graphQlUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                grpcupload, grpcSchemeType, grpcApiHost, grpcApiServicePath);
+                grpcupload, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQlFilePath, grpcFilePath);
 
     }
 
@@ -375,6 +372,18 @@ public class DastScanSharedBuildStep {
             case "WorkflowDrivenMacro":
                 patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.WorkflowDrivenMacro;
                 break;
+            case "OpenAPIDefinition":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.OpenAPIDefinition;
+                break;
+            case "GraphQLDefinition":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.GraphQLDefinition;
+                break;
+            case "GRPCDefinition":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.GRPCDefinition;
+                break;
+            case "PostmanCollection":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.PostmanCollection;
+                break;
             default:
                 throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
         }
@@ -396,6 +405,18 @@ public class DastScanSharedBuildStep {
                 break;
             case "WorkflowDrivenMacro":
                 patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.WorkflowDrivenMacro;
+                break;
+            case "OpenAPIDefinition":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.OpenAPIDefinition;
+                break;
+            case "GraphQLDefinition":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.GraphQLDefinition;
+                break;
+            case "GRPCDefinition":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.GRPCDefinition;
+                break;
+            case "PostmanCollection":
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.PostmanCollection;
                 break;
             default:
                 throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());

@@ -77,7 +77,7 @@ public class DastScanController extends ControllerBase {
 
             File temp = null;
             String fileName = null;
-
+            //TODO : Retain the File name uploaded by the user
             switch (requestModel.dastFileType) {
                 case LoginMacro:
                     temp = File.createTempFile("loginmacro", ".webmacro");

@@ -323,6 +323,11 @@
                                        id="openApiRadioSource"></input>
                             </f:entry>
                             <div class="sourceDetails openApiSourceControls">
+                                <div id="dast-openApi-filePath" class="dastPipelineFilePath openApiFilePath fode-field spinner-container">
+                                    <f:entry title="Please provide the OpenAPI file path. Supported extension: *.json">
+                                        <f:textbox field="openApiFilePath" ></f:textbox>
+                                    </f:entry>
+                                </div>
                                 <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileds">
                                     <f:entry field="openApiFileSource"
                                              title="Please upload your OpenAPI specification json file. Supported extensions: *.json">
@@ -353,7 +358,12 @@
                     </f:entry>
                     <f:entry field="postman">
                         <div id="dast-postman" class="apiOptions fode-field spinner-container">
-                            <f:entry field="postmanFile"
+                            <div class="dastPipelineFilePath postmanFilePath fode-field spinner-container">
+                                <f:entry title="Please provide the postman file path. Supported extension: *.json">
+                                    <f:textbox field="postmanFilePath" ></f:textbox>
+                                </f:entry>
+                            </div>
+                           <!-- <f:entry field="postmanFile"
                                      title="Please upload the Postman collection. Supported extensions: *.json">
                                 <div id="dast-api-postman-upload" class="fode-field spinner-container sourceDetails">
                                     <span>
@@ -365,7 +375,7 @@
                                               style="color: red;"></span>
                                     </span>
                                 </div>
-                            </f:entry>
+                            </f:entry>-->
 
                         </div>
                     </f:entry>
@@ -382,6 +392,10 @@
                                        id="graphQlRadioSource"></input>
                             </f:entry>
                             <div class="sourceDetails graphQLSourceControls">
+                                <div class="dastPipelineFilePath graphQlFilePath fode-field spinner-container">
+                                    <f:entry title="Please provide the graphQL file path. Supported extension: *.json">
+                                        <f:textbox field="graphQlFilePath" ></f:textbox></f:entry>
+                                </div>
                                 <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
                                     <f:entry field="graphQlUpload"
                                              title="Please upload the introspection query schema file. Supported extensions: *.json">
@@ -421,7 +435,11 @@
                     </f:entry>
                     <f:entry field="grpc">
                         <div id="dast-grpc" class="apiOptions fode-field spinner-container">
-                            <f:entry field="grpcupload" title="Please upload the proto file: *.proto">
+                            <div class="dastPipelineFilePath grpcFilePath fode-field spinner-container">
+                                <f:entry title="Please provide the grpc file path. Supported extension: *.proto">
+                                    <f:textbox field="grpcFilePath" ></f:textbox></f:entry>
+                            </div>
+                           <!-- <f:entry field="grpcupload" title="Please upload the proto file: *.proto">
                                 <div id="dast-grpc-upload" class="fode-field spinner-container">
                                     <span>
                                         <input accept=".proto" id="grpcFile" type="File" name="grpcFile"/>
@@ -431,7 +449,7 @@
                                         <span class="uploadMessage" id="grpcUploadMessage" style="color: red;"></span>
                                     </span>
                                 </div>
-                            </f:entry>
+                            </f:entry>-->
                             <f:entry title="SchemeType">
                                 <div id="dast-grpc-schemeType" class="fode-field spinner-container">
                                     <f:textbox field="grpcSchemeType" name="grpcSchemeType"/>

@@ -55,7 +55,7 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
                                   String openApiRadioSource, String openApiFileId, String openApiUrl, String openApiKey,
                                   String postmanFileId,
                                   String graphQlRadioSource, String graphQLFileId, String graphQLUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
-                                  String grpcFileId, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath
+                                  String grpcFileId, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath
 
     ) throws IllegalArgumentException, IOException {
 
@@ -81,14 +81,13 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
                     scanTimeBox,
                     scanPolicy, scanScope,
                     selectedScanType, selectedDynamicTimeZone,
-                    webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword,
+                    webSiteNetworkAuthUserName, webSiteNetworkAuthPassword,
                     userSelectedApplication, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, userSelectedEntitlement,
-                    selectedDynamicGeoLocation, selectedNetworkAuthType,
                     timeBoxChecked, selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
                     postmanFileId,
                     graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
+                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQlFilePath, grpcFilePath);
         } else {
             throw new IllegalArgumentException("Invalid Scan Type");
         }

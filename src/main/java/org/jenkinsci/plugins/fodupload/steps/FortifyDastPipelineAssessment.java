@@ -20,6 +20,7 @@ import org.jenkinsci.plugins.fodupload.controllers.*;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.response.AssessmentTypeEntitlementsForAutoProv;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.GetDastScanSettingResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -142,6 +143,17 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
 
     String openApiKey;
 
+    public String getOpenApiFilePath() {
+        return openApiFilePath;
+    }
+
+    @DataBoundSetter
+    public void setOpenApiFilePath(String openApiFilePath) {
+        this.openApiFilePath = openApiFilePath;
+    }
+
+    String openApiFilePath;
+
     public java.lang.String getPostmanFileId() {
         return postmanFileId;
     }
@@ -153,6 +165,16 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
 
     String postmanFileId;
 
+    public String getPostmanFilePath() {
+        return postmanFilePath;
+    }
+
+    @DataBoundSetter
+    public void setPostmanFilePath(String postmanFilePath) {
+        this.postmanFilePath = postmanFilePath;
+    }
+
+    String postmanFilePath;
     public String getGraphQlRadioSource() {
         return graphQlRadioSource;
     }
@@ -174,6 +196,17 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     }
 
     String graphQLFileId;
+
+    public String getGraphQLFilePath() {
+        return graphQLFilePath;
+    }
+
+    @DataBoundSetter
+    public void setGraphQLFilePath(String graphQLFilePath) {
+        this.graphQLFilePath = graphQLFilePath;
+    }
+
+    String graphQLFilePath;
 
     public String getGraphQLUrl() {
         return graphQLUrl;
@@ -240,6 +273,16 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         this.grpcSchemeType = grpcSchemeType;
     }
 
+    public String getGrpcFilePath() {
+        return grpcFilePath;
+    }
+
+    @DataBoundSetter
+    public void setGrpcFilePath(String grpcFilePath) {
+        this.grpcFilePath = grpcFilePath;
+    }
+
+    String grpcFilePath;
     String grpcSchemeType;
 
     public String getGrpcApiHost() {
@@ -454,7 +497,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 if (!loginMacroFileId.isEmpty()) {
                     loginFileId = Integer.parseInt(loginMacroFileId);
                 }
-
                 dastScanSharedBuildStep = new DastScanSharedBuildStep(
                         overrideGlobalConfig,
                         username,
@@ -483,6 +525,18 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                         networkAuthType,
                         timeBoxChecked
                 );
+            } else if (Objects.equals(scanType, FodEnums.DastScanType.API.toString()) ) {
+                dastScanSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username, personalAccessToken, tenantId,
+                        releaseId, envFacing, scanTimeBox, scanPolicy, scanScope, scanType,
+                        selectedDynamicTimeZone,
+                        networkAuthUserName,
+                        networkAuthPassword, applicationId,
+                        assessmentTypeId, entitlementId,
+                        entitlementFrequency, entitlementId, timeBoxChecked,
+                        selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
+                        postmanFileId,
+                        graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
+                        grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
             }
 
             if (dastScanSharedBuildStep == null) {
@@ -745,37 +799,51 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         PrintStream log = listener.getLogger();
-
+        DastScanSharedBuildStep dastScanSharedBuildStep = null;
         log.println("Fortify on Demand Dynamic Scan PreBuild Running...");
-
-        DastScanSharedBuildStep dastScanSharedBuildStep = new DastScanSharedBuildStep(
-                overrideGlobalConfig,
-                username,
-                tenantId,
-                personalAccessToken,
-                releaseId,
-                webSiteUrl,
-                envFacing,
-                scanTimeBox,
-                null,
-                scanPolicy,
-                scanScope,
-                scanType,
-                selectedDynamicTimeZone,
-                enableRedundantPageDetection,
-                webSiteUrl,
-                Integer.parseInt(loginMacroFileId),
-                workflowMacroId,
-                workflowMacroHosts,
-                networkAuthUserName,
-                networkAuthPassword,
-                applicationId,
-                assessmentTypeId,
-                entitlementId,
-                entitlementFrequency,
-                networkAuthType,
-                timeBoxChecked
-        );
+        if(Objects.equals(scanType, FodEnums.DastScanType.Standard) || Objects.equals(scanType, FodEnums.DastScanType.Workflow)) {
+            dastScanSharedBuildStep = new DastScanSharedBuildStep(
+                    overrideGlobalConfig,
+                    username,
+                    tenantId,
+                    personalAccessToken,
+                    releaseId,
+                    webSiteUrl,
+                    envFacing,
+                    scanTimeBox,
+                    null,
+                    scanPolicy,
+                    scanScope,
+                    scanType,
+                    selectedDynamicTimeZone,
+                    enableRedundantPageDetection,
+                    webSiteUrl,
+                    Integer.parseInt(loginMacroFileId),
+                    workflowMacroId,
+                    workflowMacroHosts,
+                    networkAuthUserName,
+                    networkAuthPassword,
+                    applicationId,
+                    assessmentTypeId,
+                    entitlementId,
+                    entitlementFrequency,
+                    networkAuthType,
+                    timeBoxChecked
+            );
+        }
+        else if(Objects.equals(FodEnums.DastScanType.API, scanType)){
+            dastScanSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username, personalAccessToken, tenantId,
+                    releaseId, envFacing, scanTimeBox, scanPolicy, scanScope, scanType,
+                    selectedDynamicTimeZone,
+                    networkAuthUserName,
+                    networkAuthPassword, applicationId,
+                    assessmentTypeId, entitlementId,
+                    entitlementFrequency, entitlementId, timeBoxChecked,
+                    selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
+                    postmanFileId,
+                    graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
+                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
+        }
 
         // When does this happen? If this only happens in syntax gen, then just use ServerClient
         boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
@@ -884,12 +952,12 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 selectedDynamicTimeZone, scanPolicy, enableRedundantPageDetection, envFacing, getNetworkAuthType().isEmpty(), networkAuthUserName, networkAuthPassword, networkAuthType);
     }
 
-    private void saveApiScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws IOException {
+    private void saveApiScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
         try {
             if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
-
-                //Path == > read the bytes=> Patch end point
-
+                Path openApiPath = Paths.get(openApiFilePath);
+                PatchDastFileUploadResponse response = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(openApiPath), "OpenAPIDefinition");
+                    openApiFileId = String.valueOf(response.fileId);
                 String sourceUrn = openApiRadioSource.equals("Url") ? openApiUrl : openApiFileId;
                 dastScanSharedBuildStep.saveReleaseSettingsForOpenApiScan(releaseId, assessmentTypeId, entitlementId,
                         entitlementFrequency, selectedDynamicTimeZone,
@@ -898,7 +966,10 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                         openApiRadioSource, sourceUrn, openApiKey);
 
             }
-            if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
+            else if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
+                Path graphQlPath = Paths.get(graphQLFilePath);
+                PatchDastFileUploadResponse response = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(graphQlPath), "GraphQLDefinition");
+                graphQLFileId = String.valueOf(response.fileId);
                 String sourceUrn = graphQlRadioSource.equals("Url") ? graphQLUrl : graphQLFileId;
                 dastScanSharedBuildStep.saveReleaseSettingsForGraphQlScan(releaseId, assessmentTypeId, entitlementId,
                         entitlementFrequency, selectedDynamicTimeZone,
@@ -906,14 +977,22 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                         networkAuthUserName, networkAuthPassword, networkAuthType,
                         sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath);
 
-            } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
+            }
+            else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
+                Path grpcPath = Paths.get(grpcFilePath);
+                PatchDastFileUploadResponse response = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(grpcPath), "GRPCDefinition");
+                grpcFileId = String.valueOf(response.fileId);
                 dastScanSharedBuildStep.saveReleaseSettingsForGrpcScan(releaseId, assessmentTypeId, entitlementId,
                         entitlementFrequency, selectedDynamicTimeZone,
                         enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
                         networkAuthUserName, networkAuthPassword, networkAuthType,
                         grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
 
-            } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
+            }
+            else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
+                Path postmanPath = Paths.get(postmanFilePath);
+                PatchDastFileUploadResponse response = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(postmanPath), "PostmanCollection");
+                postmanFileId = String.valueOf(response.fileId);
                 dastScanSharedBuildStep.saveReleaseSettingsForPostmanScan(releaseId, assessmentTypeId, entitlementId,
                         entitlementFrequency, selectedDynamicTimeZone,
                         enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
@@ -976,7 +1055,18 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                     timeBoxChecked);
         } else if (Objects.equals(scanType, FodEnums.DastScanType.API.toString())) {
 
-            //initialize dastScanSharedBuildStep overload for API here.
+            dastScanSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username, personalAccessToken, tenantId,
+                    releaseId, envFacing, scanTimeBox, scanPolicy, scanScope, scanType,
+                    selectedDynamicTimeZone,
+                    networkAuthUserName,
+                    networkAuthPassword, applicationId,
+                    assessmentTypeId, entitlementId,
+                    entitlementFrequency, entitlementId, timeBoxChecked,
+                    selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
+                    postmanFileId,
+                    graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
+                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
+
         }
         boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
         List<String> errors = null;

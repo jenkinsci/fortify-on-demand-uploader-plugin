@@ -266,7 +266,43 @@ public class DastScanJobModel {
     public String getSelectedGrpcApiServicePath() {
         return selectedGrpcApiServicePath;
     }
+    String openApiFilePath;
 
+    public String getOpenApiFilePath() {
+        return openApiFilePath;
+    }
+
+    public void setOpenApiFilePath(String openApiFilePath) {
+        this.openApiFilePath = openApiFilePath;
+    }
+
+    public String getPostmanFilePath() {
+        return postmanFilePath;
+    }
+
+    public void setPostmanFilePath(String postmanFilePath) {
+        this.postmanFilePath = postmanFilePath;
+    }
+
+    public String getGrpcFilePath() {
+        return grpcFilePath;
+    }
+
+    public void setGrpcFilePath(String grpcFilePath) {
+        this.grpcFilePath = grpcFilePath;
+    }
+
+    public String getGraphQlFilePath() {
+        return graphQlFilePath;
+    }
+
+    public void setGraphQlFilePath(String graphQlFilePath) {
+        this.graphQlFilePath = graphQlFilePath;
+    }
+
+    String postmanFilePath;
+    String grpcFilePath;
+    String graphQlFilePath;
     String selectedDynamicGeoLocation;
     boolean webSiteNetworkAuthEnabled;
     boolean webSiteLoginMacroEnabled;
@@ -278,24 +314,21 @@ public class DastScanJobModel {
                             String scanTimebox,
                             String scanPolicyType, boolean scanScope,
                             String selectedScanType, String selectedDynamicTimeZone,
-                            boolean networkAuthSettingEnabled,
                            String networkAuthUserName,
                            String networkAuthPassword,
                             String userSelectedApplication,
                            String assessmentTypeId,
                             String entitlementId,
                             String entitlementFrequencyType, String userSelectedEntitlement,
-                            String selectedDynamicGeoLocation, String selectedNetworkAuthType,
                             String selectedApiType,
                             String openApiSource, String openApiFileSource, String openApiurl, String apiKey,
                             String postmanFile,
                             String graphQlSource, String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
-                            String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath) {
+                            String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath) {
         this._releaseId = releaseId;
         this.tenantId = tenantId;
         this.overrideGlobalConfig = overrideGlobalConfig;
         this.userSelectedApplication = userSelectedApplication;
-        this.webSiteNetworkAuthEnabled = networkAuthSettingEnabled;
         this.dastEnv = dastEnv;
         this.assessmentTypeId = assessmentTypeId;
         this.username = username;
@@ -304,13 +337,11 @@ public class DastScanJobModel {
         this.scanHost = scanScope;
         this.userSelectedEntitlement = userSelectedEntitlement;
         this.selectedDynamicTimeZone = selectedDynamicTimeZone;
-        this.selectedDynamicGeoLocation = selectedDynamicGeoLocation;
         this.entitlementId = entitlementId;
         this.entitlementFrequencyType = entitlementFrequencyType;
         this.scanPolicyType = scanPolicyType;
         this.networkAuthUserName = networkAuthUserName;
         this.networkAuthPassword = networkAuthPassword;
-        this.networkAuthType = selectedNetworkAuthType;
         this.selectedApi = selectedApiType;
         this.selectedOpenApiFileSource = openApiFileSource;
         this.selectedOpenApiSource = openApiSource;
@@ -326,6 +357,10 @@ public class DastScanJobModel {
         this.selectedGrpcApiHost = grpcApiHost;
         this.selectedGrpcSchemeType = grpcSchemeType;
         this.selectedGrpcApiServicePath = grpcApiServicePath;
+        this.openApiFilePath = openApiFilePath;
+        this.postmanFilePath = postmanFilePath;
+        this.graphQlFilePath = graphQlFilePath;
+        this.grpcFilePath = grpcFilePath;
     }
 
     public String get_releaseId() {
