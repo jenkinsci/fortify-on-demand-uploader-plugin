@@ -98,7 +98,6 @@
                                 <input type="button" value="Upload" id="btnUploadOpenApiFile" class="dastFileUploadButton"/>
                                 <h6 id="openApiUploadMessage" hidden="true" class="uploadMessage"></h6>
                                 <input type="label" hidden="true"  name="openApiFileId" id="openApiFileId"/>
-                                <span class="uploadMessage" id="openApiUploadMessage" style="color: red;"></span>
                             </span>
                     </f:entry>
                 </div>
@@ -125,7 +124,6 @@
                                 <input type="button" value="Upload" id="btnUploadPostmanFile" class="dastFileUploadButton"/>
                                 <h6 id="postmanUploadMessage" hidden="true" class="uploadMessage"></h6>
                                 <input type="label" hidden="true" name="postmanFileId" id="postmanFileId"/>
-                                <span class="uploadMessage" id="postmanUploadMessage" style="color: red;"></span>
                             </span>
                         </div>
                     </f:entry>
@@ -195,7 +193,7 @@
                     </f:entry>
                     <f:entry title="API Host">
                         <div id="dast-grpc-api-host" class="fode-field spinner-container">
-                            <f:textbox field="grpcApiHost" name="graphApiHost"/>
+                            <f:textbox field="grpcApiHost" name="grpcApiHost"/>
                         </div>
                     </f:entry>
                     <f:entry title="API ServicePath">
@@ -216,7 +214,7 @@
         <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
             <div id="dast-workflow-macro-upload" class="fode-field spinner-container dast-workflow-scan">
                 <span>
-                    <input accept=".har,.webmacro,.brup" id="workflowMacroFile" type="File" name="workflowMacroFile"/>
+                    <input accept=".har,.webmacro,.burp" id="workflowMacroFile" type="File" name="workflowMacroFile"/>
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
                     <h6 id="workflowMacroUploadStatusMessage" hidden="true" name="workflowMacroUploadStatusMessage"></h6>
                     <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>

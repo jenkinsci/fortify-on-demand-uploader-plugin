@@ -306,6 +306,12 @@ class DastPipelineGenerator {
 
             jq('.fodp-row-screc').hide();
 
+            jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
+
+            jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
+
+            setOnblurEventForPipeline();
+
             //  jq('#workflowMacroFilePath').blur(_ => this.onWorkflowFlowMacroFilePathChange());
 
             this.uiLoaded = true;
@@ -450,7 +456,9 @@ class DastPipelineGenerator {
         }
 
         let fields = jq('.fodp-field.spinner-container');
-        fields.addClass('spinner');
+        handleSpinner('#releaseSelectioForm',false);
+        jq('#dastScanDetails').hide();
+        //fields.addClass('spinner');
         rows.show();
         // ToDo: deal with overlapping calls
         let ssp = this.api.getReleaseEntitlementSettings(this.releaseId, getAuthInfo(), true)
@@ -476,6 +484,7 @@ class DastPipelineGenerator {
                         let timeZoneId = this.scanSettings.timeZone;
                         jq('#timeZoneStackSelectList').val(timeZoneId);
                         this.onLoadTimeZone();
+                        this.onTimeZoneChanged();
                         /*'set the scan type based on the scan setting get response'*/
                         this.setScanType();
                         this.onScanTypeChanged();
@@ -492,12 +501,15 @@ class DastPipelineGenerator {
                         /*Set network settings from response. */
                         jq('#ddlNetworkAuthType').val(networkAuthTypes);
                         this.onNetworkAuthTypeLoad();
+                        this.onNetworkAuthTypeChanged();
                         this.setNetworkSettings();
                         //Set the PatchUploadManifest File's fileId from get response.
                         this.setPatchUploadFileId();
                         //Enable scan Type right after assessment Type drop populated.
                         this.scanSettingsVisibility(true);
                         this.scanTypeVisibility(true);
+
+                        validateRequiredFields(requiredFieldsPipeline);
 
                     } else {
                         await this.onAssessmentChanged(false);
@@ -514,7 +526,9 @@ class DastPipelineGenerator {
             this.showMessage('Failed to retrieve scan settings from API', true);
             rows.hide();
         }
-        fields.removeClass('spinner');
+        handleSpinner('#releaseSelectioForm',true);
+        jq('#dastScanDetails').show();
+        //fields.removeClass('spinner');
     }
 
     setNetworkSettings() {
@@ -668,6 +682,7 @@ class DastPipelineGenerator {
                 case "Standard": {
                     this.websiteScanSettingsVisibility(isVisible);
                     this.workflowScanSettingVisibility(false);
+                    this.apiScanSettingVisibility(false);
                     this.networkAuthSettingVisibility(isVisible);
                     this.commonScopeSettingVisibility(isVisible);
                     this.directoryAndSubdirectoriesScopeVisibility(isVisible);
@@ -693,6 +708,7 @@ class DastPipelineGenerator {
                 case "Workflow-driven":
                     this.workflowScanSettingVisibility(isVisible);
                     this.websiteScanSettingsVisibility(false);
+                    this.apiScanSettingVisibility(false);
                     this.commonScopeSettingVisibility(isVisible);
                     this.loginMacroSettingsVisibility(false);
                     this.networkAuthSettingVisibility(isVisible);
@@ -919,6 +935,7 @@ class DastPipelineGenerator {
         } else {
 
             this.scanTypeUserControlVisibility(selectedScanTypeValue, true);
+            validateDropdown('#scanTypeList');
         }
     }
 
@@ -1096,7 +1113,7 @@ class DastPipelineGenerator {
             }
 
         }
-
+        validateDropdown('#assessmentTypeSelect');
         await this.onEntitlementChanged(skipAuditPref);
         // ToDo: set to unselected if selected value doesn't exist
     }
@@ -1326,6 +1343,7 @@ class DastPipelineGenerator {
 
         } else {
             apiScanSettingRows.show();
+            validateDropdown('#apiTypeList');
         }
     }
 
@@ -1407,6 +1425,7 @@ class DastPipelineGenerator {
             this.apiTypeUserControlVisibility(null, false);
             this.apiTypeUserControlVisibility(selectedApiTypeValue, true);
             jq('.dast-api-specific-controls').show();
+            validateDropdown('#apiTypeList');
         }
     }
 
@@ -1442,6 +1461,13 @@ class DastPipelineGenerator {
         }
     }
 
+    onTimeZoneChanged() {
+      validateDropdown('#timeZoneStackSelectList');
+    }
+
+    onNetworkAuthTypeChanged() {
+      validateDropdown('#ddlNetworkAuthType');
+    }
 
     populateHiddenFields() {
         // Auth
@@ -1556,6 +1582,7 @@ class DastPipelineGenerator {
         jq('#owner').val(own);
 
     }
+
 }
 
 

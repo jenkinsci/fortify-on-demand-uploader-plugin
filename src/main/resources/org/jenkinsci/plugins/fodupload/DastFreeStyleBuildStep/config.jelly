@@ -97,7 +97,7 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreationDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreationDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelectionDialog.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastScanSettings.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastValidation.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastScanSettings.js"/>
 
 </j:jelly>

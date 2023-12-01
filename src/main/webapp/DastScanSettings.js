@@ -253,7 +253,7 @@ class DastScanSettings {
                 }
             }
         }
-
+        validateDropdown('#ddAssessmentType');
         await this.onEntitlementChanged(skipAuditPref);
         // ToDo: set to unselected if selected value doesn't exist
     }
@@ -427,7 +427,7 @@ class DastScanSettings {
                         this.scanSettingsVisibility(true);
                         this.scanTypeVisibility(true);
 
-                        validateRequiredFields();
+                        validateRequiredFields(requiredFieldsFreestyle);
 
                     } else {
                         await this.onAssessmentChanged(false);
@@ -936,6 +936,7 @@ class DastScanSettings {
             this.apiTypeUserControlVisibility(null, false);
             this.apiTypeUserControlVisibility(selectedApiTypeValue, true);
             jq('.dast-api-specific-controls').show();
+            validateDropdown('#apiTypeList');
         }
     }
 
@@ -1054,6 +1055,7 @@ class DastScanSettings {
 
         } else {
             apiScanSettingRows.show();
+            validateDropdown('#apiTypeList');
         }
     }
 
@@ -1153,7 +1155,7 @@ class DastScanSettings {
 
         jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
 
-        setOnblurEvent();
+        setOnblurEventForFreestyle(setOnblurEventForPipeline);
 
         this.uiLoaded = true;
 
