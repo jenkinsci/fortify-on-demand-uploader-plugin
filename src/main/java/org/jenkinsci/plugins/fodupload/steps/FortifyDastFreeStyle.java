@@ -58,95 +58,100 @@ public class FortifyDastFreeStyle extends Recorder implements SimpleBuildStep {
                                 String grpcFileId, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath
 
     ) throws IllegalArgumentException, IOException {
+        try {
 
+            if (selectedScanType.equals(FodEnums.DastScanType.Workflow.toString()) || selectedScanType.equals(FodEnums.DastScanType.Standard.toString())) {
+                dastSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username, tenantId,
+                        personalAccessToken, userSelectedRelease,
+                        webSiteUrl, dastEnv,
+                        scanTimeBox,
+                        listStandardScanTypeExcludedUrl,
+                        scanPolicy, scanScope,
+                        selectedScanType, selectedDynamicTimeZone, enableRedundantPageDetection, null,
+                        loginMacroId.isEmpty() ? 0 : Integer.parseInt(loginMacroId), workflowMacroId, workflowMacroHosts,
+                        webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, userSelectedApplication,
+                        assessmentTypeId, entitlementId, entitlementFrequencyType, selectedNetworkAuthType, timeBoxChecked
+                );
 
-        if (selectedScanType.equals(FodEnums.DastScanType.Workflow.toString()) || selectedScanType.equals(FodEnums.DastScanType.Standard.toString())) {
-            dastSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username, tenantId,
-                    personalAccessToken, userSelectedRelease,
-                    webSiteUrl, dastEnv,
-                    scanTimeBox,
-                    listStandardScanTypeExcludedUrl,
-                    scanPolicy, scanScope,
-                    selectedScanType, selectedDynamicTimeZone, enableRedundantPageDetection, null,
-                    loginMacroId.isEmpty() ? 0 : Integer.parseInt(loginMacroId), workflowMacroId, workflowMacroHosts,
-                    webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, userSelectedApplication,
-                    assessmentTypeId, entitlementId, entitlementFrequencyType, selectedNetworkAuthType, timeBoxChecked
-            );
-
-        } else if (selectedScanType.equals(FodEnums.DastScanType.API.toString())) {
-            dastSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username,
-                    personalAccessToken, tenantId,
-                    userSelectedRelease,
-                    dastEnv,
-                    scanTimeBox,
-                    scanPolicy, scanScope,
-                    selectedScanType, selectedDynamicTimeZone,
-                    webSiteNetworkAuthUserName, webSiteNetworkAuthPassword,
-                    userSelectedApplication, assessmentTypeId, entitlementId,
-                    entitlementFrequencyType, userSelectedEntitlement,
-                    timeBoxChecked, selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
-                    postmanFileId,
-                    graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQlFilePath, grpcFilePath);
-        } else {
-            throw new IllegalArgumentException("Invalid Scan Type");
-        }
-
-        if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
-
-            dastSharedBuildStep.SaveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                    entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicy,
-                    webSiteUrl, scanScope, enableRedundantPageDetection, dastEnv,
-                    webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName,
-                    webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimeBox);
-
-        } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
-
-            dastSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                    entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicy,
-                    enableRedundantPageDetection, dastEnv,
-                    webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType);
-
-        } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
-            if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
-                String sourceUrn = openApiRadioSource.equals("Url") ? openApiUrl : openApiFileId;
-                dastSharedBuildStep.saveReleaseSettingsForOpenApiScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                        entitlementFrequencyType, selectedDynamicTimeZone,
-                        enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
-                        webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
-                        openApiRadioSource, sourceUrn, openApiKey);
-
-            }
-            if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
-
-                String sourceUrn = graphQlRadioSource.equals("Url") ? graphQLUrl : graphQLFileId;
-                dastSharedBuildStep.SaveReleaseSettingsForGraphQlScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                        entitlementFrequencyType, selectedDynamicTimeZone,
-                        enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
-                        webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
-                        sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath);
-
-            } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
-
-                dastSharedBuildStep.SaveReleaseSettingsForGrpcScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                        entitlementFrequencyType, selectedDynamicTimeZone,
+            } else if (selectedScanType.equals(FodEnums.DastScanType.API.toString())) {
+                dastSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username,
+                        personalAccessToken, tenantId,
+                        userSelectedRelease,
                         dastEnv,
-                        webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
-                        grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
-
-            } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
-
-                dastSharedBuildStep.SaveReleaseSettingsForPostmanScan(userSelectedRelease, assessmentTypeId, entitlementId,
-                        entitlementFrequencyType, selectedDynamicTimeZone,
-                        dastEnv,
-                        webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
-                        postmanFileId);
+                        scanTimeBox,
+                        scanPolicy, scanScope,
+                        selectedScanType, selectedDynamicTimeZone,
+                        webSiteNetworkAuthUserName, webSiteNetworkAuthPassword,
+                        userSelectedApplication, assessmentTypeId, entitlementId,
+                        entitlementFrequencyType, userSelectedEntitlement,
+                        timeBoxChecked, selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
+                        postmanFileId,
+                        graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
+                        grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQlFilePath, grpcFilePath);
             } else {
-
-                throw new IllegalArgumentException("Fortify onDemand: Not Valid Dast API Scan Type set for releaseId: " + userSelectedRelease);
+                throw new IllegalArgumentException("Invalid Scan Type");
             }
-        } else
-            throw new IllegalArgumentException("Fortify onDemand: Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
+
+            if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
+
+                dastSharedBuildStep.SaveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                        entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicy,
+                        webSiteUrl, scanScope, enableRedundantPageDetection, dastEnv,
+                        webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName,
+                        webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimeBox);
+
+            } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
+
+                dastSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                        entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicy,
+                        enableRedundantPageDetection, dastEnv,
+                        webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType);
+
+            } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
+                if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
+                    String sourceUrn = openApiRadioSource.equals("Url") ? openApiUrl : openApiFileId;
+                    dastSharedBuildStep.saveReleaseSettingsForOpenApiScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                            entitlementFrequencyType, selectedDynamicTimeZone,
+                            enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
+                            webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
+                            openApiRadioSource, sourceUrn, openApiKey);
+
+                }
+                if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
+
+                    String sourceUrn = graphQlRadioSource.equals("Url") ? graphQLUrl : graphQLFileId;
+                    dastSharedBuildStep.SaveReleaseSettingsForGraphQlScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                            entitlementFrequencyType, selectedDynamicTimeZone,
+                            enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
+                            webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
+                            sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath);
+
+                } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
+
+                    dastSharedBuildStep.SaveReleaseSettingsForGrpcScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                            entitlementFrequencyType, selectedDynamicTimeZone,
+                            dastEnv,
+                            webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
+                            grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
+
+                } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
+
+                    dastSharedBuildStep.SaveReleaseSettingsForPostmanScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                            entitlementFrequencyType, selectedDynamicTimeZone,
+                            dastEnv,
+                            webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
+                            postmanFileId);
+                } else {
+
+                    throw new IllegalArgumentException("Fortify onDemand: Not Valid Dast API Scan Type set for releaseId: " + userSelectedRelease);
+                }
+            } else
+                throw new IllegalArgumentException("Fortify onDemand: Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
+        }
+        catch (Exception ex)
+        {
+          throw  new RuntimeException(String.format("Fortify onDemand: %s",ex.getMessage()));
+        }
     }
 
 

@@ -328,7 +328,8 @@ public class DastScanSharedBuildStep {
                 System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
-                throw new Exception(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)));
+                throw new Exception(String.format("Failed to save scan settings for release id=%d, error=%s", Integer.parseInt(userSelectedRelease)
+                ,response.errors.toString()));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
