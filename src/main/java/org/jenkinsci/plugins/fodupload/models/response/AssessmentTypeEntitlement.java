@@ -16,9 +16,13 @@ public class AssessmentTypeEntitlement {
     private Integer parentAssessmentTypeId;
     private String entitlementDescription;
 
+    public String getAssessmentCategory() {return assessmentCategory;}
+
+    private String assessmentCategory;
+
     public AssessmentTypeEntitlement(Integer assessmentTypeId, String name, Integer entitlementId, String frequencyType, Integer frequencyTypeId, Integer units,
                                      Integer unitsAvailable, String subscriptionEndDate, Boolean isRemediation, Integer remediationScansAvailable,
-                                     Boolean isBundledAssessment, Integer parentAssessmentTypeId, String entitlementDescription) {
+                                     Boolean isBundledAssessment, Integer parentAssessmentTypeId, String entitlementDescription, String assessmentCategory) {
         this.assessmentTypeId = assessmentTypeId;
         this.name = name;
         this.entitlementId = entitlementId;
@@ -32,6 +36,7 @@ public class AssessmentTypeEntitlement {
         this.isBundledAssessment = isBundledAssessment;
         this.parentAssessmentTypeId = parentAssessmentTypeId;
         this.entitlementDescription = entitlementDescription;
+        this.assessmentCategory = assessmentCategory;
     }
 
     public Integer getAssessmentTypeId() {

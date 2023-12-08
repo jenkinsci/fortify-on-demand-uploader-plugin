@@ -401,7 +401,7 @@
                             <div class="sourceDetails graphQLSourceControls">
                                 <div class="dastPipelineFilePath graphQlFilePath fode-field spinner-container">
                                     <f:entry title="Please provide the graphQL file path. Supported extension: *.json">
-                                        <f:textbox field="graphQlFilePath" ></f:textbox></f:entry>
+                                        <f:textbox field="graphQLFilePath" ></f:textbox></f:entry>
                                 </div>
                                 <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
                                     <f:entry field="graphQlUpload"

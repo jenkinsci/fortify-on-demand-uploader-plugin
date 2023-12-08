@@ -36,7 +36,6 @@ class ScanSettings {
 
         for (let k of Object.keys(this.assessments)) {
             let at = this.assessments[k];
-
             atsel.append(`<option value="${at.id}">${at.name}</option>`);
         }
     }
