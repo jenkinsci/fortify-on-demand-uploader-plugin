@@ -22,11 +22,7 @@
         display: none;
         }
 
-        div[descriptorid="org.jenkinsci.plugins.fodupload.StaticAssessmentBuildStep"] select {
-        width: 240px;
-        }
-
-        div[descriptorid="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"] select {
+        div[descriptorid="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"] select {
         width: 240px;
         }
 
@@ -55,30 +51,31 @@
     </style>
 
     <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+
     <f:section title="Authentication - Select to override global authentication settings">
         <f:optionalBlock name="overrideGlobalConfig" field="overrideGlobalConfig"
                          title="Configure Personal Access Token" inline="true">
-            <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AuthenticationOverride.jelly"
-                        class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
+            <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyle/AuthenticationOverride.jelly"
+                        class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
         </f:optionalBlock>
     </f:section>
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AppAndReleaseSelection.jelly"
-                class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
+    <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/AppAndReleaseSelection.jelly"
+                class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
 
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AppAndReleaseSelectionForm.jelly"
-                class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
+    <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/AppAndReleaseSelectionForm.jelly"
+                class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
 
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/ScanSettings.jelly"
-                class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
+    <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/ScanSettings.jelly"
+                class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/CreateApplicationForm.jelly"
-                class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
+    <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/CreateApplicationForm.jelly"
+                class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
 
-    <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/CreateReleaseForm.jelly"
-                class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
+    <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/CreateReleaseForm.jelly"
+                class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
 
 
     <!-- Script Section -->
@@ -86,12 +83,15 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Common.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Styling.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Auth.js"/>
+
     <script>
         var descriptor =
         <st:bind value="${descriptor}"/>
         var instance =
         <st:bind value="${instance}"/>
+
     </script>
+
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelection.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreationDialog.js"/>

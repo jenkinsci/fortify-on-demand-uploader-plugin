@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.fodupload.steps;
+package org.jenkinsci.plugins.fodupload;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
@@ -31,31 +31,31 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.UUID;
 
-public class FortifyDastFreeStyle extends Recorder implements SimpleBuildStep {
+public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBuildStep {
 
     DastScanSharedBuildStep dastSharedBuildStep;
 
     @DataBoundConstructor
-    public FortifyDastFreeStyle(boolean overrideGlobalConfig, String username,
-                                String personalAccessToken, String tenantId,
-                                String webSiteUrl, String dastEnv,
-                                String scanTimeBox,
-                                List<String> listStandardScanTypeExcludedUrl,
-                                String scanPolicy, boolean scanScope,
-                                String selectedScanType, String selectedDynamicTimeZone,
-                                boolean webSiteNetworkAuthSettingEnabled,
-                                boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                String loginMacroId, String workflowMacroId, String workflowMacroHosts, String webSiteNetworkAuthPassword,
-                                String userSelectedApplication,
-                                String userSelectedRelease, String assessmentTypeId,
-                                String entitlementId,
-                                String entitlementFrequencyType, String userSelectedEntitlement,
-                                String selectedNetworkAuthType, boolean timeBoxChecked,
-                                String selectedApiType,
-                                String openApiRadioSource, String openApiFileId, String openApiUrl, String openApiKey,
-                                String postmanFileId,
-                                String graphQlRadioSource, String graphQLFileId, String graphQLUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
-                                String grpcFileId, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath
+    public FortifyDastFreeStyleBuildStep(boolean overrideGlobalConfig, String username,
+                                         String personalAccessToken, String tenantId,
+                                         String webSiteUrl, String dastEnv,
+                                         String scanTimeBox,
+                                         List<String> listStandardScanTypeExcludedUrl,
+                                         String scanPolicy, boolean scanScope,
+                                         String selectedScanType, String selectedDynamicTimeZone,
+                                         boolean webSiteNetworkAuthSettingEnabled,
+                                         boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
+                                         String loginMacroId, String workflowMacroId, String workflowMacroHosts, String webSiteNetworkAuthPassword,
+                                         String userSelectedApplication,
+                                         String userSelectedRelease, String assessmentTypeId,
+                                         String entitlementId,
+                                         String entitlementFrequencyType, String userSelectedEntitlement,
+                                         String selectedNetworkAuthType, boolean timeBoxChecked,
+                                         String selectedApiType,
+                                         String openApiRadioSource, String openApiFileId, String openApiUrl, String openApiKey,
+                                         String postmanFileId,
+                                         String graphQlRadioSource, String graphQLFileId, String graphQLUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
+                                         String grpcFileId, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath
 
     ) throws IllegalArgumentException, IOException {
         try {
@@ -261,14 +261,14 @@ public class FortifyDastFreeStyle extends Recorder implements SimpleBuildStep {
     }
 
     @Override
-    public DynamicAssessmentBuilderDescriptor getDescriptor() {
+    public FortifyDastFreeStyleBuilderDescriptor getDescriptor() {
 
-        return (DynamicAssessmentBuilderDescriptor) super.getDescriptor();
+        return (FortifyDastFreeStyleBuilderDescriptor) super.getDescriptor();
     }
 
     @Extension
-    public static final class DynamicAssessmentBuilderDescriptor extends BuildStepDescriptor<Publisher> {
-        public DynamicAssessmentBuilderDescriptor() {
+    public static final class FortifyDastFreeStyleBuilderDescriptor extends BuildStepDescriptor<Publisher> {
+        public FortifyDastFreeStyleBuilderDescriptor() {
             super();
             load();
         }
