@@ -332,7 +332,8 @@
                             <div class="sourceDetails openApiSourceControls">
                                 <div id="dast-openApi-filePath" class="dastPipelineFilePath openApiFilePath fode-field spinner-container">
                                     <f:entry title="Please provide the OpenAPI file path. Supported extension: *.json">
-                                        <f:textbox field="openApiFilePath" ></f:textbox>
+                                        <f:textbox field="openApiFilePath" name="openApiFilePath"></f:textbox>
+                                        <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are *.json</p>
                                     </f:entry>
                                 </div>
                                 <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileds">
@@ -367,7 +368,8 @@
                         <div id="dast-postman" class="apiOptions fode-field spinner-container">
                             <div class="dastPipelineFilePath postmanFilePath fode-field spinner-container">
                                 <f:entry title="Please provide the postman file path. Supported extension: *.json">
-                                    <f:textbox field="postmanFilePath" ></f:textbox>
+                                    <f:textbox field="postmanFilePath" name="postmanFilePath"></f:textbox>
+                                    <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are *.json</p>
                                 </f:entry>
                             </div>
                            <!-- <f:entry field="postmanFile"
@@ -401,7 +403,9 @@
                             <div class="sourceDetails graphQLSourceControls">
                                 <div class="dastPipelineFilePath graphQlFilePath fode-field spinner-container">
                                     <f:entry title="Please provide the graphQL file path. Supported extension: *.json">
-                                        <f:textbox field="graphQLFilePath" ></f:textbox></f:entry>
+                                        <f:textbox field="graphQLFilePath" name="graphQLFilePath" ></f:textbox>
+                                        <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are *.json</p>
+                                    </f:entry>
                                 </div>
                                 <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
                                     <f:entry field="graphQlUpload"
@@ -444,7 +448,9 @@
                         <div id="dast-grpc" class="apiOptions fode-field spinner-container">
                             <div class="dastPipelineFilePath grpcFilePath fode-field spinner-container">
                                 <f:entry title="Please provide the grpc file path. Supported extension: *.proto">
-                                    <f:textbox field="grpcFilePath" ></f:textbox></f:entry>
+                                    <f:textbox field="grpcFilePath" name="grpcFilePath"></f:textbox>
+                                    <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are *.proto</p>
+                                </f:entry>
                             </div>
                            <!-- <f:entry field="grpcupload" title="Please upload the proto file: *.proto">
                                 <div id="dast-grpc-upload" class="fode-field spinner-container">
