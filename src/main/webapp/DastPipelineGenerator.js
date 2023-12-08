@@ -356,8 +356,11 @@ class DastPipelineGenerator {
         if (this.assessments) {
             for (let k of Object.keys(this.assessments)) {
                 let at = this.assessments[k];
-                if (at !== null)
+                if (at !== null){
+                if(at.assessmentCategory == 'DAST_Automated'){
                     atsel.append(`<option value="${at.id}">${at.name}</option>`);
+                    }
+            }
             }
         }
     }

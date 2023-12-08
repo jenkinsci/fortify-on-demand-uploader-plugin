@@ -220,9 +220,10 @@ class DastFreeStyle {
         jq(`#entitlementSelectList`).find('option').remove();
 
         for (let k of Object.keys(this.assessments)) {
-            let at = this.assessments[k];
-
+         let at = this.assessments[k];
+         if(at.assessmentCategory == 'DAST_Automated'){
             atsel.append(`<option value="${at.id}">${at.name}</option>`);
+            }
         }
     }
 

@@ -186,7 +186,8 @@ class Api {
                         id: ae.assessmentTypeId,
                         name: ae.name,
                         entitlements: {},
-                        entitlementsSorted: []
+                        entitlementsSorted: [],
+                        assessmentCategory: ae.assessmentCategory
                     };
                     assessments[ae.assessmentTypeId] = assessment;
                 }

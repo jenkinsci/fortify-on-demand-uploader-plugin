@@ -837,7 +837,7 @@ public class FortifyDastPipeline extends FortifyStep {
             }
 
             PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.graphQLFilePath,
-                    printStream, FodEnums.DastScanFileTypes.OpenAPIDefinition);
+                    printStream, FodEnums.DastScanFileTypes.GraphQLDefinition);
 
             if (response == null || !response.isSuccess || response.fileId <= 0) {
                 throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));

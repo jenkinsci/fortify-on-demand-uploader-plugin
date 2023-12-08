@@ -70,7 +70,7 @@ public class DastScanSharedBuildStep {
                                    String openApiRadioSource, String openApiFileSource, String openApiurl, String apiKey,
                                    String postmanFile,
                                    String graphQlSource, String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
-                                   String grpcUpload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath) {
+                                   String grpcUpload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQLFilePath, String grpcFilePath) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
         model = new DastScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
@@ -82,7 +82,7 @@ public class DastScanSharedBuildStep {
                 selectedApiType, openApiRadioSource, openApiFileSource, openApiurl, apiKey,
                 postmanFile,
                 graphQlSource, graphQlUpload, graphQlUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                grpcUpload, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQlFilePath, grpcFilePath);
+                grpcUpload, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
 
     }
 
