@@ -281,8 +281,7 @@ class Api {
         });
     }
 
-//-----------Dynamic Scan Settings----------------------------
-
+//-----------DAST Scan Settings----------------------------
     getTimeZoneStacks(customAuth) {
         return new Promise((res, rej) => {
             let timeZones;
@@ -297,22 +296,6 @@ class Api {
 
         });
     }
-
-    getGeoLocationStacks(customAuth) {
-        return new Promise((res, rej) => {
-            let geoLocations;
-
-            let ttprom = new Promise((ttres, ttrej) => {
-                this.descriptor.retrieveLookupItems('GeoLocations', customAuth, t => {
-                    geoLocations = JSON.parse(t.responseJSON);
-                    res(geoLocations);
-                    ttres();
-                });
-            });
-            console.log(geoLocations);
-        });
-    }
-
     getNetworkAuthType(customAuth) {
 
         return new Promise((res, reject) => {
@@ -334,10 +317,7 @@ class Api {
             let fileContent = fileReader.readAsBinaryString(file);
             fileReader.onload = () => {
                 fileContent = fileReader.result;
-
-                this.descriptor.patchSetupManifestFile(releaseId, customAuth, fileContent, fileType, async res => {
-                    console.log(res);
-                    console.log(res.responseJSON);
+                this.descriptor.DastManifestFileUpload(releaseId, customAuth, fileContent, fileType,file.name, async res => {
 
                     if (res.responseJSON !== null && res.responseJSON.isSuccess ===true)
                         return accept(res.responseJSON);
@@ -348,7 +328,7 @@ class Api {
         });
     }
 
-//-----------------------Dynamic Scan Settings-------------
+//-----------------------DAST Scan Settings-------------
 
     _modifyDynamicAssessmentEntitlements(responseJSON) {
         if (Array.isArray(responseJSON) && responseJSON.length > 0) {

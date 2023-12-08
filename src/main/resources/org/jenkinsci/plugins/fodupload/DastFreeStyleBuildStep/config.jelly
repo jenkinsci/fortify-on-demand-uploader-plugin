@@ -26,7 +26,7 @@
         width: 240px;
         }
 
-        div[descriptorid="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"] select {
+        div[descriptorid="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"] select {
         width: 240px;
         }
 
@@ -59,26 +59,26 @@
         <f:optionalBlock name="overrideGlobalConfig" field="overrideGlobalConfig"
                          title="Configure Personal Access Token" inline="true">
             <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AuthenticationOverride.jelly"
-                        class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
+                        class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
         </f:optionalBlock>
     </f:section>
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AppAndReleaseSelection.jelly"
-                class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
+                class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
 
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/AppAndReleaseSelectionForm.jelly"
-                class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
+                class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
 
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/ScanSettings.jelly"
-                class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
+                class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/CreateApplicationForm.jelly"
-                class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
+                class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
 
     <st:include page="/org/jenkinsci/plugins/fodupload/DastFreeStyleBuildStep/CreateReleaseForm.jelly"
-                class="org.jenkinsci.plugins.fodupload.DastFreeStyleBuildStep"/>
+                class="org.jenkinsci.plugins.fodupload.steps.FortifyDastFreeStyle"/>
 
 
     <!-- Script Section -->
@@ -98,6 +98,6 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreationDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelectionDialog.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastValidation.js"/>
-    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastScanSettings.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastFreeStyle.js"/>
 
 </j:jelly>
