@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.fodupload;
+package org.jenkinsci.plugins.fodupload.steps;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
@@ -13,6 +13,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.fodupload.*;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.controllers.*;
@@ -30,32 +31,31 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.UUID;
 
-public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep {
+public class FortifyDastFreeStyle extends Recorder implements SimpleBuildStep {
 
     DastScanSharedBuildStep dastSharedBuildStep;
 
     @DataBoundConstructor
-    public DastFreeStyleBuildStep(boolean overrideGlobalConfig, String username,
-                                  String personalAccessToken, String tenantId,
-                                  String selectedReleaseType,
-                                  String webSiteUrl, String dastEnv,
-                                  String scanTimeBox,
-                                  List<String> listStandardScanTypeExcludedUrl,
-                                  String scanPolicy, boolean scanScope,
-                                  String selectedScanType, String selectedDynamicTimeZone,
-                                  boolean webSiteLoginMacroEnabled, boolean webSiteNetworkAuthSettingEnabled,
-                                  boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                  String loginMacroId, String workflowMacroId, String workflowMacroHosts, String webSiteNetworkAuthPassword,
-                                  String userSelectedApplication,
-                                  String userSelectedRelease, String assessmentTypeId,
-                                  String entitlementId,
-                                  String entitlementFrequencyType, String userSelectedEntitlement,
-                                  String selectedDynamicGeoLocation, String selectedNetworkAuthType, boolean timeBoxChecked,
-                                  String selectedApiType,
-                                  String openApiRadioSource, String openApiFileId, String openApiUrl, String openApiKey,
-                                  String postmanFileId,
-                                  String graphQlRadioSource, String graphQLFileId, String graphQLUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
-                                  String grpcFileId, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath
+    public FortifyDastFreeStyle(boolean overrideGlobalConfig, String username,
+                                String personalAccessToken, String tenantId,
+                                String webSiteUrl, String dastEnv,
+                                String scanTimeBox,
+                                List<String> listStandardScanTypeExcludedUrl,
+                                String scanPolicy, boolean scanScope,
+                                String selectedScanType, String selectedDynamicTimeZone,
+                                boolean webSiteNetworkAuthSettingEnabled,
+                                boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
+                                String loginMacroId, String workflowMacroId, String workflowMacroHosts, String webSiteNetworkAuthPassword,
+                                String userSelectedApplication,
+                                String userSelectedRelease, String assessmentTypeId,
+                                String entitlementId,
+                                String entitlementFrequencyType, String userSelectedEntitlement,
+                                String selectedNetworkAuthType, boolean timeBoxChecked,
+                                String selectedApiType,
+                                String openApiRadioSource, String openApiFileId, String openApiUrl, String openApiKey,
+                                String postmanFileId,
+                                String graphQlRadioSource, String graphQLFileId, String graphQLUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
+                                String grpcFileId, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath
 
     ) throws IllegalArgumentException, IOException {
 
@@ -94,18 +94,19 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
 
         if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
 
-            dastSharedBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
+            dastSharedBuildStep.SaveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicy,
                     webSiteUrl, scanScope, enableRedundantPageDetection, dastEnv,
-                    webSiteNetworkAuthSettingEnabled, webSiteLoginMacroEnabled, webSiteNetworkAuthUserName,
+                    webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName,
                     webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimeBox);
 
         } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
 
-            dastSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
+            dastSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
                     entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicy,
                     enableRedundantPageDetection, dastEnv,
                     webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType);
+
         } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
             if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
                 String sourceUrn = openApiRadioSource.equals("Url") ? openApiUrl : openApiFileId;
@@ -117,32 +118,35 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
 
             }
             if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
+
                 String sourceUrn = graphQlRadioSource.equals("Url") ? graphQLUrl : graphQLFileId;
-                dastSharedBuildStep.saveReleaseSettingsForGraphQlScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                dastSharedBuildStep.SaveReleaseSettingsForGraphQlScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, selectedDynamicTimeZone,
                         enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
                         webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
                         sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath);
 
             } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
-                dastSharedBuildStep.saveReleaseSettingsForGrpcScan(userSelectedRelease, assessmentTypeId, entitlementId,
+
+                dastSharedBuildStep.SaveReleaseSettingsForGrpcScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, selectedDynamicTimeZone,
-                        enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
+                        dastEnv,
                         webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
                         grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
 
             } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
-                dastSharedBuildStep.saveReleaseSettingsForPostmanScan(userSelectedRelease, assessmentTypeId, entitlementId,
+
+                dastSharedBuildStep.SaveReleaseSettingsForPostmanScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, selectedDynamicTimeZone,
-                        enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
+                        dastEnv,
                         webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
                         postmanFileId);
             } else {
-                throw new IllegalArgumentException("Not Valid Dast API Scan Type set for releaseId: " + userSelectedRelease);
+
+                throw new IllegalArgumentException("Fortify onDemand: Not Valid Dast API Scan Type set for releaseId: " + userSelectedRelease);
             }
         } else
-            throw new IllegalArgumentException("Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
-
+            throw new IllegalArgumentException("Fortify onDemand: Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
     }
 
 
@@ -150,16 +154,12 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
 
         if (dastSharedBuildStep.getModel() == null) {
-            System.out.println("job model is null");
-            throw new IllegalArgumentException("DAST model not been set");
+            Utils.logger(listener.getLogger(), "Dast job model not constructed");
+            throw new RuntimeException("Dast job model not constructed");
         } else {
-            try {
-                dastSharedBuildStep.ValidateModel();
-            } catch (FormValidation e) {
-                throw new RuntimeException(e);
-            }
+            dastSharedBuildStep.ValidateModel();
+            return true;
         }
-        return true;
     }
 
     @Override
@@ -168,18 +168,15 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
         PrintStream log = listener.getLogger();
         build.addAction(new CrossBuildAction());
         try {
-            System.out.println("saves the jobs information");
-            build.save();
+           build.save();
         } catch (IOException ex) {
-            log.println("Error saving settings. Error message: " + ex);
+            Utils.logger(log, String.format("Build save failed for release Id: %s with error: %s" , getReleaseId(),ex.getMessage()));
         }
-
         String correlationId = UUID.randomUUID().toString();
         dastSharedBuildStep.perform(build, workspace, launcher, listener, correlationId);
 
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
         crossBuildAction.setPreviousStepBuildResult(build.getResult());
-
 
         if (Result.SUCCESS.equals(crossBuildAction.getPreviousStepBuildResult())) {
             crossBuildAction.setScanId(dastSharedBuildStep.getScanId());
@@ -188,9 +185,8 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
         try {
             build.save();
         } catch (IOException ex) {
-            log.println("Error saving settings. Error message: " + ex);
+            Utils.logger(log, String.format("Build save failed for release Id: %s with error: %s" , getReleaseId(),ex.getMessage()));
         }
-
     }
 
     @SuppressWarnings("unused")
@@ -244,13 +240,11 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
     @SuppressWarnings("unused")
     @JavaScriptMethod
     public String getUserSelectedRelease() {
-        System.out.println("user selected release");
         return dastSharedBuildStep.getModel().getUserSelectedRelease();
     }
 
     @JavaScriptMethod
     public String getUseSelectedApiType() {
-        System.out.println("user selected release");
         return dastSharedBuildStep.getModel().getUseSelectedApiType();
     }
 
@@ -258,7 +252,6 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
     @SuppressWarnings("unused")
     @JavaScriptMethod
     public String getUserSelectedApplication() {
-        System.out.println("user selected application");
         return dastSharedBuildStep.getModel().getUserSelectedApplication();
     }
 
@@ -315,25 +308,9 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
             return applicationsController.getApplicationById(applicationId);
         }
 
-        //ToDo:- delete this dead code after completing pipeline.
-//        public static GenericListResponse<ReleaseApiResponse> customFillUserSelectedReleaseList(int applicationId, int microserviceId, String searchTerm, Integer offset, Integer limit, AuthenticationModel authModel) throws IOException {
-//            FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
-//            ApplicationsController applicationController = new ApplicationsController(apiConnection, null, null);
-//            return applicationController.getReleaseListByApplication(applicationId, microserviceId, searchTerm, offset, limit);
-//        }
-//
-//
-//        public static org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> customFillUserReleaseById(int releaseId, AuthenticationModel authModel) throws IOException {
-//            FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel);
-//            ApplicationsController applicationsController = new ApplicationsController(apiConnection, null, null);
-//            org.jenkinsci.plugins.fodupload.models.Result<ReleaseApiResponse> result = applicationsController.getReleaseById(releaseId);
-//            return result;
-//        }
-
-
         @SuppressWarnings("unused")
         @JavaScriptMethod
-        public PatchDastFileUploadResponse patchSetupManifestFile(String releaseId, JSONObject authModelObject, String fileContent, String fileType) throws FormValidation {
+        public PatchDastFileUploadResponse DastManifestFileUpload(String releaseId, JSONObject authModelObject, String fileContent, String fileType,String fileName) throws FormValidation {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
@@ -343,29 +320,29 @@ public class DastFreeStyleBuildStep extends Recorder implements SimpleBuildStep 
 
                 switch (fileType) {
                     case "LoginMacro":
-                        patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.LoginMacro;
+                        patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.LoginMacro;
                         break;
                     case "WorkflowDrivenMacro":
-                        patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.WorkflowDrivenMacro;
+                        patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.WorkflowDrivenMacro;
                         break;
                     case "OpenAPIDefinition":
-                        patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.OpenAPIDefinition;
+                        patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.OpenAPIDefinition;
                         break;
                     case "GraphQLDefinition":
-                        patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.GraphQLDefinition;
+                        patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.GraphQLDefinition;
                         break;
                     case "GRPCDefinition":
-                        patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.GRPCDefinition;
+                        patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.GRPCDefinition;
                         break;
                     case "PostmanCollection":
-                        patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.PostmanCollection;
+                        patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.PostmanCollection;
                         break;
                     default:
-                        throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + releaseId);
+                        throw new IllegalArgumentException("Dast Manifest upload file type is not set for the release Id: " + releaseId);
                 }
 
                 patchDastScanFileUploadReq.Content = fileContent.getBytes();
-                return dastScanController.PatchDynamicScan(patchDastScanFileUploadReq);
+                return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());

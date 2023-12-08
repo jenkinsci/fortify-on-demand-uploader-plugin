@@ -1,8 +1,10 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.reflect.TypeToken;
+import hudson.FilePath;
 import okhttp3.*;
 import org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants;
+import org.jenkinsci.plugins.fodupload.FodApi.DastScanPayloadUpload;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.Json;
@@ -10,8 +12,6 @@ import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class DastScanController extends ControllerBase {
         super(apiConnection, logger, correlationId);
     }
 
-    public PutDastScanSetupResponse putDastWebSiteScanSettings(final Integer releaseId, PutDastWebSiteScanReqModel settings) throws IOException {
+    public PutDastScanSetupResponse SaveDastWebSiteScanSettings(final Integer releaseId, PutDastWebSiteScanReqModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
 
@@ -51,7 +51,7 @@ public class DastScanController extends ControllerBase {
         return putDynamicScanSetupResponse;
     }
 
-    public PutDastScanSetupResponse putDastWorkflowDrivenScanSettings(final Integer releaseId, PutDastWorkflowDrivenScanReqModel settings) throws IOException {
+    public PutDastScanSetupResponse SaveDastWorkflowDrivenScanSettings(final Integer releaseId, PutDastWorkflowDrivenScanReqModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
 
@@ -71,82 +71,55 @@ public class DastScanController extends ControllerBase {
         return putDastScanSetupResponse;
     }
 
-    public PatchDastFileUploadResponse PatchDynamicScan(PatchDastScanFileUploadReq requestModel) throws Exception {
+    public PatchDastFileUploadResponse DastFileUpload(PatchDastScanFileUploadReq requestModel) throws Exception {
 
         try {
-
-            File temp = null;
-            String fileName = null;
-            //TODO : Retain the File name uploaded by the user
-            switch (requestModel.dastFileType) {
-                case LoginMacro:
-                    temp = File.createTempFile("loginmacro", ".webmacro");
-                    fileName = "loginmacro.webmacro";
-                    break;
-
-                case WorkflowDrivenMacro:
-                    temp = File.createTempFile("worflowdriven", requestModel.releaseId);
-                    fileName = "WorkflowDriven.webmacro";
-                    break;
-                case OpenAPIDefinition:
-                    temp = File.createTempFile("openAPIDefinition", requestModel.releaseId);
-                    fileName = "OpenAPIDefinition.json";
-                    break;
-                case GRPCDefinition:
-                    temp = File.createTempFile("grpcDefinition", requestModel.releaseId);
-                    fileName = "GRPCDefinition.proto";
-                    break;
-                case GraphQLDefinition:
-                    temp = File.createTempFile("graphQLDefinition", requestModel.releaseId);
-                    fileName = "GraphQLDefinition.json";
-                    break;
-                case PostmanCollection:
-                    temp = File.createTempFile("postmanCollection", requestModel.releaseId);
-                    fileName = "PostmanCollection.json";
-                    break;
-            }
-            if (temp == null) {
-                throw new RuntimeException("File upload not available");
-            }
-            try (FileOutputStream outputStream = new FileOutputStream(temp)) {
-                outputStream.write(requestModel.Content);
-            }
-            System.out.println(temp.getAbsolutePath());
-
             HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                     .addQueryParameter("dastFileType", (requestModel.dastFileType.getValue()))
                     .addPathSegments(String.format(FodGlobalConstants.FodDastApiEndpoint.DastFileUploadPatchApi, Integer.parseInt(requestModel.releaseId)));
 
             RequestBody requestBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart("file", fileName,
-                            RequestBody.create(MediaType.parse("application/octet-stream"), temp))
+                    .addFormDataPart("file", requestModel.fileName,
+                            RequestBody.create(MediaType.parse("application/octet-stream"), requestModel.Content))
                     .build();
-
 
             Request request = new Request.Builder().url(urlBuilder.build())
                     .addHeader("Accept", "application/octet-stream")
                     .addHeader("CorrelationId", getCorrelationId())
                     .patch(requestBody).build();
-
-
             ResponseContent response = apiConnection.request(request);
             PatchDastFileUploadResponse patchDastFileUploadResponse = new PatchDastFileUploadResponse();
             patchDastFileUploadResponse = convertHttpResponseIntoDastApiResponse(response, patchDastFileUploadResponse);
-            try {
-                temp.delete();
-            } catch (SecurityException ex) {
-                //ignore.
-            }
+
             return patchDastFileUploadResponse;
 
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             throw ex;
-        } finally {
-
         }
     }
+
+
+    public PatchDastFileUploadResponse DastFileUpload(FilePath payload, PrintStream logger,
+                                                      PatchDastScanFileUploadReq requestModel) throws Exception {
+        try {
+
+            HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                    .addQueryParameter("dastFileType", (requestModel.dastFileType.getValue()))
+                    .addPathSegments(String.format(FodGlobalConstants.FodDastApiEndpoint.DastFileUploadPatchApi, Integer.parseInt(requestModel.releaseId)));
+
+            DastScanPayloadUpload dastScanPayloadUpload = apiConnection.getDastScanPayloadUploadInstance(payload, requestModel.releaseId,
+                    urlBuilder.build().url().toString(), correlationId, logger);
+
+            return dastScanPayloadUpload.performUpload();
+
+        } catch (Exception ex) {
+            logger.println(ex.getMessage());
+            throw ex;
+        }
+    }
+
 
     public PostDastStartScanResponse StartDastScan(Integer releaseId) throws IOException {
 
@@ -167,8 +140,6 @@ public class DastScanController extends ControllerBase {
     public GetDastScanSettingResponse getDastScanSettings(final Integer releaseId) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiEndpoint.DastGetApi, releaseId));
-
-        System.out.println("retrieve dynamic scan settings....");
 
         Request request = new Request.Builder().url(urlBuilder.build()).addHeader("Accept", "application/json").addHeader("CorrelationId", getCorrelationId()).get().build();
         return apiConnection.requestTyped(request, new TypeToken<GetDastScanSettingResponse>() {
@@ -191,15 +162,13 @@ public class DastScanController extends ControllerBase {
                 .build();
         ResponseContent response = apiConnection.request(request);
         PutDastScanSetupResponse putDastScanSetupResponse = new PutDastScanSetupResponse();
-        putDastScanSetupResponse =  convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
+        putDastScanSetupResponse = convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
         return putDastScanSetupResponse;
     }
 
     public PutDastScanSetupResponse putDastGrpcScanSettings(final Integer releaseId, PutDastAutomatedGrpcReqModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
-
-        System.out.println("req content " + requestContent);
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments(String.format(DastGrpcScanPutApi, releaseId));
@@ -211,15 +180,13 @@ public class DastScanController extends ControllerBase {
                 .build();
         ResponseContent response = apiConnection.request(request);
         PutDastScanSetupResponse putDastScanSetupResponse = new PutDastScanSetupResponse();
-        putDastScanSetupResponse =  convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
+        putDastScanSetupResponse = convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
         return putDastScanSetupResponse;
     }
 
     public PutDastScanSetupResponse putDastGraphQLScanSettings(final Integer releaseId, PutDastAutomatedGraphQlReqModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
-
-        System.out.println("req content " + requestContent);
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments(String.format(DastGraphQLScanPutApi, releaseId));
@@ -231,15 +198,13 @@ public class DastScanController extends ControllerBase {
                 .build();
         ResponseContent response = apiConnection.request(request);
         PutDastScanSetupResponse putDastScanSetupResponse = new PutDastScanSetupResponse();
-        putDastScanSetupResponse =  convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
+        putDastScanSetupResponse = convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
         return putDastScanSetupResponse;
     }
 
     public PutDastScanSetupResponse putDastPostmanScanSettings(final Integer releaseId, PutDastAutomatedPostmanReqModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
-
-        System.out.println("req content " + requestContent);
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments(String.format(DastPostmanScanPutApi, releaseId));
@@ -251,7 +216,7 @@ public class DastScanController extends ControllerBase {
                 .build();
         ResponseContent response = apiConnection.request(request);
         PutDastScanSetupResponse putDastScanSetupResponse = new PutDastScanSetupResponse();
-        putDastScanSetupResponse =  convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
+        putDastScanSetupResponse = convertHttpResponseIntoDastApiResponse(response, putDastScanSetupResponse);
         return putDastScanSetupResponse;
     }
 
@@ -261,9 +226,7 @@ public class DastScanController extends ControllerBase {
             return parseHttpSuccessResponse(response, fodApiResponse);
 
         } else {
-
             return parseFailureResponse(response, fodApiResponse);
-
         }
     }
 
@@ -293,11 +256,11 @@ public class DastScanController extends ControllerBase {
         } else {
             T parsedResponse = parseHttpBodyResponse(response, fodApiResponse);
             error err = new error();
-            err.errorCode =  ((FodDastApiResponse) parsedResponse).HttpCode;
+            err.errorCode = ((FodDastApiResponse) parsedResponse).HttpCode;
             err.message = ((FodDastApiResponse) parsedResponse).reason;
             ((FodDastApiResponse) parsedResponse).errors = new ArrayList<>();
             ((FodDastApiResponse) parsedResponse).errors.add(err);
-            return  parsedResponse;
+            return parsedResponse;
         }
     }
 
@@ -326,7 +289,7 @@ public class DastScanController extends ControllerBase {
             ((PostDastStartScanResponse) parsedResponse).isSuccess = response.isSuccessful();
             ((PostDastStartScanResponse) parsedResponse).HttpCode = response.code();
             ((PostDastStartScanResponse) parsedResponse).reason = response.bodyContent();
-            return  parsedResponse;
+            return parsedResponse;
 
         } else {
             ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();

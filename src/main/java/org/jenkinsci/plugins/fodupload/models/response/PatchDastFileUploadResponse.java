@@ -15,9 +15,7 @@ import java.util.List;
 public class PatchDastFileUploadResponse extends FodDastApiResponse {
     public PatchDastFileUploadResponse(){
     }
-    public void setFileId(int fileId) {
-        this.fileId = fileId;
-    }
+
     public int fileId;
     public String[] hosts;
 }

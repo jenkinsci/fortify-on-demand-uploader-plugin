@@ -307,7 +307,7 @@ public class FodEnums {
 
     }
 
-    public enum DynamicScanFileTypes {
+    public enum DastScanFileTypes {
         OpenAPIDefinition("OpenAPIDefinition"),
         GraphQLDefinition("GraphQLDefinition"),
         GRPCDefinition("GRPCDefinition"),
@@ -316,7 +316,7 @@ public class FodEnums {
         PostmanCollection("PostmanCollection");
         private final String _val;
 
-        public static DynamicScanFileTypes fromInt(int val) {
+        public static DastScanFileTypes fromInt(int val) {
             switch (val) {
                 case 7:
                     return PostmanCollection;
@@ -339,7 +339,7 @@ public class FodEnums {
             return null;
         }
 
-        DynamicScanFileTypes(String val) {
+        DastScanFileTypes(String val) {
             this._val = val;
         }
 

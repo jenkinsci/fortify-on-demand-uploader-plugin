@@ -1,9 +1,6 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-import java.util.List;
-
 public class DastScanJobModel {
-
     private boolean overrideGlobalConfig;
     String username;
     String timeBoxScan;
@@ -24,7 +21,6 @@ public class DastScanJobModel {
     }
 
     int workflowMacroFileId;
-
     String dastEnv;
     String scanPolicyType;
     boolean scanHost;
@@ -36,10 +32,7 @@ public class DastScanJobModel {
     String networkAuthUserName;
     Integer loginFileMacro;
     String networkAuthPassword;
-
-
-     String networkAuthType;
-
+    String networkAuthType;
     String userSelectedApplication;
     String userSelectedRelease;
     String assessmentTypeId;
@@ -57,11 +50,10 @@ public class DastScanJobModel {
     String selectedGraphQlUpload;
     String selectedGraphQlUrl;
     String selectedGraphQLSchemeType;
-
     String loginMacroFilePath;
     String selectedGraphQlApiHost;
     String selectedGraphQlApiServicePath;
-    String selectedGrpcupload;
+    String selectedGrpcUpload;
     String selectedGrpcSchemeType;
     String selectedGrpcApiHost;
     String selectedGrpcApiServicePath;
@@ -76,7 +68,6 @@ public class DastScanJobModel {
                             String networkAuthPassword, String assessmentTypeId,
                             String entitlementId, String entitlementFrequencyType,
                             String selectedNetworkAuthType) {
-
         this._releaseId = releaseId;
         this.overrideGlobalConfig = overrideGlobalConfig;
         this.username = username;
@@ -84,7 +75,7 @@ public class DastScanJobModel {
         this.tenantId = tenantId;
         this.webSiteUrl = webSiteUrl;
 
-        if ( workflowMacroId!=null &&!workflowMacroId.isEmpty()) {
+        if (workflowMacroId != null && !workflowMacroId.isEmpty()) {
             this.workflowMacroFileId = Integer.parseInt(workflowMacroId);
         }
         this.loginMacroFilePath = loginMacroFilePath;
@@ -101,7 +92,6 @@ public class DastScanJobModel {
         this.entitlementId = entitlementId;
         this.entitlementFrequencyType = entitlementFrequencyType;
         this.networkAuthType = selectedNetworkAuthType;
-
     }
 
     public boolean isOverrideGlobalConfig() {
@@ -147,6 +137,7 @@ public class DastScanJobModel {
     public String getNetworkAuthType() {
         return networkAuthType;
     }
+
     public String getSelectedScanType() {
         return selectedScanType;
     }
@@ -251,8 +242,8 @@ public class DastScanJobModel {
         return selectedGraphQlApiServicePath;
     }
 
-    public String getSelectedGrpcupload() {
-        return selectedGrpcupload;
+    public String getSelectedGrpcUpload() {
+        return selectedGrpcUpload;
     }
 
     public String getSelectedGrpcApiHost() {
@@ -266,6 +257,7 @@ public class DastScanJobModel {
     public String getSelectedGrpcApiServicePath() {
         return selectedGrpcApiServicePath;
     }
+
     String openApiFilePath;
 
     public String getOpenApiFilePath() {
@@ -314,17 +306,18 @@ public class DastScanJobModel {
                             String scanTimebox,
                             String scanPolicyType, boolean scanScope,
                             String selectedScanType, String selectedDynamicTimeZone,
-                           String networkAuthUserName,
-                           String networkAuthPassword,
+                            String networkAuthUserName,
+                            String networkAuthPassword,
                             String userSelectedApplication,
-                           String assessmentTypeId,
+                            String assessmentTypeId,
                             String entitlementId,
                             String entitlementFrequencyType, String userSelectedEntitlement,
                             String selectedApiType,
                             String openApiSource, String openApiFileSource, String openApiurl, String apiKey,
                             String postmanFile,
                             String graphQlSource, String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
-                            String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath) {
+                            String grpcUpload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath) {
+
         this._releaseId = releaseId;
         this.tenantId = tenantId;
         this.overrideGlobalConfig = overrideGlobalConfig;
@@ -353,7 +346,7 @@ public class DastScanJobModel {
         this.selectedGraphQlApiHost = graphQlApiHost;
         this.selectedGraphQLSchemeType = graphQLSchemeType;
         this.selectedGraphQlApiServicePath = graphQlApiServicePath;
-        this.selectedGrpcupload = grpcupload;
+        this.selectedGrpcUpload = grpcUpload;
         this.selectedGrpcApiHost = grpcApiHost;
         this.selectedGrpcSchemeType = grpcSchemeType;
         this.selectedGrpcApiServicePath = grpcApiServicePath;

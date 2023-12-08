@@ -37,16 +37,15 @@ import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
 public class DastScanSharedBuildStep {
     private final DastScanJobModel model;
     private final AuthenticationModel authModel;
-
     public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
     public static final String CLIENT_ID = "clientId";
     public static final String CLIENT_SECRET = "clientSecret";
     public static final String USERNAME = "username";
     public static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
     public static final String TENANT_ID = "tenantId";
-
     private int scanId;
-    private OpenApi openApi;
+
+    private PrintStream printStream;
 
     public DastScanSharedBuildStep(DastScanJobModel model, AuthenticationModel authModel) {
         this.model = model;
@@ -71,7 +70,7 @@ public class DastScanSharedBuildStep {
                                    String openApiRadioSource, String openApiFileSource, String openApiurl, String apiKey,
                                    String postmanFile,
                                    String graphQlSource, String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
-                                   String grpcupload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath) {
+                                   String grpcUpload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
         model = new DastScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
@@ -83,7 +82,7 @@ public class DastScanSharedBuildStep {
                 selectedApiType, openApiRadioSource, openApiFileSource, openApiurl, apiKey,
                 postmanFile,
                 graphQlSource, graphQlUpload, graphQlUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                grpcupload, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQlFilePath, grpcFilePath);
+                grpcUpload, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQlFilePath, grpcFilePath);
 
     }
 
@@ -129,7 +128,6 @@ public class DastScanSharedBuildStep {
     public List<String> ValidateAuthModel(boolean overrideGlobalAuth, String username, String tenantId, String personalAccessToken) throws FormValidation {
         List<String> errors = new ArrayList<>();
 
-        // Any have value and any don't have value
         if (overrideGlobalAuth && (Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(tenantId) || Utils.isNullOrEmpty(personalAccessToken))) {
             errors.add("Personal access token override requires all 3 be provided: username, personalAccessToken, tenantId");
         }
@@ -137,9 +135,10 @@ public class DastScanSharedBuildStep {
         return errors;
     }
 
-    public List<String> ValidateModel() throws FormValidation {
+    public List<String> ValidateModel(){
 
         List<String> errors = new ArrayList<>();
+
 
         //Check for mandate fields based on scan type.
         if (this.model.getSelectedScanType().isEmpty()) {
@@ -151,29 +150,24 @@ public class DastScanSharedBuildStep {
         if (this.model.getEntitlementId().isEmpty()) {
             errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanEntitlementIdNotFound);
         }
-
         if (getModel().isWebSiteNetworkAuthEnabled()) {
             if (getModel().getNetworkAuthPassword().isEmpty()) {
                 errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkPasswordNotFound);
             } else if (getModel().getNetworkAuthUserName().isEmpty()) {
 
                 errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkUserNameNotFound);
-
             } else if (getModel().getNetworkAuthType().isEmpty()) {
 
                 errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkAuthTypeNotFound);
-
             }
         }
         switch (this.model.getSelectedScanType()) {
             case "Standard":
-                // should we have strategy pattern instead of if chaining ?
-                if (this.model.getWebSiteUrl().isEmpty()) {
+               if (this.model.getWebSiteUrl().isEmpty()) {
                     errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWebSiteUrlNotFound);
                 }
                 if (this.model.getScanPolicyType().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
-
                 break;
             case "Workflow-Driven":
 
@@ -188,26 +182,14 @@ public class DastScanSharedBuildStep {
                 break;
         }
         return errors;
-
     }
 
-
-    List<String> ValidateStandardScanType(DastScanJobModel model) {
-
-        List<String> error = new ArrayList<>();
-        if (model.getWebSiteUrl().isEmpty()) {
-            error.add("Invalid Web Site URL");
-
-        }
-        return null;
-    }
-
-    public void saveReleaseSettingsForWebSiteScan(String userSelectedRelease, String assessmentTypeID,
+    public void SaveReleaseSettingsForWebSiteScan(String userSelectedRelease, String assessmentTypeID,
                                                   String entitlementId, String entitlementFreq, String loginMacroId,
                                                   String timeZone, String scanPolicy, String webSiteAssessmentUrl,
                                                   boolean scanScope,
                                                   boolean redundantPageDetection, String scanEnvironment,
-                                                  boolean requireNetworkAuth, boolean requireLoginMacroAuth,
+                                                  boolean requireLoginMacroAuth,
                                                   String networkAuthUserName, String networkAuthPassword
             , String networkAuthType, String timeboxScan
 
@@ -234,8 +216,8 @@ public class DastScanSharedBuildStep {
 
             if (loginMacroId != null && !loginMacroId.isEmpty()) {
                 dynamicScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
+                requireLoginMacroAuth =true;
             }
-
             try {
                 if (timeboxScan != null && !timeboxScan.isEmpty())
                     dynamicScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(timeboxScan));
@@ -254,7 +236,6 @@ public class DastScanSharedBuildStep {
                     dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
                 }
             }
-
             if (!networkAuthType.isEmpty() && !networkAuthPassword.isEmpty()
                     && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkSetting = dynamicScanSetupReqModel.getNetworkAuthenticationSettings();
@@ -264,23 +245,17 @@ public class DastScanSharedBuildStep {
                 networkSetting.setNetworkAuthenticationType(networkAuthType);
                 dynamicScanSetupReqModel.setNetworkAuthenticationSettings(networkSetting);
             }
-
             if (scanScope) //if true => Restrict scan to URL directories and subdirectories
                 dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(scanScope);
             else
                 dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(true);
 
             dynamicScanSetupReqModel.setDynamicSiteUrl(webSiteAssessmentUrl);
-
-            PutDastScanSetupResponse response = dynamicController.putDastWebSiteScanSettings(Integer.parseInt(userSelectedRelease),
+            PutDastScanSetupResponse response = dynamicController.SaveDastWebSiteScanSettings(Integer.parseInt(userSelectedRelease),
                     dynamicScanSetupReqModel);
-
             if (response.isSuccess && response.errors == null) {
                 System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
-
-
             } else {
-
                 throw new Exception("Failed to save scan settings for release id: " + userSelectedRelease);
             }
         } catch (IllegalArgumentException e) {
@@ -291,7 +266,7 @@ public class DastScanSharedBuildStep {
     }
 
 
-    public void saveReleaseSettingsForWorkflowDrivenScan(String userSelectedRelease, String assessmentTypeID,
+    public void SaveReleaseSettingsForWorkflowDrivenScan(String userSelectedRelease, String assessmentTypeID,
                                                          String entitlementId, String entitlementFreq, String workflowMacroId,
                                                          String workflowMacroHosts,
                                                          String timeZone, String scanPolicy,
@@ -304,7 +279,8 @@ public class DastScanSharedBuildStep {
         if (!ValidateModel().isEmpty()) {
             throw new IllegalArgumentException("Failed to save scan settings for release id: " + String.join(", ", ValidateModel()));
         }
-        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId()
+        );
         try {
 
             PutDastWorkflowDrivenScanReqModel dastWorkflowScanSetupReqModel;
@@ -346,7 +322,7 @@ public class DastScanSharedBuildStep {
                 dastWorkflowScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
 
-            PutDastScanSetupResponse response = dynamicController.putDastWorkflowDrivenScanSettings(Integer.parseInt(userSelectedRelease),
+            PutDastScanSetupResponse response = dynamicController.SaveDastWorkflowDrivenScanSettings(Integer.parseInt(userSelectedRelease),
                     dastWorkflowScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
                 System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
@@ -359,72 +335,90 @@ public class DastScanSharedBuildStep {
         }
     }
 
-    public PatchDastFileUploadResponse PatchSetupManifestFile(String fileContent, String fileType) throws Exception {
+    public PatchDastFileUploadResponse DastManifestFileUpload(String fileContent, String fileType, String filename) throws Exception {
 
-        DastScanController dastScanController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        DastScanController dastScanController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId()
+        );
         PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
         patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
-
+        patchDastScanFileUploadReq.fileName = filename;
         switch (fileType) {
             case "LoginMacro":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.LoginMacro;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.LoginMacro;
                 break;
             case "WorkflowDrivenMacro":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.WorkflowDrivenMacro;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.WorkflowDrivenMacro;
                 break;
             case "OpenAPIDefinition":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.OpenAPIDefinition;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.OpenAPIDefinition;
                 break;
             case "GraphQLDefinition":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.GraphQLDefinition;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.GraphQLDefinition;
                 break;
             case "GRPCDefinition":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.GRPCDefinition;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.GRPCDefinition;
                 break;
             case "PostmanCollection":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.PostmanCollection;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.PostmanCollection;
                 break;
             default:
                 throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
         }
 
         patchDastScanFileUploadReq.Content = fileContent.getBytes();
-        return dastScanController.PatchDynamicScan(patchDastScanFileUploadReq);
+        return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
 
     }
 
-    public PatchDastFileUploadResponse PatchSetupManifestFile(byte[] fileContent, String fileType) throws Exception {
+    public PatchDastFileUploadResponse DastManifestFileUpload(byte[] fileContent, String fileType) throws Exception {
 
-        DastScanController dastScanController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        DastScanController dastScanController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId()
+        );
         PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
         patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
 
         switch (fileType) {
             case "LoginMacro":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.LoginMacro;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.LoginMacro;
                 break;
             case "WorkflowDrivenMacro":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.WorkflowDrivenMacro;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.WorkflowDrivenMacro;
                 break;
             case "OpenAPIDefinition":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.OpenAPIDefinition;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.OpenAPIDefinition;
                 break;
             case "GraphQLDefinition":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.GraphQLDefinition;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.GraphQLDefinition;
                 break;
             case "GRPCDefinition":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.GRPCDefinition;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.GRPCDefinition;
                 break;
             case "PostmanCollection":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DynamicScanFileTypes.PostmanCollection;
+                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.PostmanCollection;
                 break;
             default:
                 throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
         }
 
         patchDastScanFileUploadReq.Content = fileContent;
-        return dastScanController.PatchDynamicScan(patchDastScanFileUploadReq);
+        return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
 
+    }
+
+
+    public PatchDastFileUploadResponse DastManifestFileUpload(FilePath workspace, String payLoadPath, PrintStream logger,
+                                                              FodEnums.DastScanFileTypes fileType) throws Exception {
+
+        FilePath dastPayload = new FilePath(workspace, payLoadPath);
+        if (!dastPayload.exists()) {
+            logger.printf("FilePath for the Payload not constructed for releaseId %s%n", getModel().get_releaseId());
+            throw new RuntimeException(String.format("FilePath for the Payload not constructed for releaseId %s%n", getModel().get_releaseId()));
+        }
+        DastScanController dastScanController = new DastScanController(getApiConnection(), logger, Utils.createCorrelationId());
+        PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
+        patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
+        patchDastScanFileUploadReq.dastFileType =fileType;
+        return dastScanController.DastFileUpload(dastPayload, logger,patchDastScanFileUploadReq);
     }
 
     public void saveReleaseSettingsForOpenApiScan(String userSelectedRelease, String assessmentTypeID,
@@ -437,7 +431,8 @@ public class DastScanSharedBuildStep {
                                                   String networkAuthType, String openApiSourceType, String sourceUrn, String openApiKey)
             throws IllegalArgumentException, IOException {
 
-        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId()
+        );
         try {
 
             PutDastAutomatedOpenApiReqModel dastOpenApiScanSetupReqModel;
@@ -479,7 +474,7 @@ public class DastScanSharedBuildStep {
         }
     }
 
-    public void saveReleaseSettingsForGraphQlScan(String userSelectedRelease, String assessmentTypeID,
+    public void SaveReleaseSettingsForGraphQlScan(String userSelectedRelease, String assessmentTypeID,
                                                   String entitlementId, String entitlementFreq,
                                                   String timeZone,
                                                   boolean allowSameHostRedirect,
@@ -490,7 +485,8 @@ public class DastScanSharedBuildStep {
                                                   String schemeType, String host, String servicePath)
             throws IllegalArgumentException, IOException {
 
-        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId()
+        );
         try {
 
             PutDastAutomatedGraphQlReqModel dastGraphQlScanSetupReqModel;
@@ -528,12 +524,10 @@ public class DastScanSharedBuildStep {
         }
     }
 
-    public void saveReleaseSettingsForGrpcScan(String userSelectedRelease, String assessmentTypeID,
+    public void SaveReleaseSettingsForGrpcScan(String userSelectedRelease, String assessmentTypeID,
                                                String entitlementId, String entitlementFreq,
                                                String timeZone,
-                                               boolean allowSameHostRedirect,
                                                String scanEnvironment,
-                                               boolean requireNetworkAuth,
                                                String networkAuthUserName, String networkAuthPassword,
                                                String networkAuthType,
                                                String grpcFileId, String schemeType, String host, String servicePath)
@@ -547,6 +541,9 @@ public class DastScanSharedBuildStep {
             dastgrpcScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dastgrpcScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dastgrpcScanSetupReqModel.setTimeZone(timeZone);
+            dastgrpcScanSetupReqModel.setSchemeType(schemeType);
+            dastgrpcScanSetupReqModel.setHost(host);
+            dastgrpcScanSetupReqModel.setServicePath(servicePath);
             dastgrpcScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastgrpcScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
@@ -579,12 +576,10 @@ public class DastScanSharedBuildStep {
         }
     }
 
-    public void saveReleaseSettingsForPostmanScan(String userSelectedRelease, String assessmentTypeID,
+    public void SaveReleaseSettingsForPostmanScan(String userSelectedRelease, String assessmentTypeID,
                                                   String entitlementId, String entitlementFreq,
                                                   String timeZone,
-                                                  boolean allowSameHostRedirect,
                                                   String scanEnvironment,
-                                                  boolean requireNetworkAuth,
                                                   String networkAuthUserName, String networkAuthPassword,
                                                   String networkAuthType, String postmanIdCollection)
             throws IllegalArgumentException, IOException {
@@ -613,7 +608,7 @@ public class DastScanSharedBuildStep {
                 throw new IllegalArgumentException(String.format("Postman Scan - one of the id is  not set for release Id={%s}"
                         , userSelectedRelease));
             } else {
-                dastPostmanScanSetupReqModel.setCollectionFileIds(ConvertStringtoIntArr(postmanIdCollection));
+                dastPostmanScanSetupReqModel.setCollectionFileIds(ConvertStringToIntArr(postmanIdCollection));
             }
 
             PutDastScanSetupResponse response = dynamicController.putDastPostmanScanSettings(Integer.parseInt(userSelectedRelease),
@@ -629,24 +624,29 @@ public class DastScanSharedBuildStep {
         }
     }
 
-    public int[] ConvertStringtoIntArr(String fileIds) {
+    public int[] ConvertStringToIntArr(String fileIds) {
+
         String[] postmanIds = fileIds.split(",");
-        int[] postmanIdArr = new int[postmanIds.length];
-        for (int i = 0; i < postmanIds.length; i++) {
-            postmanIdArr[i] = Integer.parseInt(postmanIds[i]);
+
+        if(postmanIds.length >0) {
+            int[] postmanIdArr = new int[postmanIds.length];
+            for (int i = 0; i < postmanIds.length; i++) {
+                postmanIdArr[i] = Integer.parseInt(postmanIds[i]);
+            }
+            return postmanIdArr;
         }
-        return postmanIdArr;
+        return null;
     }
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build, FilePath workspace,
                         Launcher launcher, TaskListener listener, String correlationId) {
         final PrintStream logger = listener.getLogger();
+        boolean isRemoteAgent = workspace.isRemote();
         FodApiConnection apiConnection = null;
-
         try {
             taskListener.set(listener);
-            // check to see if sensitive fields are encrypted. If not halt scan and recommend encryption.
+
             if (authModel != null) {
                 if (authModel.getOverrideGlobalConfig()) {
                     if (!Utils.isCredential(authModel.getPersonalAccessToken())) {
@@ -674,28 +674,40 @@ public class DastScanSharedBuildStep {
             if (Result.FAILURE.equals(currentResult)
                     || Result.ABORTED.equals(currentResult)
                     || Result.UNSTABLE.equals(currentResult)) {
-
                 logger.println("Error: Build Failed or Unstable.  Halting with Fortify on Demand upload.");
                 return;
             }
             Integer releaseId = Integer.parseInt(model.get_releaseId());
+
+            if (releaseId <= 0) {
+                build.setResult(Result.FAILURE);
+                Utils.logger(logger,"Invalid release ID.");
+                return;
+            }
             try {
-                apiConnection = ApiConnectionFactory.createApiConnection(this.getAuthModel(), false, null, null);
+                apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel(), isRemoteAgent, launcher, logger);
             } catch (IOException e) {
                 build.setResult(Result.FAILURE);
                 throw new RuntimeException(e);
             }
-            DastScanController dynamicController = new DastScanController(apiConnection, null, Utils.createCorrelationId());
-            PostDastStartScanResponse response = dynamicController.StartDastScan(releaseId);
+            if (apiConnection != null) {
 
-            if (response.errors == null && response.scanId > 0) {
-                build.setResult(Result.SUCCESS);
-                logger.println(String.format("Fortify On Demand dynamic scan successfully triggered for scan Id %d ", response.scanId));
-                this.scanId = response.scanId;
+                DastScanController dynamicController = new DastScanController(apiConnection, logger, Utils.createCorrelationId());
+                PostDastStartScanResponse response = dynamicController.StartDastScan(releaseId);
+
+                if (response.errors == null && response.scanId > 0) {
+                    build.setResult(Result.SUCCESS);
+                    logger.println(String.format("Fortify On Demand dynamic scan successfully triggered for scan Id %d ", response.scanId));
+                    this.scanId = response.scanId;
+                } else {
+                    logger.println(String.format("Fortify On Demand Dynamic Scan Failed for release Id %d", releaseId));
+                    build.setResult(Result.FAILURE);
+                }
             } else {
-                logger.println(String.format("Fortify On Demand Dynamic Scan Failed for release Id %d", releaseId));
+                logger.println("Failed to create Fod API connection.");
                 build.setResult(Result.FAILURE);
             }
+
         } catch (IOException e) {
             build.setResult(Result.FAILURE);
             throw new RuntimeException(e);

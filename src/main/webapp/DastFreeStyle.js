@@ -17,7 +17,7 @@ const dastScanSelectDefaultValues =
         "ApiScan": {"ScanPolicy": "API Scan"}
     }
 
-class DastScanSettings {
+class DastFreeStyle {
 
     constructor() {
         this.api = new Api(instance, descriptor);
@@ -627,7 +627,6 @@ class DastScanSettings {
 
 
     onLoadTimeZone() {
-
         let tsSel = jq('#timeZoneStackSelectList');
         let currVal = this.scanSettings.timeZone;
         let currValSelected = false;
@@ -668,7 +667,6 @@ class DastScanSettings {
     }
 
     onScanTypeChanged() {
-
         this.resetAuthSettings();
         jq('#apiTypeList').prop('selectedIndex', 0);
         let selectedScanTypeValue = jq('#scanTypeList').val();
@@ -794,7 +792,6 @@ class DastScanSettings {
                                 hosts = arr[index];
                         }
                     }
-
                     jq('#workflowMacroHosts').val(hosts);
                     jq('#listWorkflowDrivenAllowedHostUrl').empty();
 
@@ -1169,7 +1166,7 @@ class DastScanSettings {
 }
 
 const
-    scanSettings = new DastScanSettings();
+    scanSettings = new DastFreeStyle();
 
 spinAndWait(
     () =>

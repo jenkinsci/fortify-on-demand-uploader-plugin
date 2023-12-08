@@ -5,6 +5,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -20,7 +21,6 @@ import org.jenkinsci.plugins.fodupload.controllers.*;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.response.AssessmentTypeEntitlementsForAutoProv;
-import org.jenkinsci.plugins.fodupload.models.response.Dast.GetDastScanSettingResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -31,20 +31,15 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
-import org.kohsuke.stapler.interceptor.JsonOutputFilter;
 import org.kohsuke.stapler.verb.POST;
 
-import javax.annotation.PostConstruct;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static org.jenkinsci.plugins.fodupload.models.FodEnums.APILookupItemTypes;
 
 @SuppressFBWarnings("unused")
-public class FortifyDastPipelineAssessment extends FortifyStep {
+public class FortifyDastPipeline extends FortifyStep {
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
     private final String correlationId = UUID.randomUUID().toString();
     private String releaseId;
@@ -175,6 +170,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     }
 
     String postmanFilePath;
+
     public String getGraphQlRadioSource() {
         return graphQlRadioSource;
     }
@@ -424,7 +420,7 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     private DastScanSharedBuildStep dastScanSharedBuildStep;
 
     @DataBoundConstructor
-    public FortifyDastPipelineAssessment() {
+    public FortifyDastPipeline() {
         super();
     }
 
@@ -479,95 +475,27 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         this.entitlementFrequency = entitlementFrequency;
     }
 
-    /*
-    PostConstruct method invokes finally after all the get and set properties invoked.
-    So we don't need to save as part of build perform function.
-    But whenever the scan settings got update through portal, Then there would be discrepancy when the Scripts not updated through the
-    Script generator.
-     */
-    @PostConstruct
-    public final void SaveScanSettings() throws Exception {
+    public final void SaveScanSettings(FilePath workspace, PrintStream logger, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
 
-        try {
-            DastScanSharedBuildStep dastScanSharedBuildStep = null;
-
-            if (Objects.equals(scanType, FodEnums.DastScanType.Standard.toString()) || Objects.equals(scanType, FodEnums.DastScanType.Workflow.toString())) {
-
-                int loginFileId = 0;
-                if (!loginMacroFileId.isEmpty()) {
-                    loginFileId = Integer.parseInt(loginMacroFileId);
-                }
-                dastScanSharedBuildStep = new DastScanSharedBuildStep(
-                        overrideGlobalConfig,
-                        username,
-                        tenantId,
-                        personalAccessToken,
-                        releaseId,
-                        webSiteUrl,
-                        envFacing,
-                        scanTimeBox,
-                        null,
-                        scanPolicy,
-                        scanScope,
-                        scanType,
-                        selectedDynamicTimeZone,
-                        enableRedundantPageDetection,
-                        webSiteUrl,
-                        loginFileId,
-                        workflowMacroId,
-                        workflowMacroHosts,
-                        networkAuthUserName,
-                        networkAuthPassword,
-                        applicationId,
-                        assessmentTypeId,
-                        entitlementId,
-                        entitlementFrequency,
-                        networkAuthType,
-                        timeBoxChecked
-                );
-            } else if (Objects.equals(scanType, FodEnums.DastScanType.API.toString()) ) {
-                dastScanSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username, personalAccessToken, tenantId,
-                        releaseId, envFacing, scanTimeBox, scanPolicy, scanScope, scanType,
-                        selectedDynamicTimeZone,
-                        networkAuthUserName,
-                        networkAuthPassword, applicationId,
-                        assessmentTypeId, entitlementId,
-                        entitlementFrequency, entitlementId, timeBoxChecked,
-                        selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
-                        postmanFileId,
-                        graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                        grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
-            }
-
-            if (dastScanSharedBuildStep == null) {
-                throw new RuntimeException("DastScanSharedBuildStep Object not set");
-            }
-
-            List<String> errors = dastScanSharedBuildStep.ValidateModel();
-
-            if (!errors.isEmpty()) {
-                throw new IllegalArgumentException("Missing or invalid fields: " + String.join(", ", errors));
-            }
-
-            switch (this.scanType) {
-                case "Standard":
-                    saveWebSiteScanSettings(dastScanSharedBuildStep);
-                    break;
-                case "Workflow-driven":
-                    saveWorkflowSiteScanSettings(dastScanSharedBuildStep);
-                    break;
-
-                case "API":
-                    saveApiScanSettings(dastScanSharedBuildStep);
-                    break;
-            }
-
-
-        } catch (Exception ex) {
-            throw ex;
+        if (dastScanSharedBuildStep == null) {
+            throw new RuntimeException("DastScanSharedBuildStep Object not set");
         }
-    }
 
+        switch (this.scanType) {
+            case "Standard":
+                saveWebSiteScanSettings(workspace, logger, dastScanSharedBuildStep);
+                break;
+            case "Workflow-driven":
+                saveWorkflowSiteScanSettings(workspace, logger, dastScanSharedBuildStep);
+                break;
+            case "API":
+                saveApiScanSettings(workspace, logger, dastScanSharedBuildStep);
+                break;
+            default:
+                throw new IllegalArgumentException("Not a valid Fortify Scan Type.");
+        }
+
+    }
 
     public String getSelectedDynamicTimeZone() {
         return selectedDynamicTimeZone;
@@ -798,95 +726,8 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
     @Override
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        PrintStream log = listener.getLogger();
-        DastScanSharedBuildStep dastScanSharedBuildStep = null;
-        log.println("Fortify on Demand Dynamic Scan PreBuild Running...");
-        if(Objects.equals(scanType, FodEnums.DastScanType.Standard) || Objects.equals(scanType, FodEnums.DastScanType.Workflow)) {
-            dastScanSharedBuildStep = new DastScanSharedBuildStep(
-                    overrideGlobalConfig,
-                    username,
-                    tenantId,
-                    personalAccessToken,
-                    releaseId,
-                    webSiteUrl,
-                    envFacing,
-                    scanTimeBox,
-                    null,
-                    scanPolicy,
-                    scanScope,
-                    scanType,
-                    selectedDynamicTimeZone,
-                    enableRedundantPageDetection,
-                    webSiteUrl,
-                    Integer.parseInt(loginMacroFileId),
-                    workflowMacroId,
-                    workflowMacroHosts,
-                    networkAuthUserName,
-                    networkAuthPassword,
-                    applicationId,
-                    assessmentTypeId,
-                    entitlementId,
-                    entitlementFrequency,
-                    networkAuthType,
-                    timeBoxChecked
-            );
-        }
-        else if(Objects.equals(FodEnums.DastScanType.API, scanType)){
-            dastScanSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username, personalAccessToken, tenantId,
-                    releaseId, envFacing, scanTimeBox, scanPolicy, scanScope, scanType,
-                    selectedDynamicTimeZone,
-                    networkAuthUserName,
-                    networkAuthPassword, applicationId,
-                    assessmentTypeId, entitlementId,
-                    entitlementFrequency, entitlementId, timeBoxChecked,
-                    selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
-                    postmanFileId,
-                    graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
-        }
 
-        // When does this happen? If this only happens in syntax gen, then just use ServerClient
-        boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
-        List<String> errors = null;
-        try {
-            errors = dastScanSharedBuildStep.ValidateAuthModel(overrideGlobalAuthConfig, username, tenantId, personalAccessToken);
-            if (errors.isEmpty()) {
-                AuthenticationModel authModel = new AuthenticationModel(overrideGlobalAuthConfig,
-                        username,
-                        personalAccessToken,
-                        tenantId);
-            }
-
-            errors = dastScanSharedBuildStep.ValidateModel();
-
-        } catch (FormValidation e) {
-            throw new RuntimeException(e);
-        }
-
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException("Invalid arguments: Missing or invalid fields for auto provisioning: " + String.join(", ", errors));
-        }
-        try {
-            switch (scanType) {
-                case ("Standard"): {
-                    saveWebSiteScanSettings(dastScanSharedBuildStep);
-                    log.printf("Fortify On Demand Dynamic Scan Settings Saved Successfully for release Id %s", releaseId);
-                    break;
-                }
-                case "Workflow-driven": {
-                    saveWorkflowSiteScanSettings(dastScanSharedBuildStep);
-                    break;
-                }
-
-                case "API": {
-
-                    saveApiScanSettings(dastScanSharedBuildStep);
-                    break;
-                }
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+        System.out.println("prebuild invoked");
         return true;
     }
 
@@ -901,43 +742,49 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         return errors;
     }
 
-    private void saveWebSiteScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
+    private void saveWebSiteScanSettings(FilePath workspace, PrintStream printStream, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
 
-        if (loginMacroFilePath != null && !loginMacroFilePath.isEmpty() && loginMacroFilePath.length() > 1) {
-            Path path = Paths.get(loginMacroFilePath);
-            //add file validation here.
-            PatchDastFileUploadResponse patchUploadResponse = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(path), "LoginMacro");
+        if (loginMacroFilePath != null && loginMacroFilePath.length() > 1) {
 
-            if (patchUploadResponse == null || !patchUploadResponse.isSuccess) {
+            PatchDastFileUploadResponse patchUploadResponse = dastScanSharedBuildStep.DastManifestFileUpload(workspace, loginMacroFilePath, printStream, FodEnums.DastScanFileTypes.LoginMacro);
+
+            if (patchUploadResponse == null || !patchUploadResponse.isSuccess || patchUploadResponse.fileId <= 0) {
+
+                Utils.logger(printStream,String.format("Failed to upload login macro file %s for release Id:%s",
+                        loginMacroFilePath, releaseId));
+
                 throw new FileUploadException(String.format("Failed to upload login macro file %s for release Id:%s",
                         loginMacroFilePath, releaseId));
             } else {
                 this.loginMacroFileId = String.valueOf(patchUploadResponse.fileId);
+                requireLoginMacro = true;
             }
+        } else if (this.loginMacroFileId != null && !this.loginMacroFileId.isEmpty() && Integer.parseInt(this.loginMacroFileId) > 0) {
+            requireLoginMacro = true;
         }
-
-        dastScanSharedBuildStep.saveReleaseSettingsForWebSiteScan(releaseId, assessmentTypeId,
+        dastScanSharedBuildStep.SaveReleaseSettingsForWebSiteScan(releaseId, assessmentTypeId,
                 entitlementId
                 , entitlementFrequency, String.valueOf(loginMacroFileId),
                 selectedDynamicTimeZone,
                 scanPolicy,
                 webSiteUrl
                 , scanScope, enableRedundantPageDetection, envFacing
-                , networkAuthType != null && !networkAuthType.isEmpty(), requireLoginMacro,
+                , requireLoginMacro,
                 networkAuthUserName, networkAuthPassword
                 , networkAuthType, scanTimeBox);
     }
 
-    private void saveWorkflowSiteScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
+    private void saveWorkflowSiteScanSettings(FilePath workspace, PrintStream printStream, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
 
-        if (!this.workflowMacroFilePath.isEmpty() && this.workflowMacroFilePath.length() > 2) {
+        if (this.workflowMacroFilePath != null && this.workflowMacroFilePath.length() > 2) {
 
-            int workflowMacroFileId = 0;
+            PatchDastFileUploadResponse patchDastFileUploadResponse = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.workflowMacroFilePath, printStream, FodEnums.DastScanFileTypes.WorkflowDrivenMacro);
 
-            Path path = Paths.get(this.workflowMacroFilePath);
+            if (patchDastFileUploadResponse == null || !patchDastFileUploadResponse.isSuccess || patchDastFileUploadResponse.fileId <= 0) {
 
-            PatchDastFileUploadResponse patchDastFileUploadResponse = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(path), "WorkflowDrivenMacro");
-            if (patchDastFileUploadResponse == null || !patchDastFileUploadResponse.isSuccess) {
+                Utils.logger(printStream,String.format("Failed to upload workflow macro file %s for release Id:%s",
+                        this.workflowMacroFilePath, releaseId));
+
                 throw new FileUploadException(String.format("Failed to upload workflow macro file %s for release Id:%s",
                         this.workflowMacroFilePath, releaseId));
             } else {
@@ -948,62 +795,114 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
                 this.workflowMacroHosts = String.join(",", patchDastFileUploadResponse.hosts);
             }
         }
-        dastScanSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(releaseId, assessmentTypeId, entitlementId, entitlementFrequency, workflowMacroId, this.workflowMacroHosts,
+        dastScanSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(releaseId, assessmentTypeId, entitlementId, entitlementFrequency, workflowMacroId, this.workflowMacroHosts,
                 selectedDynamicTimeZone, scanPolicy, enableRedundantPageDetection, envFacing, getNetworkAuthType().isEmpty(), networkAuthUserName, networkAuthPassword, networkAuthType);
     }
 
-    private void saveApiScanSettings(DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
-        try {
-            if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
-                Path openApiPath = Paths.get(openApiFilePath);
-                PatchDastFileUploadResponse response = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(openApiPath), "OpenAPIDefinition");
-                    openApiFileId = String.valueOf(response.fileId);
-                String sourceUrn = openApiRadioSource.equals("Url") ? openApiUrl : openApiFileId;
-                dastScanSharedBuildStep.saveReleaseSettingsForOpenApiScan(releaseId, assessmentTypeId, entitlementId,
-                        entitlementFrequency, selectedDynamicTimeZone,
-                        enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
-                        networkAuthUserName, networkAuthPassword, networkAuthType,
-                        openApiRadioSource, sourceUrn, openApiKey);
+    private void saveApiScanSettings(FilePath workspace, PrintStream printStream, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
 
-            }
-            else if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
-                Path graphQlPath = Paths.get(graphQLFilePath);
-                PatchDastFileUploadResponse response = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(graphQlPath), "GraphQLDefinition");
-                graphQLFileId = String.valueOf(response.fileId);
-                String sourceUrn = graphQlRadioSource.equals("Url") ? graphQLUrl : graphQLFileId;
-                dastScanSharedBuildStep.saveReleaseSettingsForGraphQlScan(releaseId, assessmentTypeId, entitlementId,
-                        entitlementFrequency, selectedDynamicTimeZone,
-                        enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
-                        networkAuthUserName, networkAuthPassword, networkAuthType,
-                        sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath);
+        //TodO:-Change to switch
 
-            }
-            else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
-                Path grpcPath = Paths.get(grpcFilePath);
-                PatchDastFileUploadResponse response = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(grpcPath), "GRPCDefinition");
-                grpcFileId = String.valueOf(response.fileId);
-                dastScanSharedBuildStep.saveReleaseSettingsForGrpcScan(releaseId, assessmentTypeId, entitlementId,
-                        entitlementFrequency, selectedDynamicTimeZone,
-                        enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
-                        networkAuthUserName, networkAuthPassword, networkAuthType,
-                        grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
+        if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
 
+            PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.openApiFilePath,
+                    printStream, FodEnums.DastScanFileTypes.OpenAPIDefinition);
+
+            if (response == null || !response.isSuccess || response.fileId <= 0) {
+
+                Utils.logger(printStream,
+                        String.format("Failed to upload payload for release Id %s", releaseId));
+
+                throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
             }
-            else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
-                Path postmanPath = Paths.get(postmanFilePath);
-                PatchDastFileUploadResponse response = dastScanSharedBuildStep.PatchSetupManifestFile(Files.readAllBytes(postmanPath), "PostmanCollection");
-                postmanFileId = String.valueOf(response.fileId);
-                dastScanSharedBuildStep.saveReleaseSettingsForPostmanScan(releaseId, assessmentTypeId, entitlementId,
-                        entitlementFrequency, selectedDynamicTimeZone,
-                        enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
-                        networkAuthUserName, networkAuthPassword, networkAuthType,
-                        postmanFileId);
-            } else {
-                throw new IllegalArgumentException("Not Valid Dast API Scan Type set for releaseId: " + releaseId);
+
+            openApiFileId = String.valueOf(response.fileId);
+
+            String sourceUrn = openApiRadioSource.equals("Url") ? openApiUrl : openApiFileId;
+
+            dastScanSharedBuildStep.saveReleaseSettingsForOpenApiScan(releaseId, assessmentTypeId, entitlementId,
+                    entitlementFrequency, selectedDynamicTimeZone,
+                    enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
+                    networkAuthUserName, networkAuthPassword, networkAuthType,
+                    openApiRadioSource, sourceUrn, openApiKey);
+
+        } else if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
+
+            FilePath patchPayload = new FilePath(workspace, this.graphQLFilePath);
+
+            if (!patchPayload.exists()) {
+
+                printStream.printf("FilePath for the Payload not constructed for releaseId %s%n", releaseId);
+                throw new RuntimeException(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
             }
-        } catch (Exception ex) {
-            throw ex;
+
+            PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.graphQLFilePath,
+                    printStream, FodEnums.DastScanFileTypes.OpenAPIDefinition);
+
+            if (response == null || !response.isSuccess || response.fileId <= 0) {
+                throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
+            }
+            graphQLFileId = String.valueOf(response.fileId);
+            String sourceUrn = graphQlRadioSource.equals("Url") ? graphQLUrl : graphQLFileId;
+            dastScanSharedBuildStep.SaveReleaseSettingsForGraphQlScan(releaseId, assessmentTypeId, entitlementId,
+                    entitlementFrequency, selectedDynamicTimeZone,
+                    enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
+                    networkAuthUserName, networkAuthPassword, networkAuthType,
+                    sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath);
+
+        } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
+
+            FilePath patchPayload = new FilePath(workspace, this.grpcFilePath);
+
+            if (!patchPayload.exists()) {
+                printStream.printf("FilePath for the Payload not constructed for releaseId %s%n", releaseId);
+                throw new RuntimeException(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
+            }
+            PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.grpcFilePath,
+                    printStream, FodEnums.DastScanFileTypes.GRPCDefinition);
+
+            if (response == null || !response.isSuccess || response.fileId <= 0) {
+                throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
+            }
+            grpcFileId = String.valueOf(response.fileId);
+
+            dastScanSharedBuildStep.SaveReleaseSettingsForGrpcScan(releaseId, assessmentTypeId, entitlementId,
+                    entitlementFrequency, selectedDynamicTimeZone,
+                    envFacing,
+                    networkAuthUserName, networkAuthPassword, networkAuthType,
+                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
+
+        } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
+
+            FilePath patchPayload = new FilePath(workspace, this.postmanFilePath);
+
+            if (!patchPayload.exists()) {
+
+                Utils.logger(printStream,String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
+                throw new RuntimeException(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
+            }
+
+            PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.postmanFilePath,
+                    printStream, FodEnums.DastScanFileTypes.PostmanCollection);
+
+            if (response == null || !response.isSuccess || response.fileId <= 0) {
+
+                Utils.logger(printStream,String.format("Failed to upload payload for release Id %s", releaseId));
+
+                throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
+            }
+
+            postmanFileId = String.valueOf(response.fileId);
+            dastScanSharedBuildStep.SaveReleaseSettingsForPostmanScan(releaseId, assessmentTypeId, entitlementId,
+                    entitlementFrequency, selectedDynamicTimeZone,
+                    envFacing,
+                    networkAuthUserName, networkAuthPassword, networkAuthType,
+                    postmanFileId);
+        } else {
+            Utils.logger(printStream,"Not Valid Dast API Scan Type set for releaseId: " + releaseId);
+            throw new IllegalArgumentException("Not Valid Dast API Scan Type set for releaseId: " + releaseId);
         }
+
     }
 
     @Override
@@ -1026,7 +925,6 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
             if (!loginMacroFileId.isEmpty()) {
                 loginFileId = Integer.parseInt(loginMacroFileId);
             }
-
             dastScanSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig,
                     username,
                     tenantId,
@@ -1089,13 +987,21 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
             throw new RuntimeException(e);
         }
         if (!errors.isEmpty()) {
+            Utils.logger(log,"Invalid arguments:\n\t" + String.join("\n\t", errors));
             throw new IllegalArgumentException("Invalid arguments:\n\t" + String.join("\n\t", errors));
         }
 
         try {
             build.save();
         } catch (IOException ex) {
-            log.println("Error saving settings. Error message: " + ex.toString());
+            log.println("Error Jenkins Build. Error message: " + ex.getMessage());
+
+        }
+        try {
+            SaveScanSettings(workspace, log, dastScanSharedBuildStep);
+        } catch (Exception ex) {
+            log.println("Error Saving Scan Settings. Error message: " + ex.getMessage());
+            throw new RuntimeException(ex);
         }
         dastScanSharedBuildStep.perform(build, workspace, launcher, listener, correlationId);
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
@@ -1108,7 +1014,8 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
         try {
             build.save();
         } catch (IOException ex) {
-            log.println("Fortify On Demand Dynamic Scan Error saving settings. Error message: " + ex.getMessage());
+            Utils.logger(log, "Error while saving scan settings=" + ex.getMessage());
+            throw ex;
         }
     }
 
@@ -1284,9 +1191,9 @@ public class FortifyDastPipelineAssessment extends FortifyStep {
 
     private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
         private static final long serialVersionUID = 1L;
-        private transient FortifyDastPipelineAssessment upload;
+        private transient FortifyDastPipeline upload;
 
-        protected Execution(FortifyDastPipelineAssessment upload, StepContext context) {
+        protected Execution(FortifyDastPipeline upload, StepContext context) {
             super(context);
             this.upload = upload;
         }
