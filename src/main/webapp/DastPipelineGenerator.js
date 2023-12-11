@@ -51,7 +51,7 @@ class DastPipelineGenerator {
     }
 
     async preinit() {
-        debugger;
+
         jq('#fodp-authUser > input').attr('id', 'usernameField');
         jq('#fodp-authPAT select.credentials-select').attr('id', 'patField');
         jq('#fodp-authTenant > input').attr('id', 'tenantIdField');
@@ -241,7 +241,7 @@ class DastPipelineGenerator {
         commonScanPolicy.addClass(dastCommonScopeSetting);
         <!--Scope sections-->
 
-        debugger;
+
         try {
             this.hideMessages();
             this.showMessage('Set a release id');
@@ -334,7 +334,7 @@ class DastPipelineGenerator {
         let assmt = null;
         let entl = null;
         let freq = null;
-        debugger;
+
         if (this.scanSettings) {
             assmt = this.scanSettings.assessmentTypeId;
             entl = this.scanSettings.entitlementId;
@@ -366,7 +366,7 @@ class DastPipelineGenerator {
     }
 
     async onReleaseSelectionChanged() {
-        debugger;
+
         let rs = jq('#releaseSelection').val();
 
         jq('.fodp-row-relid').hide();
@@ -398,7 +398,7 @@ class DastPipelineGenerator {
     }
 
     onReleaseIdChanged() {
-        debugger;
+
         this.releaseId = numberOrNull(jq('#releaseSelectionValue').val());
         if (this.overrideServerSettings) {
             if (this.releaseId < 1) {
@@ -428,28 +428,8 @@ class DastPipelineGenerator {
 
     }
 
-    //     debugger;
-    //     this.releaseId = numberOrNull(jq('#releaseSelectionValue').val());
-    //     if (this.overrideServerSettings) {
-    //         if (this.releaseId < 1) {
-    //             this.releaseId = null
-    //         } else
-    //             this.loadReleaseEntitlementSettings().then(() => {
-    //                     this.fodOverrideRowsVisibility(true);
-    //                 }
-    //             );
-    //     } else {
-    //         this.loadReleaseEntitlementSettings().then(
-    //             () => {
-    //                 this.hideMessages();
-    //                // this.fodOverrideRowsVisibility(false);
-    //             }
-    //         );
-    //     }
-    // }
-
     async loadReleaseEntitlementSettings() {
-        debugger;
+
         let rows = jq(fodpOverrideRowsSelector);
         this.hideMessages();
         if (!this.releaseId) {
@@ -476,7 +456,7 @@ class DastPipelineGenerator {
         if (this.releaseId > 0)
             await Promise.all([ssp, entp, tzs, networkAuthTypes])
                 .then(async () => {
-                    debugger;
+
                     this.scanTypeUserControlVisibility('allTypes', false);
                     if (this.scanSettings && this.assessments) {
                         await this.setAssessmentsAndSettings();
@@ -519,7 +499,7 @@ class DastPipelineGenerator {
                         this.showMessage('Failed to retrieve scan settings from API', true);
                         rows.hide();
                     }
-                    debugger;
+
                     this.populateHiddenFields();
                 })
                 .catch((reason) => {
@@ -539,7 +519,7 @@ class DastPipelineGenerator {
             && !Object.is(this.scanSettings.networkAuthenticationSettings, undefined)) {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
             jq('#networkPasswordRow').find('input').val(this.scanSettings.networkAuthenticationSettings.password);
-            debugger;
+
             if (jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').prop('checked') === false) {
                 jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
             }
@@ -622,7 +602,7 @@ class DastPipelineGenerator {
     }
 
     setWebSiteScanSetting() {
-        debugger;
+
         if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
             jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.dynamicSiteUrl);
             jq('#loginMacroFileId').val(this.scanSettings.loginMacroFileId);
@@ -634,11 +614,11 @@ class DastPipelineGenerator {
 
     setWorkflowDrivenScanSetting() {
 
-        debugger;
+
         //only single file upload is allowed from FOD. Todo Iterate the array
         if (!Object.is(this.scanSettings.workflowdrivenAssessment, undefined)) {
             if (!Object.is(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro, undefined)) {
-                debugger;
+
                 jq('#listWorkflowDrivenAllowedHostUrl').empty();
                 jq('#workflowMacroHosts').val(undefined);
 
@@ -655,7 +635,7 @@ class DastPipelineGenerator {
                             if (jq('#workflowMacroHosts').val() === null || undefined) {
                                 jq('#workflowMacroHosts').val(arr[index]);
                             } else {
-                                debugger;
+
                                 let host = jq('#workflowMacroHosts').val();
                                 if (host !== null || undefined) {
 
@@ -927,7 +907,7 @@ class DastPipelineGenerator {
     }
 
     onScanTypeChanged() {
-        debugger;
+
 
         this.resetAuthSettings();
         let selectedScanTypeValue = jq('#scanTypeList').val();
@@ -952,7 +932,7 @@ class DastPipelineGenerator {
 
 
     setScanPolicy() {
-        debugger;
+
         if (this.scanSettings !== undefined && this.scanSettings.policy !== null || undefined) {
             let selectedScanPolicyType = this.scanSettings.policy;
             let ScanPolicy = ["Standard", "Critical and high", "Passive", "API Scan"]
@@ -1041,12 +1021,12 @@ class DastPipelineGenerator {
     }
 
     onWorkflowDrivenHostChecked(event) {
-        debugger;
+
         let allowedHost = jq('#workflowMacroHosts').val();
 
         if (event.target.checked) {
 
-            debugger;
+
             let hostToAdd = event.target.name; //name point to the host returned from FOD Patch API
 
             if (allowedHost !== undefined || null) {
@@ -1058,7 +1038,7 @@ class DastPipelineGenerator {
             }
         } else {
             if (allowedHost !== undefined || null) {
-                debugger;
+
                 let hosts = allowedHost.split(',');
                 hosts.forEach((entry) => {
                     if (entry === event.target.name) {
@@ -1086,7 +1066,7 @@ class DastPipelineGenerator {
 
     setTimeBoxScan() {
         if (this.scanSettings.timeBoxInHours !== undefined) {
-            debugger;
+
             jq('#dast-timeBox-scan').find('input:text:first').val(this.scanSettings.timeBoxInHours);
             if (jq('#dast-timeBox-scan').find('input:checkbox:first').prop('checked') === false) {
                 jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
@@ -1101,7 +1081,7 @@ class DastPipelineGenerator {
     }
 
     async onAssessmentChanged(skipAuditPref) {
-        debugger;
+
         let atval = jq('#assessmentTypeSelect').val();
         let entsel = jq('#entitlementSelect');
         let at = this.assessments ? this.assessments[atval] : null;
@@ -1137,7 +1117,7 @@ class DastPipelineGenerator {
     }
 
     async loadEntitlementOptions() {
-        debugger;
+
         if (this.autoProvMode) {
             this.hideMessages();
             let appName = jq('#autoProvAppName').val();
@@ -1161,7 +1141,7 @@ class DastPipelineGenerator {
     async loadAutoProvEntitlementSettings(appName, relName) {
         let fields = jq('.fodp-field.spinner-container');
         fields.addClass('spinner');
-        debugger;
+
         let assessments = await this.api.getAssessmentTypeEntitlementsForAutoProv(appName, relName, false, "", getAuthInfo());
         let fail = () => {
             fields.removeClass('spinner');
@@ -1182,7 +1162,7 @@ class DastPipelineGenerator {
         await this.setAssessmentsAndSettings();
         fields.removeClass('spinner');
         if (this.assessments) {
-            debugger;
+
             this.scanTypeUserControlVisibility('allTypes', false)
 
             return true;
@@ -1190,7 +1170,7 @@ class DastPipelineGenerator {
     }
 
     fodOverrideRowsVisibility(isVisible) {
-        debugger;
+
         jq(fodpOverrideRowsSelector)
             .each((i, e) => {
                 let jqe = jq(e);

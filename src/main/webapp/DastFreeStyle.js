@@ -88,7 +88,7 @@ class DastFreeStyle {
                 case "Workflow-driven":
                     jq('#dast-standard-scan-policy').show();
                     jq('#dast-api-scan-policy-apiType').hide();
-                    jq('.redundantPageDetection').show();
+                    jq('.redundantPageDetection').hide();
                     this.workflowScanSettingVisibility(isVisible);
                     this.apiScanSettingVisibility(false);
                     this.websiteScanSettingsVisibility(false);
@@ -206,6 +206,8 @@ class DastFreeStyle {
         } else {
             jq('.dast-scan-setting').show();
         }
+        //Remove BSI token form Pick a release selection list as it is not supported for DAST.
+        jq("#releaseTypeSelectList option[value='UseBsiToken']").remove();
     }
 
     hideMessages(msg) {
@@ -463,7 +465,7 @@ class DastFreeStyle {
                         if (jq('#workflowMacroHosts').val() === null || undefined) {
                             jq('#workflowMacroHosts').val(arr[index]);
                         } else {
-                            debugger;
+
                             let host = jq('#workflowMacroHosts').val();
                             if (host !== null || undefined) {
 
@@ -703,7 +705,7 @@ class DastFreeStyle {
 
         if (this.scanSettings !== undefined && this.scanSettings.policy !== null || undefined) {
             let selectedScanPolicyType = this.scanSettings.policy;
-            let ScanPolicy = ["Standard", "Critical and high", "Passive", "API Scan"]
+            let ScanPolicy = ["Standard", "Critical and high", "Passive"]
             let scanPolicySel = jq('#dast-standard-scan-policy').find('select');
             let currValSelected = false;
             scanPolicySel.find('option').not(':first').remove();
@@ -722,9 +724,8 @@ class DastFreeStyle {
     }
 
     setTimeBoxScan() {
-        if (this.scanSettings.timeBoxInHours !== undefined) {
+        if (this.scanSettings.timeBoxInHours !== undefined && this.scanSettings.timeBoxInHours > 0) {
 
-            debugger;
             jq('#dast-timeBox-scan').find('input:text:first').val(this.scanSettings.timeBoxInHours);
             if (jq('#dast-timeBox-scan').find('input:checkbox:first').prop('checked') === false) {
                 jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
@@ -1058,7 +1059,7 @@ class DastFreeStyle {
     }
 
     onExcludeUrlBtnClick(event, args) {
-        debugger;
+
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
         jq('#listStandardScanTypeExcludedUrl');
         jq('#listStandardScanTypeExcludedUrl').append("<li>" + excludedUrl + "</li>");
@@ -1163,16 +1164,13 @@ class DastFreeStyle {
         }
     }
 
-
 }
 
 const
     scanSettings = new DastFreeStyle();
 
 spinAndWait(
-    () =>
-
-        jq(
+    () =>jq(
             '#selectedRelease'
         ).text()
 
@@ -1195,17 +1193,8 @@ spinAndWait(
 ;
 
 spinAndWait(
-    () =>
-
-        jq(
+    () => jq(
             '#releaseTypeSelectList'
-        ).val()
-
-        !==
-        undefined
-).then(scanSettings
-
+        ).val()!== undefined).then(scanSettings
     .scanSettingsVisibility
-    .bind(scanSettings)
-)
-;
+    .bind(scanSettings));
