@@ -2,6 +2,8 @@ const fileUploadSuccess = "File uploaded successfully."
 const fileUploadFailed = "File upload failed. Please try again!"
 const inValidResponse = "Invalid response,";
 const allowedFileExtensions = ["burp","har","webmacro"];
+const jsonExtension = ["json"];
+const protoExtension = ["proto"];
 
 
 const requiredFieldsFreestyle = ['webSiteUrl',
@@ -63,7 +65,11 @@ const requiredFieldsPipeline = ['webSiteUrl',
              //grpc fields
              jq('[name="grpcSchemeType"],[name="grpcApiHost"], [name="grpcApiServicePath"]').blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
 
-             jq('[name="workflowMacroFilePath"], [name="loginMacroFilePath"]').blur(_ => this.validateFileExtension("[name='" + event.target.name + "']"));
+             jq('[name="workflowMacroFilePath"], [name="loginMacroFilePath"]').blur(_ => this.validateFileExtension("[name='" + event.target.name + "']", allowedFileExtensions));
+
+             jq('[name="postmanFilePath"], [name="openApiFilePath"], [name="graphQLFilePath"]').blur(_ => this.validateFileExtension("[name='" + event.target.name + "']", jsonExtension));
+
+             jq('[name="grpcFilePath"]').blur(_ => this.validateFileExtension("[name='" + event.target.name + "']", protoExtension));
           }
 
      function handleUploadStatusMessage (id, message, success) {
@@ -110,7 +116,7 @@ const requiredFieldsPipeline = ['webSiteUrl',
         });
      }
 
-     function validateFileExtension (id) {
+     function validateFileExtension (id, extensions) {
         let ctl = jq(id).next('p');
         ctl.hide();
         jq(id).removeClass('req-field');
@@ -119,7 +125,7 @@ const requiredFieldsPipeline = ['webSiteUrl',
         let path = jq(id).val();
         if(path && path.length > 0) {
             let extension = path.split('.').pop();
-            jq.each(allowedFileExtensions, function( index, value ) {
+            jq.each(extensions, function( index, value ) {
                  if(value === extension)
                     allowedExtension = true;
             });
