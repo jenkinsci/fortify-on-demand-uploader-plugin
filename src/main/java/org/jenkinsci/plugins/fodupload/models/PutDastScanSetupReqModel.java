@@ -1,10 +1,8 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
-
-public class PutDastScanSetupReqModel {
+public class PutDastScanSetupReqModel implements Serializable {
 
     public NetworkAuthentication getNetworkAuthenticationSettings() {
         return new NetworkAuthentication();

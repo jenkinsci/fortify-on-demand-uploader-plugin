@@ -13,8 +13,6 @@ import java.util.List;
 }
  */
 public class PatchDastFileUploadResponse extends FodDastApiResponse {
-    public PatchDastFileUploadResponse(){
-    }
 
     public int fileId;
     public String[] hosts;

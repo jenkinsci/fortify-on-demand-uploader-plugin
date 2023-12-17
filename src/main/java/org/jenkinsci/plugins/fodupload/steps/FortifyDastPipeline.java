@@ -5,7 +5,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -36,6 +35,7 @@ import org.kohsuke.stapler.verb.POST;
 import java.io.*;
 import java.util.*;
 
+import static org.jenkinsci.plugins.fodupload.Utils.logger;
 import static org.jenkinsci.plugins.fodupload.models.FodEnums.APILookupItemTypes;
 
 @SuppressFBWarnings("unused")
@@ -417,7 +417,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
     private String networkAuthPassword;
 
-    private DastScanSharedBuildStep dastScanSharedBuildStep;
+    private DastScanSharedBuildStep _dastScanSharedBuildStep;
 
     @DataBoundConstructor
     public FortifyDastPipeline() {
@@ -731,22 +731,12 @@ public class FortifyDastPipeline extends FortifyStep {
         return true;
     }
 
-    private List<String> ValidateAuthModel(boolean overrideGlobalAuth) throws FormValidation {
-        List<String> errors = new ArrayList<>();
-
-        // Any have value and any don't have value
-        if (overrideGlobalAuth && (Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(tenantId) || Utils.isNullOrEmpty(personalAccessToken))) {
-            errors.add("Personal access token override requires all 3 be provided: username, personalAccessToken, tenantId");
-        }
-
-        return errors;
-    }
-
     private void saveWebSiteScanSettings(FilePath workspace, PrintStream printStream, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
 
         if (loginMacroFilePath != null && loginMacroFilePath.length() > 1) {
 
-            PatchDastFileUploadResponse patchUploadResponse = dastScanSharedBuildStep.DastManifestFileUpload(workspace, loginMacroFilePath, printStream, FodEnums.DastScanFileTypes.LoginMacro);
+            PatchDastFileUploadResponse patchUploadResponse = dastScanSharedBuildStep.DastManifestFileUpload(workspace, loginMacroFilePath, printStream, FodEnums.DastScanFileTypes.LoginMacro
+            , dastScanSharedBuildStep.getFodApiConnection());
 
             if (patchUploadResponse == null || !patchUploadResponse.isSuccess || patchUploadResponse.fileId <= 0) {
 
@@ -778,7 +768,8 @@ public class FortifyDastPipeline extends FortifyStep {
 
         if (this.workflowMacroFilePath != null && this.workflowMacroFilePath.length() > 2) {
 
-            PatchDastFileUploadResponse patchDastFileUploadResponse = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.workflowMacroFilePath, printStream, FodEnums.DastScanFileTypes.WorkflowDrivenMacro);
+            PatchDastFileUploadResponse patchDastFileUploadResponse = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.workflowMacroFilePath, printStream, FodEnums.DastScanFileTypes.WorkflowDrivenMacro
+            , dastScanSharedBuildStep.getFodApiConnection());
 
             if (patchDastFileUploadResponse == null || !patchDastFileUploadResponse.isSuccess || patchDastFileUploadResponse.fileId <= 0) {
 
@@ -806,7 +797,7 @@ public class FortifyDastPipeline extends FortifyStep {
         if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
 
             PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.openApiFilePath,
-                    printStream, FodEnums.DastScanFileTypes.OpenAPIDefinition);
+                    printStream, FodEnums.DastScanFileTypes.OpenAPIDefinition , dastScanSharedBuildStep.getFodApiConnection());
 
             if (response == null || !response.isSuccess || response.fileId <= 0) {
 
@@ -833,11 +824,11 @@ public class FortifyDastPipeline extends FortifyStep {
             if (!patchPayload.exists()) {
 
                 printStream.printf("FilePath for the Payload not constructed for releaseId %s%n", releaseId);
-                throw new RuntimeException(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
+                throw new Exception(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
             }
 
             PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.graphQLFilePath,
-                    printStream, FodEnums.DastScanFileTypes.GraphQLDefinition);
+                    printStream, FodEnums.DastScanFileTypes.GraphQLDefinition, dastScanSharedBuildStep.getFodApiConnection());
 
             if (response == null || !response.isSuccess || response.fileId <= 0) {
                 throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
@@ -856,10 +847,10 @@ public class FortifyDastPipeline extends FortifyStep {
 
             if (!patchPayload.exists()) {
                 printStream.printf("FilePath for the Payload not constructed for releaseId %s%n", releaseId);
-                throw new RuntimeException(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
+                throw new Exception(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
             }
             PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.grpcFilePath,
-                    printStream, FodEnums.DastScanFileTypes.GRPCDefinition);
+                    printStream, FodEnums.DastScanFileTypes.GRPCDefinition, dastScanSharedBuildStep.getFodApiConnection());
 
             if (response == null || !response.isSuccess || response.fileId <= 0) {
                 throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
@@ -877,13 +868,12 @@ public class FortifyDastPipeline extends FortifyStep {
             FilePath patchPayload = new FilePath(workspace, this.postmanFilePath);
 
             if (!patchPayload.exists()) {
-
                 Utils.logger(printStream, String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
-                throw new RuntimeException(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
+                throw new Exception(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
             }
 
             PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.postmanFilePath,
-                    printStream, FodEnums.DastScanFileTypes.PostmanCollection);
+                    printStream, FodEnums.DastScanFileTypes.PostmanCollection, dastScanSharedBuildStep.getFodApiConnection());
 
             if (response == null || !response.isSuccess || response.fileId <= 0) {
  
@@ -912,7 +902,6 @@ public class FortifyDastPipeline extends FortifyStep {
     public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, IllegalArgumentException {
 
         PrintStream printStream = listener.getLogger();
-
         try {
             printStream.println("Fortify on Demand Upload Running...");
             build.addAction(new CrossBuildAction());
@@ -966,38 +955,37 @@ public class FortifyDastPipeline extends FortifyStep {
                         grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
 
             }
+            this._dastScanSharedBuildStep = dastScanSharedBuildStep;
+
             boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
             List<String> errors = null;
 
-            try {
-                errors = ValidateAuthModel(overrideGlobalAuthConfig);
+            errors = dastScanSharedBuildStep.ValidateAuthModel(overrideGlobalAuthConfig, username, tenantId, personalAccessToken);
 
-                if (errors.isEmpty()) {
-                    AuthenticationModel authModel = new AuthenticationModel(overrideGlobalAuthConfig,
-                            username,
-                            personalAccessToken,
-                            tenantId);
-
-                }
-                if (dastScanSharedBuildStep == null) {
-                    throw new RuntimeException("Failed to initialize DAST Job model");
-                }
-                errors = dastScanSharedBuildStep.ValidateModel();
-            } catch (FormValidation e) {
-                throw new RuntimeException(e);
+            if (errors.isEmpty()) {
+                AuthenticationModel authModel = new AuthenticationModel(overrideGlobalAuthConfig,
+                        username,
+                        personalAccessToken,
+                        tenantId);
             }
+
+            errors = dastScanSharedBuildStep.ValidateModel();
+
             if (!errors.isEmpty()) {
                 Utils.logger(printStream, "Invalid arguments:\n\t" + String.join("\n\t", errors));
                 throw new IllegalArgumentException("Invalid arguments:\n\t" + String.join("\n\t", errors));
             }
             build.save();
 
-            try {
-                SaveScanSettings(workspace, printStream, dastScanSharedBuildStep);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex.getMessage());
+            FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(this._dastScanSharedBuildStep.getAuthModel(), workspace.isRemote(), launcher, printStream);
+            if (apiConnection == null) {
+                throw new Exception("Fod API Connection not created.");
             }
-            dastScanSharedBuildStep.perform(build, workspace, launcher, listener, correlationId);
+            dastScanSharedBuildStep.SetFodApiConnection(apiConnection);
+
+            SaveScanSettings(workspace, printStream, dastScanSharedBuildStep);
+
+            dastScanSharedBuildStep.perform(build, workspace, launcher, listener, correlationId, apiConnection);
             CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
             crossBuildAction.setPreviousStepBuildResult(build.getResult());
 
@@ -1007,13 +995,13 @@ public class FortifyDastPipeline extends FortifyStep {
             }
             build.save();
 
-        } catch (Exception ex) {
-            Utils.logger(printStream, ex.getMessage());
-            throw ex;
+        } catch (Exception e) {
+            logger(printStream, e.getCause()!=null? e.getCause().getMessage():e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
-    @Extension
+        @Extension
     public static class DescriptorImpl extends StepDescriptor {
         @Override
         public String getDisplayName() {

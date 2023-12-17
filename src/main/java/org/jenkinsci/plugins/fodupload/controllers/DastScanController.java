@@ -9,8 +9,8 @@ import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.models.*;
-import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.*;
+import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -47,7 +47,7 @@ public class DastScanController extends ControllerBase {
         ResponseContent response = apiConnection.request(request);
 
         PutDastScanSetupResponse putDynamicScanSetupResponse = new PutDastScanSetupResponse();
-        putDynamicScanSetupResponse = (PutDastScanSetupResponse) convertHttpResponseIntoDastApiResponse(response, putDynamicScanSetupResponse);
+        putDynamicScanSetupResponse = convertHttpResponseIntoDastApiResponse(response, putDynamicScanSetupResponse);
         return putDynamicScanSetupResponse;
     }
 
@@ -255,11 +255,7 @@ public class DastScanController extends ControllerBase {
 
         } else {
             T parsedResponse = parseHttpBodyResponse(response, fodApiResponse);
-            error err = new error();
-            err.errorCode = ((FodDastApiResponse) parsedResponse).HttpCode;
-            err.message = ((FodDastApiResponse) parsedResponse).reason;
-            ((FodDastApiResponse) parsedResponse).errors = new ArrayList<>();
-            ((FodDastApiResponse) parsedResponse).errors.add(err);
+
             return parsedResponse;
         }
     }

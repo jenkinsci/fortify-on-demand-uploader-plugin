@@ -302,8 +302,7 @@ public class Utils {
     public static void logger(PrintStream printStream ,String msg)
     {
         if(printStream!=null)
-        {
-            //job's log will have Fortify string as part of msg for ease identification from other plugin msg.
+        {  //job's log will have Fortify string as part of msg for ease identification from other plugin msg.
             printStream.printf("Fortify on demand: %s%n",msg);
         }
     }

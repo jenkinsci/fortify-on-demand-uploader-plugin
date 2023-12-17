@@ -5,7 +5,6 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
-import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
@@ -13,18 +12,19 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
-import org.jenkinsci.plugins.fodupload.*;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.controllers.*;
-import org.jenkinsci.plugins.fodupload.models.*;
-import org.jenkinsci.plugins.fodupload.models.response.*;
+import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.models.PatchDastScanFileUploadReq;
+import org.jenkinsci.plugins.fodupload.models.response.ApplicationApiResponse;
+import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.verb.POST;
-
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -147,10 +147,8 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                 }
             } else
                 throw new IllegalArgumentException("Fortify onDemand: Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
-        }
-        catch (Exception ex)
-        {
-          throw  new RuntimeException(String.format("Fortify onDemand: %s",ex.getMessage()));
+        } catch (Exception ex) {
+            throw new RuntimeException(String.format("Fortify onDemand: %s", ex.getMessage()));
         }
     }
 
@@ -170,15 +168,25 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
     @Override
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
-        PrintStream log = listener.getLogger();
+        PrintStream printStream = listener.getLogger();
         build.addAction(new CrossBuildAction());
+        FodApiConnection apiConnection = null;
         try {
-           build.save();
+            apiConnection = ApiConnectionFactory.createApiConnection(this.dastSharedBuildStep.getAuthModel(), workspace.isRemote(), launcher, printStream);
+
+            build.save();
         } catch (IOException ex) {
-            Utils.logger(log, String.format("Build save failed for release Id: %s with error: %s" , getReleaseId(),ex.getMessage()));
+           Utils.logger(printStream, String.format("Build save failed for release Id: %s with error: %s", getReleaseId(), ex.getMessage()));
+
         }
+
+        if(apiConnection ==null)
+        {
+            throw new RuntimeException("Fod API Connection not set.");
+        }
+
         String correlationId = UUID.randomUUID().toString();
-        dastSharedBuildStep.perform(build, workspace, launcher, listener, correlationId);
+        dastSharedBuildStep.perform(build, workspace, launcher, listener, correlationId, apiConnection);
 
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
         crossBuildAction.setPreviousStepBuildResult(build.getResult());
@@ -190,7 +198,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
         try {
             build.save();
         } catch (IOException ex) {
-            Utils.logger(log, String.format("Build save failed for release Id: %s with error: %s" , getReleaseId(),ex.getMessage()));
+            Utils.logger(printStream, String.format("Build save failed for release Id: %s with error: %s", getReleaseId(), ex.getMessage()));
         }
     }
 
@@ -315,7 +323,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
-        public PatchDastFileUploadResponse DastManifestFileUpload(String releaseId, JSONObject authModelObject, String fileContent, String fileType,String fileName) throws FormValidation {
+        public PatchDastFileUploadResponse DastManifestFileUpload(String releaseId, JSONObject authModelObject, String fileContent, String fileType, String fileName) throws FormValidation {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);

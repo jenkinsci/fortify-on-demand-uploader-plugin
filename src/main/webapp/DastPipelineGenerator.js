@@ -21,6 +21,7 @@ const dastScanPolicyDefaultValues =
         "WorkflowDrivenScan": {"ScanPolicy": "standard"},
         "ApiScan": {"ScanPolicy": "API Scan"}
     }
+const dastAllowedHostRow = closestRow('#allowedHostRow');
 const dastAssessmentrow = closestRow('#dastAssessmentTypeForm');
 const dastEntitlementrow = closestRow('#dastEntitlementForm');
 const dastScanTyperow = closestRow('#dastScanType');
@@ -239,6 +240,8 @@ class DastPipelineGenerator {
         commonWebScopeSetting.addClass(dastCommonScopeSetting);
         commonWebScopeSettingAttr.addClass(dastCommonScopeSetting);
         commonScanPolicy.addClass(dastCommonScopeSetting);
+        dastAllowedHostRow.addClass(dastWorkFlowSetting);
+
         <!--Scope sections-->
 
 
@@ -293,27 +296,15 @@ class DastPipelineGenerator {
                 });
             jq('#overrideReleaseSettings')
                 .change(_ => this.loadEntitlementOptions());
-
             jq('#apiTypeList').change(_ => this.onApiTypeChanged());
-
             jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_ => this.onSourceChange(event.target.id));
-
             jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile').click(_ => this.onFileUpload(event));
-
             jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
-
             await this.onReleaseSelectionChanged();
-
             jq('.fodp-row-screc').hide();
-
             jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
-
             jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
-
             setOnblurEventForPipeline();
-
-            //  jq('#workflowMacroFilePath').blur(_ => this.onWorkflowFlowMacroFilePathChange());
-
             this.uiLoaded = true;
         } catch (Error) {
             console.log(Error);
@@ -331,28 +322,26 @@ class DastPipelineGenerator {
     }
 
     async setAssessmentsAndSettings() {
+        debugger;
         let assmt = null;
         let entl = null;
         let freq = null;
-
         if (this.scanSettings) {
             assmt = this.scanSettings.assessmentTypeId;
             entl = this.scanSettings.entitlementId;
             freq = this.scanSettings.entitlementFrequencyType;
-
         }
         this.populateAssessmentsDropdown();
         jq('#assessmentTypeSelect').val(assmt);
         await this.onAssessmentChanged(true);
         jq('#entitlementSelect').val(freq && entl ? getEntitlementDropdownValue(entl, freq) : '');
+
     }
 
     populateAssessmentsDropdown() {
         let atsel = jq(`#assessmentTypeSelect`);
-
         atsel.find('option').remove();
         jq(`#entitlementSelect`).find('option').remove();
-
         if (this.assessments) {
             for (let k of Object.keys(this.assessments)) {
                 let at = this.assessments[k];
@@ -366,7 +355,7 @@ class DastPipelineGenerator {
     }
 
     async onReleaseSelectionChanged() {
-
+debugger;
         let rs = jq('#releaseSelection').val();
 
         jq('.fodp-row-relid').hide();
@@ -394,7 +383,7 @@ class DastPipelineGenerator {
             jq('.fodp-row-relid').show();
             jq('#releaseLookup').show();
         }
-        this.loadEntitlementOptions();
+        await this.loadEntitlementOptions();
     }
 
     onReleaseIdChanged() {
@@ -565,7 +554,6 @@ class DastPipelineGenerator {
             let at = this.entp[ts];
             if (curVal !== undefined && at.value !== undefined && curVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
-                alert('found');
                 entitlement.append(`<option value="${at.text}" selected>${at.text}</option>`);
             } else {
                 entitlement.append(`<option value="${at.text}">${at.text}</option>`);
@@ -583,7 +571,6 @@ class DastPipelineGenerator {
             } else if (this.scanSettings.apiAssessment !== null && this.scanSettings.apiAssessment !== undefined) {
                 selectedScanType = dastScanTypes.find(v => v.value === "API");
             }
-
             let scanSel = jq('#scanTypeList');
             let currValSelected = false;
             scanSel.find('option').not(':first').remove();
@@ -603,50 +590,35 @@ class DastPipelineGenerator {
     }
 
     setWebSiteScanSetting() {
-
         if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
             jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.dynamicSiteUrl);
             jq('#loginMacroFileId').val(this.scanSettings.loginMacroFileId);
-
         }
-
-
     }
 
     setWorkflowDrivenScanSetting() {
-
-
         //only single file upload is allowed from FOD. Todo Iterate the array
         if (!Object.is(this.scanSettings.workflowdrivenAssessment, undefined)) {
             if (!Object.is(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro, undefined)) {
 
                 jq('#listWorkflowDrivenAllowedHostUrl').empty();
                 jq('#workflowMacroHosts').val(undefined);
-
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].fileId);
-
                 this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].allowedHosts.forEach((item, index, arr) => {
-
                         console.log(item);
                         if (arr[index] !== undefined || null) {
-
                             jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + arr[index] +
                                 " ' checked='checked' name='" + arr[index] + "'>" + arr[index] + "</li>");
-
                             if (jq('#workflowMacroHosts').val() === null || undefined) {
                                 jq('#workflowMacroHosts').val(arr[index]);
                             } else {
-
                                 let host = jq('#workflowMacroHosts').val();
                                 if (host !== null || undefined) {
-
                                     if (host !== '')
                                         host = host + "," + arr[index];
                                     else
                                         host = arr[index];
-
                                     jq('#workflowMacroHosts').val(host);
-
                                 }
                             }
                         }
@@ -692,6 +664,7 @@ class DastPipelineGenerator {
                     break;
                 }
                 case "Workflow-driven":
+
                     this.workflowScanSettingVisibility(isVisible);
                      jq('#dast-standard-scan-policy').show();
                      jq('#dast-api-scan-policy-apiType').hide();
@@ -787,6 +760,7 @@ class DastPipelineGenerator {
         } else {
             this.excludeUrlVisibility(true);
             standardScanSettingRows.show();
+
         }
     }
 
@@ -1088,7 +1062,7 @@ class DastPipelineGenerator {
     }
 
     async onAssessmentChanged(skipAuditPref) {
-
+debugger;
         let atval = jq('#assessmentTypeSelect').val();
         let entsel = jq('#entitlementSelect');
         let at = this.assessments ? this.assessments[atval] : null;
@@ -1124,7 +1098,7 @@ class DastPipelineGenerator {
     }
 
     async loadEntitlementOptions() {
-
+        debugger;
         if (this.autoProvMode) {
             this.hideMessages();
             let appName = jq('#autoProvAppName').val();
@@ -1134,7 +1108,7 @@ class DastPipelineGenerator {
                 this.showMessage('Enter Application and Release names', true);
                 jq(fodpOverrideRowsSelector).hide();
             } else {
-                await this.loadAutoProvEntitlementSettings(appName, relName, false, "")
+                await this.loadAutoProvEntitlementSettings(appName, relName)
             }
 
         } else {
@@ -1146,34 +1120,67 @@ class DastPipelineGenerator {
     }
 
     async loadAutoProvEntitlementSettings(appName, relName) {
+
+        debugger;
         let fields = jq('.fodp-field.spinner-container');
         fields.addClass('spinner');
 
-        let assessments = await this.api.getAssessmentTypeEntitlementsForAutoProv(appName, relName, false, "", getAuthInfo());
-        let fail = () => {
-            fields.removeClass('spinner');
-            this.onAssessmentChanged();
-            this.showMessage('Failed to retrieve available entitlements from API', true);
-            return false;
-        };
+        let ssp = this.api.getReleaseEntitlementSettings(this.releaseId, getAuthInfo(), true)
+            .then(r => this.scanSettings = r);
+        let assessments =  this.api.getAssessmentTypeEntitlementsForAutoProv(appName, relName, false, "", getAuthInfo())
+            .then(r => this.assessments = r);
+        let tzs =  this.api.getTimeZoneStacks(getAuthInfo())
+            .then(r => this.timeZones = r);
+        let networkAuthTypes =   this.api.getNetworkAuthType(getAuthInfo()).then(
+            r => this.networkAuthTypes = r
+        );
 
-        if (assessments == null) return fail();
-        this.assessments = assessments;
-        if (this.assessments) {
-            this.scanSettings = assessments.settings;
-            this.releaseId = assessments.releaseId;
-        } else {
-            this.scanSettings = null;
-            this.releaseId = null;
-        }
-        await this.setAssessmentsAndSettings();
-        fields.removeClass('spinner');
-        if (this.assessments) {
+        await Promise.all([ssp,tzs, networkAuthTypes])
+            .then(async () => {
+                let fail = () => {
+                    fields.removeClass('spinner');
+                    this.showMessage('Failed to retrieve available entitlements from API', true);
+                    return false;
+                };
+                if (this.assessments == null) {
+                    return fail();
+                } else {
+                    let fields = jq('.fodp-field.spinner-container');
+                    fields.addClass('spinner');
 
-            this.scanTypeUserControlVisibility('allTypes', false)
+                    await this.setAssessmentsAndSettings().then(
+                        ()=>
+                        {
+                            this.scanTypeUserControlVisibility('allTypes', false);
+                            //Set Entitlement
+                          //  this.setSelectedEntitlementValue(entp);
+                            jq('#entitlementFrequency').val(this.scanSettings.entitlementFrequencyType);
+                            //Set timezone
+                            let timeZoneId = this.scanSettings.timeZone;
+                            jq('#timeZoneStackSelectList').val(timeZoneId);
+                            this.onLoadTimeZone();
+                            this.onTimeZoneChanged();
+                            jq('.fodp-row-autoProv').show();
+                            fields.removeClass('spinner');
+                        }
+                    );
 
-            return true;
-        } else return fail();
+                }
+            });
+        // if (this.assessments) {
+        //     this.scanSettings = assessments.settings;
+        //     this.releaseId = assessments.releaseId;
+        // } else {
+        //     this.scanSettings = null;
+        //     this.releaseId = null;
+        // }
+
+
+        // if (this.assessments) {
+        //     this.scanTypeUserControlVisibility('allTypes', false)
+        //      jq('.fodp-row-autoProv').show();
+        //     return true;
+        // } else return fail();
     }
 
     fodOverrideRowsVisibility(isVisible) {

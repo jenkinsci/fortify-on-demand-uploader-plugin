@@ -1,7 +1,5 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-import org.jenkinsci.plugins.fodupload.models.response.Dast.GetDastScanSettingResponse;
-
 public class PutDastAutomatedGraphQlReqModel extends PutDastScanSetupReqModel {
     public FodEnums.ApiSourceType SourceType;
     public String SourceUrn;

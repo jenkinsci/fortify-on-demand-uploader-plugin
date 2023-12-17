@@ -4,8 +4,8 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.*;
 import hudson.model.Result;
+import hudson.model.*;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -17,9 +17,8 @@ import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
 import org.jenkinsci.plugins.fodupload.controllers.DastScanController;
 import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.*;
-import org.jenkinsci.plugins.fodupload.models.response.Dast.OpenApi;
-import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDastScanSetupResponse;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.PostDastStartScanResponse;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDastScanSetupResponse;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.verb.POST;
@@ -30,7 +29,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-
+import java.util.stream.Collectors;
 import static org.jenkinsci.plugins.fodupload.Utils.FOD_URL_ERROR_MESSAGE;
 import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
 
@@ -44,8 +43,9 @@ public class DastScanSharedBuildStep {
     public static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
     public static final String TENANT_ID = "tenantId";
     private int scanId;
-
     private PrintStream printStream;
+
+    private FodApiConnection _fodApiConnection;
 
     public DastScanSharedBuildStep(DastScanJobModel model, AuthenticationModel authModel) {
         this.model = model;
@@ -108,9 +108,16 @@ public class DastScanSharedBuildStep {
                 , selectedNetworkAuthType);
     }
 
-    private FodApiConnection getApiConnection() throws FormValidation {
+    public FodApiConnection getFodApiConnection() throws Exception {
+        if (this._fodApiConnection == null) {
+            throw new Exception("FOD API connection not set");
+        }
+        return this._fodApiConnection;
+    }
 
-        return ApiConnectionFactory.createApiConnection(this.getAuthModel(), false, null, null);
+    public void SetFodApiConnection
+            (FodApiConnection apiConnection) {
+        this._fodApiConnection = apiConnection;
     }
 
     public int getScanId() {
@@ -135,7 +142,7 @@ public class DastScanSharedBuildStep {
         return errors;
     }
 
-    public List<String> ValidateModel(){
+    public List<String> ValidateModel() {
 
         List<String> errors = new ArrayList<>();
 
@@ -163,7 +170,7 @@ public class DastScanSharedBuildStep {
         }
         switch (this.model.getSelectedScanType()) {
             case "Standard":
-               if (this.model.getWebSiteUrl().isEmpty()) {
+                if (this.model.getWebSiteUrl().isEmpty()) {
                     errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWebSiteUrlNotFound);
                 }
                 if (this.model.getScanPolicyType().isEmpty())
@@ -192,18 +199,14 @@ public class DastScanSharedBuildStep {
                                                   boolean requireLoginMacroAuth,
                                                   String networkAuthUserName, String networkAuthPassword
             , String networkAuthType, String timeboxScan
+    ) throws Exception {
 
-    )
-            throws IllegalArgumentException, IOException {
-
-        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId());
 
         try {
-
             if (!ValidateModel().isEmpty()) {
                 throw new IllegalArgumentException("Failed to save scan settings for release id: " + String.join(", ", ValidateModel()));
             }
-
             PutDastWebSiteScanReqModel dynamicScanSetupReqModel;
             dynamicScanSetupReqModel = new PutDastWebSiteScanReqModel();
             dynamicScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
@@ -216,7 +219,7 @@ public class DastScanSharedBuildStep {
 
             if (loginMacroId != null && !loginMacroId.isEmpty()) {
                 dynamicScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
-                requireLoginMacroAuth =true;
+                requireLoginMacroAuth = true;
             }
             try {
                 if (timeboxScan != null && !timeboxScan.isEmpty())
@@ -254,13 +257,19 @@ public class DastScanSharedBuildStep {
             PutDastScanSetupResponse response = dynamicController.SaveDastWebSiteScanSettings(Integer.parseInt(userSelectedRelease),
                     dynamicScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
-                System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
+                Utils.logger(printStream, "Successfully saved settings for release id = " + userSelectedRelease);
             } else {
-                throw new Exception("Failed to save scan settings for release id: " + userSelectedRelease);
+
+                String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                        .collect(Collectors.joining(",")) : "";
+
+                throw new Exception(String.format("Failed to save scan settings for release id:%s, error: %s",
+                        userSelectedRelease, errMsg));
             }
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
+
             throw new IllegalArgumentException("Failed to save scan settings for release id = " + userSelectedRelease, e);
         }
     }
@@ -274,12 +283,12 @@ public class DastScanSharedBuildStep {
                                                          boolean requireNetworkAuth,
                                                          String networkAuthUserName, String networkAuthPassword
             , String networkAuthType)
-            throws IllegalArgumentException, IOException {
+            throws Exception {
 
         if (!ValidateModel().isEmpty()) {
             throw new IllegalArgumentException("Failed to save scan settings for release id: " + String.join(", ", ValidateModel()));
         }
-        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId()
+        DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
         );
         try {
 
@@ -293,7 +302,6 @@ public class DastScanSharedBuildStep {
                 dastWorkflowScanSetupReqModel.setPolicy(scanPolicy);
 
             dastWorkflowScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
-            dastWorkflowScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
 
             if (workflowMacroId.isEmpty() || Integer.parseInt(workflowMacroId) <= 0 || workflowMacroHosts.isEmpty()) {
 
@@ -325,11 +333,14 @@ public class DastScanSharedBuildStep {
             PutDastScanSetupResponse response = dynamicController.SaveDastWorkflowDrivenScanSettings(Integer.parseInt(userSelectedRelease),
                     dastWorkflowScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
-                System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
+                Utils.logger(printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
-                throw new Exception(String.format("Failed to save scan settings for release id=%d, error=%s", Integer.parseInt(userSelectedRelease)
-                ,response.errors.toString()));
+                String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                        .collect(Collectors.joining(",")) : "";
+
+                throw new Exception(String.format("Failed to save scan settings for release id:%s, error: %s",
+                        userSelectedRelease, errMsg));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
@@ -338,7 +349,7 @@ public class DastScanSharedBuildStep {
 
     public PatchDastFileUploadResponse DastManifestFileUpload(String fileContent, String fileType, String filename) throws Exception {
 
-        DastScanController dastScanController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId()
+        DastScanController dastScanController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
         );
         PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
         patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
@@ -373,7 +384,7 @@ public class DastScanSharedBuildStep {
 
     public PatchDastFileUploadResponse DastManifestFileUpload(byte[] fileContent, String fileType) throws Exception {
 
-        DastScanController dastScanController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId()
+        DastScanController dastScanController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
         );
         PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
         patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
@@ -408,18 +419,18 @@ public class DastScanSharedBuildStep {
 
 
     public PatchDastFileUploadResponse DastManifestFileUpload(FilePath workspace, String payLoadPath, PrintStream logger,
-                                                              FodEnums.DastScanFileTypes fileType) throws Exception {
+                                                              FodEnums.DastScanFileTypes fileType, FodApiConnection apiConnection) throws Exception {
 
         FilePath dastPayload = new FilePath(workspace, payLoadPath);
         if (!dastPayload.exists()) {
             logger.printf("FilePath for the Payload not constructed for releaseId %s%n", getModel().get_releaseId());
-            throw new RuntimeException(String.format("FilePath for the Payload not constructed for releaseId %s%n", getModel().get_releaseId()));
+            throw new Exception(String.format("FilePath for the Payload not constructed for releaseId %s%n", getModel().get_releaseId()));
         }
-        DastScanController dastScanController = new DastScanController(getApiConnection(), logger, Utils.createCorrelationId());
+        DastScanController dastScanController = new DastScanController(apiConnection, logger, Utils.createCorrelationId());
         PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
         patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
-        patchDastScanFileUploadReq.dastFileType =fileType;
-        return dastScanController.DastFileUpload(dastPayload, logger,patchDastScanFileUploadReq);
+        patchDastScanFileUploadReq.dastFileType = fileType;
+        return dastScanController.DastFileUpload(dastPayload, logger, patchDastScanFileUploadReq);
     }
 
     public void saveReleaseSettingsForOpenApiScan(String userSelectedRelease, String assessmentTypeID,
@@ -430,9 +441,9 @@ public class DastScanSharedBuildStep {
                                                   boolean requireNetworkAuth,
                                                   String networkAuthUserName, String networkAuthPassword,
                                                   String networkAuthType, String openApiSourceType, String sourceUrn, String openApiKey)
-            throws IllegalArgumentException, IOException {
+            throws Exception {
 
-        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId()
+        DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
         );
         try {
 
@@ -459,16 +470,21 @@ public class DastScanSharedBuildStep {
                 throw new IllegalArgumentException(String.format("OpenAPI Source= %s  not set for release Id={%s}"
                         , sourceUrn, userSelectedRelease));
             } else {
-                dastOpenApiScanSetupReqModel.SourceUrn = sourceUrn;
+                dastOpenApiScanSetupReqModel.setSourceUrn(sourceUrn);
             }
 
             PutDastScanSetupResponse response = dynamicController.putDastOpenApiScanSettings(Integer.parseInt(userSelectedRelease),
                     dastOpenApiScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
-                System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
+
+                Utils.logger(printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
-                throw new Exception(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)));
+                String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                        .collect(Collectors.joining(",")) : "";
+
+                throw new Exception(String.format("Failed to save scan settings for release id:%s, error: %s",
+                        userSelectedRelease, errMsg));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
@@ -484,9 +500,9 @@ public class DastScanSharedBuildStep {
                                                   String networkAuthUserName, String networkAuthPassword,
                                                   String networkAuthType, String sourceUrn, String sourceType,
                                                   String schemeType, String host, String servicePath)
-            throws IllegalArgumentException, IOException {
+            throws Exception {
 
-        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId()
+        DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
         );
         try {
 
@@ -515,10 +531,15 @@ public class DastScanSharedBuildStep {
             PutDastScanSetupResponse response = dynamicController.putDastGraphQLScanSettings(Integer.parseInt(userSelectedRelease),
                     dastGraphQlScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
-                System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
+
+                Utils.logger(printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
-                throw new Exception(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)));
+                String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                        .collect(Collectors.joining(",")) : "";
+
+                throw new Exception(String.format("Failed to save scan settings for release id:%s, error: %s",
+                        userSelectedRelease, errMsg));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
@@ -532,9 +553,9 @@ public class DastScanSharedBuildStep {
                                                String networkAuthUserName, String networkAuthPassword,
                                                String networkAuthType,
                                                String grpcFileId, String schemeType, String host, String servicePath)
-            throws IllegalArgumentException, IOException {
+            throws Exception {
 
-        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId());
         try {
 
             PutDastAutomatedGrpcReqModel dastgrpcScanSetupReqModel;
@@ -561,17 +582,23 @@ public class DastScanSharedBuildStep {
                 throw new IllegalArgumentException(String.format("GRPC Source= %s  not set for release Id={%s}"
                         , fileId, userSelectedRelease));
             } else {
-                dastgrpcScanSetupReqModel.FileId = Integer.parseInt(grpcFileId);
+                dastgrpcScanSetupReqModel.setFileId(Integer.parseInt(grpcFileId));
             }
 
             PutDastScanSetupResponse response = dynamicController.putDastGrpcScanSettings(Integer.parseInt(userSelectedRelease),
                     dastgrpcScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
-                System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
+                Utils.logger(printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
-                throw new Exception(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)));
+
+                String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                        .collect(Collectors.joining(",")) : "";
+
+                throw new Exception(String.format("Failed to save scan settings for release id:%s, error: %s",
+                        userSelectedRelease, errMsg));
             }
+
         } catch (Exception e) {
             throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
         }
@@ -583,9 +610,9 @@ public class DastScanSharedBuildStep {
                                                   String scanEnvironment,
                                                   String networkAuthUserName, String networkAuthPassword,
                                                   String networkAuthType, String postmanIdCollection)
-            throws IllegalArgumentException, IOException {
+            throws Exception {
 
-        DastScanController dynamicController = new DastScanController(getApiConnection(), null, Utils.createCorrelationId());
+        DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId());
         try {
 
             PutDastAutomatedPostmanReqModel dastPostmanScanSetupReqModel;
@@ -625,11 +652,12 @@ public class DastScanSharedBuildStep {
         }
     }
 
+
     public int[] ConvertStringToIntArr(String fileIds) {
 
         String[] postmanIds = fileIds.split(",");
 
-        if(postmanIds.length >0) {
+        if (postmanIds.length > 0) {
             int[] postmanIdArr = new int[postmanIds.length];
             for (int i = 0; i < postmanIds.length; i++) {
                 postmanIdArr[i] = Integer.parseInt(postmanIds[i]);
@@ -641,10 +669,10 @@ public class DastScanSharedBuildStep {
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build, FilePath workspace,
-                        Launcher launcher, TaskListener listener, String correlationId) {
+                        Launcher launcher, TaskListener listener, String correlationId, FodApiConnection apiConnection) {
         final PrintStream logger = listener.getLogger();
         boolean isRemoteAgent = workspace.isRemote();
-        FodApiConnection apiConnection = null;
+
         try {
             taskListener.set(listener);
 
@@ -682,20 +710,14 @@ public class DastScanSharedBuildStep {
 
             if (releaseId <= 0) {
                 build.setResult(Result.FAILURE);
-                Utils.logger(logger,"Invalid release ID.");
+                Utils.logger(logger, "Invalid release ID.");
                 return;
             }
-            try {
-                apiConnection = ApiConnectionFactory.createApiConnection(getAuthModel(), isRemoteAgent, launcher, logger);
-            } catch (IOException e) {
-                build.setResult(Result.FAILURE);
-                throw new RuntimeException(e);
-            }
+
             if (apiConnection != null) {
 
                 DastScanController dynamicController = new DastScanController(apiConnection, logger, Utils.createCorrelationId());
                 PostDastStartScanResponse response = dynamicController.StartDastScan(releaseId);
-
                 if (response.errors == null && response.scanId > 0) {
                     build.setResult(Result.SUCCESS);
                     logger.println(String.format("Fortify On Demand dynamic scan successfully triggered for scan Id %d ", response.scanId));

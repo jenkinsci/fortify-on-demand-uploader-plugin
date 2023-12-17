@@ -8,6 +8,7 @@ import hudson.remoting.VirtualChannel;
 import jenkins.security.MasterToSlaveCallable;
 import okhttp3.*;
 import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import org.jenkinsci.plugins.fodupload.FodApi.Utils;
 
 public interface DastScanPayloadUpload {
     PatchDastFileUploadResponse performUpload() throws IOException;
@@ -29,9 +29,9 @@ class DastScanPayloadUploadImpl {
         File uploadFile = new File(payload.getRemote());
 
         if (!uploadFile.exists()) {
-            throw new FileNotFoundException(String.format("DAST scan payload file=%s not found", uploadFile.getName()));
+            throw new IOException(String.format("DAST scan payload file=%s not found", uploadFile.getName()));
         }
-        System.out.println(uploadFile.getAbsolutePath());
+        log.println(uploadFile.getAbsolutePath());
         Path filePath = Paths.get(uploadFile.getAbsolutePath());
 
         MediaType mediaType = MediaType.parse("application/octet-stream");
@@ -53,23 +53,23 @@ class DastScanPayloadUploadImpl {
 
         try (Response response = client.newCall(request).execute()) {
 
-           ResponseContent responseContent =  Utils.ResponseContentFromOkHttp3(response);
-           System.out.println(responseContent);
+            ResponseContent responseContent = Utils.ResponseContentFromOkHttp3(response);
 
-            log.println(getLogTimestamp(dateFormat) + " File Upload Status for release Id-: " + releaseId +
-                    " (Response: " + response.code() + ")");
+            if (!response.isSuccessful()) {
+                log.printf("Fortify OnDemand: %s , Failed to upload DAST manifest payload for release Id: %s ,Response Code %d , response content: %s%n",
+                        getLogTimestamp(dateFormat), releaseId, responseContent.code(), responseContent.bodyContent());
 
+                throw new IOException("Fortify OnDemand: Failed to upload DAST manifest payload");
+            }
             patchDastFileUploadResponse = new PatchDastFileUploadResponse();
-            patchDastFileUploadResponse = Utils.ConvertHttpResponseIntoDastApiResponse( responseContent, patchDastFileUploadResponse);
+            patchDastFileUploadResponse = Utils.ConvertHttpResponseIntoDastApiResponse(responseContent, patchDastFileUploadResponse);
 
         } catch (IOException ex) {
-            log.print(String.format("Failed to upload DAST scan payload for release id %s with error %s", releaseId, ex.getMessage()));
+            log.printf("Failed to upload DAST manifest payload for release id %s", releaseId);
             throw ex;
         }
         return patchDastFileUploadResponse;
-
     }
-
     private static String getLogTimestamp(DateTimeFormatter dateFormat) {
         return dateFormat.format(LocalDateTime.now());
     }
@@ -135,11 +135,20 @@ class DastScanPayloadUploadRemote extends MasterToSlaveCallable<PatchDastFileUpl
     }
 
     @Override
-    public PatchDastFileUploadResponse call() throws IOException {
+    public PatchDastFileUploadResponse call() {
 
-        PrintStream logger = new PrintStream(_logger, true, StandardCharsets.UTF_8.name());
+        PrintStream logger = null;
+        try {
+            logger = new PrintStream(_logger, true, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
         OkHttpClient client = Utils.CreateOkHttpClient(_connectionTimeout, _writeTimeout, _readTimeout, _proxy);
-        return DastScanPayloadUploadImpl.performUpload(_filePath, _releaseId, _apiUri, _correlationId, _bearerToken, client, logger);
+        try {
+            return DastScanPayloadUploadImpl.performUpload(_filePath, _releaseId, _apiUri, _correlationId, _bearerToken, client, logger);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
     }
 

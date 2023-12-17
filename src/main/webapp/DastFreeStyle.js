@@ -361,14 +361,14 @@ debugger;
                     }
                 );
 
-            let entp = this.api.getAssessmentTypeEntitlements(releaseId, getAuthInfo())
+            let entp =await this.api.getAssessmentTypeEntitlements(releaseId, getAuthInfo())
                 .then(r => this.assessments = r)
                 .catch((err) => {
                     console.error("entitlement api failed");
                     throw err;
                 });
             //ToDo- read from constant instead of API
-            let tzs = this.api.getTimeZoneStacks(getAuthInfo())
+            let tzs = await this.api.getTimeZoneStacks(getAuthInfo())
                 .then(r => this.timeZones = r).catch(
                     (err) => {
                         console.error("timezone api failed: " + err)
@@ -376,7 +376,7 @@ debugger;
                     }
                 );
             //ToDo- read from constant instead of API
-            let networkAuthTypes = this.api.getNetworkAuthType(getAuthInfo()).then(
+            let networkAuthTypes = await this.api.getNetworkAuthType(getAuthInfo()).then(
                 r => this.networkAuthTypes = r
             ).catch((err) => {
                 console.error(err);
