@@ -55,7 +55,7 @@ class DastFreeStyle {
 
         if ((isVisible !== undefined || null)) {
             this.commonScopeSettingVisibility(false);
-
+debugger;
             switch (scanType) {
 
                 case "Standard": {
@@ -155,6 +155,7 @@ class DastFreeStyle {
 
     commonScopeSettingVisibility(isVisible) {
         let commonScopeRows = jq('.dastCommonScopeSetting');
+        debugger;
         if ((isVisible === undefined) || isVisible === false) {
             commonScopeRows.hide();
         } else {
@@ -176,6 +177,7 @@ class DastFreeStyle {
     }
 
     apiScanSettingVisibility(isVisible) {
+    debugger
         jq('.dast-api-scan').each((iterator, element) => {
             let currentElement = jq(element);
             let tr = closestRow(currentElement);
@@ -191,6 +193,7 @@ class DastFreeStyle {
     }
 
     workflowScanSettingVisibility(isVisible) {
+    debugger
         let workflowScanSettingRows = jq('.dast-workflow-setting');
         if ((isVisible === undefined || null) || isVisible === false) {
             workflowScanSettingRows.hide();
@@ -416,6 +419,7 @@ class DastFreeStyle {
                         this.setWorkflowDrivenScanSetting();
 
                         this.setApiScanSetting();
+                         this.setUploadedFileDetails();
                         /*Set restrict scan value from response to UI */
                         this.setRestrictScan();
 
@@ -502,7 +506,14 @@ class DastFreeStyle {
 
         }
     }
-
+    setUploadedFileDetails(){
+        debugger;
+       if(!Object.is(this.scanSettings.fileDetails, null)){
+               this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                       jq('.uploadedFileDetails').text(item.fileName);
+                       });
+               }
+        }
     setOpenApiSettings(openApiSettings) {
 
         jq('#apiTypeList').val('openApi');
@@ -534,13 +545,15 @@ class DastFreeStyle {
 
     setGrpcSettings(grpcSettings) {
         jq('#apiTypeList').val('grpc');
-        jq('#dast-grpc-api-host input').val(graphQlSettings.host);
-        jq('#dast-grpc-api-servicePath input').val(graphQlSettings.servicePath);
-        jq('#dast-grpc-schemeType input').val(graphQlSettings.schemeType);
+         this.onApiTypeChanged();
+        jq('#dast-grpc-api-host input').val(grpcSettings.host);
+        jq('#dast-grpc-api-servicePath input').val(grpcSettings.servicePath);
+        jq('#dast-grpc-schemeType input').val(grpcSettings.schemeType);
     }
 
     setPostmanSettings(postmanSettings) {
         jq('#apiTypeList').val('postman');
+        this.onApiTypeChanged();
     }
 
     setSelectedEntitlementValue(entitlements) {

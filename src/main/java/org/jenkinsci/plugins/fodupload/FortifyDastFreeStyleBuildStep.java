@@ -347,6 +347,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                 }
 
                 patchDastScanFileUploadReq.Content = fileContent.getBytes();
+                patchDastScanFileUploadReq.fileName = fileName;
                 return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
 
             } catch (Exception ex) {

@@ -64,6 +64,13 @@
         .req-field {
         border: 1px solid red;
         }
+        .uploadedFileDetails {
+        display: inline-block;
+        border-radius: 74px;
+        background-color: #efefef;
+        padding-left: 10px;
+        padding-right: 10px;
+        }
     </style>
     <f:section title="Authentication - Select to override global authentication settings">
         <f:block>
@@ -235,6 +242,7 @@
         </f:entry>
     </f:section>
     <f:section title="Scope">
+        <div class="scopeContainer">
         <f:entry>
             <div id="dast-workflow-macro-upload"
                  class="fodp-field spinner-container fodp-row-relid-ovr dast-workflow-setting">
@@ -298,12 +306,12 @@
                 </ol>
             </div>
         </f:entry>
-
+        </div>
         <!---API Section -->
 
         <f:block>
             <div class="dast-api-setting fodp-field spinner-container fodp-row-relid-ovr" id="dast-api-scan-block">
-                <f:entry field="apiType">
+                <f:entry field="apiType" title="Api Type">
                     <div id="dast-api-scan" class="fode-field spinner-container">
                         <div class="fode-edit jenkins-select">
                             <select name="selectedApiType" id="apiTypeList" class="jenkins-select__input">
@@ -330,16 +338,18 @@
                                        id="openApiRadioSource"></input>
                             </f:entry>
                             <div class="sourceDetails openApiSourceControls">
-                                <div id="dast-openApi-filePath" class="dastPipelineFilePath openApiFilePath fode-field spinner-container">
+                                <div class="uploadedFileContainer">  <f:entry title="Uploaded File"><div class="uploadedFileDetails"></div></f:entry>
+                                </div> <div id="dast-openApi-filePath" class="dastPipelineFilePath openApiFilePath fode-field spinner-container">
                                     <f:entry title="Please provide the OpenAPI file path. Supported extension: *.json">
                                         <f:textbox field="openApiFilePath" name="openApiFilePath"></f:textbox>
                                         <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are *.json</p>
                                     </f:entry>
                                 </div>
+
                                 <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileds">
                                     <f:entry field="openApiFileSource"
                                              title="Please upload your OpenAPI specification json file. Supported extensions: *.json">
-                                        <span>
+                                        <span  class="uploadContainer">
                                             <input accept=".json" id="openApiFile"  type="File" name="openApiFile" />
                                             <input type="button" value="Upload" id="btnUploadOpenApiFile"
                                                    class="dastFileUploadButton"/>
@@ -347,6 +357,7 @@
                                             <span class="uploadMessage" id="openApiUploadMessage"
                                                   style="color: red;"></span>
                                         </span>
+
                                     </f:entry>
                                 </div>
                                 <div id="dast-openApi-url" class="fode-field spinner-container sourceTypeFileds">
@@ -366,26 +377,15 @@
                     </f:entry>
                     <f:entry field="postman">
                         <div id="dast-postman" class="apiOptions fode-field spinner-container">
-                            <div class="dastPipelineFilePath postmanFilePath fode-field spinner-container">
+                        <div class="uploadedFileContainer">  <f:entry title="Uploaded File"><div class="uploadedFileDetails"></div></f:entry>
+                        </div> <div class="dastPipelineFilePath postmanFilePath fode-field spinner-container">
                                 <f:entry title="Please provide the postman file path. Supported extension: *.json">
-                                    <f:textbox field="postmanFilePath" name="postmanFilePath"></f:textbox>
+                                  <span  class="uploadContainer">
+                                      <f:textbox field="postmanFilePath" name="postmanFilePath"></f:textbox>
+                                  </span>
                                     <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are *.json</p>
                                 </f:entry>
                             </div>
-                           <!-- <f:entry field="postmanFile"
-                                     title="Please upload the Postman collection. Supported extensions: *.json">
-                                <div id="dast-api-postman-upload" class="fode-field spinner-container sourceDetails">
-                                    <span>
-                                        <input accept=".json" id="postmanFile"  type="File" name="postmanFile" />
-                                        <input type="button" value="Upload" id="btnUploadPostmanFile"
-                                               class="dastFileUploadButton"/>
-                                        <input type="label" hidden="true" name="postmanFileId" id="postmanFileId"/>
-                                        <span class="uploadMessage" id="postmanUploadMessage"
-                                              style="color: red;"></span>
-                                    </span>
-                                </div>
-                            </f:entry>-->
-
                         </div>
                     </f:entry>
                     <f:entry field="graphQL">
@@ -402,21 +402,11 @@
                             </f:entry>
                             <div class="sourceDetails graphQLSourceControls">
                                 <div class="dastPipelineFilePath graphQlFilePath fode-field spinner-container">
+                                    <div class="uploadedFileContainer"> <f:entry title="Uploaded File"><div class="uploadedFileDetails"></div></f:entry>
+                                    </div>
                                     <f:entry title="Please provide the graphQL file path. Supported extension: *.json">
                                         <f:textbox field="graphQLFilePath" name="graphQLFilePath" ></f:textbox>
                                         <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are *.json</p>
-                                    </f:entry>
-                                </div>
-                                <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
-                                    <f:entry field="graphQlUpload"
-                                             title="Please upload the introspection query schema file. Supported extensions: *.json">
-                                        <span>
-                                            <input accept=".json" id="graphQLFile" type="File" name="graphQLFile"/>
-                                            <input type="button" value="Upload" id="btnUploadgraphQLFile"/>
-                                            <input type="label" hidden="true" name="graphQLFileId" id="graphQLFileId"/>
-                                            <span class="uploadMessage" id="grapgQlUploadMessage"
-                                                  style="color: red;"></span>
-                                        </span>
                                     </f:entry>
                                 </div>
                                 <div id="dast-graphQL-url" class="fode-field spinner-container sourceTypeFileds">
@@ -447,22 +437,15 @@
                     <f:entry field="grpc">
                         <div id="dast-grpc" class="apiOptions fode-field spinner-container">
                             <div class="dastPipelineFilePath grpcFilePath fode-field spinner-container">
+                                <div class="uploadedFileContainer"> <f:entry title="Uploaded File"><div class="uploadedFileDetails"></div></f:entry>
+                                </div> <div class="dastPipelineFilePath grpcFilePath fode-field spinner-container">
                                 <f:entry title="Please provide the grpc file path. Supported extension: *.proto">
+                                    <span  class="uploadContainer">
                                     <f:textbox field="grpcFilePath" name="grpcFilePath"></f:textbox>
-                                    <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are *.proto</p>
-                                </f:entry>
-                            </div>
-                           <!-- <f:entry field="grpcupload" title="Please upload the proto file: *.proto">
-                                <div id="dast-grpc-upload" class="fode-field spinner-container">
-                                    <span>
-                                        <input accept=".proto" id="grpcFile" type="File" name="grpcFile"/>
-                                        <input type="button" value="Upload" id="btnUploadgrpcFile"
-                                               class="dastFileUploadButton"/>
-                                        <input type="label" hidden="true" name="grpcFileId" id="grpcFileId"/>
-                                        <span class="uploadMessage" id="grpcUploadMessage" style="color: red;"></span>
                                     </span>
-                                </div>
-                            </f:entry>-->
+                                    <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are *.proto</p>
+                                </f:entry></div>
+                            </div>
                             <f:entry title="SchemeType">
                                 <div id="dast-grpc-schemeType" class="fode-field spinner-container">
                                     <f:textbox field="grpcSchemeType" name="grpcSchemeType"/>
@@ -486,9 +469,15 @@
 
 
         <f:entry title="Scan Policy">
-            <div id="dast-standard-scan-policy"
-                 class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
-                <f:select field="scanPolicy"/>
+            <div id="dast-standard-scan-policy" class="fode-field spinner-container">
+                <select name="scanPolicy" id="scanPolicy">
+                    <option value="Standard">Standard</option>
+                    <option value="CriticalsAndHighs">Critical And Highs</option>
+                    <option value="PassiveScan">Passive Scan</option>
+                </select>
+            </div>
+            <div id="dast-api-scan-policy-apiType" class="fode-field spinner-container">
+                <div value="API">API</div>
             </div>
         </f:entry>
         <f:entry>
@@ -508,7 +497,6 @@
 
         </f:entry>
     </f:section>
-
     <f:section title="Authentication">
         <f:entry>
             <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv"
@@ -558,7 +546,8 @@
                             <input type="label" hidden="true" value="" name="loginMacroFileId" id="loginMacroFileId"/>
 
                         </span>
-                    </f:entry>
+                        <div class="uploadedFileContainer"><f:entry title="Uploaded File"><div class="uploadedFileDetails"></div></f:entry>
+                        </div> </f:entry>
 
                 </f:optionalBlock>
             </div>

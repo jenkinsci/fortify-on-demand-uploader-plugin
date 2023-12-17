@@ -48,6 +48,13 @@
         .req-field {
         border: 1px solid red;
         }
+        .uploadedFileDetails {
+        display: inline-block;
+        border-radius: 74px;
+        background-color: #efefef;
+        padding-left: 10px;
+        padding-right: 10px;
+        }
     </style>
 
     <st:adjunct includes="io.jenkins.plugins.jquery3"/>

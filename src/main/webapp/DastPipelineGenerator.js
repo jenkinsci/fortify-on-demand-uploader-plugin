@@ -479,6 +479,7 @@ class DastPipelineGenerator {
                         this.setTimeBoxScan();
                         this.setWorkflowDrivenScanSetting();
                         this.setApiScanSetting();
+                        this.setUploadedFileDetails();
                         /*Set restrict scan value from response to UI */
                         this.setRestrictScan();
                         /*Set network settings from response. */
@@ -663,6 +664,8 @@ class DastPipelineGenerator {
             this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
             switch (scanType) {
                 case "Standard": {
+                 jq('#dast-standard-scan-policy').show();
+                 jq('#dast-api-scan-policy-apiType').hide();
                     this.websiteScanSettingsVisibility(isVisible);
                     this.workflowScanSettingVisibility(false);
                     this.apiScanSettingVisibility(false);
@@ -678,18 +681,21 @@ class DastPipelineGenerator {
                     jq('#dast-standard-scan-policy').hide();
                     jq('#dast-api-scan-policy-apiType').show();
                     jq('.redundantPageDetection').hide();
-                    this.apiScanSettingVisibility(isVisible);
-                    this.commonScopeSettingVisibility(isVisible);
+                    this.commonScopeSettingVisibility(false);
                     this.networkAuthSettingVisibility(true);
                     this.loginMacroSettingsVisibility(false);
                     this.workflowScanSettingVisibility(false);
                     this.websiteScanSettingsVisibility(false);
                     this.directoryAndSubdirectoriesScopeVisibility(false);
                     this.timeboxScanVisibility(isVisible);
+                     this.apiScanSettingVisibility(isVisible);
                     break;
                 }
                 case "Workflow-driven":
                     this.workflowScanSettingVisibility(isVisible);
+                     jq('#dast-standard-scan-policy').show();
+                     jq('#dast-api-scan-policy-apiType').hide();
+                     jq('.redundantPageDetection').hide();
                     this.websiteScanSettingsVisibility(false);
                     this.apiScanSettingVisibility(false);
                     this.commonScopeSettingVisibility(isVisible);
@@ -800,7 +806,8 @@ class DastPipelineGenerator {
 
 
     commonScopeSettingVisibility(isVisible) {
-        let commonScopeRows = jq('.dast-common-scan-scope');
+    debugger;
+        let commonScopeRows = jq('.scopeContainer');
         if ((isVisible === undefined) || isVisible === false) {
             commonScopeRows.hide();
         } else {
@@ -908,7 +915,7 @@ class DastPipelineGenerator {
 
     onScanTypeChanged() {
 
-
+        debugger;
         this.resetAuthSettings();
         let selectedScanTypeValue = jq('#scanTypeList').val();
 
@@ -1214,6 +1221,16 @@ class DastPipelineGenerator {
             //ToDo : Write code for showing file name
         }
     }
+    setUploadedFileDetails(){
+    debugger;
+    if(!Object.is(this.scanSettings.fileDetails, null)){
+        this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                var a = closestRow('.uploadContainer');
+                debugger;
+                jq('.uploadedFileDetails').text(item.fileName);
+                });
+        }
+    }
 
     setGraphQlSettings(graphQlSettings) {
         jq('#apiTypeList').val('graphQl');
@@ -1232,13 +1249,15 @@ class DastPipelineGenerator {
 
     setGrpcSettings(grpcSettings) {
         jq('#apiTypeList').val('grpc');
-        jq('#dast-grpc-api-host input').val(graphQlSettings.host);
-        jq('#dast-grpc-api-servicePath input').val(graphQlSettings.servicePath);
-        jq('#dast-grpc-schemeType input').val(graphQlSettings.schemeType);
+        this.onApiTypeChanged();
+        jq('#dast-grpc-api-host input').val(grpcSettings.host);
+        jq('#dast-grpc-api-servicePath input').val(grpcSettings.servicePath);
+        jq('#dast-grpc-schemeType input').val(grpcSettings.schemeType);
     }
 
     setPostmanSettings(postmanSettings) {
         jq('#apiTypeList').val('postman');
+        this.onApiTypeChanged();
     }
 
     apiTypeUserControlVisibility(apiType, isVisible) {

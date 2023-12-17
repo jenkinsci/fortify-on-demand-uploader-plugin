@@ -61,7 +61,13 @@ public class GetDastScanSettingResponse {
     public boolean restrictToDirectoryAndSubdirectories;
     public boolean requiresNetworkAuthentication;
     public NetworkAuthenticationSettings networkAuthenticationSettings;
+    public FileDetails[] fileDetails;
 
+    public class  FileDetails{
+        public int fileId;
+        public String fileName;
+        public String fileType;
+    }
     public enum DayOfWeekTypes {
         Sunday,
         Monday,
