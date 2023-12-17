@@ -64,6 +64,13 @@
         .req-field {
         border: 1px solid red;
         }
+        .uploadedFileDetails {
+        display: inline-block;
+        border-radius: 74px;
+        background-color: #efefef;
+        padding-left: 10px;
+        padding-right: 10px;
+        }
     </style>
     <f:section title="Authentication - Select to override global authentication settings">
         <f:block>
@@ -234,22 +241,11 @@
             </f:entry>
         </f:section>
         <f:section title="Scope">
+            <div class="scopeContainer">
             <f:entry>
                 <div id="dast-workflow-macro-upload"
                      class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv dast-workflow-setting">
-<!--                    <f:optionalBlock title="Workflow Macro File Uploader" name="workflowUploader"-->
-<!--                                     field="workflowUploader">-->
 
-<!--                        <f:entry-->
-<!--                                title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">-->
-<!--                            <span>-->
-<!--                                <input accept=".har,.webmacro,.burp" id="workflowMacroFile" type="File"-->
-<!--                                       name="workflowMacroFile"/>-->
-<!--                                <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>-->
-
-<!--                            </span>-->
-<!--                        </f:entry>-->
-<!--                    </f:optionalBlock>-->
                     <f:entry
                             title="Please provide the workflow driven macro file path. Supported extensions: *.har, *.webmacro, *.burp">
                         <f:textbox name="workflowMacroFilePath" field="workflowMacroFilePath"/>
@@ -304,7 +300,7 @@
                     </ol>
                 </div>
             </f:entry>
-
+            </div>
             <!---API Section -->
 
             <f:block>
