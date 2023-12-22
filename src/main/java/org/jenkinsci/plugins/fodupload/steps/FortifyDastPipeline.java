@@ -6,6 +6,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
+import hudson.model.Result;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
@@ -17,9 +18,9 @@ import org.jenkinsci.plugins.fodupload.SharedUploadBuildStep;
 import org.jenkinsci.plugins.fodupload.Utils;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.controllers.*;
-import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
-import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.AssessmentTypeEntitlementsForAutoProv;
+import org.jenkinsci.plugins.fodupload.models.response.CreateApplicationResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -46,16 +47,13 @@ public class FortifyDastPipeline extends FortifyStep {
     @Deprecated
     private Boolean overrideGlobalConfig;
     private String username;
-
     public String getLoginMacroFileId() {
         return loginMacroFileId;
     }
-
     @DataBoundSetter
     public void setLoginMacroFileId(String loginMacroFileId) {
         this.loginMacroFileId = loginMacroFileId;
     }
-
     private String loginMacroFileId;
     private String personalAccessToken;
     private String tenantId;
@@ -70,16 +68,13 @@ public class FortifyDastPipeline extends FortifyStep {
     private String auditPreference;
     private String applicationName;
     private String applicationType;
-
-    private String releaseName;
+     private String releaseName;
     private Integer owner;
     private String attributes;
     private String businessCriticality;
     private String sdlcStatus;
     private boolean enableRedundantPageDetection;
-
-
-    String networkAuthType;
+    private String networkAuthType;
 
     public java.lang.String getSelectedApiType() {
         return selectedApiType;
@@ -113,7 +108,7 @@ public class FortifyDastPipeline extends FortifyStep {
         this.openApiFileId = openApiFileId;
     }
 
-    String openApiFileId;
+    private String openApiFileId;
 
     public java.lang.String getOpenApiUrl() {
         return openApiUrl;
@@ -124,7 +119,7 @@ public class FortifyDastPipeline extends FortifyStep {
         this.openApiUrl = openApiUrl;
     }
 
-    String openApiUrl;
+    private String openApiUrl;
 
     public java.lang.String getOpenApiKey() {
         return openApiKey;
@@ -136,7 +131,7 @@ public class FortifyDastPipeline extends FortifyStep {
         this.openApiKey = openApiKey;
     }
 
-    String openApiKey;
+    private String openApiKey;
 
     public String getOpenApiFilePath() {
         return openApiFilePath;
@@ -147,7 +142,7 @@ public class FortifyDastPipeline extends FortifyStep {
         this.openApiFilePath = openApiFilePath;
     }
 
-    String openApiFilePath;
+   private String openApiFilePath;
 
     public java.lang.String getPostmanFileId() {
         return postmanFileId;
@@ -278,8 +273,8 @@ public class FortifyDastPipeline extends FortifyStep {
         this.grpcFilePath = grpcFilePath;
     }
 
-    String grpcFilePath;
-    String grpcSchemeType;
+    private String grpcFilePath;
+    private String grpcSchemeType;
 
     public String getGrpcApiHost() {
         return grpcApiHost;
@@ -290,7 +285,7 @@ public class FortifyDastPipeline extends FortifyStep {
         this.grpcApiHost = grpcApiHost;
     }
 
-    String grpcApiHost;
+    private String grpcApiHost;
 
     public String getGrpcApiServicePath() {
         return grpcApiServicePath;
@@ -414,7 +409,6 @@ public class FortifyDastPipeline extends FortifyStep {
     public void setNetworkAuthPassword(String networkAuthPassword) {
         this.networkAuthPassword = networkAuthPassword;
     }
-
     private String networkAuthPassword;
 
     private DastScanSharedBuildStep _dastScanSharedBuildStep;
@@ -479,6 +473,19 @@ public class FortifyDastPipeline extends FortifyStep {
 
         if (dastScanSharedBuildStep == null) {
             throw new RuntimeException("DastScanSharedBuildStep Object not set");
+        }
+        List<String> errors =null;
+        if(!this.getReleaseId().isEmpty() && this.getReleaseName().isEmpty()) {
+            errors = dastScanSharedBuildStep.ValidateModel();
+        }
+        else if(!this.getApplicationName().isEmpty()&& !this.getReleaseName().isEmpty())
+        {
+            errors = dastScanSharedBuildStep.ValidateForAutoProv();
+        }
+
+        if (errors !=null && !errors.isEmpty()) {
+            Utils.logger(logger, "Invalid arguments:\n\t" + String.join("\n\t", errors));
+            throw new IllegalArgumentException("Invalid arguments:\n\t" + String.join("\n\t", errors));
         }
 
         switch (this.scanType) {
@@ -752,6 +759,7 @@ public class FortifyDastPipeline extends FortifyStep {
         } else if (this.loginMacroFileId != null && !this.loginMacroFileId.isEmpty() && Integer.parseInt(this.loginMacroFileId) > 0) {
             requireLoginMacro = true;
         }
+
         dastScanSharedBuildStep.SaveReleaseSettingsForWebSiteScan(releaseId, assessmentTypeId,
                 entitlementId
                 , entitlementFrequency, String.valueOf(loginMacroFileId),
@@ -928,7 +936,7 @@ public class FortifyDastPipeline extends FortifyStep {
                         scanType,
                         selectedDynamicTimeZone,
                         enableRedundantPageDetection,
-                        loginMacroFilePath,
+                        loginMacroFilePath, workflowMacroFilePath,
                         loginFileId,
                         workflowMacroId,
                         workflowMacroHosts,
@@ -955,6 +963,10 @@ public class FortifyDastPipeline extends FortifyStep {
                         grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
 
             }
+            else
+            {
+                throw  new IllegalArgumentException("Invalid Scan Type");
+            }
             this._dastScanSharedBuildStep = dastScanSharedBuildStep;
 
             boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
@@ -969,12 +981,6 @@ public class FortifyDastPipeline extends FortifyStep {
                         tenantId);
             }
 
-            errors = dastScanSharedBuildStep.ValidateModel();
-
-            if (!errors.isEmpty()) {
-                Utils.logger(printStream, "Invalid arguments:\n\t" + String.join("\n\t", errors));
-                throw new IllegalArgumentException("Invalid arguments:\n\t" + String.join("\n\t", errors));
-            }
             build.save();
 
             FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(this._dastScanSharedBuildStep.getAuthModel(), workspace.isRemote(), launcher, printStream);
@@ -982,6 +988,42 @@ public class FortifyDastPipeline extends FortifyStep {
                 throw new Exception("Fod API Connection not created.");
             }
             dastScanSharedBuildStep.SetFodApiConnection(apiConnection);
+            dastScanSharedBuildStep.setLogger(printStream);
+
+            if (!this.getReleaseName().isEmpty() && this.getReleaseId().isEmpty()) {
+
+                Utils.logger(printStream,"AutoProv Creating new Application and Release");
+
+                ApplicationsController applicationsController =
+                        new ApplicationsController(apiConnection, printStream, Utils.createCorrelationId());
+
+                ApplicationAttribute[] applicationAttribute =null;
+                String[] microservices = null;
+
+                CreateApplicationModel newAppReqModel = new CreateApplicationModel(
+                        this.applicationName, ApplicationType.fromInteger(Integer.parseInt(this.applicationType)), this.releaseName, this.owner,
+                        applicationAttribute, BusinessCriticalityType.fromInteger(Integer.parseInt(this.getBusinessCriticality())),
+                        SDLCStatusType.fromInteger(Integer.parseInt(this.getSdlcStatus())),
+                        false, microservices, "");
+
+                CreateApplicationResponse createApplicationResponse = applicationsController.createApplication(newAppReqModel);
+
+                if(!createApplicationResponse.getSuccess() || createApplicationResponse.getReleaseId() <0)
+                {
+                    throw  new RuntimeException(String.format("Fortify OnDemand Failed to create application and release, error(s): %s",
+                            String.join("," ,createApplicationResponse.getErrors())));
+                }
+                this.releaseId = createApplicationResponse.getReleaseId().toString();
+                this.applicationId = createApplicationResponse.getApplicationId().toString();
+                dastScanSharedBuildStep.getModel().set_releaseIdFromAutoProv(this.releaseId);
+            }
+            else if(!this.getReleaseId().isEmpty() && this.getReleaseName().isEmpty()) {
+               Utils.logger(printStream,"Existing application and release Id picked for scanning");
+            }
+            else
+            {
+                throw  new IllegalArgumentException("Invalid Fortify DAST scan setting, Either among the release Id or release name is allowed");
+            }
 
             SaveScanSettings(workspace, printStream, dastScanSharedBuildStep);
 

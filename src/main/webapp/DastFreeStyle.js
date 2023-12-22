@@ -55,7 +55,7 @@ class DastFreeStyle {
 
         if ((isVisible !== undefined || null)) {
             this.commonScopeSettingVisibility(false);
-debugger;
+
             switch (scanType) {
 
                 case "Standard": {
@@ -155,7 +155,7 @@ debugger;
 
     commonScopeSettingVisibility(isVisible) {
         let commonScopeRows = jq('.dastCommonScopeSetting');
-        debugger;
+
         if ((isVisible === undefined) || isVisible === false) {
             commonScopeRows.hide();
         } else {
@@ -177,7 +177,7 @@ debugger;
     }
 
     apiScanSettingVisibility(isVisible) {
-    debugger
+
         jq('.dast-api-scan').each((iterator, element) => {
             let currentElement = jq(element);
             let tr = closestRow(currentElement);
@@ -193,7 +193,7 @@ debugger;
     }
 
     workflowScanSettingVisibility(isVisible) {
-    debugger
+
         let workflowScanSettingRows = jq('.dast-workflow-setting');
         if ((isVisible === undefined || null) || isVisible === false) {
             workflowScanSettingRows.hide();
@@ -210,7 +210,7 @@ debugger;
             jq('.dast-scan-setting').show();
         }
         //Remove BSI token form Pick a release selection list as it is not supported for DAST.
-        jq("#releaseTypeSelectList option[value='UseBsiToken']").remove();
+          jq("#releaseTypeSelectList option[value='UseBsiToken']").remove();
     }
 
     hideMessages(msg) {
@@ -225,9 +225,9 @@ debugger;
         jq(`#entitlementSelectList`).find('option').remove();
 
         for (let k of Object.keys(this.assessments)) {
-         let at = this.assessments[k];
-         if(at.assessmentCategory == 'DAST_Automated'){
-            atsel.append(`<option value="${at.id}">${at.name}</option>`);
+            let at = this.assessments[k];
+            if (at.assessmentCategory == 'DAST_Automated') {
+                atsel.append(`<option value="${at.id}">${at.name}</option>`);
             }
         }
     }
@@ -326,6 +326,10 @@ debugger;
 
     async loadEntitlementSettings(releaseChangedPayload) {
 
+        if (releaseChangedPayload && releaseChangedPayload.mode === ReleaseSetMode.releaseId
+            && numberOrNull(releaseChangedPayload.releaseId) > 0) {
+            this.uiLoaded = true;
+        }
         if (!this.uiLoaded) {
             this.scanTypeVisibility(false);
             this.scanTypeUserControlVisibility("allTypes", false);
@@ -354,21 +358,21 @@ debugger;
             rows.show();
             jq('.fode-row-bsi').hide();
 
-            let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo(), true)
+            let ssp= this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo(), true)
                 .then(r => this.scanSettings = r).catch((err) => {
                         console.error("release settings api failed: " + err);
                         throw err;
                     }
                 );
 
-            let entp =await this.api.getAssessmentTypeEntitlements(releaseId, getAuthInfo())
+            let entp = this.api.getAssessmentTypeEntitlements(releaseId, getAuthInfo())
                 .then(r => this.assessments = r)
                 .catch((err) => {
                     console.error("entitlement api failed");
                     throw err;
                 });
             //ToDo- read from constant instead of API
-            let tzs = await this.api.getTimeZoneStacks(getAuthInfo())
+            let tzs = this.api.getTimeZoneStacks(getAuthInfo())
                 .then(r => this.timeZones = r).catch(
                     (err) => {
                         console.error("timezone api failed: " + err)
@@ -376,7 +380,7 @@ debugger;
                     }
                 );
             //ToDo- read from constant instead of API
-            let networkAuthTypes = await this.api.getNetworkAuthType(getAuthInfo()).then(
+            let networkAuthTypes = this.api.getNetworkAuthType(getAuthInfo()).then(
                 r => this.networkAuthTypes = r
             ).catch((err) => {
                 console.error(err);
@@ -385,20 +389,16 @@ debugger;
 
             await Promise.all([ssp, entp, tzs, networkAuthTypes])
                 .then(async () => {
-
-                    this.scanTypeUserControlVisibility('allTypes', false);
-
+                   // this.scanTypeUserControlVisibility('allTypes', false);
                     if (this.scanSettings && this.assessments) {
                         let assessmentId = this.scanSettings.assessmentTypeId;
                         let timeZoneId = this.scanSettings.timeZone;
                         this.populateAssessmentsDropdown();
-
                         jq('#ddAssessmentType').val(assessmentId);
                         await this.onAssessmentChanged(true);
-
                         jq('#entitlementFreqType').val(this.scanSettings.entitlementFrequencyType);
-
                         await this.onEntitlementChanged(false);
+
                         this.setSelectedEntitlementValue(entp);
                         jq('#timeZoneStackSelectList').val(timeZoneId);
                         this.onLoadTimeZone();
@@ -408,21 +408,16 @@ debugger;
                         this.onScanTypeChanged();
                         //Set scan policy from the response.
                         this.setScanPolicy();
-
                         this.setTimeBoxScan();
-
                         //Set the Website assessment scan type specific settings.
-
                         if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
                             jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.dynamicSiteUrl);
                         }
                         this.setWorkflowDrivenScanSetting();
-
                         this.setApiScanSetting();
-                         this.setUploadedFileDetails();
+                        this.setUploadedFileDetails();
                         /*Set restrict scan value from response to UI */
                         this.setRestrictScan();
-
                         /*Set network settings from response. */
                         jq('#ddlNetworkAuthType').val(networkAuthTypes);
                         this.onNetworkAuthTypeLoad();
@@ -433,9 +428,7 @@ debugger;
                         //Enable scan Type right after assessment Type drop populated.
                         this.scanSettingsVisibility(true);
                         this.scanTypeVisibility(true);
-
                         validateRequiredFields(requiredFieldsFreestyle);
-
                     } else {
                         await this.onAssessmentChanged(false);
                         this.showMessage('Failed to retrieve scan settings from API', true);
@@ -492,7 +485,6 @@ debugger;
     }
 
     setApiScanSetting() {
-
         if (!Object.is(this.scanSettings.apiAssessment, undefined)) {
             if (!Object.is(this.scanSettings.apiAssessment.openAPI, undefined)) {
                 this.setOpenApiSettings(this.scanSettings.apiAssessment.openAPI);
@@ -503,19 +495,19 @@ debugger;
             } else if (!Object.is(this.scanSettings.apiAssessment.postman, undefined)) {
                 this.setPostmanSettings(this.scanSettings.apiAssessment.postman);
             }
-
         }
     }
-    setUploadedFileDetails(){
-        debugger;
-       if(!Object.is(this.scanSettings.fileDetails, null)){
-               this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                       jq('.uploadedFileDetails').text(item.fileName);
-                       });
-               }
-        }
-    setOpenApiSettings(openApiSettings) {
 
+    setUploadedFileDetails() {
+
+        if (!Object.is(this.scanSettings.fileDetails, null)) {
+            this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                jq('.uploadedFileDetails').text(item.fileName);
+            });
+        }
+    }
+
+    setOpenApiSettings(openApiSettings) {
         jq('#apiTypeList').val('openApi');
         var inputId = openApiSettings.sourceType == 'Url' ? 'openApiInputUrl' : 'openApiInputFile';
         this.onApiTypeChanged();
@@ -545,7 +537,7 @@ debugger;
 
     setGrpcSettings(grpcSettings) {
         jq('#apiTypeList').val('grpc');
-         this.onApiTypeChanged();
+        this.onApiTypeChanged();
         jq('#dast-grpc-api-host input').val(grpcSettings.host);
         jq('#dast-grpc-api-servicePath input').val(grpcSettings.servicePath);
         jq('#dast-grpc-schemeType input').val(grpcSettings.schemeType);
@@ -562,13 +554,17 @@ debugger;
         let curVal = getEntitlementDropdownValue(this.scanSettings.entitlementId, this.scanSettings.entitlementFrequencyType);
         let entitlement = jq('#entitlementSelectList');
         for (let ts of Object.keys(entitlements)) {
-            let at = this.entp[ts];
+            let at = entitlement[ts];
+            console.log(at.text);
+            console.log(at.value);
             if (curVal !== undefined && at.value !== undefined && curVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
                 entitlement.append(`<option value="${at.text}" selected>${at.text}</option>`);
                 jq('#entitlementId').val(at.text);
             } else {
-                entitlement.append(`<option value="${at.text}">${at.text}</option>`);
+                if(at.text !== null||undefined) {
+                    entitlement.append(`<option value="${at.text}">${at.text}</option>`);
+                }
             }
         }
     }
@@ -715,7 +711,6 @@ debugger;
 
 
     setScanPolicy() {
-
         if (this.scanSettings !== undefined && this.scanSettings.policy !== null || undefined) {
             let selectedScanPolicyType = this.scanSettings.policy;
             let ScanPolicy = ["Standard", "Critical and high", "Passive"]
@@ -725,7 +720,6 @@ debugger;
             scanPolicySel.find('option').first().prop('selected', true);
 
             for (let p of ScanPolicy) {
-
                 if (selectedScanPolicyType !== undefined && selectedScanPolicyType.toLowerCase() === p.toLowerCase()) {
                     currValSelected = true;
                     scanPolicySel.append(`<option value="${p}" selected>${p}</option>`);
@@ -743,7 +737,6 @@ debugger;
             if (jq('#dast-timeBox-scan').find('input:checkbox:first').prop('checked') === false) {
                 jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
             }
-
         }
     }
 
@@ -753,9 +746,7 @@ debugger;
         let ctl = '#loginMacroUploadContainer';
         let msgCtl = '#loginMacroUploadMessage';
         handleSpinner(ctl, false);
-
         this.api.patchSetupManifestFile(this.releaseId, getAuthInfo(), loginMacroFile, dastManifestLoginFileUpload).then(res => {
-
                 if (res.fileId > 0) {
                     jq('#loginMacroId').val(res.fileId);
                     handleSpinner(ctl, true);
@@ -779,15 +770,11 @@ debugger;
         let workFlowMacroFile = document.getElementById('workflowMacroFile').files[0];
         let ctl = '#dast-workflow-macro-upload';
         let msgCtl = '#workflowMacroUploadStatusMessage';
-
         handleSpinner(ctl, false);
-
         this.api.patchSetupManifestFile(this.releaseId, getAuthInfo(), workFlowMacroFile, dastManifestWorkflowMacroFileUpload).then(res => {
-
                 //Todo: - check
                 console.log("File upload success " + res);
                 handleSpinner(ctl, true);
-
                 if (res.fileId > 0) {
                     jq('#workflowMacroId').val(res.fileId)
                     handleUploadStatusMessage(msgCtl, fileUploadSuccess, true);
@@ -829,7 +816,6 @@ debugger;
     }
 
     onFileUpload(event) {
-
         let uploadContainer = '#' + jq('#' + event.target.id).closest('span').attr('id');
         handleSpinner(uploadContainer, false);
         jq('.uploadMessage').text('');
@@ -1183,7 +1169,7 @@ const
     scanSettings = new DastFreeStyle();
 
 spinAndWait(
-    () =>jq(
+    () => jq(
             '#selectedRelease'
         ).text()
 
@@ -1207,7 +1193,7 @@ spinAndWait(
 
 spinAndWait(
     () => jq(
-            '#releaseTypeSelectList'
-        ).val()!== undefined).then(scanSettings
+        '#releaseTypeSelectList'
+    ).val() !== undefined).then(scanSettings
     .scanSettingsVisibility
     .bind(scanSettings));

@@ -44,8 +44,8 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                                          String scanPolicy, boolean scanScope,
                                          String selectedScanType, String selectedDynamicTimeZone,
                                          boolean webSiteNetworkAuthSettingEnabled,
-                                         boolean enableRedundantPageDetection, String webSiteNetworkAuthUserName,
-                                         String loginMacroId, String workflowMacroId, String workflowMacroHosts, String webSiteNetworkAuthPassword,
+                                         boolean enableRedundantPageDetection, String networkAuthUserName,
+                                         String loginMacroId, String workflowMacroId, String workflowMacroHosts, String networkAuthPassword,
                                          String userSelectedApplication,
                                          String userSelectedRelease, String assessmentTypeId,
                                          String entitlementId,
@@ -67,9 +67,9 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                         scanTimeBox,
                         listStandardScanTypeExcludedUrl,
                         scanPolicy, scanScope,
-                        selectedScanType, selectedDynamicTimeZone, enableRedundantPageDetection, null,
+                        selectedScanType, selectedDynamicTimeZone, enableRedundantPageDetection, null,null,
                         loginMacroId.isEmpty() ? 0 : Integer.parseInt(loginMacroId), workflowMacroId, workflowMacroHosts,
-                        webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, userSelectedApplication,
+                        networkAuthUserName, networkAuthPassword, userSelectedApplication,
                         assessmentTypeId, entitlementId, entitlementFrequencyType, selectedNetworkAuthType, timeBoxChecked
                 );
 
@@ -81,7 +81,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                         scanTimeBox,
                         scanPolicy, scanScope,
                         selectedScanType, selectedDynamicTimeZone,
-                        webSiteNetworkAuthUserName, webSiteNetworkAuthPassword,
+                        networkAuthUserName, networkAuthPassword,
                         userSelectedApplication, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, userSelectedEntitlement,
                         timeBoxChecked, selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
@@ -92,20 +92,25 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                 throw new IllegalArgumentException("Invalid Scan Type");
             }
 
+            List<String> error = dastSharedBuildStep.ValidateModel();
+            if (!error.isEmpty()) {
+                throw new IllegalArgumentException("Invalid save scan settings for release id: " + String.join(", ", error));
+            }
+
             if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
 
                 dastSharedBuildStep.SaveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicy,
                         webSiteUrl, scanScope, enableRedundantPageDetection, dastEnv,
-                        webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName,
-                        webSiteNetworkAuthPassword, selectedNetworkAuthType, scanTimeBox);
+                        webSiteNetworkAuthSettingEnabled, networkAuthUserName,
+                        networkAuthPassword, selectedNetworkAuthType, scanTimeBox);
 
             } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
 
                 dastSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicy,
                         enableRedundantPageDetection, dastEnv,
-                        webSiteNetworkAuthSettingEnabled, webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType);
+                        webSiteNetworkAuthSettingEnabled, networkAuthUserName, networkAuthPassword, selectedNetworkAuthType);
 
             } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
                 if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
@@ -113,7 +118,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                     dastSharedBuildStep.saveReleaseSettingsForOpenApiScan(userSelectedRelease, assessmentTypeId, entitlementId,
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
-                            webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
+                            networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
                             openApiRadioSource, sourceUrn, openApiKey);
 
                 }
@@ -123,7 +128,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                     dastSharedBuildStep.SaveReleaseSettingsForGraphQlScan(userSelectedRelease, assessmentTypeId, entitlementId,
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
-                            webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
+                            networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
                             sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath);
 
                 } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
@@ -131,7 +136,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                     dastSharedBuildStep.SaveReleaseSettingsForGrpcScan(userSelectedRelease, assessmentTypeId, entitlementId,
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             dastEnv,
-                            webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
+                            networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
                             grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
 
                 } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
@@ -139,7 +144,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                     dastSharedBuildStep.SaveReleaseSettingsForPostmanScan(userSelectedRelease, assessmentTypeId, entitlementId,
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             dastEnv,
-                            webSiteNetworkAuthUserName, webSiteNetworkAuthPassword, selectedNetworkAuthType,
+                            networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
                             postmanFileId);
                 } else {
 

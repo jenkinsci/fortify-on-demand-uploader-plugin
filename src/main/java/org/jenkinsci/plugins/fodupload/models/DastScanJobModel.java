@@ -20,6 +20,11 @@ public class DastScanJobModel {
         return workflowMacroFileId;
     }
 
+    public  String getWorkflowMacroFilePath()
+    {
+        return this.workflowMacroFilePath;
+    }
+
     int workflowMacroFileId;
     String dastEnv;
     String scanPolicyType;
@@ -51,6 +56,7 @@ public class DastScanJobModel {
     String selectedGraphQlUrl;
     String selectedGraphQLSchemeType;
     String loginMacroFilePath;
+    String workflowMacroFilePath;
     String selectedGraphQlApiHost;
     String selectedGraphQlApiServicePath;
     String selectedGrpcUpload;
@@ -63,7 +69,8 @@ public class DastScanJobModel {
                             boolean scanScope, String selectedScanType, String scanPolicy,
                             String selectedDynamicTimeZone,
                             boolean enableRedundantPageDetection,
-                            String networkAuthUserName, String loginMacroFilePath, int loginMacroId,
+                            String networkAuthUserName, String loginMacroFilePath,
+                            String workflowMacroFilePath,int loginMacroId,
                             String workflowMacroId, String allowedHost,
                             String networkAuthPassword, String assessmentTypeId,
                             String entitlementId, String entitlementFrequencyType,
@@ -79,6 +86,7 @@ public class DastScanJobModel {
             this.workflowMacroFileId = Integer.parseInt(workflowMacroId);
         }
         this.loginMacroFilePath = loginMacroFilePath;
+        this.workflowMacroFilePath = workflowMacroFilePath;
         this.loginFileMacro = loginMacroId;
         this.dastEnv = dastEnv;
         this.timeBoxScan = scanTimebox;
@@ -359,6 +367,11 @@ public class DastScanJobModel {
     public String get_releaseId() {
         System.out.println(_releaseId + " selected release id");
         return _releaseId;
+    }
+    public String set_releaseIdFromAutoProv(String releaseId)
+    {
+        this._releaseId =releaseId;
+        return this._releaseId;
     }
 
     public String getSelectedReleaseType() {

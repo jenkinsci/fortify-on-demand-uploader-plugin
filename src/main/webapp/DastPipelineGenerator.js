@@ -322,40 +322,47 @@ class DastPipelineGenerator {
     }
 
     async setAssessmentsAndSettings() {
-        debugger;
+
+        this.populateAssessmentsDropdown();
         let assmt = null;
         let entl = null;
         let freq = null;
-        if (this.scanSettings) {
+        if (this.scanSettings && this.scanSettings.assessmentTypeId !==null && this.scanSettings.assessmentTypeId >0) {
+
             assmt = this.scanSettings.assessmentTypeId;
             entl = this.scanSettings.entitlementId;
             freq = this.scanSettings.entitlementFrequencyType;
+            jq('#assessmentTypeSelect').val(assmt);
+            await this.onAssessmentChanged(true);
+            jq('#entitlementSelect').val(freq && entl ? getEntitlementDropdownValue(entl, freq) : '');
         }
-        this.populateAssessmentsDropdown();
-        jq('#assessmentTypeSelect').val(assmt);
-        await this.onAssessmentChanged(true);
-        jq('#entitlementSelect').val(freq && entl ? getEntitlementDropdownValue(entl, freq) : '');
-
     }
 
     populateAssessmentsDropdown() {
+
         let atsel = jq(`#assessmentTypeSelect`);
         atsel.find('option').remove();
         jq(`#entitlementSelect`).find('option').remove();
         if (this.assessments) {
             for (let k of Object.keys(this.assessments)) {
                 let at = this.assessments[k];
-                if (at !== null){
-                if(at.assessmentCategory == 'DAST_Automated'){
-                    atsel.append(`<option value="${at.id}">${at.name}</option>`);
+                if (at !== null) {
+                    if (at.assessmentCategory === 'DAST_Automated') {
+                        alert('found');
+                        if (at.id !== undefined || null) {
+                            atsel.append(`<option value="${at.id}">${at.name}</option>`);
+                        } else {
+                            atsel.append(`<option value="${at.assessmentTypeId}">${at.name}</option>`);
+                        }
+                        break;
                     }
-            }
+                }
             }
         }
     }
 
     async onReleaseSelectionChanged() {
-debugger;
+
         let rs = jq('#releaseSelection').val();
 
         jq('.fodp-row-relid').hide();
@@ -363,7 +370,7 @@ debugger;
         jq('.fodp-row-autoProv').hide();
         jq('#releaseSelectionValue').show();
         this.autoProvMode = false;
-
+        jq('#dast-api-scan-policy-apiType').hide();
         if (rs === '1') {
             jq('#overrideReleaseSettings').prop('checked', false);
 
@@ -387,7 +394,6 @@ debugger;
     }
 
     onReleaseIdChanged() {
-
         this.releaseId = numberOrNull(jq('#releaseSelectionValue').val());
         if (this.overrideServerSettings) {
             if (this.releaseId < 1) {
@@ -560,6 +566,22 @@ debugger;
             }
         }
     }
+
+    setEntitlementForAutoProv(assessmentEntitlement) {
+        let entitlement = jq('#entitlementSelect');
+        for (let ts of Object.keys(assessmentEntitlement)) {
+            let at = assessmentEntitlement[ts];
+
+            let entlVal = at.entitlementDescription.split('(');
+            if (entlVal.length > 0) {
+                entitlement.append(`<option value="${entlVal[0]}">${at.entitlementDescription}</option>`);
+            } else {
+                throw new Error("Invalid Entitlement Freq from AutoProv")
+            }
+
+        }
+    }
+
 
     setScanType() {
         if (this.scanSettings !== undefined && this.scanSettings !== null) {
@@ -780,7 +802,7 @@ debugger;
 
 
     commonScopeSettingVisibility(isVisible) {
-    debugger;
+
         let commonScopeRows = jq('.scopeContainer');
         if ((isVisible === undefined) || isVisible === false) {
             commonScopeRows.hide();
@@ -889,7 +911,7 @@ debugger;
 
     onScanTypeChanged() {
 
-        debugger;
+
         this.resetAuthSettings();
         let selectedScanTypeValue = jq('#scanTypeList').val();
 
@@ -1062,7 +1084,7 @@ debugger;
     }
 
     async onAssessmentChanged(skipAuditPref) {
-debugger;
+
         let atval = jq('#assessmentTypeSelect').val();
         let entsel = jq('#entitlementSelect');
         let at = this.assessments ? this.assessments[atval] : null;
@@ -1098,7 +1120,7 @@ debugger;
     }
 
     async loadEntitlementOptions() {
-        debugger;
+
         if (this.autoProvMode) {
             this.hideMessages();
             let appName = jq('#autoProvAppName').val();
@@ -1121,12 +1143,9 @@ debugger;
 
     async loadAutoProvEntitlementSettings(appName, relName) {
 
-        debugger;
         let fields = jq('.fodp-field.spinner-container');
         fields.addClass('spinner');
 
-        let ssp = this.api.getReleaseEntitlementSettings(this.releaseId, getAuthInfo(), true)
-            .then(r => this.scanSettings = r);
         let assessments =  this.api.getAssessmentTypeEntitlementsForAutoProv(appName, relName, false, "", getAuthInfo())
             .then(r => this.assessments = r);
         let tzs =  this.api.getTimeZoneStacks(getAuthInfo())
@@ -1135,8 +1154,9 @@ debugger;
             r => this.networkAuthTypes = r
         );
 
-        await Promise.all([ssp,tzs, networkAuthTypes])
+        await Promise.all([assessments, tzs, networkAuthTypes])
             .then(async () => {
+
                 let fail = () => {
                     fields.removeClass('spinner');
                     this.showMessage('Failed to retrieve available entitlements from API', true);
@@ -1151,17 +1171,25 @@ debugger;
                     await this.setAssessmentsAndSettings().then(
                         ()=>
                         {
-                            this.scanTypeUserControlVisibility('allTypes', false);
+                            let entitlementsOfDastAutomatedAsstCategory = this.assessments.findAll(e=>e.assessmentCategory ==='DAST_Automated');
                             //Set Entitlement
-                          //  this.setSelectedEntitlementValue(entp);
-                            jq('#entitlementFrequency').val(this.scanSettings.entitlementFrequencyType);
-                            //Set timezone
-                            let timeZoneId = this.scanSettings.timeZone;
-                            jq('#timeZoneStackSelectList').val(timeZoneId);
-                            this.onLoadTimeZone();
-                            this.onTimeZoneChanged();
+                            this.setEntitlementForAutoProv(entitlementsOfDastAutomatedAsstCategory);
+
+                            let timeZoneSel = jq('#timeZoneStackSelectList');
+                            for (let ts of Object.keys(this.timeZones)) {
+                                let at = this.timeZones[ts];
+                                timeZoneSel.append(`<option value="${at.value}">${at.text}</option>`);
+                            }
+                            let networkAuthTypeSel = jq('#ddlNetworkAuthType');
+                            for (let ts of Object.keys(this.networkAuthTypes)) {
+                                let nt = this.networkAuthTypes[ts];
+                                networkAuthTypeSel.append(`<option value="${nt.text}" >${nt.text}</option>`);
+                            }
+                            this.scanTypeUserControlVisibility('allTypes', false);
+                            this.apiTypeUserControlVisibility(null, false);
                             jq('.fodp-row-autoProv').show();
                             fields.removeClass('spinner');
+
                         }
                     );
 
@@ -1229,11 +1257,11 @@ debugger;
         }
     }
     setUploadedFileDetails(){
-    debugger;
+
     if(!Object.is(this.scanSettings.fileDetails, null)){
         this.scanSettings.fileDetails.forEach((item, index, arr) => {
                 var a = closestRow('.uploadContainer');
-                debugger;
+
                 jq('.uploadedFileDetails').text(item.fileName);
                 });
         }
@@ -1549,7 +1577,7 @@ debugger;
         } else if (this.overrideServerSettings) {
             relId = relVal;
 
-            let entVal = jq('#entitlementSelect').val();
+            let entVal = jq('#entitlementFrequency').val();
             let {entitlementId, frequencyType} = parseEntitlementDropdownValue(entVal);
             entId = entitlementId;
             freqType = frequencyType;
@@ -1559,6 +1587,7 @@ debugger;
 
         } else {
             relId = relVal;
+
             let {entitlementId, frequencyType} = parseEntitlementDropdownValue(jq('#entitlementSelect').val());
             at = jq('#assessmentTypeSelect').val();
             entId = entitlementId;

@@ -25,11 +25,9 @@ import org.kohsuke.stapler.verb.POST;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+
 import static org.jenkinsci.plugins.fodupload.Utils.FOD_URL_ERROR_MESSAGE;
 import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
 
@@ -43,7 +41,7 @@ public class DastScanSharedBuildStep {
     public static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
     public static final String TENANT_ID = "tenantId";
     private int scanId;
-    private PrintStream printStream;
+    private PrintStream _printStream;
 
     private FodApiConnection _fodApiConnection;
 
@@ -70,7 +68,11 @@ public class DastScanSharedBuildStep {
                                    String openApiRadioSource, String openApiFileSource, String openApiurl, String apiKey,
                                    String postmanFile,
                                    String graphQlSource, String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
-                                   String grpcUpload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQLFilePath, String grpcFilePath) {
+                                   String grpcUpload, String grpcSchemeType, String grpcApiHost,
+                                   String grpcApiServicePath, String openApiFilePath,
+                                   String postmanFilePath, String graphQLFilePath,
+                                   String grpcFilePath
+    ) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
         model = new DastScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
@@ -91,8 +93,9 @@ public class DastScanSharedBuildStep {
                                    String webSiteUrl, String dastEnv, String scanTimebox, Object excludeUrlList,
                                    String scanPolicy, boolean scanScope, String selectedScanType,
                                    String selectedDynamicTimeZone, boolean enableRedundantPageDetection, String loginMacroFilePath,
-                                   int loginMacroId, String workflowMacroId, String allowedHost, String webSiteNetworkAuthUserName,
-                                   String webSiteNetworkAuthPassword, String applicationId, String assessmentTypeId, String entitlementId,
+                                   String workflowMacroPath,
+                                   int loginMacroId, String workflowMacroId, String allowedHost, String networkAuthUserName,
+                                   String networkAuthPassword, String applicationId, String assessmentTypeId, String entitlementId,
                                    String entitlementFrequencyType, String selectedNetworkAuthType, boolean timeBoxChecked) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
@@ -101,8 +104,8 @@ public class DastScanSharedBuildStep {
                 , dastEnv, scanTimebox, scanScope, selectedScanType, scanPolicy
                 , selectedDynamicTimeZone
                 , enableRedundantPageDetection,
-                webSiteNetworkAuthUserName, loginMacroFilePath, loginMacroId, workflowMacroId, allowedHost
-                , webSiteNetworkAuthPassword
+                networkAuthUserName, loginMacroFilePath, workflowMacroPath, loginMacroId, workflowMacroId, allowedHost
+                , networkAuthPassword
                 , assessmentTypeId, entitlementId,
                 entitlementFrequencyType
                 , selectedNetworkAuthType);
@@ -118,6 +121,10 @@ public class DastScanSharedBuildStep {
     public void SetFodApiConnection
             (FodApiConnection apiConnection) {
         this._fodApiConnection = apiConnection;
+    }
+
+    public void setLogger(PrintStream printStream) {
+        this._printStream = printStream;
     }
 
     public int getScanId() {
@@ -142,10 +149,50 @@ public class DastScanSharedBuildStep {
         return errors;
     }
 
+    public List<String> ValidateForAutoProv() {
+        List<String> errors = new ArrayList<>();
+        //Check for mandate fields based on scan type.
+        if (this.model.getSelectedScanType().isEmpty()) {
+            errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanTypeNotFound);
+        }
+
+        if (this.model.getEntitlementId().isEmpty()) {
+            errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanEntitlementIdNotFound);
+        }
+        if (getModel().isWebSiteNetworkAuthEnabled()) {
+            if (getModel().getNetworkAuthPassword().isEmpty()) {
+                errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkPasswordNotFound);
+            } else if (getModel().getNetworkAuthUserName().isEmpty()) {
+
+                errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkUserNameNotFound);
+            } else if (getModel().getNetworkAuthType().isEmpty()) {
+
+                errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkAuthTypeNotFound);
+            }
+        }
+        switch (this.model.getSelectedScanType()) {
+            case "Standard":
+                if (this.model.getWebSiteUrl().isEmpty()) {
+                    errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWebSiteUrlNotFound);
+                }
+                if (this.model.getScanPolicyType().isEmpty())
+                    errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
+                break;
+            case "Workflow-driven":
+
+                if (this.model.getWorkflowMacroFilePath().isEmpty())
+                    errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWorkflowMacroFilePathNotFound);
+
+                if (this.model.getScanPolicyType().isEmpty())
+                    errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
+                break;
+        }
+        return errors;
+    }
+
     public List<String> ValidateModel() {
 
         List<String> errors = new ArrayList<>();
-
 
         //Check for mandate fields based on scan type.
         if (this.model.getSelectedScanType().isEmpty()) {
@@ -176,12 +223,12 @@ public class DastScanSharedBuildStep {
                 if (this.model.getScanPolicyType().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
                 break;
-            case "Workflow-Driven":
+            case "Workflow-driven":
 
                 if (this.model.getWorkflowMacroFileId() <= 0)
                     errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWorkflowMacroIdNotFound);
 
-                if (this.model.getAllowedHost().isEmpty())
+                if (this.model.getAllowedHost() == null || this.model.getAllowedHost().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastWorkflowAllowedHostNotFound);
 
                 if (this.model.getScanPolicyType().isEmpty())
@@ -204,9 +251,7 @@ public class DastScanSharedBuildStep {
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId());
 
         try {
-            if (!ValidateModel().isEmpty()) {
-                throw new IllegalArgumentException("Failed to save scan settings for release id: " + String.join(", ", ValidateModel()));
-            }
+
             PutDastWebSiteScanReqModel dynamicScanSetupReqModel;
             dynamicScanSetupReqModel = new PutDastWebSiteScanReqModel();
             dynamicScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
@@ -257,7 +302,7 @@ public class DastScanSharedBuildStep {
             PutDastScanSetupResponse response = dynamicController.SaveDastWebSiteScanSettings(Integer.parseInt(userSelectedRelease),
                     dynamicScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
-                Utils.logger(printStream, "Successfully saved settings for release id = " + userSelectedRelease);
+                Utils.logger(_printStream, "Successfully saved settings for release id = " + userSelectedRelease);
             } else {
 
                 String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
@@ -285,9 +330,6 @@ public class DastScanSharedBuildStep {
             , String networkAuthType)
             throws Exception {
 
-        if (!ValidateModel().isEmpty()) {
-            throw new IllegalArgumentException("Failed to save scan settings for release id: " + String.join(", ", ValidateModel()));
-        }
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
         );
         try {
@@ -333,7 +375,7 @@ public class DastScanSharedBuildStep {
             PutDastScanSetupResponse response = dynamicController.SaveDastWorkflowDrivenScanSettings(Integer.parseInt(userSelectedRelease),
                     dastWorkflowScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
-                Utils.logger(printStream, "Successfully saved settings for release id = " + userSelectedRelease);
+                Utils.logger(_printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
                 String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
@@ -477,7 +519,7 @@ public class DastScanSharedBuildStep {
                     dastOpenApiScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
 
-                Utils.logger(printStream, "Successfully saved settings for release id = " + userSelectedRelease);
+                Utils.logger(_printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
                 String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
@@ -532,7 +574,7 @@ public class DastScanSharedBuildStep {
                     dastGraphQlScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
 
-                Utils.logger(printStream, "Successfully saved settings for release id = " + userSelectedRelease);
+                Utils.logger(_printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
                 String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
@@ -588,7 +630,7 @@ public class DastScanSharedBuildStep {
             PutDastScanSetupResponse response = dynamicController.putDastGrpcScanSettings(Integer.parseInt(userSelectedRelease),
                     dastgrpcScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
-                Utils.logger(printStream, "Successfully saved settings for release id = " + userSelectedRelease);
+                Utils.logger(_printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
 
