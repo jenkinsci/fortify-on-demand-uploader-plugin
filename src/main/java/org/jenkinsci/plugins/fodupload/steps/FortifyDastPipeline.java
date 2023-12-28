@@ -795,7 +795,7 @@ public class FortifyDastPipeline extends FortifyStep {
             }
         }
         dastScanSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(releaseId, assessmentTypeId, entitlementId, entitlementFrequency, workflowMacroId, this.workflowMacroHosts,
-                selectedDynamicTimeZone, scanPolicy, enableRedundantPageDetection, envFacing, getNetworkAuthType().isEmpty(), networkAuthUserName, networkAuthPassword, networkAuthType);
+                selectedDynamicTimeZone, scanPolicy,  envFacing,networkAuthUserName, networkAuthPassword, networkAuthType);
     }
 
     private void saveApiScanSettings(FilePath workspace, PrintStream printStream, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
@@ -1027,7 +1027,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
             SaveScanSettings(workspace, printStream, dastScanSharedBuildStep);
 
-            dastScanSharedBuildStep.perform(build, workspace, launcher, listener, correlationId, apiConnection);
+            dastScanSharedBuildStep.perform(build, listener, correlationId, apiConnection);
             CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
             crossBuildAction.setPreviousStepBuildResult(build.getResult());
 

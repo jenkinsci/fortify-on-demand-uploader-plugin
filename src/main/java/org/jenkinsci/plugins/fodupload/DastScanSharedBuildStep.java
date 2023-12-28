@@ -1,9 +1,7 @@
 package org.jenkinsci.plugins.fodupload;
-
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
-import hudson.Launcher;
 import hudson.model.Result;
 import hudson.model.*;
 import hudson.security.ACL;
@@ -22,12 +20,10 @@ import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDastScanSetupResp
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.verb.POST;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import static org.jenkinsci.plugins.fodupload.Utils.FOD_URL_ERROR_MESSAGE;
 import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
 
@@ -43,7 +39,7 @@ public class DastScanSharedBuildStep {
     private int scanId;
     private PrintStream _printStream;
 
-    private FodApiConnection _fodApiConnection;
+    private transient FodApiConnection _fodApiConnection;
 
     public DastScanSharedBuildStep(DastScanJobModel model, AuthenticationModel authModel) {
         this.model = model;
@@ -73,7 +69,6 @@ public class DastScanSharedBuildStep {
                                    String postmanFilePath, String graphQLFilePath,
                                    String grpcFilePath
     ) {
-
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
         model = new DastScanJobModel(overrideGlobalConfig, username, personalAccessToken, tenantId,
                 releaseId, dastEnv, scanTimebox, scanPolicyType, scanScope, selectedScanType
@@ -85,7 +80,6 @@ public class DastScanSharedBuildStep {
                 postmanFile,
                 graphQlSource, graphQlUpload, graphQlUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
                 grpcUpload, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
-
     }
 
     public DastScanSharedBuildStep(Boolean overrideGlobalConfig, String username,
@@ -110,6 +104,7 @@ public class DastScanSharedBuildStep {
                 entitlementFrequencyType
                 , selectedNetworkAuthType);
     }
+
 
     public FodApiConnection getFodApiConnection() throws Exception {
         if (this._fodApiConnection == null) {
@@ -284,7 +279,10 @@ public class DastScanSharedBuildStep {
                     dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
                 }
             }
-            if (!networkAuthType.isEmpty() && !networkAuthPassword.isEmpty()
+            if (networkAuthType != null &&
+                    networkAuthPassword != null && networkAuthUserName != null
+                    && !networkAuthType.isEmpty()
+                    && !networkAuthPassword.isEmpty()
                     && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkSetting = dynamicScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkSetting.setPassword(networkAuthPassword);
@@ -324,8 +322,7 @@ public class DastScanSharedBuildStep {
                                                          String entitlementId, String entitlementFreq, String workflowMacroId,
                                                          String workflowMacroHosts,
                                                          String timeZone, String scanPolicy,
-                                                         boolean redundantPageDetection, String scanEnvironment,
-                                                         boolean requireNetworkAuth,
+                                                         String scanEnvironment,
                                                          String networkAuthUserName, String networkAuthPassword
             , String networkAuthType)
             throws Exception {
@@ -362,7 +359,10 @@ public class DastScanSharedBuildStep {
             }
             dastWorkflowScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (!networkAuthType.isEmpty() && !networkAuthPassword.isEmpty()
+            if (networkAuthType != null &&
+                    networkAuthPassword != null && networkAuthUserName != null
+                    && !networkAuthType.isEmpty()
+                    && !networkAuthPassword.isEmpty()
                     && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkAuthentication.setPassword(networkAuthPassword);
@@ -497,7 +497,9 @@ public class DastScanSharedBuildStep {
             dastOpenApiScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastOpenApiScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (!networkAuthPassword.isEmpty() && !networkAuthUserName.isEmpty() && !networkAuthType.isEmpty()) {
+            if (networkAuthType != null &&
+                    networkAuthPassword != null && networkAuthUserName != null &&
+                    !networkAuthPassword.isEmpty() && !networkAuthUserName.isEmpty() && !networkAuthType.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastOpenApiScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
@@ -611,7 +613,9 @@ public class DastScanSharedBuildStep {
             dastgrpcScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastgrpcScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (!networkAuthPassword.isEmpty() && !networkAuthType.isEmpty() && !networkAuthUserName.isEmpty()) {
+            if (networkAuthType != null &&
+                    networkAuthPassword != null && networkAuthUserName != null &&
+                    !networkAuthPassword.isEmpty() && !networkAuthType.isEmpty() && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastgrpcScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
@@ -666,7 +670,9 @@ public class DastScanSharedBuildStep {
             dastPostmanScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
 
-            if (!networkAuthPassword.isEmpty() && !networkAuthType.isEmpty() && !networkAuthUserName.isEmpty()) {
+            if (networkAuthType != null &&
+                    networkAuthPassword != null && networkAuthUserName != null &&
+                    !networkAuthPassword.isEmpty() && !networkAuthType.isEmpty() && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastPostmanScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
@@ -710,10 +716,9 @@ public class DastScanSharedBuildStep {
     }
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    public void perform(Run<?, ?> build, FilePath workspace,
-                        Launcher launcher, TaskListener listener, String correlationId, FodApiConnection apiConnection) {
+    public void perform(Run<?, ?> build,
+                        TaskListener listener, String correlationId, FodApiConnection apiConnection) {
         final PrintStream logger = listener.getLogger();
-        boolean isRemoteAgent = workspace.isRemote();
 
         try {
             taskListener.set(listener);
@@ -762,14 +767,17 @@ public class DastScanSharedBuildStep {
                 PostDastStartScanResponse response = dynamicController.StartDastScan(releaseId);
                 if (response.errors == null && response.scanId > 0) {
                     build.setResult(Result.SUCCESS);
-                    logger.println(String.format("Fortify On Demand dynamic scan successfully triggered for scan Id %d ", response.scanId));
+                    Utils.logger(logger,String.format("Dynamic scan successfully triggered for scan Id %d ", response.scanId));
                     this.scanId = response.scanId;
                 } else {
-                    logger.println(String.format("Fortify On Demand Dynamic Scan Failed for release Id %d", releaseId));
+                    String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                            .collect(Collectors.joining(",")) : "";
+
+                    Utils.logger(logger,String.format("Scan Failed for release Id %d,error:%s", releaseId,errMsg));
                     build.setResult(Result.FAILURE);
                 }
             } else {
-                logger.println("Failed to create Fod API connection.");
+                Utils.logger(logger,"Failed to create Fod API connection.");
                 build.setResult(Result.FAILURE);
             }
 

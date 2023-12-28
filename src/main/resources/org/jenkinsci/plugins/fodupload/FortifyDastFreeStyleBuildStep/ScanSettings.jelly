@@ -320,12 +320,12 @@
 
                     <f:entry title="Network Username">
                         <div id="networkUsernameRow">
-                            <f:textbox name="webSiteNetworkAuthUserName"/>
+                            <f:textbox name="networkAuthUserName"/>
                         </div>
                     </f:entry>
                     <f:entry title="Network Password">
                         <div id="networkPasswordRow">
-                            <f:password name="webSiteNetworkAuthPassword"/>
+                            <f:password name="networkAuthPassword"/>
                         </div>
                     </f:entry>
 

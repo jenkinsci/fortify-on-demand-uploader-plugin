@@ -33,6 +33,7 @@ import java.util.UUID;
 
 public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBuildStep {
 
+
     DastScanSharedBuildStep dastSharedBuildStep;
 
     @DataBoundConstructor
@@ -45,7 +46,8 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                                          String selectedScanType, String selectedDynamicTimeZone,
                                          boolean webSiteNetworkAuthSettingEnabled,
                                          boolean enableRedundantPageDetection, String networkAuthUserName,
-                                         String loginMacroId, String workflowMacroId, String workflowMacroHosts, String networkAuthPassword,
+                                         String loginMacroId, String workflowMacroId, String workflowMacroHosts,
+                                         String networkAuthPassword,
                                          String userSelectedApplication,
                                          String userSelectedRelease, String assessmentTypeId,
                                          String entitlementId,
@@ -97,6 +99,16 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                 throw new IllegalArgumentException("Invalid save scan settings for release id: " + String.join(", ", error));
             }
 
+            FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(this.dastSharedBuildStep.getAuthModel(), false,
+                    null, null);
+
+            if(apiConnection ==null)
+            {
+                throw  new Exception("FOD API Connection not set.");
+            }
+
+            dastSharedBuildStep.SetFodApiConnection(apiConnection);
+
             if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
 
                 dastSharedBuildStep.SaveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
@@ -109,8 +121,8 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
                 dastSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicy,
-                        enableRedundantPageDetection, dastEnv,
-                        webSiteNetworkAuthSettingEnabled, networkAuthUserName, networkAuthPassword, selectedNetworkAuthType);
+                         dastEnv,
+                         networkAuthUserName, networkAuthPassword, selectedNetworkAuthType);
 
             } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
                 if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
@@ -161,6 +173,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
 
+
         if (dastSharedBuildStep.getModel() == null) {
             Utils.logger(listener.getLogger(), "Dast job model not constructed");
             throw new RuntimeException("Dast job model not constructed");
@@ -191,7 +204,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
         }
 
         String correlationId = UUID.randomUUID().toString();
-        dastSharedBuildStep.perform(build, workspace, launcher, listener, correlationId, apiConnection);
+        dastSharedBuildStep.perform(build, listener, correlationId, apiConnection);
 
         CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
         crossBuildAction.setPreviousStepBuildResult(build.getResult());
@@ -203,7 +216,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
         try {
             build.save();
         } catch (IOException ex) {
-            Utils.logger(printStream, String.format("Build save failed for release Id: %s with error: %s", getReleaseId(), ex.getMessage()));
+            Utils.logger(printStream, String.format("Build failed for release Id: %s with error: %s", getReleaseId(), ex.getMessage()));
         }
     }
 

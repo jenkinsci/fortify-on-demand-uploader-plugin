@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-public class DastScanJobModel {
+
+public class DastScanJobModel{
     private boolean overrideGlobalConfig;
     String username;
     String timeBoxScan;
@@ -365,7 +366,6 @@ public class DastScanJobModel {
     }
 
     public String get_releaseId() {
-        System.out.println(_releaseId + " selected release id");
         return _releaseId;
     }
     public String set_releaseIdFromAutoProv(String releaseId)

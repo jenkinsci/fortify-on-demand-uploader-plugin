@@ -34,8 +34,6 @@ public class DastScanController extends ControllerBase {
 
         String requestContent = Json.getInstance().toJson(settings);
 
-        System.out.println("req content " + requestContent);
-
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addPathSegments(String.format(DastWebSiteScanPutApi, releaseId));
         Request request = new Request.Builder()
@@ -103,21 +101,15 @@ public class DastScanController extends ControllerBase {
 
     public PatchDastFileUploadResponse DastFileUpload(FilePath payload, PrintStream logger,
                                                       PatchDastScanFileUploadReq requestModel) throws Exception {
-        try {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addQueryParameter("dastFileType", (requestModel.dastFileType.getValue()))
+                .addPathSegments(String.format(FodGlobalConstants.FodDastApiEndpoint.DastFileUploadPatchApi, Integer.parseInt(requestModel.releaseId)));
 
-            HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
-                    .addQueryParameter("dastFileType", (requestModel.dastFileType.getValue()))
-                    .addPathSegments(String.format(FodGlobalConstants.FodDastApiEndpoint.DastFileUploadPatchApi, Integer.parseInt(requestModel.releaseId)));
+        DastScanPayloadUpload dastScanPayloadUpload = apiConnection.getDastScanPayloadUploadInstance(payload, requestModel.releaseId,
+                urlBuilder.build().url().toString(), correlationId, logger);
 
-            DastScanPayloadUpload dastScanPayloadUpload = apiConnection.getDastScanPayloadUploadInstance(payload, requestModel.releaseId,
-                    urlBuilder.build().url().toString(), correlationId, logger);
+        return dastScanPayloadUpload.performUpload();
 
-            return dastScanPayloadUpload.performUpload();
-
-        } catch (Exception ex) {
-            logger.println(ex.getMessage());
-            throw ex;
-        }
     }
 
 
