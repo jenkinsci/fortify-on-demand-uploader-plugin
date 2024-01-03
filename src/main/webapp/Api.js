@@ -312,16 +312,19 @@ class Api {
     }
 
     patchSetupManifestFile(releaseId, customAuth, file, fileType) {
-
+        debugger;
         return new Promise((accept, reject) => {
             let fileReader = new FileReader();
             let fileContent = fileReader.readAsBinaryString(file);
             fileReader.onload = () => {
                 fileContent = fileReader.result;
                 this.descriptor.DastManifestFileUpload(releaseId, customAuth, fileContent, fileType,file.name, async res => {
-
-                    if (res.responseJSON !== null && res.responseJSON.isSuccess ===true)
+                    debugger;
+                    if (res.responseJSON !== null && res.responseJSON.isSuccess ===true){
+                    res.responseJSON.fileName = file.name;
+                    debugger;
                         return accept(res.responseJSON);
+                        }
                     else
                         return reject(res.responseJSON.reason);
                 })

@@ -62,6 +62,8 @@ class DastFreeStyle {
                     jq('#dast-standard-scan-policy').show();
                     jq('#dast-api-scan-policy-apiType').hide();
                     jq('.redundantPageDetection').show();
+                    jq('#requestFalsePositiveRemovalRow').show();
+                    jq('#loginMacroFileCreationRow').show();
                     this.websiteScanSettingsVisibility(isVisible);
                     this.workflowScanSettingVisibility(false);
                     this.networkAuthSettingVisibility(true);
@@ -76,6 +78,8 @@ class DastFreeStyle {
                     jq('#dast-standard-scan-policy').hide();
                     jq('#dast-api-scan-policy-apiType').show();
                     jq('.redundantPageDetection').hide();
+                    jq('#requestFalsePositiveRemovalRow').hide();
+                    jq('#loginMacroFileCreationRow').hide();
                     this.apiScanSettingVisibility(isVisible);
                     this.commonScopeSettingVisibility(isVisible);
                     this.networkAuthSettingVisibility(true);
@@ -89,6 +93,8 @@ class DastFreeStyle {
                     jq('#dast-standard-scan-policy').show();
                     jq('#dast-api-scan-policy-apiType').hide();
                     jq('.redundantPageDetection').hide();
+                    jq('#requestFalsePositiveRemovalRow').hide();
+                    jq('#loginMacroFileCreationRow').hide();
                     this.workflowScanSettingVisibility(isVisible);
                     this.apiScanSettingVisibility(false);
                     this.websiteScanSettingsVisibility(false);
@@ -503,6 +509,7 @@ class DastFreeStyle {
         if (!Object.is(this.scanSettings.fileDetails, null)) {
             this.scanSettings.fileDetails.forEach((item, index, arr) => {
                 jq('.uploadedFileDetails').text(item.fileName);
+                       jq('.uploadedFileContainer').show();
             });
         }
     }
@@ -868,6 +875,8 @@ class DastFreeStyle {
 
                 if (res.fileId > 0) {
                     elem.val(res.fileId);
+                     jq('.uploadedFileDetails').text(res.fileName);
+                     jq('.uploadedFileContainer').show();
                     handleUploadStatusMessage(displayMessage, fileUploadSuccess, true);
                 } else {
                     handleUploadStatusMessage(displayMessage, fileUploadFailed, false)
@@ -1109,6 +1118,7 @@ class DastFreeStyle {
         this.init();
     }
 
+
     async init() {
         try {
 
@@ -1148,6 +1158,9 @@ class DastFreeStyle {
         jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile, #btnUploadgrpcFile').click(_ => this.onFileUpload(event));
 
         jq('.fode-row-screc').hide();
+        jq('.uploadedFileContainer').hide();
+        jq('#requestFalsePositiveRemovalRow').hide();
+        jq('#loginMacroFileCreationRow').hide();
 
         jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
 

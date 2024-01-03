@@ -11,8 +11,9 @@ const dastWebSiteSetting = 'dast-standard-setting';
 const dastWorkFlowSetting = 'dast-workflow-setting';
 const dastCommonScopeSetting = 'dast-common-scan-scope';
 const nwAuthSetting = 'dast-networkAuth-setting';
-const loginAuthSetting = 'dast-login-macro'
-
+const loginAuthSetting = 'dast-login-macro';
+const  requestFalsePos = closestRow('#requestFalsePositiveRemovalRow');
+const loginMacroCreation = closestRow('#loginMacroFileCreationRow');
 const dastApiSpecificControls = 'dast-api-specific-controls';
 
 const dastScanPolicyDefaultValues =
@@ -224,6 +225,8 @@ class DastPipelineGenerator {
     async init() {
         dastEntitlementrow.addClass(dastScanSetting);
         dastAssessmentrow.addClass(dastScanSetting);
+        requestFalsePos.addClass(dastScanSetting);
+        loginMacroCreation.addClass(dastScanSetting);
         dastScanTyperow.addClass(dastScanSetting);
         dastStandardScope.addClass(dastScanSetting);
         dastEnv.addClass(dastScanSetting);
@@ -304,6 +307,10 @@ class DastPipelineGenerator {
             jq('.fodp-row-screc').hide();
             jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
             jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
+
+
+
+
             setOnblurEventForPipeline();
             this.uiLoaded = true;
         } catch (Error) {
@@ -660,6 +667,8 @@ class DastPipelineGenerator {
                 case "Standard": {
                  jq('#dast-standard-scan-policy').show();
                  jq('#dast-api-scan-policy-apiType').hide();
+                 jq('#requestFalsePositiveRemovalRow').show();
+                 jq('#loginMacroFileCreationRow').show();
                     this.websiteScanSettingsVisibility(isVisible);
                     this.workflowScanSettingVisibility(false);
                     this.apiScanSettingVisibility(false);
@@ -675,6 +684,8 @@ class DastPipelineGenerator {
                     jq('#dast-standard-scan-policy').hide();
                     jq('#dast-api-scan-policy-apiType').show();
                     jq('.redundantPageDetection').hide();
+                    jq('#requestFalsePositiveRemovalRow').hide();
+                     jq('#loginMacroFileCreationRow').hide();
                     this.commonScopeSettingVisibility(false);
                     this.networkAuthSettingVisibility(true);
                     this.loginMacroSettingsVisibility(false);
@@ -691,6 +702,8 @@ class DastPipelineGenerator {
                      jq('#dast-standard-scan-policy').show();
                      jq('#dast-api-scan-policy-apiType').hide();
                      jq('.redundantPageDetection').hide();
+                     jq('#requestFalsePositiveRemovalRow').hide();
+                     jq('#loginMacroFileCreationRow').hide();
                     this.websiteScanSettingsVisibility(false);
                     this.apiScanSettingVisibility(false);
                     this.commonScopeSettingVisibility(isVisible);
@@ -1432,6 +1445,7 @@ class DastPipelineGenerator {
 
                 //Todo: - check
                 console.log("File upload success " + res);
+                debugger;
                 if (res.fileId > 0) {
                     elem.val(res.fileId);
                     displayMessage.text('Uploaded Successfully !!');

@@ -68,7 +68,7 @@ public class FortifyDastPipeline extends FortifyStep {
     private String auditPreference;
     private String applicationName;
     private String applicationType;
-     private String releaseName;
+    private String releaseName;
     private Integer owner;
     private String attributes;
     private String businessCriticality;
@@ -142,7 +142,7 @@ public class FortifyDastPipeline extends FortifyStep {
         this.openApiFilePath = openApiFilePath;
     }
 
-   private String openApiFilePath;
+    private String openApiFilePath;
 
     public java.lang.String getPostmanFileId() {
         return postmanFileId;
@@ -437,7 +437,70 @@ public class FortifyDastPipeline extends FortifyStep {
     }
 
     private boolean scanScope;
+
+    public boolean isRequestLoginMacroFileCreation() {
+        return requestLoginMacroFileCreation;
+    }
+
+    @DataBoundSetter
+    public void setRequestLoginMacroFileCreation(boolean requestLoginMacroFileCreation) {
+        this.requestLoginMacroFileCreation = requestLoginMacroFileCreation;
+    }
+
+    public String getLoginMacroPrimaryUserName() {
+        return loginMacroPrimaryUserName;
+    }
+
+    @DataBoundSetter
+    public void setLoginMacroPrimaryUserName(String loginMacroPrimaryUserName) {
+        this.loginMacroPrimaryUserName = loginMacroPrimaryUserName;
+    }
+
+    public String getLoginMacroPrimaryPassword() {
+        return loginMacroPrimaryPassword;
+    }
+
+    @DataBoundSetter
+    public void setLoginMacroPrimaryPassword(String loginMacroPrimaryPassword) {
+        this.loginMacroPrimaryPassword = loginMacroPrimaryPassword;
+    }
+
+    public String getLoginMacroSecondaryUsername() {
+        return loginMacroSecondaryUsername;
+    }
+
+    @DataBoundSetter
+    public void setLoginMacroSecondaryUsername(String loginMacroSecondaryUsername) {
+        this.loginMacroSecondaryUsername = loginMacroSecondaryUsername;
+    }
+
+    public String getLoginMacroSecondaryPassword() {
+        return loginMacroSecondaryPassword;
+    }
+
+    @DataBoundSetter
+    public void setLoginMacroSecondaryPassword(String loginMacroSecondaryPassword) {
+        this.loginMacroSecondaryPassword = loginMacroSecondaryPassword;
+    }
+
+    private boolean requestLoginMacroFileCreation;
+    private String loginMacroPrimaryUserName;
+    private String loginMacroPrimaryPassword;
+    private String loginMacroSecondaryUsername;
+    private String loginMacroSecondaryPassword;
+
+    public boolean getRequestFalsePositiveRemoval() {
+        return requestFalsePositiveRemoval;
+    }
+
+    @DataBoundSetter
+    public void setRequestFalsePositiveRemoval(boolean requestFalsePositiveRemoval) {
+        this.requestFalsePositiveRemoval = requestFalsePositiveRemoval;
+    }
+
+    private boolean requestFalsePositiveRemoval;
     private String scanType;
+
 
     private String workflowMacroId;
 
@@ -468,6 +531,9 @@ public class FortifyDastPipeline extends FortifyStep {
     public void setEntitlementFrequency(String entitlementFrequency) {
         this.entitlementFrequency = entitlementFrequency;
     }
+
+
+
 
     public final void SaveScanSettings(FilePath workspace, PrintStream logger, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
 
@@ -743,7 +809,7 @@ public class FortifyDastPipeline extends FortifyStep {
         if (loginMacroFilePath != null && loginMacroFilePath.length() > 1) {
 
             PatchDastFileUploadResponse patchUploadResponse = dastScanSharedBuildStep.DastManifestFileUpload(workspace, loginMacroFilePath, printStream, FodEnums.DastScanFileTypes.LoginMacro
-            , dastScanSharedBuildStep.getFodApiConnection());
+                    , dastScanSharedBuildStep.getFodApiConnection());
 
             if (patchUploadResponse == null || !patchUploadResponse.isSuccess || patchUploadResponse.fileId <= 0) {
 
@@ -769,7 +835,8 @@ public class FortifyDastPipeline extends FortifyStep {
                 , scanScope, enableRedundantPageDetection, envFacing
                 , requireLoginMacro,
                 networkAuthUserName, networkAuthPassword
-                , networkAuthType, scanTimeBox);
+                , networkAuthType, scanTimeBox, requestLoginMacroFileCreation, loginMacroPrimaryUserName, loginMacroPrimaryPassword,
+                loginMacroSecondaryUsername, loginMacroSecondaryPassword, requestFalsePositiveRemoval);
     }
 
     private void saveWorkflowSiteScanSettings(FilePath workspace, PrintStream printStream, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
@@ -777,7 +844,7 @@ public class FortifyDastPipeline extends FortifyStep {
         if (this.workflowMacroFilePath != null && this.workflowMacroFilePath.length() > 2) {
 
             PatchDastFileUploadResponse patchDastFileUploadResponse = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.workflowMacroFilePath, printStream, FodEnums.DastScanFileTypes.WorkflowDrivenMacro
-            , dastScanSharedBuildStep.getFodApiConnection());
+                    , dastScanSharedBuildStep.getFodApiConnection());
 
             if (patchDastFileUploadResponse == null || !patchDastFileUploadResponse.isSuccess || patchDastFileUploadResponse.fileId <= 0) {
 
@@ -884,7 +951,7 @@ public class FortifyDastPipeline extends FortifyStep {
                     printStream, FodEnums.DastScanFileTypes.PostmanCollection, dastScanSharedBuildStep.getFodApiConnection());
 
             if (response == null || !response.isSuccess || response.fileId <= 0) {
- 
+
                 throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
             }
 
@@ -947,7 +1014,14 @@ public class FortifyDastPipeline extends FortifyStep {
                         entitlementId,
                         entitlementFrequency,
                         networkAuthType,
-                        timeBoxChecked);
+                        timeBoxChecked,
+                        requestLoginMacroFileCreation,
+                        loginMacroPrimaryUserName,
+                        loginMacroPrimaryPassword,
+                        loginMacroSecondaryUsername,
+                        loginMacroSecondaryPassword,
+                        requestFalsePositiveRemoval
+                );
             } else if (Objects.equals(scanType, FodEnums.DastScanType.API.toString())) {
 
                 dastScanSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username, personalAccessToken, tenantId,
@@ -1018,7 +1092,7 @@ public class FortifyDastPipeline extends FortifyStep {
                 dastScanSharedBuildStep.getModel().set_releaseIdFromAutoProv(this.releaseId);
             }
             else if(!this.getReleaseId().isEmpty() && this.getReleaseName().isEmpty()) {
-               Utils.logger(printStream,"Existing application and release Id picked for scanning");
+                Utils.logger(printStream,"Existing application and release Id picked for scanning");
             }
             else
             {
@@ -1043,7 +1117,7 @@ public class FortifyDastPipeline extends FortifyStep {
         }
     }
 
-        @Extension
+    @Extension
     public static class DescriptorImpl extends StepDescriptor {
         @Override
         public String getDisplayName() {

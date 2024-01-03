@@ -20,7 +20,15 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     public void setRestrictToDirectoryAndSubdirectories(boolean restrictToDirectoryAndSubdirectories) {
         this.restrictToDirectoryAndSubdirectories = restrictToDirectoryAndSubdirectories;
     }
-    boolean restrictToDirectoryAndSubdirectories;
+
+    public void setRequestFalsePositiveRemoval(boolean requestFalsePositiveRemoval) {
+        this.requestFalsePositiveRemoval = requestFalsePositiveRemoval;
+    }
+
+    private  boolean restrictToDirectoryAndSubdirectories;
+
+    private boolean requestFalsePositiveRemoval;
+
     public void setTimeBoxInHours(Integer timeBoxInHours) {
         this.timeBoxInHours = timeBoxInHours;
     }
@@ -37,4 +45,22 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     }
     String policy;
     int loginMacroFileId;
+
+    public void setRequestLoginMacroFileCreation(boolean requestLoginMacroFileCreation) {
+        this.requestLoginMacroFileCreation = requestLoginMacroFileCreation;
+    }
+
+    private  boolean requestLoginMacroFileCreation;
+    private String loginMacroPrimaryUserName;
+
+    public void setLoginMacroFileCreationDetails(LoginMacroFileCreationDetails loginMacroFileCreationDetails) {
+        this.loginMacroFileCreationDetails = loginMacroFileCreationDetails;
+    }
+
+
+    private LoginMacroFileCreationDetails loginMacroFileCreationDetails;
+
+
+
 }
+

@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-
-public class DastScanJobModel{
+public class DastScanJobModel {
     private boolean overrideGlobalConfig;
     String username;
     String timeBoxScan;
@@ -64,6 +63,15 @@ public class DastScanJobModel{
     String selectedGrpcSchemeType;
     String selectedGrpcApiHost;
     String selectedGrpcApiServicePath;
+    boolean timeBoxChecked;
+    boolean requestLoginMacroFileCreation;
+    String loginMacroPrimaryUserName;
+    String loginMacroPrimaryPassword;
+    String loginMacroSecondaryUsername;
+    String loginMacroSecondaryPassword;
+
+    Boolean requestFalsePositiveRemoval;
+
 
     public DastScanJobModel(Boolean overrideGlobalConfig, String username, String personalAccessToken, String tenantId, String releaseId,
                             String webSiteUrl, String dastEnv, String scanTimebox,
@@ -75,7 +83,10 @@ public class DastScanJobModel{
                             String workflowMacroId, String allowedHost,
                             String networkAuthPassword, String assessmentTypeId,
                             String entitlementId, String entitlementFrequencyType,
-                            String selectedNetworkAuthType) {
+                            String selectedNetworkAuthType,boolean timeBoxChecked,
+                            boolean requestLoginMacroFileCreation, String loginMacroPrimaryUserName, String loginMacroPrimaryPassword,
+                            String loginMacroSecondaryUsername, String loginMacroSecondaryPassword, boolean requestFalsePositiveRemoval) {
+
         this._releaseId = releaseId;
         this.overrideGlobalConfig = overrideGlobalConfig;
         this.username = username;
@@ -101,6 +112,13 @@ public class DastScanJobModel{
         this.entitlementId = entitlementId;
         this.entitlementFrequencyType = entitlementFrequencyType;
         this.networkAuthType = selectedNetworkAuthType;
+        this.timeBoxChecked = timeBoxChecked;
+        this.requestLoginMacroFileCreation = requestLoginMacroFileCreation;
+        this.loginMacroPrimaryUserName = loginMacroPrimaryUserName;
+        this.loginMacroPrimaryPassword = loginMacroPrimaryPassword;
+        this.loginMacroSecondaryUsername = loginMacroSecondaryUsername;
+        this.loginMacroSecondaryPassword = loginMacroSecondaryPassword;
+        this.requestFalsePositiveRemoval = requestFalsePositiveRemoval;
     }
 
     public boolean isOverrideGlobalConfig() {
@@ -203,6 +221,33 @@ public class DastScanJobModel{
         return webSiteLoginMacroEnabled;
     }
 
+    public boolean isTimeBoxChecked() {
+        return timeBoxChecked;
+    }
+
+    public boolean isRequestLoginMacroFileCreation() {
+        return requestLoginMacroFileCreation;
+    }
+
+    public String getLoginMacroPrimaryUserName() {
+        return loginMacroPrimaryUserName;
+    }
+
+    public String getLoginMacroPrimaryPassword() {
+        return loginMacroPrimaryPassword;
+    }
+
+    public String getLoginMacroSecondaryUsername() {
+        return loginMacroSecondaryUsername;
+    }
+
+    public String getLoginMacroSecondaryPassword() {
+        return loginMacroSecondaryPassword;
+    }
+
+    public boolean getRequestFalsePositiveRemoval() {
+        return requestFalsePositiveRemoval;
+    }
     public String getSelectedOpenApiSource() {
         return selectedOpenApiSource;
     }
@@ -307,6 +352,7 @@ public class DastScanJobModel{
     String selectedDynamicGeoLocation;
     boolean webSiteNetworkAuthEnabled;
     boolean webSiteLoginMacroEnabled;
+
 
     public DastScanJobModel(boolean overrideGlobalConfig, String username,
                             String personalAccessToken, String tenantId,

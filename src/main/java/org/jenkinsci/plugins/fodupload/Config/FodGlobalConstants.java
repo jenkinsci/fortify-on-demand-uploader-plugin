@@ -40,6 +40,8 @@ public class FodGlobalConstants {
             public final  static  String DastScanNetworkPasswordNotFound = "NetworkWork Authentication Password not set.";
 
             public final  static  String DastScanNetworkAuthTypeNotFound = "Missing NetworkWork Authentication Type.";
+            public final  static  String DastScanAPITypeNotFound = "Missing API Type.";
+            public final  static  String DastScanOpenApiSourceNotFound = "Missing Open Api Source input.";
         }
 
         public static class FodDastErrorMsg

@@ -61,7 +61,19 @@ public class GetDastScanSettingResponse {
     public boolean restrictToDirectoryAndSubdirectories;
     public boolean requiresNetworkAuthentication;
     public NetworkAuthenticationSettings networkAuthenticationSettings;
+
     public FileDetails[] fileDetails;
+
+    public boolean requestLoginMacroFileConfiguration;
+
+    public loginMacroFileConfigurationDetails  loginMacroFileConfigurationDetails;
+
+    public class loginMacroFileConfigurationDetails{
+        public  String primaryUsername;
+        public String primaryPassword;
+        public String secondaryUsername;
+        public String secondaryPassword;
+    }
 
     public class  FileDetails{
         public int fileId;

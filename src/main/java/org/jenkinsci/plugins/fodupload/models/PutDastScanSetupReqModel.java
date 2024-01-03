@@ -14,6 +14,8 @@ public class PutDastScanSetupReqModel implements Serializable {
 
     NetworkAuthentication networkAuthenticationSettings;
 
+
+
     public void setEntitlementFrequencyType(String entitlementFrequencyType) {
         this.entitlementFrequencyType = entitlementFrequencyType;
     }
@@ -63,6 +65,8 @@ public class PutDastScanSetupReqModel implements Serializable {
 
 
     }
+
+
 
 
 

@@ -16,4 +16,6 @@ public class PatchDastFileUploadResponse extends FodDastApiResponse {
 
     public int fileId;
     public String[] hosts;
+
+    public String fileName;
 }

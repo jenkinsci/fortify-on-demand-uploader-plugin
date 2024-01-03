@@ -36,6 +36,8 @@ class AppAndReleaseSelection {
         jq('.dast-networkAuth-setting').hide();
         jq('.dast-api-setting').hide();
         jq('dast-api-specific-controls').hide();
+        jq('#requestFalsePositiveRemovalRow').hide();
+         jq('#loginMacroFileCreationRow').hide();
 
     }
 

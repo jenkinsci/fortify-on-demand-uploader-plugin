@@ -60,6 +60,13 @@
                 </div>
             </f:entry>
 
+            <f:entry>
+                <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv" id="requestFalsePositiveRemovalRow">
+                    <f:checkbox title="Request False Positive Removal" field="requestFalsePositiveRemoval"></f:checkbox>
+                    <div class="reqFalsePositiveWarn">This service consumes 1 assessment unit. One or both of login macro generation and false positive removal consume a total of 1 assessment unit.</div>
+                </div>
+            </f:entry>
+
         </f:block>
     </f:section>
     <!-- API Section -->
@@ -326,6 +333,37 @@
                     <f:entry title="Network Password">
                         <div id="networkPasswordRow">
                             <f:password name="networkAuthPassword"/>
+                        </div>
+                    </f:entry>
+
+                </f:optionalBlock>
+            </div>
+
+            <div class="fode-field spinner-container"
+                 id="loginMacroFileCreationRow">
+                <f:optionalBlock name="requestLoginMacroFileCreation" field="requestLoginMacroFileCreation"
+                                 title="Request Login Macro File Creation"
+                                 checked="${instance.requestLoginMacroFileCreation}" inline="true">
+
+                    <f:entry title="Primary Username">
+                        <div id="loginMacroPrimaryUsernameRow">
+                            <f:textbox name="loginMacroPrimaryUserName"/>
+                        </div>
+                    </f:entry>
+                    <f:entry title="Primary Password">
+                        <div id="loginMacroPrimaryPasswordRow">
+                            <f:password name="loginMacroPrimaryPassword"/>
+                        </div>
+                    </f:entry>
+
+                    <f:entry title="Secondary Username">
+                        <div id="loginMacroSecondaryUsernameRow">
+                            <f:textbox name="loginMacroSecondaryUsername"/>
+                        </div>
+                    </f:entry>
+                    <f:entry title="Secondary Password">
+                        <div id="loginMacroSecondaryPasswordRow">
+                            <f:password name="loginMacroSecondaryPassword"/>
                         </div>
                     </f:entry>
 
