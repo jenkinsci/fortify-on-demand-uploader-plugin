@@ -66,7 +66,7 @@ function debounce(func, wait, immediate) {
 };
 
 function getEntitlementDropdownValue(id, freqId, freq) {
-    if (freq !== ('' || undefined))
+    if (freq && freq !=='')
         return `${id}-${freqId}-${freq}`;
     else
         return `${id}-${freqId}`;

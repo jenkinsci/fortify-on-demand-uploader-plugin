@@ -12,10 +12,8 @@ import org.jenkinsci.plugins.fodupload.models.response.Dast.PostDastStartScanRes
 import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDastScanSetupResponse;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.error;
 import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
@@ -24,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class Utils {
+public class Utils {
 
     static String getRawBody(InputStream stream) throws IOException {
         if (stream == null) return null;

@@ -126,7 +126,7 @@ class Api {
         return new Promise((res, rej) => {
             this.descriptor.retrieveStaticScanSettings(releaseId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
-                if (responseJSON !== undefined || null)
+                if (responseJSON)
                     return res(responseJSON);
                 else
                     rej();
@@ -137,8 +137,8 @@ class Api {
     getAssessmentTypeEntitlements(releaseId, customAuth) {
         return new Promise((res, rej) => {
             this.descriptor.retrieveAssessmentTypeEntitlements(releaseId, customAuth, async t => {
-                if (t.responseJSON === null || undefined)
-                    rej();
+                if (!t.responseJSON)
+                    rej("Failed to retrieve AssessmentType settings.");
                 else {
                     let responseJSON = JSON.parse(t.responseJSON);
                     return res(this._mutateAssessmentEntitlements(responseJSON));
@@ -222,12 +222,12 @@ class Api {
         return new Promise((res, rej) => {
             if (isDast) {
                 this.descriptor.retrieveDynamicScanSettings(releaseId, customAuth, async t => {
-                    if (t === null || undefined) {
-                        rej();
+                    if (!t) {
+                        rej("Failed to retrieve DAST scan settings.");
                     }
                     const responseJSON = JSON.parse(t.responseJSON);
-                    if (responseJSON === null || undefined) {
-                        rej();
+                    if (!responseJSON) {
+                        rej("Error while parsing DAST scan settings into json.");
                     } else
                         return res(responseJSON);
                 });
@@ -302,7 +302,7 @@ class Api {
         return new Promise((res, reject) => {
 
             this.descriptor.retrieveLookupItems("NetworkAuthenticationType", customAuth, async result => {
-                if (result === undefined || result.responseJSON === undefined) {
+                if (!result ||! result.responseJSON) {
                     return reject("Error Network Authentication type not retrieved");
                 }
                 return res((JSON.parse(result.responseJSON)));
@@ -312,15 +312,15 @@ class Api {
     }
 
     patchSetupManifestFile(releaseId, customAuth, file, fileType) {
-        debugger;
+
         return new Promise((accept, reject) => {
             let fileReader = new FileReader();
             let fileContent = fileReader.readAsBinaryString(file);
             fileReader.onload = () => {
                 fileContent = fileReader.result;
                 this.descriptor.DastManifestFileUpload(releaseId, customAuth, fileContent, fileType,file.name, async res => {
-                    debugger;
-                    if (res.responseJSON !== null && res.responseJSON.isSuccess ===true){
+
+                    if (res.responseJSON  && res.responseJSON.isSuccess ===true){
                     res.responseJSON.fileName = file.name;
                     debugger;
                         return accept(res.responseJSON);

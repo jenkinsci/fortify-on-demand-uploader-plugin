@@ -20,7 +20,6 @@ import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDastScanSetupResp
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.verb.POST;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
@@ -108,7 +107,7 @@ public class DastScanSharedBuildStep {
                 , networkAuthPassword
                 , assessmentTypeId, entitlementId,
                 entitlementFrequencyType
-                ,selectedNetworkAuthType, timeBoxChecked,
+                , selectedNetworkAuthType, timeBoxChecked,
                 requestLoginMacroFileCreation, loginMacroPrimaryUserName, loginMacroPrimaryPassword, loginMacroSecondaryUsername,
                 loginMacroSecondaryPassword, requestFalsePositiveRemoval);
     }
@@ -172,35 +171,39 @@ public class DastScanSharedBuildStep {
                 errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkAuthTypeNotFound);
             }
         }
-        switch (this.model.getSelectedScanType()) {
-            case "Standard":
+        FodEnums.DastScanType dastScanType;
+        if (Objects.equals(this.model.getSelectedScanType(), FodEnums.DastScanType.Workflow.toString())) {
+            dastScanType = FodEnums.DastScanType.Workflow; //hack to match the workflow-driven enum, as naming an enum using - is not valid one
+        } else
+            dastScanType = FodEnums.DastScanType.valueOf(this.model.getSelectedScanType());
+
+        switch (dastScanType) {
+            case Standard:
                 if (this.model.getWebSiteUrl().isEmpty()) {
                     errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWebSiteUrlNotFound);
                 }
                 if (this.model.getScanPolicyType().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
                 break;
-            case "Workflow-driven":
-
+            case Workflow:
                 if (this.model.getWorkflowMacroFilePath().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWorkflowMacroFilePathNotFound);
 
                 if (this.model.getScanPolicyType().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
                 break;
-            case "API":
-
+            case API:
                 if (this.model.getSelectedApi().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanAPITypeNotFound);
+                FodEnums.DastApiType dastApiType = FodEnums.DastApiType.valueOf(this.model.getUseSelectedApiType());
 
-                switch(this.model.getSelectedApi()){
-                    case "OpenApi":
-                        if(this.model.getSelectedOpenApiurl().isEmpty() && this.model.getSelectedOpenApiFileSource().isEmpty()
-                                && this.model.getOpenApiFilePath().isEmpty()){
+                switch (dastApiType) {
+                    case OpenApi:
+                        if (this.model.getSelectedOpenApiurl().isEmpty() && this.model.getSelectedOpenApiFileSource().isEmpty()
+                                && this.model.getOpenApiFilePath().isEmpty()) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanOpenApiSourceNotFound);
                         }
                 }
-
                 errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
                 break;
         }
@@ -232,16 +235,21 @@ public class DastScanSharedBuildStep {
                 errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkAuthTypeNotFound);
             }
         }
-        switch (this.model.getSelectedScanType()) {
-            case "Standard":
+        FodEnums.DastScanType dastScanType;
+        if (Objects.equals(this.model.getSelectedScanType(), FodEnums.DastScanType.Workflow.toString())) {
+            dastScanType = FodEnums.DastScanType.Workflow;
+        } else
+            dastScanType = FodEnums.DastScanType.valueOf(this.model.getSelectedScanType());
+
+        switch (dastScanType) {
+            case Standard:
                 if (this.model.getWebSiteUrl().isEmpty()) {
                     errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWebSiteUrlNotFound);
                 }
                 if (this.model.getScanPolicyType().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
                 break;
-            case "Workflow-driven":
-
+            case Workflow:
                 if (this.model.getWorkflowMacroFileId() <= 0)
                     errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWorkflowMacroIdNotFound);
 
@@ -265,7 +273,7 @@ public class DastScanSharedBuildStep {
             , String networkAuthType, String timeboxScan, boolean requestLoginMacroFileCreation, String loginMacroPrimaryUserName,
                                                   String loginMacroPrimaryPassword,
                                                   String loginMacroSecondaryUsername, String loginMacroSecondaryPassword, boolean requestFalsePositiveRemoval)
-            throws Exception{
+            throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId());
 
@@ -317,10 +325,12 @@ public class DastScanSharedBuildStep {
                 dynamicScanSetupReqModel.setNetworkAuthenticationSettings(networkSetting);
             }
 
-            if (!loginMacroPrimaryUserName.isEmpty() && !loginMacroPrimaryPassword.isEmpty()
-                    && !loginMacroSecondaryUsername.isEmpty() && !loginMacroSecondaryPassword.isEmpty()) {
+            if (loginMacroPrimaryUserName!=null && !loginMacroPrimaryUserName.isEmpty() &&
+                    loginMacroPrimaryPassword!=null && !loginMacroPrimaryPassword.isEmpty()
+                    &&loginMacroSecondaryUsername!=null && !loginMacroSecondaryUsername.isEmpty() &&
+                    loginMacroSecondaryPassword!=null&&!loginMacroSecondaryPassword.isEmpty()) {
                 dynamicScanSetupReqModel.setRequestLoginMacroFileCreation(true);
-                LoginMacroFileCreationDetails loginMacroDetails =  new LoginMacroFileCreationDetails();
+                LoginMacroFileCreationDetails loginMacroDetails = new LoginMacroFileCreationDetails();
                 loginMacroDetails.setPrimaryUsername(loginMacroPrimaryUserName);
                 loginMacroDetails.setPrimaryPassword(loginMacroPrimaryPassword);
                 loginMacroDetails.setSecondaryUsername(loginMacroSecondaryUsername);
@@ -434,67 +444,32 @@ public class DastScanSharedBuildStep {
         PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
         patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
         patchDastScanFileUploadReq.fileName = filename;
-        switch (fileType) {
-            case "LoginMacro":
+
+        FodEnums.DastScanFileTypes dastScanFileTypes = FodEnums.DastScanFileTypes.valueOf(fileType);
+        switch (dastScanFileTypes) {
+            case LoginMacro:
                 patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.LoginMacro;
                 break;
-            case "WorkflowDrivenMacro":
+            case WorkflowDrivenMacro:
                 patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.WorkflowDrivenMacro;
                 break;
-            case "OpenAPIDefinition":
+            case OpenAPIDefinition:
                 patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.OpenAPIDefinition;
                 break;
-            case "GraphQLDefinition":
+            case GraphQLDefinition:
                 patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.GraphQLDefinition;
                 break;
-            case "GRPCDefinition":
+            case GRPCDefinition:
                 patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.GRPCDefinition;
                 break;
-            case "PostmanCollection":
+            case PostmanCollection:
                 patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.PostmanCollection;
                 break;
             default:
                 throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
         }
-
         patchDastScanFileUploadReq.Content = fileContent.getBytes();
         return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
-
-    }
-
-    public PatchDastFileUploadResponse DastManifestFileUpload(byte[] fileContent, String fileType) throws Exception {
-
-        DastScanController dastScanController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
-        );
-        PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
-        patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
-
-        switch (fileType) {
-            case "LoginMacro":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.LoginMacro;
-                break;
-            case "WorkflowDrivenMacro":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.WorkflowDrivenMacro;
-                break;
-            case "OpenAPIDefinition":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.OpenAPIDefinition;
-                break;
-            case "GraphQLDefinition":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.GraphQLDefinition;
-                break;
-            case "GRPCDefinition":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.GRPCDefinition;
-                break;
-            case "PostmanCollection":
-                patchDastScanFileUploadReq.dastFileType = FodEnums.DastScanFileTypes.PostmanCollection;
-                break;
-            default:
-                throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
-        }
-
-        patchDastScanFileUploadReq.Content = fileContent;
-        return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
-
     }
 
 
@@ -805,17 +780,17 @@ public class DastScanSharedBuildStep {
                 PostDastStartScanResponse response = dynamicController.StartDastScan(releaseId);
                 if (response.errors == null && response.scanId > 0) {
                     build.setResult(Result.SUCCESS);
-                    Utils.logger(logger,String.format("Dynamic scan successfully triggered for scan Id %d ", response.scanId));
+                    Utils.logger(logger, String.format("Dynamic scan successfully triggered for scan Id %d ", response.scanId));
                     this.scanId = response.scanId;
                 } else {
                     String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
                             .collect(Collectors.joining(",")) : "";
 
-                    Utils.logger(logger,String.format("Scan Failed for release Id %d,error:%s", releaseId,errMsg));
+                    Utils.logger(logger, String.format("Scan Failed for release Id %d,error:%s", releaseId, errMsg));
                     build.setResult(Result.FAILURE);
                 }
             } else {
-                Utils.logger(logger,"Failed to create Fod API connection.");
+                Utils.logger(logger, "Failed to create Fod API connection.");
                 build.setResult(Result.FAILURE);
             }
 
@@ -942,6 +917,7 @@ public class DastScanSharedBuildStep {
                 1, java.util.Arrays.asList(new LookupItemsModel[]{new LookupItemsModel("1", "Placeholder")}),
                 1, 1, false);
     }
+
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @POST

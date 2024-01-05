@@ -93,7 +93,7 @@ public class DastScanJobModel {
         this.personalAccessToken = personalAccessToken;
         this.tenantId = tenantId;
         this.webSiteUrl = webSiteUrl;
-
+        this.allowedHost = allowedHost;
         if (workflowMacroId != null && !workflowMacroId.isEmpty()) {
             this.workflowMacroFileId = Integer.parseInt(workflowMacroId);
         }

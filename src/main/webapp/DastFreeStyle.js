@@ -5,40 +5,42 @@ const openApiFileType = 'OpenAPIDefinition';
 const grpcFileType = 'GRPCDefinition';
 const graphQlFileType = 'GraphQLDefinition';
 const postmanFileType = 'PostmanCollection';
-const dastScanTypes = [{"value": 'Standard', "text": 'Standard'}, {
-    "value": 'Workflow-driven',
-    "text": 'Workflow-driven'
-},
-    {"value": 'API', "text": 'API'}]
-const dastScanSelectDefaultValues =
+const dastScanSelectDefaultValues = Object.freeze(
     {
         "WebSiteScan": {"ScanPolicy": "standard"},
         "WorkflowDrivenScan": {"ScanPolicy": "standard"},
         "ApiScan": {"ScanPolicy": "API Scan"}
-    }
+    });
+
+const DastScanTypeEnum = Object.freeze({
+    Standard: 'Standard',
+    WorkflowDriven: 'Workflow-driven',
+    Api: 'API',
+});
+const DastApiScanTypeEnum = Object.freeze({
+    OpenApi: 'openApi',
+    Postman:'postman',
+    gRPC:'grpc',
+    GraphQl:'graphQl'
+});
 
 class DastFreeStyle {
-
     constructor() {
         this.api = new Api(instance, descriptor);
         this.uiLoaded = false;
         this.releaseId = null;
-
         subscribeToEvent('releaseChanged', p => this.loadEntitlementSettings(p.detail));
     }
 
     showMessage(msg, isError) {
         let msgElem;
-
         if (isError) msgElem = jq('#fode-error'); else msgElem = jq('#fode-msg');
-
         msgElem.text(msg);
         msgElem.show();
     }
 
     scanTypeVisibility(isVisible) {
-        if ((isVisible === undefined || null) || isVisible === false) {
-
+        if (!isVisible) {
             jq('.dast-scan-type').each((iterator, element) => {
                 let currentElement = jq(element);
                 let tr = closestRow(currentElement);
@@ -52,13 +54,10 @@ class DastFreeStyle {
     }
 
     scanTypeUserControlVisibility(scanType, isVisible) {
-
-        if ((isVisible !== undefined || null)) {
+       if (isVisible) {
             this.commonScopeSettingVisibility(false);
-
-            switch (scanType) {
-
-                case "Standard": {
+               switch (scanType) {
+                case DastScanTypeEnum.Standard: {
                     jq('#dast-standard-scan-policy').show();
                     jq('#dast-api-scan-policy-apiType').hide();
                     jq('.redundantPageDetection').show();
@@ -74,7 +73,7 @@ class DastFreeStyle {
                     this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
                     break;
                 }
-                case "API": {
+                case DastScanTypeEnum.Api: {
                     jq('#dast-standard-scan-policy').hide();
                     jq('#dast-api-scan-policy-apiType').show();
                     jq('.redundantPageDetection').hide();
@@ -89,7 +88,7 @@ class DastFreeStyle {
                     this.directoryAndSubdirectoriesScopeVisibility(false);
                     break;
                 }
-                case "Workflow-driven":
+                case DastScanTypeEnum.WorkflowDriven:
                     jq('#dast-standard-scan-policy').show();
                     jq('#dast-api-scan-policy-apiType').hide();
                     jq('.redundantPageDetection').hide();
@@ -112,7 +111,6 @@ class DastFreeStyle {
                     this.workflowScanSettingVisibility(false);
                     this.loginMacroSettingsVisibility(false);
                     this.networkAuthSettingVisibility(false);
-
                     break;
             }
         }
@@ -121,7 +119,6 @@ class DastFreeStyle {
     resetAuthSettings() {
         this.resetNetworkSettings();
         this.resetLoginMacroSettings();
-
     }
 
     resetLoginMacroSettings() {
@@ -131,7 +128,7 @@ class DastFreeStyle {
 
     loginMacroSettingsVisibility(isVisible) {
         let loginMacroSetting = jq('.dast-login-macro');
-        if ((isVisible === undefined || null) || isVisible === false) {
+        if (!isVisible) {
             loginMacroSetting.hide();
         } else {
             loginMacroSetting.show();
@@ -140,7 +137,7 @@ class DastFreeStyle {
 
     networkAuthSettingVisibility(isVisible) {
         let networkAuth = jq('.dast-networkAuth-setting');
-        if ((isVisible === undefined) || isVisible === false) {
+        if (!isVisible) {
             networkAuth.hide();
             //reset the value here so on changing the scan type the hidden n/w values don't retain the values.
             this.resetNetworkSettings();
@@ -150,9 +147,8 @@ class DastFreeStyle {
     }
 
     websiteScanSettingsVisibility(isVisible) {
-
         let standardScanSettingRows = jq('.dast-standard-setting');
-        if ((isVisible === undefined) || isVisible === false) {
+        if (!isVisible) {
             standardScanSettingRows.hide();
         } else {
             standardScanSettingRows.show();
@@ -161,8 +157,7 @@ class DastFreeStyle {
 
     commonScopeSettingVisibility(isVisible) {
         let commonScopeRows = jq('.dastCommonScopeSetting');
-
-        if ((isVisible === undefined) || isVisible === false) {
+        if (!isVisible) {
             commonScopeRows.hide();
         } else {
             commonScopeRows.show();
@@ -172,26 +167,23 @@ class DastFreeStyle {
 
     setDefaultValuesForSelectBasedOnScanType(scanType, selectControl) {
         switch (scanType) {
-            case "Standard":
+            case DastScanTypeEnum.Standard:
                 jq('#' + selectControl).val(dastScanSelectDefaultValues.WebSiteScan.ScanPolicy);
                 break;
-            case "Workflow-driven":
+            case DastScanTypeEnum.WorkflowDriven:
                 jq('#' + selectControl).val(dastScanSelectDefaultValues.WorkflowDrivenScan.ScanPolicy);
                 break;
         }
-
     }
 
     apiScanSettingVisibility(isVisible) {
-
         jq('.dast-api-scan').each((iterator, element) => {
             let currentElement = jq(element);
             let tr = closestRow(currentElement);
             tr.addClass('dast-api-scan');
         });
         let apiScanSettingRows = jq('.dast-api-scan');
-        if ((isVisible === undefined || null) || isVisible === false) {
-
+        if (!isVisible) {
             apiScanSettingRows.hide();
         } else {
             apiScanSettingRows.show();
@@ -199,9 +191,8 @@ class DastFreeStyle {
     }
 
     workflowScanSettingVisibility(isVisible) {
-
         let workflowScanSettingRows = jq('.dast-workflow-setting');
-        if ((isVisible === undefined || null) || isVisible === false) {
+        if (!isVisible) {
             workflowScanSettingRows.hide();
         } else {
             workflowScanSettingRows.show();
@@ -209,14 +200,15 @@ class DastFreeStyle {
     }
 
     scanSettingsVisibility(isVisible) {
-        if ((isVisible === undefined || null) || isVisible === false) {
+        if (!isVisible) {
             let scanSettingsRows = jq('.dast-standard-setting');
             scanSettingsRows.hide();
         } else {
             jq('.dast-scan-setting').show();
         }
-        //Remove BSI token form Pick a release selection list as it is not supported for DAST.
-          jq("#releaseTypeSelectList option[value='UseBsiToken']").remove();
+        //ToDo:
+        // //Remove BSI token form Pick a release selection list as it is not supported for DAST.
+        // jq("#releaseTypeSelectList option[value='UseBsiToken']").remove();
     }
 
     hideMessages(msg) {
@@ -242,22 +234,16 @@ class DastFreeStyle {
         let atval = jq('#ddAssessmentType').val();
         let entsel = jq('#entitlementSelectList');
         let at = this.assessments ? this.assessments[atval] : null;
-
         entsel.find('option,optgroup').remove();
-
         if (at) {
-
             let available = at.entitlementsSorted.filter(e => e.id > 0);
             let forPurchase = at.entitlementsSorted.filter(e => e.id <= 0);
             let availableGrp = forPurchase.length > 0 ? jq(`<optgroup label="Available Entitlements"></optgroup>`) : entsel;
-
             for (let e of available) {
                 availableGrp.append(`<option value="${getEntitlementDropdownValue(e.id, e.frequencyId, e.frequency)}">${e.description}</option>`);
             }
-
             if (forPurchase.length > 0) {
                 let grp = jq(`<optgroup label="Available For Purchase"></optgroup>`);
-
                 entsel.append(availableGrp);
                 entsel.append(grp);
                 for (let e of forPurchase) {
@@ -271,10 +257,8 @@ class DastFreeStyle {
     }
 
     async onEntitlementChanged(skipAuditPref) {
-
         let val = jq('#entitlementSelectList').val();
         let {entitlementId, frequencyId, frequencyType} = parseEntitlementDropdownValue(val);
-
         jq('#entitlementId').val(entitlementId);
         jq('#frequencyId').val(frequencyId);
         jq('#frequencyId').val();
@@ -331,7 +315,6 @@ class DastFreeStyle {
     }
 
     async loadEntitlementSettings(releaseChangedPayload) {
-
         if (releaseChangedPayload && releaseChangedPayload.mode === ReleaseSetMode.releaseId
             && numberOrNull(releaseChangedPayload.releaseId) > 0) {
             this.uiLoaded = true;
@@ -343,28 +326,21 @@ class DastFreeStyle {
             this.deferredLoadEntitlementSettings = _ => this.loadEntitlementSettings(releaseChangedPayload);
             return;
         } else this.deferredLoadEntitlementSettings = null;
-
         this.releaseId = null;
         let rows = jq(fodeRowSelector);
         rows.hide();
         this.hideMessages();
 
-        if (releaseChangedPayload && releaseChangedPayload.mode === ReleaseSetMode.bsiToken) {
-            this.isBsi = true;
-            jq('.fode-row-bsi').show();
-            jq('.fode-row-remediation').show();
-            return;
-        }
         let releaseId = releaseChangedPayload ? releaseChangedPayload.releaseId : null;
         let fields = jq('.fode-field.spinner-container');
         releaseId = numberOrNull(releaseId);
-        if (releaseId > 0) {
+        if ( releaseId && releaseId > 0) {
             this.releaseId = releaseId;
             fields.addClass('spinner');
             rows.show();
             jq('.fode-row-bsi').hide();
 
-            let ssp= this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo(), true)
+            let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo(), true)
                 .then(r => this.scanSettings = r).catch((err) => {
                         console.error("release settings api failed: " + err);
                         throw err;
@@ -395,7 +371,7 @@ class DastFreeStyle {
 
             await Promise.all([ssp, entp, tzs, networkAuthTypes])
                 .then(async () => {
-                   // this.scanTypeUserControlVisibility('allTypes', false);
+
                     if (this.scanSettings && this.assessments) {
                         let assessmentId = this.scanSettings.assessmentTypeId;
                         let timeZoneId = this.scanSettings.timeZone;
@@ -404,37 +380,31 @@ class DastFreeStyle {
                         await this.onAssessmentChanged(true);
                         jq('#entitlementFreqType').val(this.scanSettings.entitlementFrequencyType);
                         await this.onEntitlementChanged(false);
-
                         this.setSelectedEntitlementValue(entp);
                         jq('#timeZoneStackSelectList').val(timeZoneId);
                         this.onLoadTimeZone();
                         this.onTimeZoneChanged();
-                        /*'set the scan type based on the scan setting get response'*/
                         this.setScanType();
                         this.onScanTypeChanged();
-                        //Set scan policy from the response.
                         this.setScanPolicy();
                         this.setTimeBoxScan();
                         //Set the Website assessment scan type specific settings.
-                        if (!Object.is(this.scanSettings.websiteAssessment, undefined)) {
-                            jq('#dast-standard-site-url').find('input').val(this.scanSettings.websiteAssessment.dynamicSiteUrl);
+                        if (this.scanSettings.websiteAssessment) {
+                            jq('#dast-standard-site-url').find('input')
+                                .val(this.scanSettings.websiteAssessment.dynamicSiteUrl);
                         }
                         this.setWorkflowDrivenScanSetting();
                         this.setApiScanSetting();
                         this.setUploadedFileDetails();
-                        /*Set restrict scan value from response to UI */
                         this.setRestrictScan();
-                        /*Set network settings from response. */
                         jq('#ddlNetworkAuthType').val(networkAuthTypes);
                         this.onNetworkAuthTypeLoad();
                         this.onNetworkAuthTypeChanged();
                         this.setNetworkSettings();
-                        //Set the PatchUploadManifest File's fileId from get response.
                         this.setPatchUploadFileId();
-                        //Enable scan Type right after assessment Type drop populated.
                         this.scanSettingsVisibility(true);
                         this.scanTypeVisibility(true);
-                        validateRequiredFields(requiredFieldsFreestyle);
+                      //  validateRequiredFields(requiredFieldsFreestyle);
                     } else {
                         await this.onAssessmentChanged(false);
                         this.showMessage('Failed to retrieve scan settings from API', true);
@@ -454,73 +424,63 @@ class DastFreeStyle {
     }
 
     setWorkflowDrivenScanSetting() {
-
-        if (!Object.is(this.scanSettings.workflowdrivenAssessment, undefined)) {
-            if (!Object.is(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro, undefined)) {
+        if (this.scanSettings.workflowdrivenAssessment) {
+            if (this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro) {
                 jq('#listWorkflowDrivenAllowedHostUrl').empty();
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].fileId);
-
                 this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].allowedHosts.forEach((item, index, arr) => {
                         console.log(item);
                         let ident = arr[index];
-                        jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'" +
-                            " id=' " + ident + " ' name='" + ident + "'>" + arr[index] + "</li>");
-                        if (jq('#workflowMacroHosts').val() === null || undefined) {
+                        jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + arr[index] +
+                            " ' checked='checked' name='" + arr[index] + "'>" + arr[index] + "</li>");
+                        if (!jq('#workflowMacroHosts').val()) {
                             jq('#workflowMacroHosts').val(arr[index]);
                         } else {
-
                             let host = jq('#workflowMacroHosts').val();
-                            if (host !== null || undefined) {
-
+                            if (host) {
                                 if (host !== '')
                                     host = host + "," + arr[index];
                                 else
                                     host = arr[index];
-
                                 jq('#workflowMacroHosts').val(host);
-
                             }
                         }
                     }
                 )
-
             }
-
         }
-
     }
 
     setApiScanSetting() {
-        if (!Object.is(this.scanSettings.apiAssessment, undefined)) {
-            if (!Object.is(this.scanSettings.apiAssessment.openAPI, undefined)) {
+        if (this.scanSettings.apiAssessment) {
+            if (this.scanSettings.apiAssessment.openAPI) {
                 this.setOpenApiSettings(this.scanSettings.apiAssessment.openAPI);
-            } else if (!Object.is(this.scanSettings.apiAssessment.graphQL, undefined)) {
+            } else if (this.scanSettings.apiAssessment.graphQL) {
                 this.setGraphQlSettings(this.scanSettings.apiAssessment.graphQL);
-            } else if (!Object.is(this.scanSettings.apiAssessment.gRPC, undefined)) {
+            } else if (this.scanSettings.apiAssessment.gRPC) {
                 this.setGrpcSettings(this.scanSettings.apiAssessment.gRPC);
-            } else if (!Object.is(this.scanSettings.apiAssessment.postman, undefined)) {
+            } else if (this.scanSettings.apiAssessment.postman) {
                 this.setPostmanSettings(this.scanSettings.apiAssessment.postman);
             }
         }
     }
 
     setUploadedFileDetails() {
-
-        if (!Object.is(this.scanSettings.fileDetails, null)) {
+        if (this.scanSettings && this.scanSettings.fileDetails) {
             this.scanSettings.fileDetails.forEach((item, index, arr) => {
                 jq('.uploadedFileDetails').text(item.fileName);
-                       jq('.uploadedFileContainer').show();
+                jq('.uploadedFileContainer').show();
             });
         }
     }
 
     setOpenApiSettings(openApiSettings) {
         jq('#apiTypeList').val('openApi');
-        var inputId = openApiSettings.sourceType == 'Url' ? 'openApiInputUrl' : 'openApiInputFile';
+        var inputId = openApiSettings.sourceType === 'Url' ? 'openApiInputUrl' : 'openApiInputFile';
         this.onApiTypeChanged();
         jq('#' + inputId).trigger('click');
         jq('#dast-openApi-api-key input').val(openApiSettings.apiKey);
-        if (openApiSettings.sourceType == 'Url') {
+        if (openApiSettings.sourceType === 'Url') {
             jq('#dast-openApi-url input').val(openApiSettings.sourceUrn);
         } else {
             //ToDo : Write code for showing file name
@@ -529,13 +489,13 @@ class DastFreeStyle {
 
     setGraphQlSettings(graphQlSettings) {
         jq('#apiTypeList').val('graphQl');
-        var inputId = graphQlSettings.sourceType == 'Url' ? 'graphQlInputUrl' : 'graphQlInputFile';
+        var inputId = graphQlSettings.sourceType === 'Url' ? 'graphQlInputUrl' : 'graphQlInputFile';
         this.onApiTypeChanged();
         jq('#' + inputId).trigger('click');
         jq('#dast-graphQL-api-host input').val(graphQlSettings.host);
         jq('#dast-graphQL-api-servicePath input').val(graphQlSettings.servicePath);
         jq('#dast-graphQL-schemeType input').val(graphQlSettings.schemeType);
-        if (graphQlSettings.sourceType == 'Url') {
+        if (graphQlSettings.sourceType === 'Url') {
             jq('#dast-graphQL-url input').val(graphQlSettings.sourceUrn);
         } else {
             //ToDo : Write code for showing file name
@@ -564,12 +524,12 @@ class DastFreeStyle {
             let at = entitlement[ts];
             console.log(at.text);
             console.log(at.value);
-            if (curVal !== undefined && at.value !== undefined && curVal.toLowerCase() === at.value.toLowerCase()) {
+            if (curVal && at.value && curVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
                 entitlement.append(`<option value="${at.text}" selected>${at.text}</option>`);
                 jq('#entitlementId').val(at.text);
             } else {
-                if(at.text !== null||undefined) {
+                if (at.text) {
                     entitlement.append(`<option value="${at.text}">${at.text}</option>`);
                 }
             }
@@ -577,23 +537,18 @@ class DastFreeStyle {
     }
 
     setPatchUploadFileId() {
-
-        if (!Object.is(this.scanSettings.loginMacroFileId, null) &&
-            this.scanSettings.loginMacroFileId !== undefined && this.scanSettings.loginMacroFileId > 0) {
+        if (this.scanSettings &&
+            this.scanSettings.loginMacroFileId && this.scanSettings.loginMacroFileId > 0) {
             jq('#loginMacroId').val(this.scanSettings.loginMacroFileId);
         }
-        if (!Object.is(this.scanSettings.workflowdrivenAssessment, null)
-            && this.scanSettings.workflowdrivenAssessment !== undefined) {
-
+        if (this.scanSettings.workflowdrivenAssessment && this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro) {
             if (this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro.fileId > 0)
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro.fileId);
         }
     }
 
     setNetworkSettings() {
-
-        if (!Object.is(this.scanSettings.networkAuthenticationSettings, null)
-            && !Object.is(this.scanSettings.networkAuthenticationSettings, undefined)) {
+        if (this.scanSettings && this.scanSettings.networkAuthenticationSettings) {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
             jq('#networkPasswordRow').find('input').val(this.scanSettings.networkAuthenticationSettings.password);
             if (jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').prop('checked') === false) {
@@ -605,7 +560,6 @@ class DastFreeStyle {
     }
 
     resetNetworkSettings() {
-
         jq('#networkUsernameRow').find('input').val(undefined);
         jq('#networkPasswordRow').find('input').val(undefined);
         jq('#ddlNetworkAuthType').prop('selectedIndex', 0);
@@ -613,38 +567,34 @@ class DastFreeStyle {
     }
 
     setScanType() {
-        if (this.scanSettings !== undefined && this.scanSettings !== null) {
+        debugger;
+        if (this.scanSettings) {
             let selectedScanType;
-            if (this.scanSettings.websiteAssessment !== null && this.scanSettings.websiteAssessment !== undefined) {
-                selectedScanType = dastScanTypes.find(v => v.value === "Standard");
-            } else if (this.scanSettings.workflowdrivenAssessment !== null && this.scanSettings.workflowdrivenAssessment !== undefined) {
-                selectedScanType = dastScanTypes.find(v => v.value === "Workflow-driven")
-            } else if (this.scanSettings.apiAssessment !== null && this.scanSettings.apiAssessment !== undefined) {
-                selectedScanType = dastScanTypes.find(v => v.value === "API")
+            if (this.scanSettings.websiteAssessment) {
+                selectedScanType = DastScanTypeEnum.Standard;
+            } else if (this.scanSettings.workflowdrivenAssessment) {
+                selectedScanType = DastScanTypeEnum.WorkflowDriven;
+            } else if (this.scanSettings.apiAssessment) {
+                selectedScanType = DastScanTypeEnum.Api;
             }
-            // Check for API Type
-
-            //Set other scan type values in the dropdown.
             let scanSel = jq('#scanTypeList');
             let currValSelected = false;
             scanSel.find('option').not(':first').remove();
             scanSel.find('option').first().prop('selected', true);
 
-            for (let s of Object.keys(dastScanTypes)) {
-                let at = dastScanTypes[s];
-                if (selectedScanType !== undefined
-                    && at.text !== undefined && (selectedScanType.value.toLowerCase() === at.text.toLowerCase())) {
+            for (let s of Object.keys(DastScanTypeEnum)) {
+                let at = DastScanTypeEnum[s];
+                if (selectedScanType
+                    && at && (selectedScanType.toLowerCase() === at.toLowerCase())) {
                     currValSelected = true;
-                    scanSel.append(`<option value="${at.value}" selected>${at.text}</option>`);
+                    scanSel.append(`<option value="${at}" selected>${at}</option>`);
                 } else {
-                    scanSel.append(`<option value="${at.value}">${at.text}</option>`);
+                    scanSel.append(`<option value="${at}">${at}</option>`);
                 }
             }
         }
 
     }
-
-
     onLoadTimeZone() {
         let tsSel = jq('#timeZoneStackSelectList');
         let currVal = this.scanSettings.timeZone;
@@ -653,7 +603,7 @@ class DastFreeStyle {
         tsSel.find('option').first().prop('selected', true);
         for (let ts of Object.keys(this.timeZones)) {
             let at = this.timeZones[ts];
-            if (currVal !== undefined && at.value !== undefined && currVal.toLowerCase() === at.value.toLowerCase()) {
+            if (currVal && at.value && currVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
                 tsSel.append(`<option value="${at.value}" selected>${at.text}</option>`);
             } else {
@@ -661,22 +611,19 @@ class DastFreeStyle {
             }
         }
     }
-
     onNetworkAuthTypeLoad() {
         let networkAuthTypeSel = jq('#ddlNetworkAuthType');
         let currVal;
-        if (this.scanSettings.networkAuthenticationSettings !== undefined &&
-            this.scanSettings.networkAuthenticationSettings.networkAuthenticationType !== null) {
+        if (this.scanSettings.networkAuthenticationSettings &&
+            this.scanSettings.networkAuthenticationSettings.networkAuthenticationType) {
             currVal = this.scanSettings.networkAuthenticationSettings.networkAuthenticationType;
         }
-
         let currValSelected = false;
         networkAuthTypeSel.find('option').not(':first').remove();
         networkAuthTypeSel.find('option').first().prop('selected', true);
-
         for (let ts of Object.keys(this.networkAuthTypes)) {
             let at = this.networkAuthTypes[ts];
-            if (currVal !== undefined && at.value !== undefined && currVal.toLowerCase() === at.value.toLowerCase()) {
+            if (currVal && at.value && currVal.toLowerCase() === at.value.toLowerCase()) {
                 currValSelected = true;
                 networkAuthTypeSel.append(`<option value="${at.text}" selected>${at.text}</option>`);
             } else {
@@ -684,17 +631,14 @@ class DastFreeStyle {
             }
         }
     }
-
     onScanTypeChanged() {
         this.resetAuthSettings();
         jq('#apiTypeList').prop('selectedIndex', 0);
         let selectedScanTypeValue = jq('#scanTypeList').val();
-
-        if (selectedScanTypeValue === null || undefined) {
+        if (!selectedScanTypeValue) {
             //Reset All ScanTypes Controls
             this.scanTypeUserControlVisibility('allTypes', false);
         } else {
-
             this.scanTypeUserControlVisibility(selectedScanTypeValue, true);
             validateDropdown('#scanTypeList');
         }
@@ -709,7 +653,7 @@ class DastFreeStyle {
     }
 
     setRestrictScan() {
-        if (this.scanSettings !== null && this.scanSettings.restrictToDirectoryAndSubdirectories !== null) {
+        if (this.scanSettings && this.scanSettings.restrictToDirectoryAndSubdirectories) {
             {
                 jq('#restrictScan').prop('checked', this.scanSettings.restrictToDirectoryAndSubdirectories);
             }
@@ -718,16 +662,15 @@ class DastFreeStyle {
 
 
     setScanPolicy() {
-        if (this.scanSettings !== undefined && this.scanSettings.policy !== null || undefined) {
+        if (this.scanSettings && this.scanSettings.policy) {
             let selectedScanPolicyType = this.scanSettings.policy;
             let ScanPolicy = ["Standard", "Critical and high", "Passive"]
             let scanPolicySel = jq('#dast-standard-scan-policy').find('select');
             let currValSelected = false;
             scanPolicySel.find('option').not(':first').remove();
             scanPolicySel.find('option').first().prop('selected', true);
-
             for (let p of ScanPolicy) {
-                if (selectedScanPolicyType !== undefined && selectedScanPolicyType.toLowerCase() === p.toLowerCase()) {
+                if (selectedScanPolicyType && selectedScanPolicyType.toLowerCase() === p.toLowerCase()) {
                     currValSelected = true;
                     scanPolicySel.append(`<option value="${p}" selected>${p}</option>`);
                 } else {
@@ -738,8 +681,7 @@ class DastFreeStyle {
     }
 
     setTimeBoxScan() {
-        if (this.scanSettings.timeBoxInHours !== undefined && this.scanSettings.timeBoxInHours > 0) {
-
+        if (this.scanSettings.timeBoxInHours && this.scanSettings.timeBoxInHours > 0) {
             jq('#dast-timeBox-scan').find('input:text:first').val(this.scanSettings.timeBoxInHours);
             if (jq('#dast-timeBox-scan').find('input:checkbox:first').prop('checked') === false) {
                 jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
@@ -754,13 +696,11 @@ class DastFreeStyle {
         let msgCtl = '#loginMacroUploadMessage';
         handleSpinner(ctl, false);
         this.api.patchSetupManifestFile(this.releaseId, getAuthInfo(), loginMacroFile, dastManifestLoginFileUpload).then(res => {
-                if (res.fileId > 0) {
+                if (res && res.fileId > 0) {
                     jq('#loginMacroId').val(res.fileId);
                     handleSpinner(ctl, true);
                     handleUploadStatusMessage(msgCtl, fileUploadSuccess, true);
                 } else {
-                    throw new Exception("Illegal argument exception,FileId not valid");
-                    console.log(res.reason);
                     handleUploadStatusMessage(msgCtl, inValidResponse + "error =" + res.message, false);
                 }
             }
@@ -773,7 +713,6 @@ class DastFreeStyle {
     }
 
     onWorkflowMacroFileUpload() {
-
         let workFlowMacroFile = document.getElementById('workflowMacroFile').files[0];
         let ctl = '#dast-workflow-macro-upload';
         let msgCtl = '#workflowMacroUploadStatusMessage';
@@ -782,20 +721,19 @@ class DastFreeStyle {
                 //Todo: - check
                 console.log("File upload success " + res);
                 handleSpinner(ctl, true);
-                if (res.fileId > 0) {
+                if (res && res.fileId > 0) {
                     jq('#workflowMacroId').val(res.fileId)
                     handleUploadStatusMessage(msgCtl, fileUploadSuccess, true);
                 } else {
-                    throw new Exception("Illegal argument exception,FileId not valid");
                     handleUploadStatusMessage(msgCtl, inValidResponse + "error =" + res.message, false);
+                    return;
                 }
-                if (!Object.is(res.hosts, undefined) && !Object.is(res.hosts, null)) {
+                if (res && res.hosts) {
                     let hosts = undefined;
                     res.hosts.forEach(hostIterator);
-
                     function hostIterator(item, index, arr) {
-                        if (arr !== undefined) {
-                            if (hosts !== undefined)
+                        if (arr) {
+                            if (hosts)
                                 hosts = hosts + "," + arr[index];
                             else
                                 hosts = arr[index];
@@ -803,13 +741,13 @@ class DastFreeStyle {
                     }
                     jq('#workflowMacroHosts').val(hosts);
                     jq('#listWorkflowDrivenAllowedHostUrl').empty();
-
                     //set the allowed hosts  html list value
-                    if (hosts !== undefined) {
+                    if (hosts) {
                         let host = hosts.split(',');
                         host.forEach((item) => {
-                            jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox'>" + item + "</li>")
-                        })
+                            jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + item +
+                                " ' checked='checked' name='" + item + "'>" + item + "</li>");
+                        });
                     }
                 } else
                     throw Error("Invalid hosts info");
@@ -830,7 +768,6 @@ class DastFreeStyle {
         let fileType = null;
         let elem = null;
         let displayMessage = null;
-
         switch (event.target.id) {
             case 'btnUploadOpenApiFile' :
                 file = document.getElementById('openApiFile').files[0];
@@ -838,21 +775,18 @@ class DastFreeStyle {
                 elem = jq('#openApiFileId');
                 displayMessage = jq('#openApiUploadMessage');
                 break;
-
             case 'btnUploadPostmanFile' :
                 file = document.getElementById('postmanFile').files[0];
                 fileType = postmanFileType;
                 elem = jq('#postmanFileId');
                 displayMessage = jq('#postmanUploadMessage');
                 break;
-
             case 'btnUploadgraphQLFile' :
                 file = document.getElementById('graphQLFile').files[0];
                 fileType = graphQlFileType;
                 elem = jq('#graphQLFileId');
                 displayMessage = jq('#graphQlUploadMessage');
                 break
-
             case 'btnUploadgrpcFile' :
                 file = document.getElementById('grpcFile').files[0];
                 fileType = grpcFileType;
@@ -860,27 +794,23 @@ class DastFreeStyle {
                 displayMessage = jq('#grpcUploadMessage');
                 break;
             default :
-                throw new Exception("Illegal argument exception,File Type not valid");
+                throw new Error("Illegal argument exception,File Type not valid");
         }
-
-        if (file == null || fileType == null || elem == null) {
-            throw new Exception("Illegal argument exception,File Type not valid");
+        if (!file ||!fileType ||!elem) {
+            throw new Error("Illegal argument exception,File Type not valid");
         }
-
         this.api.patchSetupManifestFile(this.releaseId, getAuthInfo(), file, fileType).then(res => {
-
                 //Todo: - check
                 console.log("File upload success " + res);
                 handleSpinner(uploadContainer, true);
-
-                if (res.fileId > 0) {
+                if (res && res.fileId > 0) {
                     elem.val(res.fileId);
-                     jq('.uploadedFileDetails').text(res.fileName);
-                     jq('.uploadedFileContainer').show();
+                    jq('.uploadedFileDetails').text(res.fileName);
+                    jq('.uploadedFileContainer').show();
                     handleUploadStatusMessage(displayMessage, fileUploadSuccess, true);
                 } else {
                     handleUploadStatusMessage(displayMessage, fileUploadFailed, false)
-                    throw new Exception("Illegal argument exception,FileId not valid");
+                    console.log("Illegal argument exception,FileId not valid");
                 }
             }
         ).catch((err) => {
@@ -890,7 +820,6 @@ class DastFreeStyle {
             }
         );
     }
-
     directoryAndSubdirectoriesScopeVisibility(isVisible) {
         if (isVisible)
             jq('#dast-standard-scan-scope').show();
@@ -899,12 +828,11 @@ class DastFreeStyle {
     }
 
     onWorkflowDrivenHostChecked(event) {
-
         let allowedHost = jq('#workflowMacroHosts').val();
         if (event.target.checked) {
             let hostToAdd = event.target.name; //name point to the host returned from FOD Patch API
 
-            if (allowedHost !== undefined || null) {
+            if (allowedHost) {
                 if (allowedHost.length > 0) {
                     allowedHost = allowedHost + "," + hostToAdd;
                 } else
@@ -912,7 +840,7 @@ class DastFreeStyle {
                 jq('#workflowMacroHosts').val(allowedHost);
             }
         } else {
-            if (allowedHost !== undefined || null) {
+            if (allowedHost) {
                 let hosts = allowedHost.split(',');
                 hosts.forEach((entry) => {
                     if (entry === event.target.name) {
@@ -929,17 +857,15 @@ class DastFreeStyle {
     }
 
     onApiTypeChanged() {
-
         jq('.uploadMessage').text('');
         this.onSourceChange('none');
         let selectedApiTypeValue = jq('#apiTypeList').val();
 
-        if (selectedApiTypeValue === null || undefined) {
+        if (!selectedApiTypeValue) {
             //Reset All ScanTypes Controls
             this.apiTypeUserControlVisibility(null, false);
             jq('.dast-api-specific-controls').show();
         } else {
-
             this.apiTypeUserControlVisibility(null, false);
             this.apiTypeUserControlVisibility(selectedApiTypeValue, true);
             jq('.dast-api-specific-controls').show();
@@ -948,13 +874,11 @@ class DastFreeStyle {
     }
 
     onSourceChange(id) {
-
         jq('.openApiSourceControls').hide();
         jq('.graphQLSourceControls').hide();
         jq('.apiOptions').show();
         jq('.sourceTypeFileds').hide();
         jq('.uploadMessage').text('');
-
         if (id === 'openApiInputFile') {
             jq('.openApiSourceControls').show()
             jq('#dast-api-openApi-upload').show();
@@ -977,36 +901,33 @@ class DastFreeStyle {
     }
 
     apiTypeUserControlVisibility(apiType, isVisible) {
-
-        if ((isVisible !== undefined || null)) {
+        if (isVisible) {
             this.openApiScanVisibility(false);
             this.grpcScanVisibility(false);
             this.graphQlScanVisibility(false);
             this.postmanScanVisibility(false);
             switch (apiType) {
-                case "openApi":
+                case DastApiScanTypeEnum.OpenApi:
                     this.openApiScanVisibility(isVisible);
                     break;
 
-                case "graphQl":
+                case DastApiScanTypeEnum.GraphQl:
                     this.graphQlScanVisibility(isVisible);
                     break;
 
-                case "grpc":
+                case DastApiScanTypeEnum.gRPC:
                     this.grpcScanVisibility(isVisible);
                     break;
 
-                case "postman":
+                case DastApiScanTypeEnum.Postman:
                     this.postmanScanVisibility(isVisible);
                     break;
-
                 default:
                     this.openApiScanVisibility(false);
                     this.grpcScanVisibility(false);
                     this.graphQlScanVisibility(false);
                     this.postmanScanVisibility(false);
                     break;
-
             }
         }
     }
@@ -1016,7 +937,6 @@ class DastFreeStyle {
             jq('#dast-openApi').closest('.tr').show();
         else
             jq('#dast-openApi').closest('.tr').hide();
-
         jq('#dast-postman').closest('.tr').hide();
         jq('#dast-graphQL').closest('.tr').hide();
         jq('#dast-grpc').closest('.tr').hide();
@@ -1057,9 +977,8 @@ class DastFreeStyle {
 
         let apiScanSettingRows = jq('.' + dastApiSetting);
         jq('.' + dastApiSpecificControls).hide();
-        if ((isVisible === undefined || null) || isVisible === false) {
+        if (!isVisible) {
             apiScanSettingRows.hide();
-
         } else {
             apiScanSettingRows.show();
             validateDropdown('#apiTypeList');
@@ -1067,15 +986,13 @@ class DastFreeStyle {
     }
 
     onExcludeUrlBtnClick(event, args) {
-
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
         jq('#listStandardScanTypeExcludedUrl');
         jq('#listStandardScanTypeExcludedUrl').append("<li>" + excludedUrl + "</li>");
         jq('#listStandardScanTypeExcludedUrl').show();
     }
 
-    preinit() {
-
+   async preInit() {
         jq('.fode-field')
             .each((i, e) => {
                 let jqe = jq(e);
@@ -1115,95 +1032,60 @@ class DastFreeStyle {
                     }
                 }
             });
-        this.init();
+       await this.init();
     }
-
 
     async init() {
         try {
-
-        } catch (err) {
-            // if (this.api.isAuthError(err)) {
-            if (!this.unsubInit) {
-                this.unsubInit = () => this.init();
-                subscribeToEvent('authInfoChanged', this.unsubInit);
+            this.hideMessages();
+            this.showMessage('Select a release');
+            if (this.unsubInit) unsubscribeEvent('authInfoChanged', this.unsubInit);
+            jq('#ddAssessmentType')
+                .change(_ => this.onAssessmentChanged());
+            jq('#entitlementSelectList')
+                .change(_ => this.onEntitlementChanged());
+            jq('#scanTypeList').change(_ => this.onScanTypeChanged());
+            jq('#btnAddExcludeUrl').click(_ => this.onExcludeUrlBtnClick());
+            jq('#btnUploadLoginMacroFile').click(_ => this.onLoginMacroFileUpload());
+            jq('#btnUploadWorkflowMacroFile').click(_ => this.onWorkflowMacroFileUpload());
+            jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
+            jq('#apiTypeList').change(_ => this.onApiTypeChanged());
+            jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_ => this.onSourceChange(event.target.id));
+            jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile, #btnUploadgrpcFile').click(_ => this.onFileUpload(event));
+            jq('.fode-row-screc').hide();
+            jq('.uploadedFileContainer').hide();
+            jq('#requestFalsePositiveRemovalRow').hide();
+            jq('#loginMacroFileCreationRow').hide();
+            jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
+            jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
+            setOnblurEventForFreestyle(setOnblurEventForPipeline);
+            this.uiLoaded = true;
+            if (this.deferredLoadEntitlementSettings) {
+                this.deferredLoadEntitlementSettings();
+                this.deferredLoadEntitlementSettings = null;
             }
-            return;
+        } catch (err) {
+           console.log(err);
         }
 
-        this.hideMessages();
-        this.showMessage('Select a release');
-
-        if (this.unsubInit) unsubscribeEvent('authInfoChanged', this.unsubInit);
-
-        jq('#ddAssessmentType')
-            .change(_ => this.onAssessmentChanged());
-        jq('#entitlementSelectList')
-            .change(_ => this.onEntitlementChanged());
-
-        jq('#scanTypeList').change(_ => this.onScanTypeChanged());
-
-        jq('#btnAddExcludeUrl').click(_ => this.onExcludeUrlBtnClick());
-
-        jq('#btnUploadLoginMacroFile').click(_ => this.onLoginMacroFileUpload());
-
-        jq('#btnUploadWorkflowMacroFile').click(_ => this.onWorkflowMacroFileUpload());
-
-        jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
-
-        jq('#apiTypeList').change(_ => this.onApiTypeChanged());
-
-        jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_ => this.onSourceChange(event.target.id));
-
-        jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile, #btnUploadgrpcFile').click(_ => this.onFileUpload(event));
-
-        jq('.fode-row-screc').hide();
-        jq('.uploadedFileContainer').hide();
-        jq('#requestFalsePositiveRemovalRow').hide();
-        jq('#loginMacroFileCreationRow').hide();
-
-        jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
-
-        jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
-
-        setOnblurEventForFreestyle(setOnblurEventForPipeline);
-
-        this.uiLoaded = true;
-
-        if (this.deferredLoadEntitlementSettings) {
-            this.deferredLoadEntitlementSettings();
-            this.deferredLoadEntitlementSettings = null;
-        }
     }
-
 }
 
-const
-    scanSettings = new DastFreeStyle();
-
+const scanSettings = new DastFreeStyle();
 spinAndWait(
     () => jq(
             '#selectedRelease'
         ).text()
-
         !==
         undefined
         &&
-
         jq(
             '#selectedRelease'
         ).text()
-
         !==
         ''
-)
-    .then(scanSettings
-
-        .preinit
-        .bind(scanSettings)
-    )
-;
-
+).then(scanSettings.preInit
+        .bind(scanSettings));
 spinAndWait(
     () => jq(
         '#releaseTypeSelectList'
