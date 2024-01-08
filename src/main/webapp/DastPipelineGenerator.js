@@ -353,7 +353,7 @@ class DastPipelineGenerator {
                 let at = this.assessments[k];
                 if (at !== null) {
                     if (at.assessmentCategory === 'DAST_Automated') {
-                        alert('found');
+
                         if (at.id) {
                             atsel.append(`<option value="${at.id}">${at.name}</option>`);
                         } else {
@@ -488,7 +488,6 @@ class DastPipelineGenerator {
                         //Enable scan Type right after assessment Type drop populated.
                         this.scanSettingsVisibility(true);
                         this.scanTypeVisibility(true);
-
                         validateRequiredFields(requiredFieldsPipeline);
 
                     } else {

@@ -7,8 +7,8 @@ const protoExtension = ["proto"];
 
 
 const requiredFieldsFreestyle = ['webSiteUrl',
-                                 'webSiteNetworkAuthUserName',
-                                 'webSiteNetworkAuthPassword',
+                                 'networkAuthUserName',
+                                 'networkAuthPassword',
                                  'openApiUrl',
                                  'graphQLUrl',
                                  'graphQLSchemeType',
