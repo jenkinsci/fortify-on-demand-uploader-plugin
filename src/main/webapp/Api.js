@@ -322,7 +322,6 @@ class Api {
 
                     if (res.responseJSON  && res.responseJSON.isSuccess ===true){
                     res.responseJSON.fileName = file.name;
-                    debugger;
                         return accept(res.responseJSON);
                         }
                     else

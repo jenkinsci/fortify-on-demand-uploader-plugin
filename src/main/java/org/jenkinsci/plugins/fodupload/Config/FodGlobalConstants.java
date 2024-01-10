@@ -42,6 +42,16 @@ public class FodGlobalConstants {
             public final  static  String DastScanNetworkAuthTypeNotFound = "Missing NetworkWork Authentication Type.";
             public final  static  String DastScanAPITypeNotFound = "Missing API Type.";
             public final  static  String DastScanOpenApiSourceNotFound = "Missing Open Api Source input.";
+            public final  static  String DastScanGrpcSourceNotFound = "Missing GRPC Source input.";
+            public final  static  String DastScanGraphQlSourceNotFound = "Missing GraphQL Source input.";
+            public final  static  String DastScanGraphQlServicePathNotFound = "Missing GraphQL Service Path input.";
+            public final  static  String DastScanGraphQlHostNotFound = "Missing GraphQL Host input.";
+            public final  static  String DastScanGraphQlSchemeTypeNotFound = "Missing GraphQL Scheme Type input.";
+            public final  static  String DastScanGrpcServicePathNotFound = "Missing GRPC Service Path input.";
+            public final  static  String DastScanGrpcHostNotFound = "Missing GRPC Host input.";
+            public final  static  String DastScanGrpcSchemeTypeNotFound = "Missing GRPC Scheme Type input.";
+            public final  static  String DastScanPostmanSourceNotFound = "Missing Postman Source input.";
+
         }
 
         public static class FodDastErrorMsg

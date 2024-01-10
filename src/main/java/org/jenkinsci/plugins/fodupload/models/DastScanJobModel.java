@@ -392,6 +392,7 @@ public class DastScanJobModel {
         this.networkAuthPassword = networkAuthPassword;
         this.selectedApi = selectedApiType;
         this.selectedOpenApiFileSource = openApiFileSource;
+        this.selectedOpenApiurl = openApiurl;
         this.selectedOpenApiSource = openApiSource;
         this.selectedApiKey = apiKey;
         this.selectedPostmanFile = postmanFile;

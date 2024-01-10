@@ -344,9 +344,9 @@
                                            id="openApiRadioSource"/>
                                 </f:entry>
                                 <div class="sourceDetails openApiSourceControls">
-                                    <div class="uploadedFileContainer">
+                                    <div class="uploadedFileContainer openApiUploadedFileContainer">
                                         <f:entry title="Uploaded File">
-                                            <div class="uploadedFileDetails"/>
+                                            <div class="uploadedFileDetails openApiFileDetails"/>
                                         </f:entry>
                                     </div>
                                     <div id="dast-openApi-filePath"
@@ -393,9 +393,9 @@
                         </f:entry>
                         <f:entry field="postman">
                             <div id="dast-postman" class="apiOptions fode-field spinner-container">
-                                <div class="uploadedFileContainer">
+                                <div class="uploadedFileContainer postmanUploadedFileContainer">
                                     <f:entry title="Uploaded File">
-                                        <div class="uploadedFileDetails"/>
+                                        <div class="uploadedFileDetails postmanFileDetails"/>
                                     </f:entry>
                                 </div>
                                 <div class="dastPipelineFilePath postmanFilePath fode-field spinner-container fodp-row-autoProv">
@@ -424,9 +424,9 @@
                                 </f:entry>
                                 <div class="sourceDetails graphQLSourceControls fodp-row-autoProv">
                                     <div class="dastPipelineFilePath graphQlFilePath fode-field spinner-container">
-                                        <div class="uploadedFileContainer">
+                                        <div class="uploadedFileContainer graphQlUploadedFileContainer">
                                             <f:entry title="Uploaded File">
-                                                <div class="uploadedFileDetails"/>
+                                                <div class="uploadedFileDetails graphQlFileDetails"/>
                                             </f:entry>
                                         </div>
                                         <f:entry
@@ -465,9 +465,9 @@
                         <f:entry field="grpc">
                             <div id="dast-grpc" class="apiOptions fode-field spinner-container">
                                 <div class="dastPipelineFilePath grpcFilePath fode-field spinner-container">
-                                    <div class="uploadedFileContainer">
+                                    <div class="uploadedFileContainer grpcUploadedFileContainer">
                                         <f:entry title="Uploaded File">
-                                            <div class="uploadedFileDetails"/>
+                                            <div class="uploadedFileDetails grpcFileDetails"/>
                                         </f:entry>
                                     </div>
                                     <div class="dastPipelineFilePath grpcFilePath fode-field spinner-container">
@@ -615,9 +615,9 @@
                                        id="loginMacroFileId"/>
 
                             </span>
-                            <div class="uploadedFileContainer">
+                            <div class="uploadedFileContainer loginMacroUploadedFileContainer">
                                 <f:entry title="Uploaded File">
-                                    <div class="uploadedFileDetails"/>
+                                    <div class="uploadedFileDetails loginMacroFileDetails"/>
                                 </f:entry>
                             </div>
                         </f:entry>

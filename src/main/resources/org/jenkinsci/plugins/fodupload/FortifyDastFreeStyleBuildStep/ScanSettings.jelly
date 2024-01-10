@@ -99,7 +99,7 @@
                     </f:entry>
                     <div class="sourceDetails openApiSourceControls">
                 <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileds">
-                    <div class="uploadedFileContainer"><f:entry title="Uploaded File"><div class="uploadedFileDetails"></div></f:entry>
+                    <div class="uploadedFileContainer openApiUploadedFileContainer"><f:entry title="Uploaded File"><div class="uploadedFileDetails openApiFileDetails"></div></f:entry>
                     </div><f:entry field="openApiFileSource" title="Please upload your OpenAPI specification json file. Supported extensions: *.json">
                             <span id="openApiUploadContainer" class="fode-field spinner-container uploadContainer" >
                                 <input accept=".json" id="openApiFile"  type="File" name="openApiFile" />
@@ -125,7 +125,7 @@
             </f:entry>
             <f:entry field="postman">
                 <div id="dast-postman" class="apiOptions fode-field spinner-container">
-                <div class="uploadedFileContainer"><f:entry title="Uploaded File"><div class="uploadedFileDetails"></div></f:entry>
+                <div class="uploadedFileContaine postmanUploadedFileContainer"><f:entry title="Uploaded File"><div class="uploadedFileDetails postmanFileDetails"></div></f:entry>
                 </div> <f:entry field="postmanFile" title="Please upload the Postman collection. Supported extensions: *.json">
                         <div id="dast-api-postman-upload" class="fode-field spinner-container sourceDetails">
                             <span id="postmanUploadContainer" class="fode-field spinner-container uploadContainer">
@@ -150,7 +150,7 @@
                     </f:entry>
                     <div class="sourceDetails graphQLSourceControls">
                 <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
-                    <div class="uploadedFileContainer"><f:entry title="Uploaded File"><div class="uploadedFileDetails"></div></f:entry>
+                    <div class="uploadedFileContainer graphQlUploadedFileContainer"><f:entry title="Uploaded File"><div class="uploadedFileDetails graphQlFileDetails"></div></f:entry>
                     </div><f:entry field="graphQlUpload" title="Please upload the introspection query schema file. Supported extensions: *.json">
                             <span id="graphQlUploadContainer" class="fode-field spinner-container uploadContainer" >
                                 <input accept=".json" id="graphQLFile"  type="File" name="graphQLFile" />
@@ -186,9 +186,9 @@
             </f:entry>
             <f:entry field="grpc">
                 <div id="dast-grpc" class="apiOptions fode-field spinner-container">
-                   <div class="uploadedFileContainer">
+                   <div class="uploadedFileContainer grpcUploadedFileContainer">
                        <div class="uploadedFileContainer"> <f:entry title="Uploaded File">
-                           <div class="uploadedFileDetails"></div></f:entry></div>
+                           <div class="uploadedFileDetails grpcFileDetails"></div></f:entry></div>
                    </div> <f:entry field="grpcupload" title="Please upload the proto file: *.proto">
                         <div id="dast-grpc-upload" class="fode-field spinner-container">
                             <span id="grpcUploadContainer" class="fode-field spinner-container uploadContainer" >
