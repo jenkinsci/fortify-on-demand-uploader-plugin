@@ -574,7 +574,8 @@ class DastFreeStyle {
         if (this.scanSettings && this.scanSettings.networkAuthenticationSettings) {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
             jq('#networkPasswordRow').find('input').val(this.scanSettings.networkAuthenticationSettings.password);
-            if (jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').prop('checked') === false) {
+            if (jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').prop('checked') === false &&
+                this.scanSettings.networkAuthenticationSettings.password) {
                 jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
             }
             let np = jq('#networkPasswordRow').find('input');
@@ -586,7 +587,10 @@ class DastFreeStyle {
         jq('#networkUsernameRow').find('input').val(undefined);
         jq('#networkPasswordRow').find('input').val(undefined);
         jq('#ddlNetworkAuthType').prop('selectedIndex', 0);
-        jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
+
+        let ctl = jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first')
+        if(ctl.prop('checked') === true)
+          ctl.trigger('click');
     }
 
     setScanType() {
