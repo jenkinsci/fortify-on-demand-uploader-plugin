@@ -535,6 +535,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
 
 
+
     public final void SaveScanSettings(FilePath workspace, PrintStream logger, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
 
         if (dastScanSharedBuildStep == null) {
@@ -868,23 +869,23 @@ public class FortifyDastPipeline extends FortifyStep {
     private void saveApiScanSettings(FilePath workspace, PrintStream printStream, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
 
         //TodO:-Change to switch
-
+        String sourceUrn = null;
         if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
+            if(FodEnums.ApiSourceType.valueOf(openApiRadioSource) == FodEnums.ApiSourceType.FileId) {
+                PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.openApiFilePath,
+                        printStream, FodEnums.DastScanFileTypes.OpenAPIDefinition , dastScanSharedBuildStep.getFodApiConnection());
 
-            PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.openApiFilePath,
-                    printStream, FodEnums.DastScanFileTypes.OpenAPIDefinition , dastScanSharedBuildStep.getFodApiConnection());
+                if (response == null || !response.isSuccess || response.fileId <= 0) {
 
-            if (response == null || !response.isSuccess || response.fileId <= 0) {
+                    throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
+                }
 
-                Utils.logger(printStream,
-                        String.format("Failed to upload payload for release Id %s", releaseId));
-
-                throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
+                sourceUrn = String.valueOf(response.fileId);
+            }
+            else {
+                sourceUrn = openApiUrl;
             }
 
-            openApiFileId = String.valueOf(response.fileId);
-
-            String sourceUrn = openApiRadioSource.equals("Url") ? openApiUrl : openApiFileId;
 
             dastScanSharedBuildStep.saveReleaseSettingsForOpenApiScan(releaseId, assessmentTypeId, entitlementId,
                     entitlementFrequency, selectedDynamicTimeZone,
@@ -893,23 +894,27 @@ public class FortifyDastPipeline extends FortifyStep {
                     openApiRadioSource, sourceUrn, openApiKey);
 
         } else if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
+            if(FodEnums.ApiSourceType.valueOf(graphQlRadioSource) == FodEnums.ApiSourceType.FileId) {
+                FilePath patchPayload = new FilePath(workspace, this.graphQLFilePath);
 
-            FilePath patchPayload = new FilePath(workspace, this.graphQLFilePath);
+                if (!patchPayload.exists()) {
 
-            if (!patchPayload.exists()) {
 
-                printStream.printf("FilePath for the Payload not constructed for releaseId %s%n", releaseId);
-                throw new Exception(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
+                    throw new Exception(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
+                }
+
+                PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.graphQLFilePath,
+                        printStream, FodEnums.DastScanFileTypes.GraphQLDefinition, dastScanSharedBuildStep.getFodApiConnection());
+
+                if (response == null || !response.isSuccess || response.fileId <= 0) {
+                    throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
+                }
+                sourceUrn = String.valueOf(response.fileId);
             }
+            else{
 
-            PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.graphQLFilePath,
-                    printStream, FodEnums.DastScanFileTypes.GraphQLDefinition, dastScanSharedBuildStep.getFodApiConnection());
-
-            if (response == null || !response.isSuccess || response.fileId <= 0) {
-                throw new Exception(String.format("Failed to upload payload for release Id %s", releaseId));
+                sourceUrn = graphQLUrl;
             }
-            graphQLFileId = String.valueOf(response.fileId);
-            String sourceUrn = graphQlRadioSource.equals("Url") ? graphQLUrl : graphQLFileId;
             dastScanSharedBuildStep.SaveReleaseSettingsForGraphQlScan(releaseId, assessmentTypeId, entitlementId,
                     entitlementFrequency, selectedDynamicTimeZone,
                     enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),

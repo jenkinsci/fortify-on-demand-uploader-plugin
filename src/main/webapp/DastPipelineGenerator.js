@@ -475,7 +475,6 @@ class DastPipelineGenerator {
                         this.setTimeBoxScan();
                         this.setWorkflowDrivenScanSetting();
                         this.setApiScanSetting();
-                        this.setUploadedFileDetails();
                         /*Set restrict scan value from response to UI */
                         this.setRestrictScan();
                         /*Set network settings from response. */
@@ -829,6 +828,7 @@ class DastPipelineGenerator {
             apiScanSettingRows.hide();
         } else {
             apiScanSettingRows.show();
+            validateDropdown('#apiTypeList');
         }
     }
 
@@ -1145,17 +1145,15 @@ class DastPipelineGenerator {
         jq('#dast-openApi-api-key input').val(openApiSettings.apiKey);
         if (openApiSettings.sourceType === 'Url') {
             jq('#dast-openApi-url input').val(openApiSettings.sourceUrn);
-        } else {
-            //ToDo : Write code for showing file name
         }
-    }
-
-    setUploadedFileDetails() {
-        if (this.scanSettings.fileDetails) {
-            this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                var a = closestRow('.uploadContainer');
-                jq('.uploadedFileDetails').text(item.fileName);
-            });
+        else if(openApiSettings.sourceType === 'FileId') {
+           if (this.scanSettings && this.scanSettings.fileDetails) {
+               this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                   jq('.openApiFileDetails').text(item.fileName);
+                   jq('#openApiFileId').val(item.fileId);
+                   jq('.uploadedFileContainer').show();
+               });
+           }
         }
     }
 
@@ -1169,14 +1167,28 @@ class DastPipelineGenerator {
         jq('#dast-graphQL-schemeType input').val(graphQlSettings.schemeType);
         if (graphQlSettings.sourceType === 'Url') {
             jq('#dast-graphQL-url input').val(graphQlSettings.sourceUrn);
-        } else {
-            //ToDo : Write code for showing file name
+        }
+        else if(graphQlSettings.sourceType === 'FileId') {
+            if (this.scanSettings && this.scanSettings.fileDetails) {
+               this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                   jq('.graphQlFileDetails').text(item.fileName);
+                   jq('#graphQLFileId').val(item.fileId);
+                   jq('.uploadedFileContainer').show();
+               });
+           }
         }
     }
 
     setGrpcSettings(grpcSettings) {
         jq('#apiTypeList').val('grpc');
         this.onApiTypeChanged();
+            if (this.scanSettings && this.scanSettings.fileDetails) {
+               this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                   jq('.grpcFileDetails').text(item.fileName);
+                   jq('#grpcFileId').val(item.fileId);
+                   jq('.uploadedFileContainer').show();
+               });
+           }
         jq('#dast-grpc-api-host input').val(grpcSettings.host);
         jq('#dast-grpc-api-servicePath input').val(grpcSettings.servicePath);
         jq('#dast-grpc-schemeType input').val(grpcSettings.schemeType);
@@ -1185,6 +1197,13 @@ class DastPipelineGenerator {
     setPostmanSettings(postmanSettings) {
         jq('#apiTypeList').val('postman');
         this.onApiTypeChanged();
+        if (this.scanSettings && this.scanSettings.fileDetails) {
+           this.scanSettings.fileDetails.forEach((item, index, arr) => {
+               jq('.postmanFileDetails').text(item.fileName);
+               jq('#openApiFileId').val(item.fileId);
+               jq('.uploadedFileContainer').show();
+           });
+       }
     }
 
     apiTypeUserControlVisibility(apiType, isVisible) {
@@ -1219,57 +1238,50 @@ class DastPipelineGenerator {
     openApiScanVisibility(isVisible) {
         if (isVisible)
             jq('#dast-openApi').closest('.tr').show();
-        else
+        else{
             jq('#dast-openApi').closest('.tr').hide();
 
         jq('#dast-postman').closest('.tr').hide();
         jq('#dast-graphQL').closest('.tr').hide();
         jq('#dast-grpc').closest('.tr').hide();
+        }
     }
 
     graphQlScanVisibility(isVisible) {
         if (isVisible)
             jq('#dast-graphQL').closest('.tr').show();
-        else
+        else{
             jq('#dast-graphQL').closest('.tr').hide();
 
         jq('#dast-openApi').closest('.tr').hide()
         jq('#dast-postman').closest('.tr').hide();
         jq('#dast-grpc').closest('.tr').hide();
+        }
     }
 
     grpcScanVisibility(isVisible) {
         if (isVisible)
             jq('#dast-grpc').closest('.tr').show();
-        else
-            jq('#dast-grpc').closest('.tr').hide();
+        else{
+        jq('#dast-grpc').closest('.tr').hide();
         jq('#dast-openApi').closest('.tr').hide()
         jq('#dast-postman').closest('.tr').hide();
         jq('#dast-graphQL').closest('.tr').hide();
+        }
     }
 
     postmanScanVisibility(isVisible) {
-        if (isVisible)
+        if (isVisible){
             jq('#dast-postman').closest('.tr').show();
-        else
+            jq('.postmanFilePath').show();
+            }
+        else{
             jq('#dast-postman').closest('.tr').hide();
         jq('#dast-openApi').closest('.tr').hide()
         jq('#dast-graphQL').closest('.tr').hide();
         jq('#dast-grpc').closest('.tr').hide();
-    }
-
-    apiScanSettingVisibility(isVisible) {
-        let apiScanSettingRows = jq('.dast-api-setting');
-        jq('.dast-api-specific-controls').hide();
-        if (!isVisible) {
-            apiScanSettingRows.hide();
-
-        } else {
-            apiScanSettingRows.show();
-            validateDropdown('#apiTypeList');
         }
     }
-
     onFileUpload(event) {
         jq('.uploadMessage').text('');
         let file = null;
@@ -1361,9 +1373,11 @@ class DastPipelineGenerator {
             jq('.openApiSourceControls').show()
             jq('#dast-api-openApi-upload').hide();
             jq('#dast-openApi-filePath').show();
+            jq('#dast-openApi-api-key').show();
             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
         } else if (id === 'openApiInputUrl') {
             jq('.openApiSourceControls').show()
+            jq('#dast-openApi-api-key').show();
             jq('#dast-openApi-url').show();
             jq('#openApiRadioSource').val(jq('#' + event.target.id).val());
         } else if (id === 'graphQlInputFile') {
