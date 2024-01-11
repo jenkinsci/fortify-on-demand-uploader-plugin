@@ -381,6 +381,7 @@ class DastPipelineGenerator {
 
         } else if (rs === '2') {
             this.hideMessages();
+            validateTextbox('#autoProvOwner');
             if (!await this.retrieveCurrentSession()) {
                 this.showMessage('Failed to retrieve auth data');
                 return;
@@ -514,9 +515,10 @@ class DastPipelineGenerator {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
             jq('#networkPasswordRow').find('input')
                 .val(this.scanSettings.networkAuthenticationSettings.password);
-            if (jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').prop('checked') === false) {
+            if (jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').prop('checked') === false &&
+            this.scanSettings.networkAuthenticationSettings.userName) {
                 jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
-            }
+               }
             let np = jq('#networkPasswordRow').find('input');
             np.attr('type', 'password');
         }
@@ -858,7 +860,10 @@ class DastPipelineGenerator {
         jq('#networkUsernameRow').find('input').val(undefined);
         jq('#networkPasswordRow').find('input').val(undefined);
         jq('#ddlNetworkAuthType').prop('selectedIndex', 0);
-        jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
+
+        let ctl = jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first');
+        if(ctl.prop('checked') === true)
+            ctl.trigger('click');
     }
 
     onLoadTimeZone() {

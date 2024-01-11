@@ -34,9 +34,11 @@ const requiredFieldsPipeline = ['webSiteUrl',
 
 
      function setOnblurEventForFreestyle () {
-             //website ,workflow-driven scan, Network Authentication, Timebox fields
-             jq('[name="webSiteUrl"], [name="webSiteNetworkAuthUserName"], [name="webSiteNetworkAuthPassword"], [name="scanTimeBox"]')
+             //website ,workflow-driven scan, Network Authentication
+             jq('[name="webSiteUrl"], [name="networkAuthUserName"], [name="networkAuthPassword"]')
                 .blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
+
+             jq('[name="scanTimeBox"]').blur(_ => this.validateTimeboxScan("[name='" + event.target.name + "']"));
 
              //openApi fields
              jq('[name="openApiUrl"]').blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
@@ -51,9 +53,11 @@ const requiredFieldsPipeline = ['webSiteUrl',
      }
 
      function setOnblurEventForPipeline () {
-             //website ,workflow-driven scan, Network Authentication, Timebox fields
-             jq('[name="webSiteUrl"], [name="networkAuthUserName"], [name="networkAuthPassword"], [name="scanTimeBox"]')
+             //website ,workflow-driven scan, Network Authentication
+             jq('[name="webSiteUrl"], [name="networkAuthUserName"], [name="networkAuthPassword"]')
                 .blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
+
+             jq('[name="scanTimeBox"]').blur(_ => this.validateTimeboxScan("[name='" + event.target.name + "']"));
 
              //openApi fields
              jq('[name="openApiUrl"]').blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
@@ -70,6 +74,8 @@ const requiredFieldsPipeline = ['webSiteUrl',
              jq('[name="postmanFilePath"], [name="openApiFilePath"], [name="graphQLFilePath"]').blur(_ => this.validateFileExtension("[name='" + event.target.name + "']", jsonExtension));
 
              jq('[name="grpcFilePath"]').blur(_ => this.validateFileExtension("[name='" + event.target.name + "']", protoExtension));
+
+             jq('#autoProvOwner').blur(_ => this.validateTextbox('#autoProvOwner'));
           }
 
      function handleUploadStatusMessage (id, message, success) {
@@ -140,6 +146,17 @@ const requiredFieldsPipeline = ['webSiteUrl',
                ctl.show();
         }
      }
+     function validateTimeboxScan (id) {
+        var value= jq(id).val();
+        if(value.length == 0 ) {
+            jq(id).addClass('req-field');
+        }
+        else if( isNaN(value) || (value <= 0 || value > 24)) {
+                jq(id).addClass('req-field');
+         }
+        else
+             jq(id).removeClass('req-field');
+        }
 
 
 

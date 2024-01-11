@@ -38,6 +38,7 @@ public class DastScanSharedBuildStep {
     public static final String USERNAME = "username";
     public static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
     public static final String TENANT_ID = "tenantId";
+    public static final String BSI_TOKEN = "useBsiToken";
     private int scanId;
     private PrintStream _printStream;
 
@@ -945,7 +946,8 @@ public class DastScanSharedBuildStep {
     public static ListBoxModel doFillSelectedReleaseTypeItems() {
         ListBoxModel items = new ListBoxModel();
         for (FodEnums.SelectedReleaseType selectedReleaseType : FodEnums.SelectedReleaseType.values()) {
-            items.add(new ListBoxModel.Option(selectedReleaseType.toString(), selectedReleaseType.getValue()));
+            if(!selectedReleaseType.getValue().equalsIgnoreCase(BSI_TOKEN))
+              items.add(new ListBoxModel.Option(selectedReleaseType.toString(), selectedReleaseType.getValue()));
         }
         return items;
     }
