@@ -176,7 +176,6 @@ class DastFreeStyle {
         }
     }
 
-   //1
     apiScanSettingVisibility(isVisible) {
         jq('.dast-api-scan').each((iterator, element) => {
             let currentElement = jq(element);
