@@ -71,7 +71,7 @@
         padding-left: 10px;
         padding-right: 10px;
         }
-        .warning-msg{
+        .reqFalsePositiveWarn{
         color:red;
         }
     </style>
@@ -246,7 +246,7 @@
         <f:entry>
             <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv" id="requestFalsePositiveRemovalRow">
                 <f:checkbox title="Request False Positive Removal" field="requestFalsePositiveRemoval"></f:checkbox>
-                <div class="warning-msg">This service consumes 1 assessment unit. One or both of login macro generation and false positive removal consume a total of 1 assessment unit.</div>
+                <div class="reqFalsePositiveWarn">This service consumes 1 assessment unit. One or both of login macro generation and false positive removal consume a total of 1 assessment unit.</div>
             </div>
         </f:entry>
 
@@ -505,7 +505,7 @@
 
 
             <f:entry title="Scan Policy">
-                <div id="dast-standard-scan-policy" class="fode-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+                <div id="dast-standard-scan-policy" class="fode-field spinner-container fodp-row-autoProv">
                     <select name="scanPolicy" id="scanPolicy">
                         <option value="Standard">Standard</option>
                         <option value="CriticalsAndHighs">Critical And Highs</option>
@@ -570,7 +570,7 @@
                 <f:optionalBlock name="requestLoginMacroFileCreation" field="requestLoginMacroFileCreation"
                                  title="Request Login Macro File Creation"
                                  checked="${instance.requestLoginMacroFileCreation}" inline="true">
-                    <div class="warning-msg">This service consumes 1 assessment unit. One or both of login macro generation and false positive removal consume a total of 1 assessment unit.</div>
+
                     <f:entry title="Primary Username">
                         <div id="loginMacroPrimaryUsernameRow">
                             <f:textbox name="loginMacroPrimaryUserName"/>

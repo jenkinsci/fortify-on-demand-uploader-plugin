@@ -55,9 +55,6 @@
         padding-left: 10px;
         padding-right: 10px;
         }
-        .warning-msg{
-        color:red;
-        }
     </style>
 
     <st:adjunct includes="io.jenkins.plugins.jquery3"/>
