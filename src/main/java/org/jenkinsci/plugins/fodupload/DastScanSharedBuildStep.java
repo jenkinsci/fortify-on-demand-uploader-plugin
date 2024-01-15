@@ -412,16 +412,18 @@ public class DastScanSharedBuildStep {
                 dynamicScanSetupReqModel.setNetworkAuthenticationSettings(networkSetting);
             }
 
-            if (loginMacroPrimaryUserName != null && !loginMacroPrimaryUserName.isEmpty() &&
-                    loginMacroPrimaryPassword != null && !loginMacroPrimaryPassword.isEmpty()
-                    && loginMacroSecondaryUsername != null && !loginMacroSecondaryUsername.isEmpty() &&
-                    loginMacroSecondaryPassword != null && !loginMacroSecondaryPassword.isEmpty()) {
+            if (isNullOrEmpty(loginMacroPrimaryUserName)&&
+                    isNullOrEmpty(loginMacroPrimaryPassword) &&
+                    isNullOrEmpty(loginMacroSecondaryUsername) &&
+                    isNullOrEmpty(loginMacroSecondaryPassword)) {
                 dynamicScanSetupReqModel.setRequestLoginMacroFileCreation(true);
+                dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
                 LoginMacroFileCreationDetails loginMacroDetails = new LoginMacroFileCreationDetails();
                 loginMacroDetails.setPrimaryUsername(loginMacroPrimaryUserName);
                 loginMacroDetails.setPrimaryPassword(loginMacroPrimaryPassword);
                 loginMacroDetails.setSecondaryUsername(loginMacroSecondaryUsername);
                 loginMacroDetails.setSecondaryPassword(loginMacroSecondaryPassword);
+
                 dynamicScanSetupReqModel.setLoginMacroFileCreationDetails(loginMacroDetails);
             }
 

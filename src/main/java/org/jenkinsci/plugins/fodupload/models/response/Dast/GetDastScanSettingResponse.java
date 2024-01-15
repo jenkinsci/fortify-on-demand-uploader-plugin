@@ -66,14 +66,7 @@ public class GetDastScanSettingResponse {
 
     public boolean requestLoginMacroFileConfiguration;
 
-    public loginMacroFileConfigurationDetails  loginMacroFileConfigurationDetails;
 
-    public class loginMacroFileConfigurationDetails{
-        public  String primaryUsername;
-        public String primaryPassword;
-        public String secondaryUsername;
-        public String secondaryPassword;
-    }
 
     public class  FileDetails{
         public int fileId;
