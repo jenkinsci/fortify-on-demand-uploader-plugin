@@ -34,7 +34,7 @@ const requiredFieldsPipeline = ['webSiteUrl',
 
 
      function setOnblurEventForFreestyle () {
-             //website ,workflow-driven scan, Network Authentication
+             //website ,workflow-driven scan, Network Authentication, Timebox fields
              jq('[name="webSiteUrl"], [name="networkAuthUserName"], [name="networkAuthPassword"]')
                 .blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
 
@@ -53,7 +53,7 @@ const requiredFieldsPipeline = ['webSiteUrl',
      }
 
      function setOnblurEventForPipeline () {
-             //website ,workflow-driven scan, Network Authentication
+             //website ,workflow-driven scan, Network Authentication, Timebox fields
              jq('[name="webSiteUrl"], [name="networkAuthUserName"], [name="networkAuthPassword"]')
                 .blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
 

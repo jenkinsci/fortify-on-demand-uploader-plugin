@@ -7,6 +7,7 @@
  * @param {string|Object} selector
  * at_return {jQueryExtended}
  * */
+
 /** @type {jQueryFunc} */
 const jq = jQuery;
 

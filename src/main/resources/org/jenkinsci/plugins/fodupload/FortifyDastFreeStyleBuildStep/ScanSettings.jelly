@@ -61,9 +61,12 @@
             </f:entry>
 
             <f:entry>
-                <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv" id="requestFalsePositiveRemovalRow">
+                <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv"
+                     id="requestFalsePositiveRemovalRow">
                     <f:checkbox title="Request False Positive Removal" field="requestFalsePositiveRemoval"></f:checkbox>
-                    <div class="reqFalsePositiveWarn">This service consumes 1 assessment unit. One or both of login macro generation and false positive removal consume a total of 1 assessment unit.</div>
+                    <div class="reqFalsePositiveWarn">This service consumes 1 assessment unit. One or both of login
+                        macro generation and false positive removal consume a total of 1 assessment unit.
+                    </div>
                 </div>
             </f:entry>
 
@@ -71,171 +74,205 @@
     </f:section>
     <!-- API Section -->
 
-    <f:section title="APIs" >
+    <f:section title="APIs">
         <f:block>
-        <div class="dast-api-setting" id="dast-api-scan-block">
-            <f:entry field="apiType">
-                <div id="dast-api-scan" class="fode-field spinner-container">
-                    <div class="fode-edit jenkins-select">
-                        <select name="selectedApiType" id="apiTypeList" class="jenkins-select__input">
-                            <option value="-1">Select a API Type</option>
-                            <option value="openApi">OpenAPI</option>
-                            <option value="graphQl">GraphQL</option>
-                            <option value="grpc">GRPC</option>
-                            <option value="postman">Postman</option>
-                        </select>
+            <div class="dast-api-setting" id="dast-api-scan-block">
+                <f:entry field="apiType">
+                    <div id="dast-api-scan" class="fode-field spinner-container">
+                        <div class="fode-edit jenkins-select">
+                            <select name="selectedApiType" id="apiTypeList" class="jenkins-select__input">
+                                <option value="-1">Select a API Type</option>
+                                <option value="openApi">OpenAPI</option>
+                                <option value="graphQl">GraphQL</option>
+                                <option value="grpc">GRPC</option>
+                                <option value="postman">Postman</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-            </f:entry>
-            <div class="dast-api-specific-controls">
-            <f:entry field="openApi">
-                <div id="dast-openApi" class="apiOptions fode-field spinner-container">
-                    <f:entry field="openApiSource" >
-                    <input type="radio" class="sourceOptions openApi_file" id="openApiInputFile" name="openApiInput" value="FileId"/>
-                    <label for="openApiInputFile">File</label>
-                    <input type="radio" class="sourceOptions openApi_url" id="openApiInputUrl" name="openApiInput" value="Url"/>
-                    <label for="openApiInputUrl">URL to the OpenAPI specification</label>
-                            <input type="label" hidden="true" name="openApiRadioSource" id="openApiRadioSource"></input>
-                    </f:entry>
-                    <div class="sourceDetails openApiSourceControls">
-                <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileds">
-                    <div class="uploadedFileContainer openApiUploadedFileContainer"><f:entry title="Uploaded File"><div class="uploadedFileDetails openApiFileDetails"></div></f:entry>
-                    </div><f:entry field="openApiFileSource" title="Please upload your OpenAPI specification json file. Supported extensions: *.json">
-                            <span id="openApiUploadContainer" class="fode-field spinner-container uploadContainer" >
-                                <input accept=".json" id="openApiFile"  type="File" name="openApiFile" />
-                                <input type="button" value="Upload" id="btnUploadOpenApiFile" class="dastFileUploadButton"/>
-                                <h6 id="openApiUploadMessage" hidden="true" class="uploadMessage"></h6>
-                                <input type="label" hidden="true"  name="openApiFileId" id="openApiFileId"/>
-                            </span>
-                    </f:entry>
-                </div>
-                <div id="dast-openApi-url" class="fode-field spinner-container sourceTypeFileds">
-                    <f:entry field="openApiUrlSource" title="Please provide a URL to your OpenAPI specification">
-                            <f:textbox field="openApiurl" name="openApiUrl"/>
-                    </f:entry>
-                </div>
+                </f:entry>
+                <div class="dast-api-specific-controls">
+                    <f:entry field="openApi">
+                        <div id="dast-openApi" class="apiOptions fode-field spinner-container">
+                            <f:entry field="openApiSource">
+                                <input type="radio" class="sourceOptions openApi_file" id="openApiInputFile"
+                                       name="openApiInput" value="FileId"/>
+                                <label for="openApiInputFile">File</label>
+                                <input type="radio" class="sourceOptions openApi_url" id="openApiInputUrl"
+                                       name="openApiInput" value="Url"/>
+                                <label for="openApiInputUrl">URL to the OpenAPI specification</label>
+                                <input type="label" hidden="true" name="openApiRadioSource"
+                                       id="openApiRadioSource"></input>
+                            </f:entry>
+                            <div class="sourceDetails openApiSourceControls">
+                                <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileds">
+                                    <div class="uploadedFileContainer openApiUploadedFileContainer">
+                                        <f:entry title="Uploaded File">
+                                            <div class="uploadedFileDetails openApiFileDetails"></div>
+                                        </f:entry>
+                                    </div>
+                                    <f:entry field="openApiFileSource"
+                                             title="Please upload your OpenAPI specification json file. Supported extensions: *.json">
+                                        <span id="openApiUploadContainer"
+                                              class="fode-field spinner-container uploadContainer">
+                                            <input accept=".json" id="openApiFile" type="File" name="openApiFile"/>
+                                            <input type="button" value="Upload" id="btnUploadOpenApiFile"
+                                                   class="dastFileUploadButton"/>
+                                            <h6 id="openApiUploadMessage" hidden="true" class="uploadMessage"></h6>
+                                            <input type="label" hidden="true" name="openApiFileId" id="openApiFileId"/>
+                                        </span>
+                                    </f:entry>
+                                </div>
+                                <div id="dast-openApi-url" class="fode-field spinner-container sourceTypeFileds">
+                                    <f:entry field="openApiUrlSource"
+                                             title="Please provide a URL to your OpenAPI specification">
+                                        <f:textbox field="openApiurl" name="openApiUrl"/>
+                                    </f:entry>
+                                </div>
 
-                    <f:entry field="apikey" title="API Key">
-                        <div id="dast-openApi-api-key" class="fode-field spinner-container">
-                            <f:textbox field="openApiKey" name="openApiKey"/>
+                                <f:entry field="apikey" title="API Key">
+                                    <div id="dast-openApi-api-key" class="fode-field spinner-container">
+                                        <f:textbox field="openApiKey" name="openApiKey"/>
+                                    </div>
+                                </f:entry>
+                            </div>
                         </div>
                     </f:entry>
-                    </div>
-                </div>
-            </f:entry>
-            <f:entry field="postman">
-                <div id="dast-postman" class="apiOptions fode-field spinner-container">
-                <div class="uploadedFileContaine postmanUploadedFileContainer"><f:entry title="Uploaded File"><div class="uploadedFileDetails postmanFileDetails"></div></f:entry>
-                </div> <f:entry field="postmanFile" title="Please upload the Postman collection. Supported extensions: *.json">
-                        <div id="dast-api-postman-upload" class="fode-field spinner-container sourceDetails">
-                            <span id="postmanUploadContainer" class="fode-field spinner-container uploadContainer">
-                                <input accept=".json" id="postmanFile"  type="File" name="postmanFile" />
-                                <input type="button" value="Upload" id="btnUploadPostmanFile" class="dastFileUploadButton"/>
-                                <h6 id="postmanUploadMessage" hidden="true" class="uploadMessage"></h6>
-                                <input type="label" hidden="true" name="postmanFileId" id="postmanFileId"/>
-                            </span>
-                        </div>
-                    </f:entry>
+                    <f:entry field="postman">
+                        <div id="dast-postman" class="apiOptions fode-field spinner-container">
+                            <div class="uploadedFileContaine postmanUploadedFileContainer">
+                                <f:entry title="Uploaded File">
+                                    <div class="uploadedFileDetails postmanFileDetails"></div>
+                                </f:entry>
+                            </div>
+                            <f:entry field="postmanFile"
+                                     title="Please upload the Postman collection. Supported extensions: *.json">
+                                <div id="dast-api-postman-upload" class="fode-field spinner-container sourceDetails">
+                                    <span id="postmanUploadContainer"
+                                          class="fode-field spinner-container uploadContainer">
+                                        <input accept=".json" id="postmanFile" type="File" name="postmanFile"/>
+                                        <input type="button" value="Upload" id="btnUploadPostmanFile"
+                                               class="dastFileUploadButton"/>
+                                        <h6 id="postmanUploadMessage" hidden="true" class="uploadMessage"></h6>
+                                        <input type="label" hidden="true" name="postmanFileId" id="postmanFileId"/>
+                                    </span>
+                                </div>
+                            </f:entry>
 
-                </div>
-            </f:entry>
-            <f:entry field="graphQL">
-                <div id="dast-graphQL" class="apiOptions fode-field spinner-container">
-                    <f:entry field="graphQlSource">
-                    <input type="radio" class="sourceOptions graphql_file" id="graphQlInputFile" name="graphQlInput" value="FileId"/>
-                    <label for="graphQlFile">File</label>
-                    <input type="radio" class="sourceOptions graphQl_url" id="graphQlInputUrl" name="graphQlInput" value="Url"/>
-                    <label for="graphQlUrl">URL</label>
-                        <input type="label" hidden="true" name="graphQlRadioSource" id="graphQlRadioSource"></input>
+                        </div>
                     </f:entry>
-                    <div class="sourceDetails graphQLSourceControls">
-                <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
-                    <div class="uploadedFileContainer graphQlUploadedFileContainer"><f:entry title="Uploaded File"><div class="uploadedFileDetails graphQlFileDetails"></div></f:entry>
-                    </div><f:entry field="graphQlUpload" title="Please upload the introspection query schema file. Supported extensions: *.json">
-                            <span id="graphQlUploadContainer" class="fode-field spinner-container uploadContainer" >
-                                <input accept=".json" id="graphQLFile"  type="File" name="graphQLFile" />
-                                <input type="button" value="Upload" id="btnUploadgraphQLFile"/>
-                                <h6 id="graphQlUploadMessage" hidden="true" class="uploadMessage"></h6>
-                                <input type="label" hidden="true" name="graphQLFileId" id="graphQLFileId"/>
-                            </span>
-                    </f:entry>
-                </div>
-                <div id="dast-graphQL-url" class="fode-field spinner-container sourceTypeFileds">
-                    <f:entry field="graphQlUrl" title="GraphQL uses an introspection to query the schema hence introspection needs to be turned on.">
-                            <f:textbox field="graphQLurl" name="graphQLUrl"/>
-                    </f:entry>
-                </div>
+                    <f:entry field="graphQL">
+                        <div id="dast-graphQL" class="apiOptions fode-field spinner-container">
+                            <f:entry field="graphQlSource">
+                                <input type="radio" class="sourceOptions graphql_file" id="graphQlInputFile"
+                                       name="graphQlInput" value="FileId"/>
+                                <label for="graphQlFile">File</label>
+                                <input type="radio" class="sourceOptions graphQl_url" id="graphQlInputUrl"
+                                       name="graphQlInput" value="Url"/>
+                                <label for="graphQlUrl">URL</label>
+                                <input type="label" hidden="true" name="graphQlRadioSource"
+                                       id="graphQlRadioSource"></input>
+                            </f:entry>
+                            <div class="sourceDetails graphQLSourceControls">
+                                <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
+                                    <div class="uploadedFileContainer graphQlUploadedFileContainer">
+                                        <f:entry title="Uploaded File">
+                                            <div class="uploadedFileDetails graphQlFileDetails"></div>
+                                        </f:entry>
+                                    </div>
+                                    <f:entry field="graphQlUpload"
+                                             title="Please upload the introspection query schema file. Supported extensions: *.json">
+                                        <span id="graphQlUploadContainer"
+                                              class="fode-field spinner-container uploadContainer">
+                                            <input accept=".json" id="graphQLFile" type="File" name="graphQLFile"/>
+                                            <input type="button" value="Upload" id="btnUploadgraphQLFile"/>
+                                            <h6 id="graphQlUploadMessage" hidden="true" class="uploadMessage"></h6>
+                                            <input type="label" hidden="true" name="graphQLFileId" id="graphQLFileId"/>
+                                        </span>
+                                    </f:entry>
+                                </div>
+                                <div id="dast-graphQL-url" class="fode-field spinner-container sourceTypeFileds">
+                                    <f:entry field="graphQlUrl"
+                                             title="GraphQL uses an introspection to query the schema hence introspection needs to be turned on.">
+                                        <f:textbox field="graphQLurl" name="graphQLUrl"/>
+                                    </f:entry>
+                                </div>
 
-                    </div>
-                    <f:entry title="Scheme Type">
-                        <div id="dast-graphQL-schemeType" class="fode-field spinner-container" >
-                            <f:textbox field="graphQLSchemeType" name="graphQLSchemeType"/>
+                            </div>
+                            <f:entry title="Scheme Type">
+                                <div id="dast-graphQL-schemeType" class="fode-field spinner-container">
+                                    <f:textbox field="graphQLSchemeType" name="graphQLSchemeType"/>
+                                </div>
+                            </f:entry>
+                            <f:entry title="API Host">
+                                <div id="dast-graphQL-api-host" class="fode-field spinner-container">
+                                    <f:textbox field="graphQlApiHost" name="graphQlApiHost"/>
+                                </div>
+                            </f:entry>
+                            <f:entry title="API ServicePath">
+                                <div id="dast-graphQL-api-servicePath" class="fode-field spinner-container">
+                                    <f:textbox field="graphQlApiServicePath" name="graphQlApiServicePath"/>
+                                </div>
+                            </f:entry>
                         </div>
                     </f:entry>
-                    <f:entry title="API Host">
-                        <div id="dast-graphQL-api-host" class="fode-field spinner-container">
-                            <f:textbox field="graphQlApiHost" name="graphQlApiHost"/>
-                        </div>
-                    </f:entry>
-                    <f:entry title="API ServicePath">
-                        <div id="dast-graphQL-api-servicePath" class="fode-field spinner-container">
-                            <f:textbox field="graphQlApiServicePath" name="graphQlApiServicePath"/>
+                    <f:entry field="grpc">
+                        <div id="dast-grpc" class="apiOptions fode-field spinner-container">
+                            <div class="uploadedFileContainer grpcUploadedFileContainer">
+                                <div class="uploadedFileContainer">-->
+                                   <f:entry title="Uploaded File">-->
+                                       <div class="uploadedFileDetails grpcFileDetails"></div>-->
+                                  </f:entry>-->
+                               </div>-->
+                            </div>
+                            <f:entry field="grpcupload" title="Please upload the proto file: *.proto">
+                                <div id="dast-grpc-upload" class="fode-field spinner-container">
+                                    <span id="grpcUploadContainer" class="fode-field spinner-container uploadContainer">
+                                        <input accept=".proto" id="grpcFile" type="File" name="grpcFile"/>
+                                        <input type="button" value="Upload" id="btnUploadgrpcFile"
+                                               class="dastFileUploadButton"/>
+                                        <h6 id="grpcUploadMessage" hidden="true" class="uploadMessage"></h6>
+                                        <input type="label" hidden="true" name="grpcFileId" id="grpcFileId"/>
+                                    </span>
+                                </div>
+                            </f:entry>
+                            <f:entry title="SchemeType">
+                                <div id="dast-grpc-schemeType" class="fode-field spinner-container">
+                                    <f:textbox field="grpcSchemeType" name="grpcSchemeType"/>
+                                </div>
+                            </f:entry>
+                            <f:entry title="API Host">
+                                <div id="dast-grpc-api-host" class="fode-field spinner-container">
+                                    <f:textbox field="grpcApiHost" name="grpcApiHost"/>
+                                </div>
+                            </f:entry>
+                            <f:entry title="API ServicePath">
+                                <div id="dast-grpc-api-servicePath" class="fode-field spinner-container">
+                                    <f:textbox field="grpcApiServicePath" name="grpcApiServicePath"/>
+                                </div>
+                            </f:entry>
                         </div>
                     </f:entry>
                 </div>
-            </f:entry>
-            <f:entry field="grpc">
-                <div id="dast-grpc" class="apiOptions fode-field spinner-container">
-                   <div class="uploadedFileContainer grpcUploadedFileContainer">
-                       <div class="uploadedFileContainer"> <f:entry title="Uploaded File">
-                           <div class="uploadedFileDetails grpcFileDetails"></div></f:entry></div>
-                   </div> <f:entry field="grpcupload" title="Please upload the proto file: *.proto">
-                        <div id="dast-grpc-upload" class="fode-field spinner-container">
-                            <span id="grpcUploadContainer" class="fode-field spinner-container uploadContainer" >
-                                <input accept=".proto" id="grpcFile"  type="File" name="grpcFile" />
-                                <input type="button" value="Upload" id="btnUploadgrpcFile" class="dastFileUploadButton"/>
-                                <h6 id="grpcUploadMessage" hidden="true" class="uploadMessage"></h6>
-                                <input type="label" hidden="true" name="grpcFileId" id="grpcFileId"/>
-                            </span>
-                        </div>
-                    </f:entry>
-                    <f:entry title="SchemeType">
-                        <div id="dast-grpc-schemeType" class="fode-field spinner-container" >
-                            <f:textbox field="grpcSchemeType" name="grpcSchemeType"/>
-                        </div>
-                    </f:entry>
-                    <f:entry title="API Host">
-                        <div id="dast-grpc-api-host" class="fode-field spinner-container">
-                            <f:textbox field="grpcApiHost" name="grpcApiHost"/>
-                        </div>
-                    </f:entry>
-                    <f:entry title="API ServicePath">
-                        <div id="dast-grpc-api-servicePath" class="fode-field spinner-container">
-                            <f:textbox field="grpcApiServicePath" name="grpcApiServicePath"/>
-                        </div>
-                    </f:entry>
-                </div>
-            </f:entry>
             </div>
-        </div>
         </f:block>
     </f:section>
     <!-- Scope Settings -->
     <f:section title="Scope">
-
         <!-- workflow scan !-->
         <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
             <div id="dast-workflow-macro-upload" class="fode-field spinner-container dast-workflow-scan">
                 <span>
                     <input accept=".har,.webmacro,.burp" id="workflowMacroFile" type="File" name="workflowMacroFile"/>
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
-                    <h6 id="workflowMacroUploadStatusMessage" hidden="true" name="workflowMacroUploadStatusMessage"></h6>
+                    <h6 id="workflowMacroUploadStatusMessage" hidden="true"
+                        name="workflowMacroUploadStatusMessage"></h6>
                     <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>
                     <input type="label" value="" hidden="true" name="workflowMacroHosts" id="workflowMacroHosts"/>
                 </span>
             </div>
         </f:entry>
         <f:entry title="Allowed Hosts">
+
             <ul id="listWorkflowDrivenAllowedHostUrl" name="listWorkflowDrivenAllowedHostUrl"
                 class="fode-field spinner-container dast-workflow-scan">
             </ul>
@@ -294,9 +331,9 @@
             <div id="dast-timeBox-scan">
 
                 <f:optionalBlock field="timeBoxChecked" name="timeBoxChecked" title="Timebox Scan Duration (Hours)"
-                checked="${instance.timeBoxChecked}}" inline="true">
+                                 checked="${instance.timeBoxChecked}}" inline="true">
                     <div>
-                        <f:textbox name="scanTimeBox" field="scanTimeBox"  />
+                        <f:textbox name="scanTimeBox" field="scanTimeBox"/>
                         <t:help tooltip="Allowed Values are between 1(hr) and 24 (hrs)"/>
                     </div>
                 </f:optionalBlock>
@@ -341,10 +378,13 @@
 
             <div class="fode-field spinner-container"
                  id="loginMacroFileCreationRow">
+
                 <f:optionalBlock name="requestLoginMacroFileCreation" field="requestLoginMacroFileCreation"
                                  title="Request Login Macro File Creation"
                                  checked="${instance.requestLoginMacroFileCreation}" inline="true">
-
+                    <span class="reqFalsePositiveWarn">This service consumes 1 assessment unit. One or both of login
+                        macro generation and false positive removal consume a total of 1 assessment unit.
+                    </span>
                     <f:entry title="Primary Username">
                         <div id="loginMacroPrimaryUsernameRow">
                             <f:textbox name="loginMacroPrimaryUserName"/>
@@ -369,9 +409,6 @@
 
                 </f:optionalBlock>
             </div>
-        </f:entry>
-
-        <f:entry>
             <div class="fode-field spinner-container" id="login-macro-row">
                 <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
                                  title="Login Macro"
@@ -381,17 +418,15 @@
                         <span id="loginMacroUploadContainer" class="fode-field spinner-container">
                             <input accept=".webmacro" id="loginFileMacro" type="File" name="loginFileMacro"/>
                             <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
-                            <h6 id="loginMacroUploadMessage" hidden="true" name="loginMacroUploadMessage" ></h6>
-                            <input type="text" hidden="true"  name="loginMacroId" id="loginMacroId"/>
+                            <h6 id="loginMacroUploadMessage" hidden="true" name="loginMacroUploadMessage"></h6>
+                            <input type="text" hidden="true" name="loginMacroId" id="loginMacroId"/>
                         </span>
                     </f:entry>
 
                 </f:optionalBlock>
             </div>
         </f:entry>
-
     </f:section>
-
     <f:entry>
         <div>
             <input type="textbox" hidden="true" name="entitlementId" id="entitlementId"></input>

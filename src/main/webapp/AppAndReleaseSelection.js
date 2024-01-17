@@ -11,7 +11,7 @@ const dastCommonScopeSetting = 'dast-common-scan-scope';
 const nwAuthSetting = 'dast-networkAuth-setting';
 const loginAuthSetting = 'dast-login-macro';
 const dastApiSetting = 'dast-api-setting';
-const dastApiSpecificControls = 'dast-api-specific-controls';
+const dastApiScanTypeSpecificControls = 'dast-api-specific-controls';
 
 class AppAndReleaseSelection {
 
@@ -319,6 +319,7 @@ class AppAndReleaseSelection {
         const commonWebScopeSetting = closestRow('#dast-common-scope');
         const commonWebScopeSettingAttr = closestRow('#dast-common-scope-attr');
         const commonScanPolicy = closestRow('#dast-standard-scan-policy');
+        const apiScanRow =closestRow('#dast-api-scan-block');
 
         releaseIdRow.addClass('releaseIdView');
         bsiTokenRow.addClass('bsiTokenView');
@@ -347,6 +348,7 @@ class AppAndReleaseSelection {
         commonWebScopeSetting.addClass(dastCommonScopeSetting);
         commonWebScopeSettingAttr.addClass(dastCommonScopeSetting);
         commonScanPolicy.addClass(dastCommonScopeSetting);
+        apiScanRow.addClass(dastApiSetting);
         <!--Scope sections-->
 
     }

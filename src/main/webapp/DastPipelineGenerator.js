@@ -10,7 +10,9 @@ const nwAuthSetting = 'dast-networkAuth-setting';
 const loginAuthSetting = 'dast-login-macro';
 const requestFalsePos = closestRow('#requestFalsePositiveRemovalRow');
 const loginMacroCreation = closestRow('#loginMacroFileCreationRow');
-const dastApiSpecificControls = 'dast-api-specific-controls';
+const dastApiSetting = 'dast-api-setting';
+const dastApiScanTypeSpecificControls = 'dast-api-specific-controls';
+const pipelineOverRide ='fode-field spinner-container fodp-row-autoProv'
 const dastScanPolicyDefaultValues = Object.freeze(
     {
         "WebSiteScan": {"ScanPolicy": "standard"},
@@ -247,14 +249,12 @@ class DastPipelineGenerator {
         commonWebScopeSetting.addClass(dastCommonScopeSetting);
         commonWebScopeSettingAttr.addClass(dastCommonScopeSetting);
         commonScanPolicy.addClass(dastCommonScopeSetting);
+        commonScanPolicy.addClass('fodp-row-relid-ovr');
         dastAllowedHostRow.addClass(dastWorkFlowSetting);
-
         <!--Scope sections-->
-
 
         try {
             this.hideMessages();
-            this.showMessage('Set a release id');
             jq('#autoProvAppName')
                 .change(_ => this.loadEntitlementOptions());
             jq('#autoProvBussCrit')
@@ -344,7 +344,6 @@ class DastPipelineGenerator {
     }
 
     populateAssessmentsDropdown() {
-
         let atsel = jq(`#assessmentTypeSelect`);
         atsel.find('option').remove();
         jq(`#entitlementSelect`).find('option').remove();
@@ -381,12 +380,14 @@ class DastPipelineGenerator {
 
         } else if (rs === '2') {
             this.hideMessages();
-            validateTextbox('#autoProvOwner');
             if (!await this.retrieveCurrentSession()) {
                 this.showMessage('Failed to retrieve auth data');
                 return;
             }
-            if (this.currentSession && this.currentSession.userId) jq('#autoProvOwnerAssignMe').show();
+            if (this.currentSession && this.currentSession.userId) {
+                jq('#autoProvOwnerAssignMe').show();
+                validateTextbox('#autoProvOwner');
+            }
             else jq('#autoProvOwnerAssignMe').hide();
             jq('#overrideReleaseSettings').prop('checked', false);
             jq('#releaseSelectionValue').hide();
@@ -401,10 +402,19 @@ class DastPipelineGenerator {
 
     onReleaseIdChanged() {
         this.releaseId = numberOrNull(jq('#releaseSelectionValue').val());
+        if(!this.releaseId) {
+            let rows = jq(fodpOverrideRowsSelector);
+            rows.hide();
+            this.showMessage('Enter release id', true);
+             return;
+        }
         if (this.overrideServerSettings) {
             if (this.releaseId < 1) {
                 this.releaseId = null;
-                return;
+                let rows = jq(fodpOverrideRowsSelector);
+                rows.hide();
+                this.showMessage('Enter release id', true);
+
             } else {
                 this.loadReleaseEntitlementSettings().then(
                     () => {
@@ -718,6 +728,7 @@ class DastPipelineGenerator {
                     this.loginMacroSettingsVisibility(false);
                     this.timeboxScanVisibility(false);
                     this.excludeUrlVisibility(false);
+                    jq('#dast-api-scan-policy-apiType').hide();
                     break;
             }
         }
@@ -823,7 +834,7 @@ class DastPipelineGenerator {
 
     apiScanSettingVisibility(isVisible) {
                let apiScanSettingRows = jq('.' + dastApiSetting);
-               jq('.' + dastApiSpecificControls).hide();
+               jq('.' + dastApiScanTypeSpecificControls).hide();
                if (!isVisible) {
                    apiScanSettingRows.hide();
                } else {
@@ -848,10 +859,9 @@ class DastPipelineGenerator {
 
     scanSettingsVisibility(isVisible) {
         if (!isVisible) {
-            let scanSettingsRows = jq('.dast-standard-setting');
-            scanSettingsRows.hide();
+            jq('.dast-standard-setting').hide();
         } else {
-            jq('.dast-scan-setting').show();
+            jq('.dast-standard-setting').show();
         }
     }
 
@@ -1112,7 +1122,7 @@ class DastPipelineGenerator {
     }
 
     fodOverrideRowsVisibility(isVisible) {
-
+debugger;
         jq(fodpOverrideRowsSelector)
             .each((i, e) => {
                 let jqe = jq(e);
@@ -1127,7 +1137,7 @@ class DastPipelineGenerator {
             jq(fodpOverrideRowsSelector).hide();
     }
      setLoginMacroCreationDetails(){
-            if(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails){
+            if(this.scanSettings && this.scanSettings.websiteAssessment && this.scanSettings.websiteAssessment.loginMacroFileCreationDetails){
                 jq('#loginMacroPrimaryUsernameRow').find('input').val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryUsername);
                 jq('#loginMacroPrimaryPasswordRow').find('input')
                     .val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryPassword);
@@ -1143,7 +1153,7 @@ class DastPipelineGenerator {
         }
 
     setFalsePositiveFlagRequest(){
-        if(this.scanSettings.requestFalsePositiveRemoval){
+        if(this.scanSettings && this.scanSettings.requestFalsePositiveRemoval){
             if (jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').prop('checked') === false) {
                    jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').trigger('click');
             }
@@ -1151,7 +1161,7 @@ class DastPipelineGenerator {
     }
 
     setApiScanSetting() {
-        if (this.scanSettings.apiAssessment) {
+        if (this.scanSettings && this.scanSettings.apiAssessment) {
             if (this.scanSettings.apiAssessment.openAPI) {
                 this.setOpenApiSettings(this.scanSettings.apiAssessment.openAPI);
             } else if (this.scanSettings.apiAssessment.graphQL) {

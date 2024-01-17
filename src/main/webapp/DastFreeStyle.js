@@ -54,9 +54,10 @@ class DastFreeStyle {
     }
 
     scanTypeUserControlVisibility(scanType, isVisible) {
-       if (isVisible) {
+
+        if (isVisible) {
             this.commonScopeSettingVisibility(false);
-               switch (scanType) {
+            switch (scanType) {
                 case DastScanTypeEnum.Standard: {
                     jq('#dast-standard-scan-policy').show();
                     jq('#dast-api-scan-policy-apiType').hide();
@@ -106,7 +107,6 @@ class DastFreeStyle {
                 default:
                     //hide all scan type settings.
                     this.websiteScanSettingsVisibility(false);
-                    this.apiScanSettingVisibility(false);
                     this.apiScanSettingVisibility(false);
                     this.workflowScanSettingVisibility(false);
                     this.loginMacroSettingsVisibility(false);
@@ -411,30 +411,30 @@ class DastFreeStyle {
     }
 
     setLoginMacroCreationDetails(){
-            if(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails){
-                jq('#loginMacroPrimaryUsernameRow').find('input').val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryUsername);
-                jq('#loginMacroPrimaryPasswordRow').find('input')
-                    .val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryPassword);
-                     jq('#loginMacroSecondaryUsernameRow').find('input').val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.secondaryUsername);
-                    jq('#loginMacroSecondaryPasswordRow').find('input')
-                        .val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.secondaryPassword);
-                if (jq('#loginMacroFileCreationRow').find('input:checkbox:first').prop('checked') === false) {
-                    jq('#loginMacroFileCreationRow').find('input:checkbox:first').trigger('click');
-                }
-                let np = jq('#networkPasswordRow').find('input');
-                np.attr('type', 'password');
+        if(this.scanSettings && this.scanSettings.websiteAssessment && this.scanSettings.websiteAssessment.loginMacroFileCreationDetails){
+            jq('#loginMacroPrimaryUsernameRow').find('input').val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryUsername);
+            jq('#loginMacroPrimaryPasswordRow').find('input')
+                .val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryPassword);
+            jq('#loginMacroSecondaryUsernameRow').find('input').val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.secondaryUsername);
+            jq('#loginMacroSecondaryPasswordRow').find('input')
+                .val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.secondaryPassword);
+            if (jq('#loginMacroFileCreationRow').find('input:checkbox:first').prop('checked') === false) {
+                jq('#loginMacroFileCreationRow').find('input:checkbox:first').trigger('click');
             }
+            let np = jq('#networkPasswordRow').find('input');
+            np.attr('type', 'password');
         }
+    }
 
     setFalsePositiveFlagRequest(){
-            if(this.scanSettings.requestFalsePositiveRemoval){
-                if (jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').prop('checked') === false) {
-                       jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').trigger('click');
-                }
+        if(this.scanSettings && this.scanSettings.requestFalsePositiveRemoval){
+            if (jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').prop('checked') === false) {
+                jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').trigger('click');
             }
         }
+    }
     setWorkflowDrivenScanSetting() {
-        if (this.scanSettings.workflowdrivenAssessment) {
+        if (this.scanSettings && this.scanSettings.workflowdrivenAssessment) {
             if (this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro) {
                 jq('#listWorkflowDrivenAllowedHostUrl').empty();
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].fileId);
@@ -462,7 +462,7 @@ class DastFreeStyle {
     }
 
     setApiScanSetting() {
-        if (this.scanSettings.apiAssessment) {
+        if (this.scanSettings && this.scanSettings.apiAssessment) {
             if (this.scanSettings.apiAssessment.openAPI) {
                 this.setOpenApiSettings(this.scanSettings.apiAssessment.openAPI);
             } else if (this.scanSettings.apiAssessment.graphQL) {
@@ -489,13 +489,13 @@ class DastFreeStyle {
             jq('#dast-openApi-url input').val(openApiSettings.sourceUrn);
         }
         else if(openApiSettings.sourceType === 'FileId') {
-           if (this.scanSettings && this.scanSettings.fileDetails) {
-               this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                   jq('.openApiFileDetails').text(item.fileName);
-                   jq('#openApiFileId').val(item.fileId);
-                   jq('.uploadedFileContainer').show();
-               });
-           }
+            if (this.scanSettings && this.scanSettings.fileDetails) {
+                this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                    jq('.openApiFileDetails').text(item.fileName);
+                    jq('#openApiFileId').val(item.fileId);
+                    jq('.uploadedFileContainer').show();
+                });
+            }
         }
     }
 
@@ -512,12 +512,12 @@ class DastFreeStyle {
         }
         else if(graphQlSettings.sourceType === 'FileId') {
             if (this.scanSettings && this.scanSettings.fileDetails) {
-               this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                   jq('.graphQlFileDetails').text(item.fileName);
-                   jq('#graphQLFileId').val(item.fileId);
-                   jq('.uploadedFileContainer').show();
-               });
-           }
+                this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                    jq('.graphQlFileDetails').text(item.fileName);
+                    jq('#graphQLFileId').val(item.fileId);
+                    jq('.uploadedFileContainer').show();
+                });
+            }
         }
     }
 
@@ -525,12 +525,12 @@ class DastFreeStyle {
         jq('#apiTypeList').val('grpc');
         this.onApiTypeChanged();
         if (this.scanSettings && this.scanSettings.fileDetails) {
-           this.scanSettings.fileDetails.forEach((item, index, arr) => {
-               jq('.grpcFileDetails').text(item.fileName);
-               jq('#grpcFileId').val(item.fileId);
-               jq('.uploadedFileContainer').show();
-           });
-       }
+            this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                jq('.grpcFileDetails').text(item.fileName);
+                jq('#grpcFileId').val(item.fileId);
+                jq('.uploadedFileContainer').show();
+            });
+        }
         jq('#dast-grpc-api-host input').val(grpcSettings.host);
         jq('#dast-grpc-api-servicePath input').val(grpcSettings.servicePath);
         jq('#dast-grpc-schemeType input').val(grpcSettings.schemeType);
@@ -540,12 +540,12 @@ class DastFreeStyle {
         jq('#apiTypeList').val('postman');
         this.onApiTypeChanged();
         if (this.scanSettings && this.scanSettings.fileDetails) {
-           this.scanSettings.fileDetails.forEach((item, index, arr) => {
-               jq('.postmanFileDetails').text(item.fileName);
-               jq('#openApiFileId').val(item.fileId);
-               jq('.uploadedFileContainer').show();
-           });
-       }
+            this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                jq('.postmanFileDetails').text(item.fileName);
+                jq('#openApiFileId').val(item.fileId);
+                jq('.uploadedFileContainer').show();
+            });
+        }
     }
 
     setSelectedEntitlementValue(entitlements) {
@@ -600,7 +600,7 @@ class DastFreeStyle {
 
         let ctl = jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first')
         if(ctl.prop('checked') === true)
-          ctl.trigger('click');
+            ctl.trigger('click');
     }
 
     setScanType() {
@@ -679,17 +679,18 @@ class DastFreeStyle {
             validateDropdown('#scanTypeList');
         }
     }
+    apiScanSettingVisibility(isVisible) {
 
-     apiScanSettingVisibility(isVisible) {
-            let apiScanSettingRows = jq('.' + dastApiSetting);
-            jq('.' + dastApiSpecificControls).hide();
-            if (!isVisible) {
-                apiScanSettingRows.hide();
-            } else {
-                apiScanSettingRows.show();
-                validateDropdown('#apiTypeList');
-            }
+        let apiScanSettingRows = jq('.' + dastApiSetting);
+        jq('.' + dastApiScanTypeSpecificControls).hide();
+        if (!isVisible) {
+            apiScanSettingRows.hide();
+        } else {
+            apiScanSettingRows.show();
+            validateDropdown('#apiTypeList');
         }
+    }
+
 
     onTimeZoneChanged() {
         validateDropdown('#timeZoneStackSelectList');
@@ -706,7 +707,6 @@ class DastFreeStyle {
             }
         }
     }
-
 
     setScanPolicy() {
         if (this.scanSettings && this.scanSettings.policy) {
@@ -907,7 +907,6 @@ class DastFreeStyle {
         jq('.uploadMessage').text('');
         this.onSourceChange('none');
         let selectedApiTypeValue = jq('#apiTypeList').val();
-
         if (!selectedApiTypeValue) {
             //Reset All ScanTypes Controls
             this.apiTypeUserControlVisibility(null, false);
@@ -1014,7 +1013,7 @@ class DastFreeStyle {
         if (isVisible)
             jq('#dast-postman').closest('.tr').show();
         else
-        jq('#dast-postman').closest('.tr').hide();
+            jq('#dast-postman').closest('.tr').hide();
         jq('#dast-openApi').closest('.tr').hide()
         jq('#dast-graphQL').closest('.tr').hide();
         jq('#dast-grpc').closest('.tr').hide();
@@ -1027,7 +1026,7 @@ class DastFreeStyle {
         jq('#listStandardScanTypeExcludedUrl').show();
     }
 
-   async preInit() {
+    async preInit() {
         jq('.fode-field')
             .each((i, e) => {
                 let jqe = jq(e);
@@ -1067,7 +1066,7 @@ class DastFreeStyle {
                     }
                 }
             });
-       await this.init();
+        await this.init();
     }
 
     async init() {
@@ -1100,7 +1099,7 @@ class DastFreeStyle {
                 this.deferredLoadEntitlementSettings = null;
             }
         } catch (err) {
-           console.log(err);
+            console.log(err);
         }
 
     }
@@ -1120,7 +1119,7 @@ spinAndWait(
         !==
         ''
 ).then(scanSettings.preInit
-        .bind(scanSettings));
+    .bind(scanSettings));
 spinAndWait(
     () => jq(
         '#releaseTypeSelectList'
