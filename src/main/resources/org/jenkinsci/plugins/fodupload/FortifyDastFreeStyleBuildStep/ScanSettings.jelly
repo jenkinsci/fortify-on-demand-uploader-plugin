@@ -409,6 +409,7 @@
 
                 </f:optionalBlock>
             </div>
+            <f:entry>
             <div class="fode-field spinner-container" id="login-macro-row">
                 <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
                                  title="Login Macro"
@@ -425,6 +426,7 @@
 
                 </f:optionalBlock>
             </div>
+            </f:entry>
         </f:entry>
     </f:section>
     <f:entry>
