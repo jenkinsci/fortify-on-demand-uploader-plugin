@@ -371,7 +371,8 @@ public class DastScanJobModel {
                             String openApiSource, String openApiFileSource, String openApiurl, String apiKey,
                             String postmanFile,
                             String graphQlSource, String graphQlUpload, String graphQlUrl, String graphQLSchemeType, String graphQlApiHost, String graphQlApiServicePath,
-                            String grpcUpload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath) {
+                            String grpcUpload, String grpcSchemeType, String grpcApiHost, String grpcApiServicePath, String openApiFilePath, String postmanFilePath, String graphQlFilePath, String grpcFilePath,
+                            boolean requestFalsePositiveRemoval) {
 
         this._releaseId = releaseId;
         this.tenantId = tenantId;
@@ -410,6 +411,7 @@ public class DastScanJobModel {
         this.postmanFilePath = postmanFilePath;
         this.graphQlFilePath = graphQlFilePath;
         this.grpcFilePath = grpcFilePath;
+        this.requestFalsePositiveRemoval = requestFalsePositiveRemoval;
     }
 
     public String get_releaseId() {

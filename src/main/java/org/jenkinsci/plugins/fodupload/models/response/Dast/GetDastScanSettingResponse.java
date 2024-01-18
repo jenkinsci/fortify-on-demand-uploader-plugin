@@ -64,7 +64,11 @@ public class GetDastScanSettingResponse {
 
     public FileDetails[] fileDetails;
 
-    public boolean requestLoginMacroFileConfiguration;
+    public boolean hasUtilizedAdditionalServices;
+
+    public boolean requestFalsePositiveRemoval;
+
+
 
 
 

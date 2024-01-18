@@ -18,16 +18,8 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     }
     boolean requiresSiteAuthentication;
     public void setRestrictToDirectoryAndSubdirectories(boolean restrictToDirectoryAndSubdirectories) {
-        this.restrictToDirectoryAndSubdirectories = restrictToDirectoryAndSubdirectories;
-    }
-
-    public void setRequestFalsePositiveRemoval(boolean requestFalsePositiveRemoval) {
-        this.requestFalsePositiveRemoval = requestFalsePositiveRemoval;
-    }
-
+        this.restrictToDirectoryAndSubdirectories = restrictToDirectoryAndSubdirectories;  }
     private  boolean restrictToDirectoryAndSubdirectories;
-
-    private boolean requestFalsePositiveRemoval;
 
     public void setTimeBoxInHours(Integer timeBoxInHours) {
         this.timeBoxInHours = timeBoxInHours;

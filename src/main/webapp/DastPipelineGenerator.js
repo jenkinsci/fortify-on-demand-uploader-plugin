@@ -687,7 +687,7 @@ class DastPipelineGenerator {
                     jq('#dast-standard-scan-policy').hide();
                     jq('#dast-api-scan-policy-apiType').show();
                     jq('.redundantPageDetection').hide();
-                    jq('#requestFalsePositiveRemovalRow').hide();
+                    jq('#requestFalsePositiveRemovalRow').show();
                     jq('#loginMacroFileCreationRow').hide();
                     this.commonScopeSettingVisibility(false);
                     this.networkAuthSettingVisibility(true);
@@ -704,7 +704,7 @@ class DastPipelineGenerator {
                     jq('#dast-standard-scan-policy').show();
                     jq('#dast-api-scan-policy-apiType').hide();
                     jq('.redundantPageDetection').hide();
-                    jq('#requestFalsePositiveRemovalRow').hide();
+                    jq('#requestFalsePositiveRemovalRow').show();
                     jq('#loginMacroFileCreationRow').hide();
                     this.websiteScanSettingsVisibility(false);
                     this.apiScanSettingVisibility(false);
@@ -1122,7 +1122,6 @@ class DastPipelineGenerator {
     }
 
     fodOverrideRowsVisibility(isVisible) {
-debugger;
         jq(fodpOverrideRowsSelector)
             .each((i, e) => {
                 let jqe = jq(e);
@@ -1136,29 +1135,54 @@ debugger;
         } else
             jq(fodpOverrideRowsSelector).hide();
     }
-     setLoginMacroCreationDetails(){
-            if(this.scanSettings && this.scanSettings.websiteAssessment && this.scanSettings.websiteAssessment.loginMacroFileCreationDetails){
-                jq('#loginMacroPrimaryUsernameRow').find('input').val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryUsername);
-                jq('#loginMacroPrimaryPasswordRow').find('input')
-                    .val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryPassword);
-                     jq('#loginMacroSecondaryUsernameRow').find('input').val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.secondaryUsername);
-                    jq('#loginMacroSecondaryPasswordRow').find('input')
-                        .val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.secondaryPassword);
-                if (jq('#loginMacroFileCreationRow').find('input:checkbox:first').prop('checked') === false) {
-                    jq('#loginMacroFileCreationRow').find('input:checkbox:first').trigger('click');
-                }
-                let np = jq('#networkPasswordRow').find('input');
-                np.attr('type', 'password');
-            }
-        }
+   setLoginMacroCreationDetails(){
+           if(this.scanSettings && this.scanSettings.websiteAssessment && this.scanSettings.websiteAssessment.loginMacroFileCreationDetails){
+               jq('#loginMacroPrimaryUsernameRow').find('input').val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryUsername);
+               jq('#loginMacroPrimaryPasswordRow').find('input')
+                   .val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryPassword);
+               jq('#loginMacroSecondaryUsernameRow').find('input').val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.secondaryUsername);
+               jq('#loginMacroSecondaryPasswordRow').find('input')
+                   .val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.secondaryPassword);
+               if (jq('#loginMacroFileCreationRow').find('input:checkbox:first').prop('checked') === false) {
+                   jq('#loginMacroFileCreationRow').find('input:checkbox:first').trigger('click');
+               }
+               let np = jq('#networkPasswordRow').find('input');
+               np.attr('type', 'password');
+           }
+           if(this.scanSettings && this.scanSettings.hasUtilizedAdditionalServices){
+           jq('#loginMacroSecondaryPasswordRow').find('input').prop('disabled','disabled');
+           jq('#loginMacroPrimaryUsernameRow').find('input').prop('disabled','disabled');
+           jq('#loginMacroSecondaryUsernameRow').find('input').prop('disabled','disabled');
+           jq('#loginMacroPrimaryPasswordRow').find('input').prop('disabled','disabled');
+           jq('#loginMacroFileCreationRow').find('input:checkbox:first').prop('disabled','disabled');
+           }
+           else{
+           jq('#loginMacroSecondaryPasswordRow').find('input').prop('disabled',false);
+                   jq('#loginMacroPrimaryUsernameRow').find('input').prop('disabled',false);
+                   jq('#loginMacroSecondaryUsernameRow').find('input').prop('disabled',false);
+                   jq('#loginMacroPrimaryPasswordRow').find('input').prop('disabled',false);
+                   jq('#loginMacroFileCreationRow').find('input:checkbox:first').prop('disabled',false);
+           }
+       }
 
-    setFalsePositiveFlagRequest(){
-        if(this.scanSettings && this.scanSettings.requestFalsePositiveRemoval){
-            if (jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').prop('checked') === false) {
+       setFalsePositiveFlagRequest(){
+           if(this.scanSettings && this.scanSettings.requestFalsePositiveRemoval){
+               if (jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').prop('checked') === false) {
                    jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').trigger('click');
-            }
-        }
-    }
+               }
+           }
+           else{
+            if (jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').prop('checked') === true) {
+                   jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').trigger('click');
+                }
+           }
+           if(this.scanSettings && this.scanSettings.hasUtilizedAdditionalServices){
+           jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').prop('disabled','disabled')
+           }
+           else{
+           jq('#requestFalsePositiveRemovalRow').find('input:checkbox:first').prop('disabled',false)
+           }
+       }
 
     setApiScanSetting() {
         if (this.scanSettings && this.scanSettings.apiAssessment) {

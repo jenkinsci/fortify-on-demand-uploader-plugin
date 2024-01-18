@@ -70,7 +70,7 @@ public class DastScanSharedBuildStep {
                                    String grpcUpload, String grpcSchemeType, String grpcApiHost,
                                    String grpcApiServicePath, String openApiFilePath,
                                    String postmanFilePath, String graphQLFilePath,
-                                   String grpcFilePath
+                                   String grpcFilePath, boolean requestFalsePositiveRemoval
     ) {
 
         authModel = new AuthenticationModel(overrideGlobalConfig, username, personalAccessToken, tenantId);
@@ -83,7 +83,7 @@ public class DastScanSharedBuildStep {
                 selectedApiType, openApiRadioSource, openApiFileSource, openApiurl, apiKey,
                 postmanFile,
                 graphQlSource, graphQlUpload, graphQlUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                grpcUpload, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
+                grpcUpload, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath, requestFalsePositiveRemoval);
 
     }
 
@@ -368,7 +368,6 @@ public class DastScanSharedBuildStep {
 
             PutDastWebSiteScanReqModel dynamicScanSetupReqModel;
             dynamicScanSetupReqModel = new PutDastWebSiteScanReqModel();
-            dynamicScanSetupReqModel.setRequestLoginMacroFileCreation(false);
             dynamicScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dynamicScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dynamicScanSetupReqModel.setTimeZone(timeZone);
@@ -412,10 +411,10 @@ public class DastScanSharedBuildStep {
                 dynamicScanSetupReqModel.setNetworkAuthenticationSettings(networkSetting);
             }
 
-            if (isNullOrEmpty(loginMacroPrimaryUserName)&&
-                    isNullOrEmpty(loginMacroPrimaryPassword) &&
-                    isNullOrEmpty(loginMacroSecondaryUsername) &&
-                    isNullOrEmpty(loginMacroSecondaryPassword)) {
+            if (!isNullOrEmpty(loginMacroPrimaryUserName)&&
+                    !isNullOrEmpty(loginMacroPrimaryPassword) &&
+                    !isNullOrEmpty(loginMacroSecondaryUsername) &&
+                    !isNullOrEmpty(loginMacroSecondaryPassword)) {
                 dynamicScanSetupReqModel.setRequestLoginMacroFileCreation(true);
                 dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
                 LoginMacroFileCreationDetails loginMacroDetails = new LoginMacroFileCreationDetails();
@@ -461,7 +460,7 @@ public class DastScanSharedBuildStep {
                                                          String timeZone, String scanPolicy,
                                                          String scanEnvironment,
                                                          String networkAuthUserName, String networkAuthPassword
-            , String networkAuthType)
+            , String networkAuthType, boolean requestFalsePositiveRemoval )
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
@@ -470,7 +469,7 @@ public class DastScanSharedBuildStep {
 
             PutDastWorkflowDrivenScanReqModel dastWorkflowScanSetupReqModel;
             dastWorkflowScanSetupReqModel = new PutDastWorkflowDrivenScanReqModel();
-
+            dastWorkflowScanSetupReqModel.setRequestFalsePositiveRemoval(requestFalsePositiveRemoval);
             dastWorkflowScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dastWorkflowScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dastWorkflowScanSetupReqModel.setTimeZone(timeZone);
@@ -584,7 +583,7 @@ public class DastScanSharedBuildStep {
                                                   String scanEnvironment,
                                                   boolean requireNetworkAuth,
                                                   String networkAuthUserName, String networkAuthPassword,
-                                                  String networkAuthType, String openApiSourceType, String sourceUrn, String openApiKey)
+                                                  String networkAuthType, String openApiSourceType, String sourceUrn, String openApiKey, boolean requestFalsePositiveRemoval)
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
@@ -598,6 +597,7 @@ public class DastScanSharedBuildStep {
             dastOpenApiScanSetupReqModel.setTimeZone(timeZone);
             dastOpenApiScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastOpenApiScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
+            dastOpenApiScanSetupReqModel.setRequestFalsePositiveRemoval(requestFalsePositiveRemoval);
 
             if (networkAuthType != null &&
                     networkAuthPassword != null && networkAuthUserName != null &&
@@ -645,7 +645,7 @@ public class DastScanSharedBuildStep {
                                                   boolean requireNetworkAuth,
                                                   String networkAuthUserName, String networkAuthPassword,
                                                   String networkAuthType, String sourceUrn, String sourceType,
-                                                  String schemeType, String host, String servicePath)
+                                                  String schemeType, String host, String servicePath, boolean requestFalsePositiveRemoval)
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
@@ -659,6 +659,7 @@ public class DastScanSharedBuildStep {
             dastGraphQlScanSetupReqModel.setTimeZone(timeZone);
             dastGraphQlScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastGraphQlScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
+            dastGraphQlScanSetupReqModel.setRequestFalsePositiveRemoval(requestFalsePositiveRemoval);
 
             if (!networkAuthType.isEmpty() && !networkAuthPassword.isEmpty() && !networkAuthUserName.isEmpty()) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastGraphQlScanSetupReqModel.getNetworkAuthenticationSettings();
@@ -698,7 +699,7 @@ public class DastScanSharedBuildStep {
                                                String scanEnvironment,
                                                String networkAuthUserName, String networkAuthPassword,
                                                String networkAuthType,
-                                               String grpcFileId, String schemeType, String host, String servicePath)
+                                               String grpcFileId, String schemeType, String host, String servicePath, boolean requestFalsePositiveRemoval)
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId());
@@ -714,6 +715,7 @@ public class DastScanSharedBuildStep {
             dastgrpcScanSetupReqModel.setServicePath(servicePath);
             dastgrpcScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastgrpcScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
+            dastgrpcScanSetupReqModel.setRequestFalsePositiveRemoval(requestFalsePositiveRemoval);
 
             if (networkAuthType != null &&
                     networkAuthPassword != null && networkAuthUserName != null &&
@@ -757,7 +759,7 @@ public class DastScanSharedBuildStep {
                                                   String timeZone,
                                                   String scanEnvironment,
                                                   String networkAuthUserName, String networkAuthPassword,
-                                                  String networkAuthType, String postmanIdCollection)
+                                                  String networkAuthType, String postmanIdCollection, boolean requestFalsePositiveRemoval)
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId());
@@ -770,6 +772,7 @@ public class DastScanSharedBuildStep {
             dastPostmanScanSetupReqModel.setTimeZone(timeZone);
             dastPostmanScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
             dastPostmanScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
+            dastPostmanScanSetupReqModel.setRequestFalsePositiveRemoval(requestFalsePositiveRemoval);
 
 
             if (networkAuthType != null &&

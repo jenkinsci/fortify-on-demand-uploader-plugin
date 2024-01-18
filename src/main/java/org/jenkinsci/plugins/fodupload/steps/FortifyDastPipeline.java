@@ -863,7 +863,7 @@ public class FortifyDastPipeline extends FortifyStep {
             }
         }
         dastScanSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(releaseId, assessmentTypeId, entitlementId, entitlementFrequency, workflowMacroId, this.workflowMacroHosts,
-                selectedDynamicTimeZone, scanPolicy,  envFacing,networkAuthUserName, networkAuthPassword, networkAuthType);
+                selectedDynamicTimeZone, scanPolicy,  envFacing,networkAuthUserName, networkAuthPassword, networkAuthType, requestFalsePositiveRemoval);
     }
 
     private void saveApiScanSettings(FilePath workspace, PrintStream printStream, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
@@ -891,7 +891,7 @@ public class FortifyDastPipeline extends FortifyStep {
                     entitlementFrequency, selectedDynamicTimeZone,
                     enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
                     networkAuthUserName, networkAuthPassword, networkAuthType,
-                    openApiRadioSource, sourceUrn, openApiKey);
+                    openApiRadioSource, sourceUrn, openApiKey, requestFalsePositiveRemoval);
 
         } else if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
             if(FodEnums.ApiSourceType.valueOf(graphQlRadioSource) == FodEnums.ApiSourceType.FileId) {
@@ -919,7 +919,7 @@ public class FortifyDastPipeline extends FortifyStep {
                     entitlementFrequency, selectedDynamicTimeZone,
                     enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
                     networkAuthUserName, networkAuthPassword, networkAuthType,
-                    sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath);
+                    sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath, requestFalsePositiveRemoval);
 
         } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
 
@@ -941,7 +941,7 @@ public class FortifyDastPipeline extends FortifyStep {
                     entitlementFrequency, selectedDynamicTimeZone,
                     envFacing,
                     networkAuthUserName, networkAuthPassword, networkAuthType,
-                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
+                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, requestFalsePositiveRemoval);
 
         } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
 
@@ -965,7 +965,7 @@ public class FortifyDastPipeline extends FortifyStep {
                     entitlementFrequency, selectedDynamicTimeZone,
                     envFacing,
                     networkAuthUserName, networkAuthPassword, networkAuthType,
-                    postmanFileId);
+                    postmanFileId, requestFalsePositiveRemoval);
         } else {
             throw new IllegalArgumentException("Not Valid Dast API Scan Type set for releaseId: " + releaseId);
         }
@@ -1039,7 +1039,7 @@ public class FortifyDastPipeline extends FortifyStep {
                         selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
                         postmanFileId,
                         graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                        grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath);
+                        grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQLFilePath, grpcFilePath, requestFalsePositiveRemoval);
 
             }
             else

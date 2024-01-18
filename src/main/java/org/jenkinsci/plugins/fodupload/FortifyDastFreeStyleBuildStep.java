@@ -92,7 +92,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                         timeBoxChecked, selectedApiType, openApiRadioSource, openApiFileId, openApiUrl, openApiKey,
                         postmanFileId,
                         graphQlRadioSource, graphQLFileId, graphQLUrl, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath,
-                        grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQlFilePath, grpcFilePath);
+                        grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, openApiFilePath, postmanFilePath, graphQlFilePath, grpcFilePath, requestFalsePositiveRemoval);
             } else {
                 throw new IllegalArgumentException("Invalid Scan Type");
             }
@@ -127,7 +127,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                 dastSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicy,
                         dastEnv,
-                        networkAuthUserName, networkAuthPassword, selectedNetworkAuthType);
+                        networkAuthUserName, networkAuthPassword, selectedNetworkAuthType, requestFalsePositiveRemoval);
 
             } else if (FodEnums.DastScanType.API.toString().equalsIgnoreCase(selectedScanType)) {
                 if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
@@ -136,17 +136,17 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
-                            openApiRadioSource, sourceUrn, openApiKey);
+                            openApiRadioSource, sourceUrn, openApiKey, requestFalsePositiveRemoval);
 
                 }
-                if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
+                else if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
 
                     String sourceUrn = graphQlRadioSource.equals("Url") ? graphQLUrl : graphQLFileId;
                     dastSharedBuildStep.SaveReleaseSettingsForGraphQlScan(userSelectedRelease, assessmentTypeId, entitlementId,
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
-                            sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath);
+                            sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath, requestFalsePositiveRemoval);
 
                 } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
 
@@ -154,7 +154,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             dastEnv,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
-                            grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath);
+                            grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, requestFalsePositiveRemoval);
 
                 } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
 
@@ -162,7 +162,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             dastEnv,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
-                            postmanFileId);
+                            postmanFileId, requestFalsePositiveRemoval);
                 } else {
 
                     throw new IllegalArgumentException("Fortify onDemand: Not Valid Dast API Scan Type set for releaseId: " + userSelectedRelease);

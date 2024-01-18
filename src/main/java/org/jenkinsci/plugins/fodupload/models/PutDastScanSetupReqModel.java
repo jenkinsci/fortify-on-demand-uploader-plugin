@@ -66,7 +66,10 @@ public class PutDastScanSetupReqModel implements Serializable {
 
     }
 
-
+    public void setRequestFalsePositiveRemoval(boolean requestFalsePositiveRemoval) {
+        this.requestFalsePositiveRemoval = requestFalsePositiveRemoval;
+    }
+    public boolean requestFalsePositiveRemoval;
 
 
 
