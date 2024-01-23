@@ -3,9 +3,9 @@ const fodpOverrideRowsSelector = '.fodp-row-relid-ovr';
 const appAttributeKeyDelimiter = ';';
 const appAttributeKeyValueDelimiter = ':';
 const dastScanSetting = 'dast-scan-setting';
-const dastWebSiteSetting = 'dast-standard-setting';
-const dastWorkFlowSetting = 'dast-workflow-setting';
-const dastCommonScopeSetting = 'dast-common-scan-scope';
+const dastWebSiteSettingIdentifier = 'dast-standard-setting';
+const dastWorkFlowSettingIdentifier = 'dast-workflow-setting';
+const dastCommonScopeSettingIdentifier = 'dast-common-scan-scope';
 const nwAuthSetting = 'dast-networkAuth-setting';
 const loginAuthSetting = 'dast-login-macro';
 const requestFalsePos = closestRow('#requestFalsePositiveRemovalRow');
@@ -35,6 +35,8 @@ const loginMacro = closestRow('#login-macro-row');
 const commonWebScopeSetting = closestRow('#dast-common-scope');
 const commonWebScopeSettingAttr = closestRow('#dast-common-scope-attr');
 const commonScanPolicy = closestRow('#dast-standard-scan-policy');
+const apiSettingRowEntry = closestRow('#dast-api-scan-block');
+
 const DastScanTypeEnum = Object.freeze({
     Standard: 'Standard',
     WorkflowDriven: 'Workflow-driven',
@@ -241,16 +243,17 @@ class DastPipelineGenerator {
         loginMacro.addClass(loginAuthSetting);
 
         <!--Scan Specific Scope Sections-->
-        dastWrkFlowMacroUpload.addClass(dastWorkFlowSetting);
-        dastWrkFlowAllowedHost.addClass(dastWorkFlowSetting);
-        dastExcludeUrl.addClass(dastWebSiteSetting);
-        dastSiteUrlRow.addClass(dastWebSiteSetting);
-        dastWebSiteTimeBoxScan.addClass(dastWebSiteSetting);
-        commonWebScopeSetting.addClass(dastCommonScopeSetting);
-        commonWebScopeSettingAttr.addClass(dastCommonScopeSetting);
-        commonScanPolicy.addClass(dastCommonScopeSetting);
+        dastWrkFlowMacroUpload.addClass(dastWorkFlowSettingIdentifier);
+        dastWrkFlowAllowedHost.addClass(dastWorkFlowSettingIdentifier);
+        dastExcludeUrl.addClass(dastWebSiteSettingIdentifier);
+        dastSiteUrlRow.addClass(dastWebSiteSettingIdentifier);
+        apiSettingRowEntry.addClass(dastApiSetting);
+        dastWebSiteTimeBoxScan.addClass(dastWebSiteSettingIdentifier);
+        commonWebScopeSetting.addClass(dastCommonScopeSettingIdentifier);
+        commonWebScopeSettingAttr.addClass(dastCommonScopeSettingIdentifier);
+        commonScanPolicy.addClass(dastCommonScopeSettingIdentifier);
         commonScanPolicy.addClass('fodp-row-relid-ovr');
-        dastAllowedHostRow.addClass(dastWorkFlowSetting);
+        dastAllowedHostRow.addClass(dastWorkFlowSettingIdentifier);
         <!--Scope sections-->
 
         try {
@@ -299,6 +302,7 @@ class DastPipelineGenerator {
                     e.preventDefault();
                     this.onAssignMeClick();
                 });
+            jq('#listStandardScanTypeExcludedUrl').click(_ => this.onExcludeUrlChecked(event));
             jq('#overrideReleaseSettings')
                 .change(_ => this.loadEntitlementOptions());
             jq('#apiTypeList').change(_ => this.onApiTypeChanged());
@@ -309,6 +313,7 @@ class DastPipelineGenerator {
             jq('.fodp-row-screc').hide();
             jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
             jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
+
             setOnblurEventForPipeline();
             this.uiLoaded = true;
         } catch (Error) {
@@ -445,11 +450,12 @@ class DastPipelineGenerator {
         if (!this.releaseId) {
             rows.hide();
             this.showMessage('Enter release id', true);
+            handleSpinner('#releaseSelectioForm', false);
             return;
         }
-        handleSpinner('#releaseSelectioForm', false);
         jq('#dastScanDetails').hide();
         rows.show();
+        this.scanTypeUserControlVisibility('allTypes', false);
         // ToDo: deal with overlapping calls
         let ssp = this.api.getReleaseEntitlementSettings(this.releaseId, getAuthInfo(), true)
             .then(r => this.scanSettings = r);
@@ -463,9 +469,7 @@ class DastPipelineGenerator {
         if (this.releaseId > 0)
             await Promise.all([ssp, entp, tzs, networkAuthTypes])
                 .then(async () => {
-
-                    this.scanTypeUserControlVisibility('allTypes', false);
-                    if (this.scanSettings && this.assessments) {
+                        if (this.scanSettings && this.assessments) {
                         await this.setAssessmentsAndSettings();
                         //Set Entitlement
                         this.setSelectedEntitlementValue(entp);
@@ -477,7 +481,6 @@ class DastPipelineGenerator {
                         this.onTimeZoneChanged();
                         /*'set the scan type based on the scan setting get response'*/
                         this.setScanType();
-                        this.onScanTypeChanged();
                         //Set scan policy from the response.
                         this.setScanPolicy();
                         //Set the Website assessment scan type specific settings.
@@ -498,16 +501,14 @@ class DastPipelineGenerator {
                         //Set the PatchUploadManifest File's fileId from get response.
                         this.setPatchUploadFileId();
                         //Enable scan Type right after assessment Type drop populated.
-                        this.scanSettingsVisibility(true);
                         this.scanTypeVisibility(true);
                         validateRequiredFields(requiredFieldsPipeline);
-
+                        this.onScanTypeChanged();
                     } else {
                         await this.onAssessmentChanged(false);
                         this.showMessage('Failed to retrieve scan settings from API', true);
                         rows.hide();
                     }
-
                     this.populateHiddenFields();
                 })
                 .catch((reason) => {
@@ -519,7 +520,7 @@ class DastPipelineGenerator {
         }
         handleSpinner('#releaseSelectioForm', true);
         jq('#dastScanDetails').show();
-        //fields.removeClass('spinner');
+
     }
 
     setNetworkSettings() {
@@ -680,7 +681,6 @@ class DastPipelineGenerator {
                     this.directoryAndSubdirectoriesScopeVisibility(isVisible);
                     this.loginMacroSettingsVisibility(isVisible);
                     this.timeboxScanVisibility(isVisible);
-                    this.excludeUrlVisibility(isVisible);
                     break;
                 }
                 case DastScanTypeEnum.Api: {
@@ -706,20 +706,17 @@ class DastPipelineGenerator {
                     jq('.redundantPageDetection').hide();
                     jq('#requestFalsePositiveRemovalRow').show();
                     jq('#loginMacroFileCreationRow').hide();
-                    this.websiteScanSettingsVisibility(false);
                     this.apiScanSettingVisibility(false);
                     this.commonScopeSettingVisibility(isVisible);
                     this.loginMacroSettingsVisibility(false);
                     this.networkAuthSettingVisibility(isVisible);
                     this.directoryAndSubdirectoriesScopeVisibility(false);
                     this.timeboxScanVisibility(false);
-                    this.excludeUrlVisibility(false);
+                    this.websiteScanSettingsVisibility(false);
                     break;
                 case "allTypes":
                 default:
                     //hide all scan type settings.
-                    this.websiteScanSettingsVisibility(false);
-                    this.workflowScanSettingVisibility(false)
                     this.apiScanSettingVisibility(false);
                     this.loginMacroSettingsVisibility(false);
                     this.networkAuthSettingVisibility(false);
@@ -727,7 +724,8 @@ class DastPipelineGenerator {
                     this.directoryAndSubdirectoriesScopeVisibility(false);
                     this.loginMacroSettingsVisibility(false);
                     this.timeboxScanVisibility(false);
-                    this.excludeUrlVisibility(false);
+                    this.websiteScanSettingsVisibility(false);
+                    this.workflowScanSettingVisibility(false)
                     jq('#dast-api-scan-policy-apiType').hide();
                     break;
             }
@@ -759,12 +757,9 @@ class DastPipelineGenerator {
     excludeUrlVisibility(isVisible) {
         if (!isVisible) {
             jq('#standardScanTypeExcludeUrlsRow').hide();
-            let tr = closestRow('#standardScanTypeExcludeUrlsRow');
-            tr.hide();
         } else {
+
             jq('#standardScanTypeExcludeUrlsRow').show();
-            let tr = closestRow('#standardScanTypeExcludeUrlsRow');
-            tr.show();
         }
     }
 
@@ -788,15 +783,14 @@ class DastPipelineGenerator {
     }
 
     websiteScanSettingsVisibility(isVisible) {
-        let standardScanSettingRows = jq('.dast-standard-setting');
-        if (!isVisible) {
-            standardScanSettingRows.hide();
-            this.excludeUrlVisibility(false);
+       if (!isVisible) {
+
             this.resetWebSiteSettingsValues();
+            jq('.'+ dastWebSiteSettingIdentifier).hide();
+            this.excludeUrlVisibility(false);
         } else {
             this.excludeUrlVisibility(true);
-            standardScanSettingRows.show();
-
+           jq('.'+ dastWebSiteSettingIdentifier).show();
         }
     }
 
@@ -992,13 +986,62 @@ class DastPipelineGenerator {
 
     onExcludeUrlBtnClick(event, args) {
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
-        //Add to exclude list
-        jq('#listStandardScanTypeExcludedUrl');
-        // jq('#listStandardScanTypeExcludedUrl').append("<li>" + "<input type='checkbox' id= " + excludedUrl + "checked='checked'> + excludedUrl + </li>");
-        jq('#listStandardScanTypeExcludedUrl').append("<li>" + excludedUrl + "</li>");
-        jq('#listStandardScanTypeExcludedUrl').show();
+        if (excludedUrl) {
+            jq('#listStandardScanTypeExcludedUrl').append("<li> <input type='checkbox' id=' " + excludedUrl +
+                " ' checked='checked' name='" + excludedUrl + "'>" + excludedUrl + "</li>");
+            jq('#listStandardScanTypeExcludedUrl').show();
+            let urlsList = jq('#excludedUrls').val();
+            if (urlsList) {
+                if (urlsList !== '' && excludedUrl !== '') {
+                    urlsList = urlsList + "," + excludedUrl;
+                    jq('#excludedUrls').val(urlsList);
+                } else
+                    jq('#excludedUrls').val(excludedUrl);
+            }
+            else
+                jq('#excludedUrls').val(excludedUrl);
+
+        }
     }
 
+    onExcludeUrlChecked(event) {
+
+        let excludedUrls = jq('#excludedUrls').val();
+        if (event.target.checked) {
+            let urlToAdd = event.target.name;
+            if (excludedUrls) {
+                if (excludedUrls.le > 0) {
+                    excludedUrls = excludedUrls + "," + urlToAdd;
+                } else
+                    excludedUrls = urlToAdd;
+                jq('#excludedUrls').val(excludedUrls);
+            }
+        } else {
+            if (excludedUrls) {
+                let urls = excludedUrls.split(',');
+                urls.forEach((entry) => {
+                    if (entry === event.target.name) {
+                        let index = urls.lastIndexOf(entry);
+                        if (index > -1) {
+                            urls.splice(index, 1);
+
+                            let ulList = document.querySelectorAll('#listStandardScanTypeExcludedUrl');
+                            if (ulList) {
+                                ulList.forEach((item) => {
+                                    item.childNodes.forEach((ctrl) => {
+                                        if (ctrl.textContent.trim() === entry.trim()) {
+                                            ctrl.remove();
+                                        }
+                                    });
+                                });
+                            }
+                        }
+                    }
+                });
+                jq('#excludedUrls').val(urls.flat());
+            }
+        }
+    }
     setTimeBoxScan() {
         if (this.scanSettings && this.scanSettings.timeBoxInHours) {
             jq('#dast-timeBox-scan').find('input:text:first').val(this.scanSettings.timeBoxInHours);
@@ -1006,10 +1049,6 @@ class DastPipelineGenerator {
                 jq('#dast-timeBox-scan').find('input:checkbox:first').trigger('click');
             }
         }
-    }
-
-    onExcludeUrlItemSelect() {
-        alert(this);
     }
 
     async onAssessmentChanged(skipAuditPref) {

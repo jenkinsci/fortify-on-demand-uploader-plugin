@@ -192,9 +192,7 @@ class DastFreeStyle {
         } else {
             jq('.dast-scan-setting').show();
         }
-        //ToDo:
-        // //Remove BSI token form Pick a release selection list as it is not supported for DAST.
-        // jq("#releaseTypeSelectList option[value='UseBsiToken']").remove();
+
     }
 
     hideMessages(msg) {
@@ -325,6 +323,7 @@ class DastFreeStyle {
             fields.addClass('spinner');
             rows.show();
             jq('.fode-row-bsi').hide();
+            jq('[name="userSelectedRelease"]').val(releaseId);
 
             let ssp = this.api.getReleaseEntitlementSettings(releaseId, getAuthInfo(), true)
                 .then(r => this.scanSettings = r).catch((err) => {
@@ -357,7 +356,6 @@ class DastFreeStyle {
 
             await Promise.all([ssp, entp, tzs, networkAuthTypes])
                 .then(async () => {
-
                     if (this.scanSettings && this.assessments) {
                         let assessmentId = this.scanSettings.assessmentTypeId;
                         let timeZoneId = this.scanSettings.timeZone;
@@ -500,10 +498,6 @@ class DastFreeStyle {
         }
     }
 
-
-
-
-
     setOpenApiSettings(openApiSettings) {
         jq('#apiTypeList').val('openApi');
         var inputId = openApiSettings.sourceType === 'Url' ? 'openApiInputUrl' : 'openApiInputFile';
@@ -574,7 +568,6 @@ class DastFreeStyle {
     }
 
     setSelectedEntitlementValue(entitlements) {
-
         let currValSelected = false;
         let curVal = getEntitlementDropdownValue(this.scanSettings.entitlementId, this.scanSettings.entitlementFrequencyType);
         let entitlement = jq('#entitlementSelectList');
@@ -928,6 +921,45 @@ class DastFreeStyle {
         }
     }
 
+    onExcludeUrlChecked(event) {
+
+        let excludedUrls = jq('#excludedUrls').val();
+        if (event.target.checked) {
+            let urlToAdd = event.target.name;
+            if (excludedUrls) {
+                if (excludedUrls.length > 0) {
+                    excludedUrls = excludedUrls + "," + urlToAdd;
+                } else
+                    excludedUrls = urlToAdd;
+                jq('#excludedUrls').val(excludedUrls);
+            }
+        } else {
+            if (excludedUrls) {
+                debugger;
+                let urls = excludedUrls.split(',');
+                urls.forEach((entry) => {
+                    if (entry === event.target.name) {
+                        let index = urls.lastIndexOf(entry);
+                        if (index > -1) {
+                            urls.splice(index, 1);
+                            let ulList = document.querySelectorAll('#listStandardScanTypeExcludedUrl');
+                            if (ulList) {
+                                ulList.forEach((item) => {
+                                    item.childNodes.forEach((ctrl) => {
+                                        if (ctrl.textContent.trim() === entry.trim()) {
+                                            ctrl.remove();
+                                        }
+                                    });
+                                });
+                            }
+                        }
+                    }
+                });
+                jq('#excludedUrls').val(urls.flat());
+            }
+        }
+    }
+
     onApiTypeChanged() {
         jq('.uploadMessage').text('');
         this.onSourceChange('none');
@@ -981,15 +1013,12 @@ class DastFreeStyle {
                 case DastApiScanTypeEnum.OpenApi:
                     this.openApiScanVisibility(isVisible);
                     break;
-
                 case DastApiScanTypeEnum.GraphQl:
                     this.graphQlScanVisibility(isVisible);
                     break;
-
                 case DastApiScanTypeEnum.gRPC:
                     this.grpcScanVisibility(isVisible);
                     break;
-
                 case DastApiScanTypeEnum.Postman:
                     this.postmanScanVisibility(isVisible);
                     break;
@@ -1044,11 +1073,24 @@ class DastFreeStyle {
         jq('#dast-grpc').closest('.tr').hide();
     }
 
-    onExcludeUrlBtnClick(event, args) {
+    onExcludeUrlBtnClick() {
+        debugger;
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
-        jq('#listStandardScanTypeExcludedUrl');
-        jq('#listStandardScanTypeExcludedUrl').append("<li>" + excludedUrl + "</li>");
-        jq('#listStandardScanTypeExcludedUrl').show();
+        if (excludedUrl) {
+            jq('#listStandardScanTypeExcludedUrl').append("<li> <input type='checkbox' id=' " + excludedUrl +
+                " ' checked='checked' name='" + excludedUrl + "'>" + excludedUrl + "</li>");
+            jq('#listStandardScanTypeExcludedUrl').show();
+            let urlsList = jq('#excludedUrls').val();
+            if (urlsList) {
+                if (urlsList !== '' && excludedUrl !== '') {
+                    urlsList = urlsList + "," + excludedUrl;
+                    jq('#excludedUrls').val(urlsList);
+                } else
+                    jq('#excludedUrls').val(excludedUrl);
+            }
+            else
+                jq('#excludedUrls').val(excludedUrl);
+        }
     }
 
     async preInit() {
@@ -1108,6 +1150,7 @@ class DastFreeStyle {
             jq('#btnUploadLoginMacroFile').click(_ => this.onLoginMacroFileUpload());
             jq('#btnUploadWorkflowMacroFile').click(_ => this.onWorkflowMacroFileUpload());
             jq('#listWorkflowDrivenAllowedHostUrl').click(_ => this.onWorkflowDrivenHostChecked(event));
+            jq('#listStandardScanTypeExcludedUrl').click(_ => this.onExcludeUrlChecked(event));
             jq('#apiTypeList').change(_ => this.onApiTypeChanged());
             jq('#openApiInputFile, #openApiInputUrl, #graphQlInputFile, #graphQlInputUrl').change(_ => this.onSourceChange(event.target.id));
             jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile, #btnUploadgrpcFile').click(_ => this.onFileUpload(event));

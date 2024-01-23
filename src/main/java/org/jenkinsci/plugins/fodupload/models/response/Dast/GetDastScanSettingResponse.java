@@ -50,7 +50,6 @@ public class GetDastScanSettingResponse {
     public Policy policy;
     public Website websiteAssessment;
     public API apiAssessment;
-
     public ExclusionDTO[] exclusionsList;
     public WorkflowdrivenAssessment workflowdrivenAssessment;
     public int loginMacroFileId;
@@ -61,16 +60,9 @@ public class GetDastScanSettingResponse {
     public boolean restrictToDirectoryAndSubdirectories;
     public boolean requiresNetworkAuthentication;
     public NetworkAuthenticationSettings networkAuthenticationSettings;
-
     public FileDetails[] fileDetails;
-
     public boolean hasUtilizedAdditionalServices;
-
     public boolean requestFalsePositiveRemoval;
-
-
-
-
 
     public class  FileDetails{
         public int fileId;

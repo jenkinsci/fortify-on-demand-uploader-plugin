@@ -63,7 +63,7 @@
             <f:entry>
                 <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv"
                      id="requestFalsePositiveRemovalRow">
-                    <f:checkbox title="Request False Positive Removal" field="requestFalsePositiveRemoval"></f:checkbox>
+                    <f:checkbox title="Request False Positive Removal" field="requestFalsePositiveRemoval"/>
                     <div class="reqFalsePositiveWarn">This service consumes 1 assessment unit. One or both of login
                         macro generation and false positive removal consume a total of 1 assessment unit.
                     </div>
@@ -101,13 +101,13 @@
                                        name="openApiInput" value="Url"/>
                                 <label for="openApiInputUrl">URL to the OpenAPI specification</label>
                                 <input type="label" hidden="true" name="openApiRadioSource"
-                                       id="openApiRadioSource"></input>
+                                       id="openApiRadioSource"/>
                             </f:entry>
                             <div class="sourceDetails openApiSourceControls">
                                 <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileds">
                                     <div class="uploadedFileContainer openApiUploadedFileContainer">
                                         <f:entry title="Uploaded File">
-                                            <div class="uploadedFileDetails openApiFileDetails"></div>
+                                            <div class="uploadedFileDetails openApiFileDetails"/>
                                         </f:entry>
                                     </div>
                                     <f:entry field="openApiFileSource"
@@ -117,7 +117,7 @@
                                             <input accept=".json" id="openApiFile" type="File" name="openApiFile"/>
                                             <input type="button" value="Upload" id="btnUploadOpenApiFile"
                                                    class="dastFileUploadButton"/>
-                                            <h6 id="openApiUploadMessage" hidden="true" class="uploadMessage"></h6>
+                                            <h6 id="openApiUploadMessage" hidden="true" class="uploadMessage"/>
                                             <input type="label" hidden="true" name="openApiFileId" id="openApiFileId"/>
                                         </span>
                                     </f:entry>
@@ -141,7 +141,7 @@
                         <div id="dast-postman" class="apiOptions fode-field spinner-container">
                             <div class="uploadedFileContaine postmanUploadedFileContainer">
                                 <f:entry title="Uploaded File">
-                                    <div class="uploadedFileDetails postmanFileDetails"></div>
+                                    <div class="uploadedFileDetails postmanFileDetails"/>
                                 </f:entry>
                             </div>
                             <f:entry field="postmanFile"
@@ -152,7 +152,7 @@
                                         <input accept=".json" id="postmanFile" type="File" name="postmanFile"/>
                                         <input type="button" value="Upload" id="btnUploadPostmanFile"
                                                class="dastFileUploadButton"/>
-                                        <h6 id="postmanUploadMessage" hidden="true" class="uploadMessage"></h6>
+                                        <h6 id="postmanUploadMessage" hidden="true" class="uploadMessage"/>
                                         <input type="label" hidden="true" name="postmanFileId" id="postmanFileId"/>
                                     </span>
                                 </div>
@@ -170,13 +170,13 @@
                                        name="graphQlInput" value="Url"/>
                                 <label for="graphQlUrl">URL</label>
                                 <input type="label" hidden="true" name="graphQlRadioSource"
-                                       id="graphQlRadioSource"></input>
+                                       id="graphQlRadioSource"/>
                             </f:entry>
                             <div class="sourceDetails graphQLSourceControls">
                                 <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
                                     <div class="uploadedFileContainer graphQlUploadedFileContainer">
                                         <f:entry title="Uploaded File">
-                                            <div class="uploadedFileDetails graphQlFileDetails"></div>
+                                            <div class="uploadedFileDetails graphQlFileDetails"/>
                                         </f:entry>
                                     </div>
                                     <f:entry field="graphQlUpload"
@@ -185,7 +185,7 @@
                                               class="fode-field spinner-container uploadContainer">
                                             <input accept=".json" id="graphQLFile" type="File" name="graphQLFile"/>
                                             <input type="button" value="Upload" id="btnUploadgraphQLFile"/>
-                                            <h6 id="graphQlUploadMessage" hidden="true" class="uploadMessage"></h6>
+                                            <h6 id="graphQlUploadMessage" hidden="true" class="uploadMessage"/>
                                             <input type="label" hidden="true" name="graphQLFileId" id="graphQLFileId"/>
                                         </span>
                                     </f:entry>
@@ -220,7 +220,7 @@
                             <div class="uploadedFileContainer grpcUploadedFileContainer">
                                 <div class="uploadedFileContainer">-->
                                    <f:entry title="Uploaded File">-->
-                                       <div class="uploadedFileDetails grpcFileDetails"></div>-->
+                                       <div class="uploadedFileDetails grpcFileDetails"/>-->
                                   </f:entry>-->
                                </div>-->
                             </div>
@@ -230,7 +230,7 @@
                                         <input accept=".proto" id="grpcFile" type="File" name="grpcFile"/>
                                         <input type="button" value="Upload" id="btnUploadgrpcFile"
                                                class="dastFileUploadButton"/>
-                                        <h6 id="grpcUploadMessage" hidden="true" class="uploadMessage"></h6>
+                                        <h6 id="grpcUploadMessage" hidden="true" class="uploadMessage"/>
                                         <input type="label" hidden="true" name="grpcFileId" id="grpcFileId"/>
                                     </span>
                                 </div>
@@ -265,7 +265,7 @@
                     <input accept=".har,.webmacro,.burp" id="workflowMacroFile" type="File" name="workflowMacroFile"/>
                     <input type="button" value="Upload" id="btnUploadWorkflowMacroFile"/>
                     <h6 id="workflowMacroUploadStatusMessage" hidden="true"
-                        name="workflowMacroUploadStatusMessage"></h6>
+                        name="workflowMacroUploadStatusMessage"/>
                     <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>
                     <input type="label" value="" hidden="true" name="workflowMacroHosts" id="workflowMacroHosts"/>
                 </span>
@@ -278,7 +278,6 @@
             </ul>
         </f:entry>
         <!--End Workflow Driven-->
-
         <f:entry title="Dynamic Site URL">
             <div id="dast-standard-site-url" class="fode-field spinner-container">
                 <f:textbox field="webSiteUrl" name="webSiteUrl"/>
@@ -288,12 +287,9 @@
             <div id="dast-standard-scan-scope" class="fode-field spinner-container">
                 <f:booleanRadio field="scanScope" true="Restrict scan to URL directories and subdirectories"
                                 false="Scan entire host"/>
-
             </div>
-
             <div id="dast-common-scope-attr"
                  class="fode-field spinner-container redundantPageDetection">
-
                 <f:checkbox title="Enable redundant page detection" field="enableRedundantPageDetection"
                             id="enableRedundantPageDetection">
                 </f:checkbox>
@@ -304,14 +300,12 @@
                 <span>
                     <input type="text" id="standardScanExcludedUrlText" class="setting-input dast-standard-scan"
                            placeholder="Exclude URL"/>
-
                     <input type="button" id="btnAddExcludeUrl" value="Add"
                            class="btn-add-exclude-url dast-standard-scan"/>
-
                 </span>
-                <ol id="listStandardScanTypeExcludedUrl" name="listStandardScanTypeExcludedUrl"
+                <ul id="listStandardScanTypeExcludedUrl" name="listStandardScanTypeExcludedUrl"
                     class="dast-standard-scan">
-                </ol>
+                </ul>
             </div>
         </f:entry>
 
@@ -419,7 +413,7 @@
                         <span id="loginMacroUploadContainer" class="fode-field spinner-container">
                             <input accept=".webmacro" id="loginFileMacro" type="File" name="loginFileMacro"/>
                             <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
-                            <h6 id="loginMacroUploadMessage" hidden="true" name="loginMacroUploadMessage"></h6>
+                            <h6 id="loginMacroUploadMessage" hidden="true" name="loginMacroUploadMessage"/>
                             <input type="text" hidden="true" name="loginMacroId" id="loginMacroId"/>
                         </span>
                     </f:entry>
@@ -431,9 +425,10 @@
     </f:section>
     <f:entry>
         <div>
-            <input type="textbox" hidden="true" name="entitlementId" id="entitlementId"></input>
-            <input type="textbox" hidden="true" name="entitlementFrequencyId" id="frequencyId"></input>
-            <input type="textbox" hidden="true" name="entitlementFrequencyType" id="entitlementFreqType"></input>
+            <input type="textbox" hidden="true" name="entitlementId" id="entitlementId"/>
+            <input type="textbox" hidden="true" name="entitlementFrequencyId" id="frequencyId"/>
+            <input type="textbox" hidden="true" name="entitlementFrequencyType" id="entitlementFreqType"/>
+            <input type="textbox" hidden="true" name="excludedUrls" id="excludedUrls"/>
         </div>
     </f:entry>
 </j:jelly>

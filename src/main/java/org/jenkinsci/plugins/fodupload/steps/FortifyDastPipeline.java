@@ -75,6 +75,7 @@ public class FortifyDastPipeline extends FortifyStep {
     private String sdlcStatus;
     private boolean enableRedundantPageDetection;
     private String networkAuthType;
+    private String excludedUrls;
 
     public java.lang.String getSelectedApiType() {
         return selectedApiType;
@@ -497,13 +498,9 @@ public class FortifyDastPipeline extends FortifyStep {
     public void setRequestFalsePositiveRemoval(boolean requestFalsePositiveRemoval) {
         this.requestFalsePositiveRemoval = requestFalsePositiveRemoval;
     }
-
     private boolean requestFalsePositiveRemoval;
     private String scanType;
-
-
     private String workflowMacroId;
-
     public String getWorkflowMacroId() {
         return workflowMacroId;
     }
@@ -532,10 +529,6 @@ public class FortifyDastPipeline extends FortifyStep {
         this.entitlementFrequency = entitlementFrequency;
     }
 
-
-
-
-
     public final void SaveScanSettings(FilePath workspace, PrintStream logger, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
 
         if (dastScanSharedBuildStep == null) {
@@ -554,7 +547,6 @@ public class FortifyDastPipeline extends FortifyStep {
             Utils.logger(logger, "Invalid arguments:\n\t" + String.join("\n\t", errors));
             throw new IllegalArgumentException("Invalid arguments:\n\t" + String.join("\n\t", errors));
         }
-
         switch (this.scanType) {
             case "Standard":
                 saveWebSiteScanSettings(workspace, logger, dastScanSharedBuildStep);
@@ -789,6 +781,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
     @SuppressWarnings("unused")
     public String getAuditPreference() {
+
         return auditPreference;
     }
 
@@ -833,11 +826,10 @@ public class FortifyDastPipeline extends FortifyStep {
                 selectedDynamicTimeZone,
                 scanPolicy,
                 webSiteUrl
-                , scanScope, enableRedundantPageDetection, envFacing
-                , requireLoginMacro,
+                , scanScope, enableRedundantPageDetection, envFacing,
                 networkAuthUserName, networkAuthPassword
                 , networkAuthType, scanTimeBox, requestLoginMacroFileCreation, loginMacroPrimaryUserName, loginMacroPrimaryPassword,
-                loginMacroSecondaryUsername, loginMacroSecondaryPassword, requestFalsePositiveRemoval);
+                loginMacroSecondaryUsername, loginMacroSecondaryPassword, requestFalsePositiveRemoval,excludedUrls);
     }
 
     private void saveWorkflowSiteScanSettings(FilePath workspace, PrintStream printStream, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {

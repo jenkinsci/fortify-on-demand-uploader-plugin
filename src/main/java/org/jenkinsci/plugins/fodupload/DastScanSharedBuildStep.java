@@ -89,7 +89,7 @@ public class DastScanSharedBuildStep {
 
     public DastScanSharedBuildStep(Boolean overrideGlobalConfig, String username,
                                    String tenantId, String personalAccessToken, String releaseId,
-                                   String webSiteUrl, String dastEnv, String scanTimebox, Object excludeUrlList,
+                                   String webSiteUrl, String dastEnv, String scanTimebox, String excludedUrlList,
                                    String scanPolicy, boolean scanScope, String selectedScanType,
                                    String selectedDynamicTimeZone, boolean enableRedundantPageDetection, String loginMacroFilePath,
                                    String workflowMacroPath,
@@ -111,7 +111,7 @@ public class DastScanSharedBuildStep {
                 entitlementFrequencyType
                 , selectedNetworkAuthType, timeBoxChecked,
                 requestLoginMacroFileCreation, loginMacroPrimaryUserName, loginMacroPrimaryPassword, loginMacroSecondaryUsername,
-                loginMacroSecondaryPassword, requestFalsePositiveRemoval);
+                loginMacroSecondaryPassword, requestFalsePositiveRemoval, excludedUrlList);
     }
 
     public FodApiConnection getFodApiConnection() throws Exception {
@@ -186,62 +186,68 @@ public class DastScanSharedBuildStep {
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
                 break;
             case Workflow:
-                if (Utils.isNullOrEmpty(this.model.getWorkflowMacroFilePath()))
-                    errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWorkflowMacroFilePathNotFound);
+                if (Utils.isNullOrEmpty(this.model.getWorkflowMacroFilePath()) && this.model.getWorkflowMacroFileId() <= 0)
+                    errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWorkflowMacroFilePathOrMacroIdNotFound);
 
                 if (Utils.isNullOrEmpty(this.model.getScanPolicyType()))
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
                 break;
             case API:
-                if (this.model.getSelectedApi().isEmpty())
+                if (Utils.isNullOrEmpty(this.model.getSelectedApiType())) {
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanAPITypeNotFound);
-                FodEnums.DastApiType dastApiType = FodEnums.DastApiType.valueOf(this.model.getUseSelectedApiType());
+                    break;
+                }
 
-                switch (dastApiType) {
-                    case OpenApi:
+                switch (this.model.getSelectedApiType()) {
+                    case "openApi":
                         if (isNullOrEmpty(this.model.getSelectedOpenApiurl()) && isNullOrEmpty(this.model.getSelectedOpenApiFileSource())
                                 && isNullOrEmpty(this.model.getOpenApiFilePath())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanOpenApiSourceNotFound);
                         }
                         break;
-                    case Grpc:
-                        if(isNullOrEmpty(this.model.getSelectedGrpcUpload())
-                                && isNullOrEmpty(this.model.getGrpcFilePath())){
+                    case "grpc":
+                        if (isNullOrEmpty(this.model.getSelectedGrpcUpload())
+                                && isNullOrEmpty(this.model.getGrpcFilePath())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGrpcSourceNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGrpcApiHost())){
+                        if (isNullOrEmpty(this.model.getSelectedGrpcApiHost())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGrpcHostNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGrpcApiServicePath())){
+                        if (isNullOrEmpty(this.model.getSelectedGrpcApiServicePath())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGrpcServicePathNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGrpcSchemeType())){
+                        if (isNullOrEmpty(this.model.getSelectedGrpcSchemeType())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGrpcSchemeTypeNotFound);
                         }
                         break;
-                    case GraphQL:
-                        if(isNullOrEmpty(this.model.getSelectedGraphQlUpload())
+                    case "graphQl":
+                        if (isNullOrEmpty(this.model.getSelectedGraphQlUpload())
                                 && isNullOrEmpty(this.model.getGraphQlFilePath())
-                                && isNullOrEmpty(this.model.getSelectedGraphQlUrl())){
+                                && isNullOrEmpty(this.model.getSelectedGraphQlUrl())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGraphQlSourceNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGraphQlApiHost())){
+                        if (isNullOrEmpty(this.model.getSelectedGraphQlApiHost())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGraphQlHostNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGraphQlApiServicePath())){
+                        if (isNullOrEmpty(this.model.getSelectedGraphQlApiServicePath())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGraphQlServicePathNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGraphQLSchemeType())){
+                        if (isNullOrEmpty(this.model.getSelectedGraphQLSchemeType())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGraphQlSchemeTypeNotFound);
                         }
                         break;
-                    case Postman:
-                        if(isNullOrEmpty(this.model.getSelectedPostmanFile()) && isNullOrEmpty(this.model.getPostmanFilePath())){
+                    case "postman":
+                        if (isNullOrEmpty(this.model.getSelectedPostmanFile()) && isNullOrEmpty(this.model.getPostmanFilePath())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanPostmanSourceNotFound);
                         }
                         break;
+                    default:
+                        errors.add(FodGlobalConstants.FodDastValidation.DastScanAPITypeNotFound);
+                        break;
+
                 }
-                errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
+            default:
+                errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanTypeNotFound);
                 break;
         }
         return errors;
@@ -261,6 +267,7 @@ public class DastScanSharedBuildStep {
         if (this.model.getEntitlementId().isEmpty()) {
             errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanEntitlementIdNotFound);
         }
+
         if (getModel().isWebSiteNetworkAuthEnabled()) {
             if (getModel().getNetworkAuthPassword().isEmpty()) {
                 errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkPasswordNotFound);
@@ -268,7 +275,6 @@ public class DastScanSharedBuildStep {
 
                 errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkUserNameNotFound);
             } else if (getModel().getNetworkAuthType().isEmpty()) {
-
                 errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkAuthTypeNotFound);
             }
         }
@@ -285,10 +291,11 @@ public class DastScanSharedBuildStep {
                 }
                 if (this.model.getScanPolicyType().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
+
                 break;
             case Workflow:
-                if (this.model.getWorkflowMacroFileId() <= 0)
-                    errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWorkflowMacroIdNotFound);
+                if (Utils.isNullOrEmpty(this.model.getWorkflowMacroFilePath()) && this.model.getWorkflowMacroFileId() <= 0)
+                    errors.add(FodGlobalConstants.FodDastValidation.DastPipelineWorkflowMacroFilePathOrMacroIdNotFound);
 
                 if (this.model.getAllowedHost() == null || this.model.getAllowedHost().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastWorkflowAllowedHostNotFound);
@@ -297,54 +304,59 @@ public class DastScanSharedBuildStep {
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
                 break;
             case API:
-
-                if (isNullOrEmpty(this.model.getSelectedApi()))
+                if (isNullOrEmpty(this.model.getSelectedApiType())) {
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanAPITypeNotFound);
-
-                switch(this.model.getSelectedApi()){
+                    break;
+                }
+                switch (this.model.getSelectedApiType()) {
                     case "openApi":
-                        if(isNullOrEmpty(this.model.getSelectedOpenApiurl()) && isNullOrEmpty(this.model.getSelectedOpenApiFileSource())
-                                && isNullOrEmpty(this.model.getOpenApiFilePath())){
+                        if (isNullOrEmpty(this.model.getSelectedOpenApiurl()) && isNullOrEmpty(this.model.getSelectedOpenApiFileSource())
+                                && isNullOrEmpty(this.model.getOpenApiFilePath())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanOpenApiSourceNotFound);
                         }
                         break;
                     case "grpc":
-                        if(isNullOrEmpty(this.model.getSelectedGrpcUpload())
-                                && isNullOrEmpty(this.model.getGrpcFilePath())){
+                        if (isNullOrEmpty(this.model.getSelectedGrpcUpload())
+                                && isNullOrEmpty(this.model.getGrpcFilePath())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGrpcSourceNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGrpcApiHost())){
+                        if (isNullOrEmpty(this.model.getSelectedGrpcApiHost())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGrpcHostNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGrpcApiServicePath())){
+                        if (isNullOrEmpty(this.model.getSelectedGrpcApiServicePath())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGrpcServicePathNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGrpcSchemeType())){
+                        if (isNullOrEmpty(this.model.getSelectedGrpcSchemeType())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGrpcSchemeTypeNotFound);
                         }
                         break;
                     case "graphQl":
-                        if(isNullOrEmpty(this.model.getSelectedGraphQlUpload())
+                        if (isNullOrEmpty(this.model.getSelectedGraphQlUpload())
                                 && isNullOrEmpty(this.model.getGraphQlFilePath())
-                                && isNullOrEmpty(this.model.getSelectedGraphQlUrl())){
+                                && isNullOrEmpty(this.model.getSelectedGraphQlUrl())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGraphQlSourceNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGraphQlApiHost())){
+                        if (isNullOrEmpty(this.model.getSelectedGraphQlApiHost())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGraphQlHostNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGraphQlApiServicePath())){
+                        if (isNullOrEmpty(this.model.getSelectedGraphQlApiServicePath())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGraphQlServicePathNotFound);
                         }
-                        if(isNullOrEmpty(this.model.getSelectedGraphQLSchemeType())){
+                        if (isNullOrEmpty(this.model.getSelectedGraphQLSchemeType())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanGraphQlSchemeTypeNotFound);
                         }
                         break;
                     case "postman":
-                        if(isNullOrEmpty(this.model.getSelectedPostmanFile()) && isNullOrEmpty(this.model.getPostmanFilePath())){
+                        if (isNullOrEmpty(this.model.getSelectedPostmanFile()) && isNullOrEmpty(this.model.getPostmanFilePath())) {
                             errors.add(FodGlobalConstants.FodDastValidation.DastScanPostmanSourceNotFound);
                         }
                         break;
+                    default:
+                        errors.add(FodGlobalConstants.FodDastValidation.DastScanAPITypeNotFound);
+                        break;
                 }
+            default:
+                errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanTypeNotFound);
                 break;
         }
         return errors;
@@ -355,63 +367,54 @@ public class DastScanSharedBuildStep {
                                                   String timeZone, String scanPolicy, String webSiteAssessmentUrl,
                                                   boolean scanScope,
                                                   boolean redundantPageDetection, String scanEnvironment,
-                                                  boolean requireLoginMacroAuth,
                                                   String networkAuthUserName, String networkAuthPassword
             , String networkAuthType, String timeboxScan, boolean requestLoginMacroFileCreation, String loginMacroPrimaryUserName,
                                                   String loginMacroPrimaryPassword,
-                                                  String loginMacroSecondaryUsername, String loginMacroSecondaryPassword, boolean requestFalsePositiveRemoval)
+                                                  String loginMacroSecondaryUsername, String loginMacroSecondaryPassword, boolean requestFalsePositiveRemoval, String excludedUrlList)
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId());
 
         try {
-
             PutDastWebSiteScanReqModel dynamicScanSetupReqModel;
             dynamicScanSetupReqModel = new PutDastWebSiteScanReqModel();
             dynamicScanSetupReqModel.setEntitlementFrequencyType(entitlementFreq);
             dynamicScanSetupReqModel.setAssessmentTypeId(Integer.parseInt(assessmentTypeID));
             dynamicScanSetupReqModel.setTimeZone(timeZone);
-            if (scanPolicy != null && !scanPolicy.isEmpty())
-                dynamicScanSetupReqModel.setPolicy(scanPolicy);
             dynamicScanSetupReqModel.setEnableRedundantPageDetection(redundantPageDetection);
             dynamicScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
 
-            if (loginMacroId != null && !loginMacroId.isEmpty()) {
-                dynamicScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
-                requireLoginMacroAuth = true;
+            if (!Utils.isNullOrEmpty(loginMacroId)) {
+                if (Integer.parseInt(loginMacroId) > 0)
+                    dynamicScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
             }
             try {
-                if (timeboxScan != null && !timeboxScan.isEmpty())
+                if (!Utils.isNullOrEmpty(timeboxScan))
                     dynamicScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(timeboxScan));
                 else
                     dynamicScanSetupReqModel.setTimeBoxInHours(null);
             } catch (NumberFormatException exception) {
                 // Should warn not throw in front end.
-                throw new IllegalArgumentException(" Invalid value for TimeBox Scan");
+                throw new IllegalArgumentException(" Invalid excludedUrl for TimeBox Scan");
             }
-            if (scanPolicy != null && !scanPolicy.isEmpty())
+            if (!Utils.isNullOrEmpty(scanPolicy))
                 dynamicScanSetupReqModel.setPolicy(scanPolicy);
+
             dynamicScanSetupReqModel.setDynamicScanEnvironmentFacingType(scanEnvironment);
 
-            if (requireLoginMacroAuth && (!Objects.equals(loginMacroId, "") && loginMacroId != null)) {
-                if (Integer.parseInt(loginMacroId) != 0) {
-                    dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
-                }
-            }
-            if (networkAuthType != null &&
-                    networkAuthPassword != null && networkAuthUserName != null
-                    && !networkAuthType.isEmpty()
-                    && !networkAuthPassword.isEmpty()
-                    && !networkAuthUserName.isEmpty()) {
+            if (!Utils.isNullOrEmpty(networkAuthType) &&
+                    !Utils.isNullOrEmpty(networkAuthPassword) && !Utils.isNullOrEmpty(networkAuthUserName)
+            ) {
                 PutDastScanSetupReqModel.NetworkAuthentication networkSetting = dynamicScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkSetting.setPassword(networkAuthPassword);
                 networkSetting.setUserName(networkAuthUserName);
                 networkSetting.setRequiresNetworkAuthentication(true);
                 networkSetting.setNetworkAuthenticationType(networkAuthType);
                 dynamicScanSetupReqModel.setNetworkAuthenticationSettings(networkSetting);
+                dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
             }
 
-            if (!isNullOrEmpty(loginMacroPrimaryUserName)&&
+            if (!isNullOrEmpty(loginMacroPrimaryUserName) &&
                     !isNullOrEmpty(loginMacroPrimaryPassword) &&
                     !isNullOrEmpty(loginMacroSecondaryUsername) &&
                     !isNullOrEmpty(loginMacroSecondaryPassword)) {
@@ -422,10 +425,8 @@ public class DastScanSharedBuildStep {
                 loginMacroDetails.setPrimaryPassword(loginMacroPrimaryPassword);
                 loginMacroDetails.setSecondaryUsername(loginMacroSecondaryUsername);
                 loginMacroDetails.setSecondaryPassword(loginMacroSecondaryPassword);
-
                 dynamicScanSetupReqModel.setLoginMacroFileCreationDetails(loginMacroDetails);
             }
-
             dynamicScanSetupReqModel.setRequestFalsePositiveRemoval(requestFalsePositiveRemoval);
             if (scanScope) //if true => Restrict scan to URL directories and subdirectories
                 dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(scanScope);
@@ -433,6 +434,24 @@ public class DastScanSharedBuildStep {
                 dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(true);
 
             dynamicScanSetupReqModel.setDynamicSiteUrl(webSiteAssessmentUrl);
+
+            if (!isNullOrEmpty(excludedUrlList)) {
+                List<ExcludedUrl> exclusionsLists = new ArrayList<ExcludedUrl>();
+                String[] urls = excludedUrlList.split(",");
+                if (urls.length > 0) {
+
+
+                    for (int cnt = 0; cnt < urls.length; cnt++) {
+                        if (!Utils.isNullOrEmpty(urls[cnt])) {
+                            ExcludedUrl urlToExclude = new ExcludedUrl();
+                            urlToExclude.value = urls[cnt];
+                            exclusionsLists.add(urlToExclude);
+                        }
+                    }
+
+                }
+                dynamicScanSetupReqModel.setExclusionsList(exclusionsLists);
+            }
             PutDastScanSetupResponse response = dynamicController.SaveDastWebSiteScanSettings(Integer.parseInt(userSelectedRelease),
                     dynamicScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
@@ -460,7 +479,7 @@ public class DastScanSharedBuildStep {
                                                          String timeZone, String scanPolicy,
                                                          String scanEnvironment,
                                                          String networkAuthUserName, String networkAuthPassword
-            , String networkAuthType, boolean requestFalsePositiveRemoval )
+            , String networkAuthType, boolean requestFalsePositiveRemoval)
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
@@ -951,8 +970,8 @@ public class DastScanSharedBuildStep {
     public static ListBoxModel doFillSelectedReleaseTypeItems() {
         ListBoxModel items = new ListBoxModel();
         for (FodEnums.SelectedReleaseType selectedReleaseType : FodEnums.SelectedReleaseType.values()) {
-            if(!selectedReleaseType.getValue().equalsIgnoreCase(BSI_TOKEN))
-              items.add(new ListBoxModel.Option(selectedReleaseType.toString(), selectedReleaseType.getValue()));
+            if (!selectedReleaseType.getValue().equalsIgnoreCase(BSI_TOKEN))
+                items.add(new ListBoxModel.Option(selectedReleaseType.toString(), selectedReleaseType.getValue()));
         }
         return items;
     }

@@ -14,29 +14,36 @@ public class PutDastScanSetupReqModel implements Serializable {
 
     NetworkAuthentication networkAuthenticationSettings;
 
-
-
     public void setEntitlementFrequencyType(String entitlementFrequencyType) {
         this.entitlementFrequencyType = entitlementFrequencyType;
     }
+
     String entitlementFrequencyType;
+
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
+
     String timeZone;
+
     public void setDynamicScanEnvironmentFacingType(String dynamicScanEnvironmentFacingType) {
         this.dynamicScanEnvironmentFacingType = dynamicScanEnvironmentFacingType;
     }
+
     String dynamicScanEnvironmentFacingType;
+
     public void setEntitlementId(int entitlementId) {
         this.entitlementId = entitlementId;
     }
 
     int entitlementId;
+
     public void setAssessmentTypeId(int assessmentTypeId) {
         this.assessmentTypeId = assessmentTypeId;
     }
+
     int assessmentTypeId;
+
     public class NetworkAuthentication {
 
         public void setUserName(String userName) {
@@ -63,16 +70,13 @@ public class PutDastScanSetupReqModel implements Serializable {
 
         boolean requiresNetworkAuthentication;
 
-
     }
 
     public void setRequestFalsePositiveRemoval(boolean requestFalsePositiveRemoval) {
         this.requestFalsePositiveRemoval = requestFalsePositiveRemoval;
     }
+
     public boolean requestFalsePositiveRemoval;
-
-
-
 
 
 }

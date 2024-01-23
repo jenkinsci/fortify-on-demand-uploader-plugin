@@ -40,7 +40,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                                          String personalAccessToken, String tenantId,
                                          String webSiteUrl, String dastEnv,
                                          String scanTimeBox,
-                                         List<String> listStandardScanTypeExcludedUrl,
+                                         String excludedUrls,
                                          String scanPolicy, boolean scanScope,
                                          String selectedScanType, String selectedDynamicTimeZone,
                                          boolean webSiteNetworkAuthSettingEnabled,
@@ -60,7 +60,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                                          boolean requestLoginMacroFileCreation, String loginMacroPrimaryUserName, String loginMacroPrimaryPassword, String loginMacroSecondaryUsername,
                                          String loginMacroSecondaryPassword, boolean requestFalsePositiveRemoval
 
-    ) throws IllegalArgumentException, IOException {
+    ) throws IllegalArgumentException {
         try {
 
             if (selectedScanType.equals(FodEnums.DastScanType.Workflow.toString()) || selectedScanType.equals(FodEnums.DastScanType.Standard.toString())) {
@@ -68,7 +68,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                         personalAccessToken, userSelectedRelease,
                         webSiteUrl, dastEnv,
                         scanTimeBox,
-                        listStandardScanTypeExcludedUrl,
+                        excludedUrls,
                         scanPolicy, scanScope,
                         selectedScanType, selectedDynamicTimeZone, enableRedundantPageDetection, null,null,
                         loginMacroId.isEmpty() ? 0 : Integer.parseInt(loginMacroId), workflowMacroId, workflowMacroHosts,
@@ -117,10 +117,11 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                 dastSharedBuildStep.SaveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicy,
                         webSiteUrl, scanScope, enableRedundantPageDetection, dastEnv,
-                        webSiteNetworkAuthSettingEnabled, networkAuthUserName,
+                        networkAuthUserName,
                         networkAuthPassword, selectedNetworkAuthType, scanTimeBox,
                         requestLoginMacroFileCreation, loginMacroPrimaryUserName,
-                        loginMacroPrimaryPassword, loginMacroSecondaryUsername ,loginMacroSecondaryPassword, requestFalsePositiveRemoval);
+                        loginMacroPrimaryPassword, loginMacroSecondaryUsername ,loginMacroSecondaryPassword, requestFalsePositiveRemoval
+                ,excludedUrls);
 
             } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
 
@@ -280,7 +281,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
     @JavaScriptMethod
     public String getUseSelectedApiType() {
-        return dastSharedBuildStep.getModel().getUseSelectedApiType();
+        return dastSharedBuildStep.getModel().getSelectedApiType();
     }
 
 

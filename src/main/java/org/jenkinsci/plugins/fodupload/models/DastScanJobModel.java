@@ -24,7 +24,7 @@ public class DastScanJobModel {
     {
         return this.workflowMacroFilePath;
     }
-
+    String excludedUrlList;
     int workflowMacroFileId;
     String dastEnv;
     String scanPolicyType;
@@ -35,7 +35,7 @@ public class DastScanJobModel {
     String selectedDynamicTimeZone;
     boolean enableRedundantPageDetection;
     String networkAuthUserName;
-    Integer loginFileMacro;
+    Integer loginFileMacroId;
     String networkAuthPassword;
     String networkAuthType;
     String userSelectedApplication;
@@ -85,7 +85,8 @@ public class DastScanJobModel {
                             String entitlementId, String entitlementFrequencyType,
                             String selectedNetworkAuthType,boolean timeBoxChecked,
                             boolean requestLoginMacroFileCreation, String loginMacroPrimaryUserName, String loginMacroPrimaryPassword,
-                            String loginMacroSecondaryUsername, String loginMacroSecondaryPassword, boolean requestFalsePositiveRemoval) {
+                            String loginMacroSecondaryUsername, String loginMacroSecondaryPassword, boolean requestFalsePositiveRemoval,
+                            String excludedUrlList){
 
         this._releaseId = releaseId;
         this.overrideGlobalConfig = overrideGlobalConfig;
@@ -99,7 +100,7 @@ public class DastScanJobModel {
         }
         this.loginMacroFilePath = loginMacroFilePath;
         this.workflowMacroFilePath = workflowMacroFilePath;
-        this.loginFileMacro = loginMacroId;
+        this.loginFileMacroId = loginMacroId;
         this.dastEnv = dastEnv;
         this.timeBoxScan = scanTimebox;
         this.scanPolicyType = scanPolicy;
@@ -119,6 +120,7 @@ public class DastScanJobModel {
         this.loginMacroSecondaryUsername = loginMacroSecondaryUsername;
         this.loginMacroSecondaryPassword = loginMacroSecondaryPassword;
         this.requestFalsePositiveRemoval = requestFalsePositiveRemoval;
+        this.excludedUrlList = excludedUrlList;
     }
 
     public boolean isOverrideGlobalConfig() {
@@ -144,6 +146,8 @@ public class DastScanJobModel {
     public String getDastEnv() {
         return dastEnv;
     }
+
+    public String getLoginMacroFilePath(){return loginMacroFilePath;}
 
     public String getScanPolicyType() {
         return scanPolicyType;
@@ -181,8 +185,8 @@ public class DastScanJobModel {
         return networkAuthUserName;
     }
 
-    public Integer getLoginFileMacro() {
-        return loginFileMacro;
+    public Integer getLoginFileMacroId() {
+        return loginFileMacroId;
     }
 
     public String getNetworkAuthPassword() {
@@ -252,7 +256,7 @@ public class DastScanJobModel {
         return selectedOpenApiSource;
     }
 
-    public String getSelectedApi() {
+    public String getSelectedApiType() {
         return selectedApi;
     }
 
@@ -424,8 +428,7 @@ public class DastScanJobModel {
     }
 
     public String getSelectedReleaseType() {
-        System.out.println(selectedReleaseType + " selectedReleaseType");
-        return selectedReleaseType;
+            return selectedReleaseType;
     }
 
     public String getUserSelectedApplication() {
@@ -435,10 +438,6 @@ public class DastScanJobModel {
 
     public String getUserSelectedRelease() {
         return userSelectedRelease;
-    }
-
-    public String getUseSelectedApiType() {
-        return selectedApi;
     }
 
 }

@@ -487,10 +487,10 @@ public class FodEnums {
     }
 
     public enum DastApiType {
-        OpenApi("OpenApi"),
-        Grpc("Grpc"),
-        GraphQL("GraphQL"),
-        Postman("Postman");
+        OpenApi("openApi"),
+        Grpc("grpc"),
+        GraphQL("graphQl"),
+        Postman("postman");
         private final String _val;
 
         DastApiType(String val){
@@ -499,19 +499,22 @@ public class FodEnums {
 
         public String toString() {
             switch (this._val) {
-                case "OpenApi":
-                    return "OpenApi";
-                case "GraphQL":
-                    return "GraphQL";
-                case "Grpc":
-                    return "Grpc";
-                case "Postman":
-                    return "Postman";
+                case "openApi":
+                    return "openApi";
+                case "graphQl":
+                    return "graphQl";
+                case "grpc":
+                    return "grpc";
+                case "postman":
+                    return "postman";
                 default:
                     return "none";
 
             }
 
+        }
+        public String getValue() {
+            return this._val;
         }
 
     }
