@@ -22,8 +22,10 @@ public class FodGlobalConstants {
         public final static String DastPipelineWebSiteUrlNotFound = "Missing Website URL.";
         public final static String DastPipelineReleaseIdNotFound = "Missing Release Id.";
         public final static String DastPipelineScanEntitlementIdNotFound = "Missing Entitlement Id.";
-        public final static String DastPipelineScanEntitlementTypeNotFound = "Missing Entitlement Type.";
+        public final static String DastPipelineScanEntitlementFreqTypeNotFound = "Missing Valid Entitlement Frequency Type.";
         public final static String DastPipelineAssessmentIdNotFound = "Missing Assessment Id.";
+
+        public final static String DastTimeZoneNotFound = "Missing Valid TimeZone";
         public final static String DastPipelineWorkflowMacroFilePathOrMacroIdNotFound = "Missing Valid Workflow File Path Or a Valid Workflow Macro Id.";
 
         public final static String DastPipelineWebSiteLoginIdNotFound = "Missing Website Login Macro Id.";

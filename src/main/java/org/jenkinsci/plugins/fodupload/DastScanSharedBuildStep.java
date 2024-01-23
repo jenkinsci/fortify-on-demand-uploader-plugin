@@ -162,6 +162,13 @@ public class DastScanSharedBuildStep {
         if (Utils.isNullOrEmpty(this.model.getEntitlementId())) {
             errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanEntitlementIdNotFound);
         }
+       if (Utils.isNullOrEmpty(this.model.getEntitlementFrequencyType())) {
+            errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanEntitlementFreqTypeNotFound);
+        }
+
+        if (Utils.isNullOrEmpty(this.model.getSelectedDynamicTimeZone())) {
+            errors.add(FodGlobalConstants.FodDastValidation.DastTimeZoneNotFound);
+        }
         if (getModel().isWebSiteNetworkAuthEnabled()) {
             if (Utils.isNullOrEmpty(getModel().getNetworkAuthPassword())) {
                 errors.add(FodGlobalConstants.FodDastValidation.DastScanNetworkPasswordNotFound);
@@ -258,14 +265,22 @@ public class DastScanSharedBuildStep {
         List<String> errors = new ArrayList<>();
 
         //Check for mandate fields based on scan type.
-        if (this.model.getSelectedScanType().isEmpty()) {
+        if (Utils.isNullOrEmpty(this.model.getSelectedScanType())) {
             errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanTypeNotFound);
         }
-        if (this.model.get_releaseId().isEmpty()) {
+        if (Utils.isNullOrEmpty(this.model.get_releaseId())) {
             errors.add(FodGlobalConstants.FodDastValidation.DastPipelineReleaseIdNotFound);
         }
-        if (this.model.getEntitlementId().isEmpty()) {
+        if (Utils.isNullOrEmpty(this.model.getEntitlementId())) {
             errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanEntitlementIdNotFound);
+        }
+
+        if (Utils.isNullOrEmpty(this.model.getEntitlementFrequencyType())) {
+            errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanEntitlementFreqTypeNotFound);
+        }
+
+        if (Utils.isNullOrEmpty(this.model.getSelectedDynamicTimeZone())) {
+            errors.add(FodGlobalConstants.FodDastValidation.DastTimeZoneNotFound);
         }
 
         if (getModel().isWebSiteNetworkAuthEnabled()) {
@@ -385,8 +400,12 @@ public class DastScanSharedBuildStep {
             dynamicScanSetupReqModel.setEntitlementId(Integer.parseInt(entitlementId));
 
             if (!Utils.isNullOrEmpty(loginMacroId)) {
-                if (Integer.parseInt(loginMacroId) > 0)
+                if (Integer.parseInt(loginMacroId) > 0) {
                     dynamicScanSetupReqModel.setLoginMacroFileId(Integer.parseInt(loginMacroId));
+                    dynamicScanSetupReqModel.setRequiresSiteAuthentication(true);
+                }
+                else
+                    throw new IllegalArgumentException("Fortify DAST Invalid Login Macro Id");
             }
             try {
                 if (!Utils.isNullOrEmpty(timeboxScan))
