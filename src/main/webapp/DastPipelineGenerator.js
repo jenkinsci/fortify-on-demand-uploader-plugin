@@ -798,6 +798,7 @@ class DastPipelineGenerator {
         jq('[name=workflowMacroFilePath]').val('');
         jq('[name=workflowMacroHosts]').val('');
         jq('[name=workflowMacroId]').val('');
+        jq('#listWorkflowDrivenAllowedHostUrl').empty();
     }
 
     resetWebSiteSettingsValues() {
