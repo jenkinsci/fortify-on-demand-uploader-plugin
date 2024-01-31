@@ -532,7 +532,7 @@ public class FortifyDastPipeline extends FortifyStep {
     public final void SaveScanSettings(FilePath workspace, PrintStream logger, DastScanSharedBuildStep dastScanSharedBuildStep) throws Exception {
 
         if (dastScanSharedBuildStep == null) {
-            throw new RuntimeException("DastScanSharedBuildStep Object not set");
+            throw new Exception("DastScanSharedBuildStep Object not set");
         }
         List<String> errors =null;
         if(!this.getReleaseId().isEmpty() && this.getReleaseName().isEmpty()) {
@@ -1081,7 +1081,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
                 if(!createApplicationResponse.getSuccess() || createApplicationResponse.getReleaseId() <0)
                 {
-                    throw  new RuntimeException(String.format("Fortify OnDemand Failed to create application and release, error(s): %s",
+                    throw  new Exception(String.format("Fortify OnDemand Failed to create application and release, error(s): %s",
                             String.join("," ,createApplicationResponse.getErrors())));
                 }
                 this.releaseId = createApplicationResponse.getReleaseId().toString();
@@ -1110,6 +1110,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
         } catch (Exception e) {
             logger(printStream, e.getCause()!=null? e.getCause().getMessage():e.getMessage());
+            build.setResult(Result.FAILURE);
             throw new RuntimeException(e);
         }
     }

@@ -60,7 +60,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                                          boolean requestLoginMacroFileCreation, String loginMacroPrimaryUserName, String loginMacroPrimaryPassword, String loginMacroSecondaryUsername,
                                          String loginMacroSecondaryPassword, boolean requestFalsePositiveRemoval
 
-    ) throws IllegalArgumentException {
+    ) throws Exception {
         try {
 
             if (selectedScanType.equals(FodEnums.DastScanType.Workflow.toString()) || selectedScanType.equals(FodEnums.DastScanType.Standard.toString())) {
@@ -107,7 +107,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
             if(apiConnection ==null)
             {
-                throw  new Exception("FOD API Connection not set.");
+                throw new Exception("FOD API Connection not set.");
             }
 
             dastSharedBuildStep.SetFodApiConnection(apiConnection);
@@ -166,12 +166,13 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                             postmanFileId, requestFalsePositiveRemoval);
                 } else {
 
-                    throw new IllegalArgumentException("Fortify onDemand: Not Valid Dast API Scan Type set for releaseId: " + userSelectedRelease);
+                    throw new IllegalArgumentException("Not Valid Dast API Scan Type set for releaseId: " + userSelectedRelease);
                 }
             } else
-                throw new IllegalArgumentException("Fortify onDemand: Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
-        } catch (Exception ex) {
-            throw new RuntimeException(String.format("Fortify onDemand: %s", ex.getMessage()));
+                throw new IllegalArgumentException("Not Valid Dast Scan Type set for releaseId: " + userSelectedRelease);
+        }
+        catch (Exception ex) {
+            throw new Exception(String.format("Fortify onDemand: %s %s", ex.getMessage(), ex.getCause()));
         }
     }
 
@@ -192,36 +193,33 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
     public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
         PrintStream printStream = listener.getLogger();
-        build.addAction(new CrossBuildAction());
-        FodApiConnection apiConnection = null;
         try {
+
+            build.addAction(new CrossBuildAction());
+            FodApiConnection apiConnection = null;
+
             apiConnection = ApiConnectionFactory.createApiConnection(this.dastSharedBuildStep.getAuthModel(), workspace.isRemote(), launcher, printStream);
-
             build.save();
-        } catch (IOException ex) {
-            Utils.logger(printStream, String.format("Build save failed for release Id: %s with error: %s", getReleaseId(), ex.getMessage()));
 
-        }
+            if (apiConnection == null) {
+                throw new Exception("Fod API Connection not set.");
+            }
 
-        if(apiConnection ==null)
-        {
-            throw new RuntimeException("Fod API Connection not set.");
-        }
+            String correlationId = UUID.randomUUID().toString();
+            dastSharedBuildStep.perform(build, listener, correlationId, apiConnection);
 
-        String correlationId = UUID.randomUUID().toString();
-        dastSharedBuildStep.perform(build, listener, correlationId, apiConnection);
+            CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
+            crossBuildAction.setPreviousStepBuildResult(build.getResult());
 
-        CrossBuildAction crossBuildAction = build.getAction(CrossBuildAction.class);
-        crossBuildAction.setPreviousStepBuildResult(build.getResult());
-
-        if (Result.SUCCESS.equals(crossBuildAction.getPreviousStepBuildResult())) {
-            crossBuildAction.setScanId(dastSharedBuildStep.getScanId());
-            crossBuildAction.setCorrelationId(correlationId);
-        }
-        try {
+            if (Result.SUCCESS.equals(crossBuildAction.getPreviousStepBuildResult())) {
+                crossBuildAction.setScanId(dastSharedBuildStep.getScanId());
+                crossBuildAction.setCorrelationId(correlationId);
+            }
             build.save();
-        } catch (IOException ex) {
-            Utils.logger(printStream, String.format("Build failed for release Id: %s with error: %s", getReleaseId(), ex.getMessage()));
+        } catch (Exception ex) {
+            Utils.logger(printStream, String.format("Build failed for release Id: %s with error: %s %s", getReleaseId(), ex.getMessage(), ex.getCause()));
+            build.setResult(Result.FAILURE);
+
         }
     }
 

@@ -199,7 +199,7 @@ public class DastScanSharedBuildStep {
                 if (Utils.isNullOrEmpty(this.model.getScanPolicyType()))
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
                 break;
-            case API:
+            case API: {
                 if (Utils.isNullOrEmpty(this.model.getSelectedApiType())) {
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanAPITypeNotFound);
                     break;
@@ -253,6 +253,8 @@ public class DastScanSharedBuildStep {
                         break;
 
                 }
+                break;
+            }
             default:
                 errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanTypeNotFound);
                 break;
@@ -318,7 +320,7 @@ public class DastScanSharedBuildStep {
                 if (this.model.getScanPolicyType().isEmpty())
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanPolicyNotFound);
                 break;
-            case API:
+            case API: {
                 if (isNullOrEmpty(this.model.getSelectedApiType())) {
                     errors.add(FodGlobalConstants.FodDastValidation.DastScanAPITypeNotFound);
                     break;
@@ -370,6 +372,8 @@ public class DastScanSharedBuildStep {
                         errors.add(FodGlobalConstants.FodDastValidation.DastScanAPITypeNotFound);
                         break;
                 }
+                break;
+            }
             default:
                 errors.add(FodGlobalConstants.FodDastValidation.DastPipelineScanTypeNotFound);
                 break;
@@ -477,11 +481,9 @@ public class DastScanSharedBuildStep {
                 Utils.logger(_printStream, "Successfully saved settings for release id = " + userSelectedRelease);
             } else {
 
-                String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                String errMsg  = response.errors != null ? response.errors.stream().map(e -> e.errorCode + ":" + e.message)
                         .collect(Collectors.joining(",")) : "";
-
-                throw new Exception(String.format("Failed to save scan settings for release id:%s, error: %s",
-                        userSelectedRelease, errMsg));
+                throw new Exception(String.format("FOD API Error %s",errMsg));
             }
         } catch (IllegalArgumentException e) {
             throw e;
@@ -552,11 +554,9 @@ public class DastScanSharedBuildStep {
                 Utils.logger(_printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
-                String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                String errMsg  = response.errors != null ? response.errors.stream().map(e -> e.errorCode + ":" + e.message)
                         .collect(Collectors.joining(",")) : "";
-
-                throw new Exception(String.format("Failed to save scan settings for release id:%s, error: %s",
-                        userSelectedRelease, errMsg));
+                throw new Exception(String.format("FOD API Error %s",errMsg));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
@@ -664,11 +664,10 @@ public class DastScanSharedBuildStep {
                 Utils.logger(_printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
-                String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                String errMsg  = response.errors != null ? response.errors.stream().map(e -> e.errorCode + ":" + e.message)
                         .collect(Collectors.joining(",")) : "";
+                throw new Exception(String.format("FOD API Error %s",errMsg));
 
-                throw new Exception(String.format("Failed to save scan settings for release id:%s, error: %s",
-                        userSelectedRelease, errMsg));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
@@ -720,11 +719,9 @@ public class DastScanSharedBuildStep {
                 Utils.logger(_printStream, "Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
-                String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                String errMsg  = response.errors != null ? response.errors.stream().map(e -> e.errorCode + ":" + e.message)
                         .collect(Collectors.joining(",")) : "";
-
-                throw new Exception(String.format("Failed to save scan settings for release id:%s, error: %s",
-                        userSelectedRelease, errMsg));
+                throw new Exception(String.format("FOD API Error %s",errMsg));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
@@ -780,11 +777,9 @@ public class DastScanSharedBuildStep {
 
             } else {
 
-                String errMsg = response.errors != null ? response.errors.stream().map(e -> e.message)
+                String errMsg  = response.errors != null ? response.errors.stream().map(e -> e.errorCode + ":" + e.message)
                         .collect(Collectors.joining(",")) : "";
-
-                throw new Exception(String.format("Failed to save scan settings for release id:%s, error: %s",
-                        userSelectedRelease, errMsg));
+                throw new Exception(String.format("FOD API Error %s",errMsg));
             }
 
         } catch (Exception e) {
@@ -836,7 +831,9 @@ public class DastScanSharedBuildStep {
                 System.out.println("Successfully saved settings for release id = " + userSelectedRelease);
 
             } else {
-                throw new Exception(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)));
+                String errMsg  = response.errors != null ? response.errors.stream().map(e -> e.errorCode + ":" + e.message)
+                        .collect(Collectors.joining(",")) : "";
+                throw new Exception(String.format("FOD API Error %s",errMsg));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(String.format("Failed to save scan settings for release id %d", Integer.parseInt(userSelectedRelease)), e);
@@ -860,10 +857,9 @@ public class DastScanSharedBuildStep {
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void perform(Run<?, ?> build,
-                        TaskListener listener, String correlationId, FodApiConnection apiConnection) {
+                        TaskListener listener, String correlationId, FodApiConnection apiConnection) throws IOException {
         final PrintStream logger = listener.getLogger();
 
-        try {
             taskListener.set(listener);
 
             if (authModel != null) {
@@ -924,10 +920,6 @@ public class DastScanSharedBuildStep {
                 build.setResult(Result.FAILURE);
             }
 
-        } catch (IOException e) {
-            build.setResult(Result.FAILURE);
-            throw new RuntimeException(e);
-        }
     }
 
     public static ListBoxModel doFillEntitlementPreferenceItems() {
