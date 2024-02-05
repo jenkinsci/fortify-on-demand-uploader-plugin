@@ -397,6 +397,7 @@ class DastPipelineGenerator {
             jq('#overrideReleaseSettings').prop('checked', false);
             jq('#releaseSelectionValue').hide();
             this.autoProvMode = true;
+            validateRequiredFieldsById(requiredFieldsPipelineById)
             jq('.fodp-row-autoProv').show();
         } else {
             jq('.fodp-row-relid').show();
@@ -911,6 +912,7 @@ class DastPipelineGenerator {
 
     onScanTypeChanged() {
         this.resetAuthSettings();
+        jq('.dast-common-scan-scope').show();
         let selectedScanTypeValue = jq('#scanTypeList').val();
         if (!selectedScanTypeValue) {
             //Reset All ScanTypes Controls
@@ -1148,11 +1150,14 @@ class DastPipelineGenerator {
                                 let nt = this.networkAuthTypes[ts];
                                 networkAuthTypeSel.append(`<option value="${nt.text}" >${nt.text}</option>`);
                             }
-                            this.scanTypeUserControlVisibility('allTypes', false);
-                            this.apiTypeUserControlVisibility(null, false);
                             jq('.fodp-row-autoProv').show();
+                            this.apiTypeUserControlVisibility(null, false);
+                            this.scanTypeUserControlVisibility('allTypes', true);
+                            this.onTimeZoneChanged()
+                            this.onNetworkAuthTypeChanged();
+                            validateRequiredFields(requiredFieldsPipeline);
+                            validateDropdown('#scanTypeList');
                             fields.removeClass('spinner');
-
                         }
                     );
 

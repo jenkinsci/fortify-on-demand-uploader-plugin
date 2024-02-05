@@ -32,6 +32,10 @@ const requiredFieldsPipeline = ['webSiteUrl',
                                 'grpcApiServicePath',
                                 'scanTimeBox'];
 
+const requiredFieldsPipelineById = ['#autoProvOwner',
+                                    '#autoProvAppName',
+                                    '#autoProvRelName'];
+
 
      function setOnblurEventForFreestyle () {
              //website ,workflow-driven scan, Network Authentication, Timebox fields
@@ -76,6 +80,8 @@ const requiredFieldsPipeline = ['webSiteUrl',
              jq('[name="grpcFilePath"]').blur(_ => this.validateFileExtension("[name='" + event.target.name + "']", protoExtension));
 
              jq('#autoProvOwner').blur(_ => this.validateTextbox('#autoProvOwner'));
+             jq('#autoProvAppName').blur(_ => this.validateTextbox('#autoProvAppName'));
+             jq('#autoProvRelName').blur(_ => this.validateTextbox('#autoProvRelName'));
           }
 
      function handleUploadStatusMessage (id, message, success) {
@@ -119,6 +125,12 @@ const requiredFieldsPipeline = ['webSiteUrl',
      function validateRequiredFields (requiredFields) {
        jq.each(requiredFields, function(index, val) {
         validateTextbox('[name="' + val + '"]');
+        });
+     }
+
+     function validateRequiredFieldsById (requiredFieldIds) {
+        jq.each(requiredFieldIds, function(index, val) {
+        validateTextbox(val);
         });
      }
 
