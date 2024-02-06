@@ -213,8 +213,8 @@
                     <div class="fode-edit jenkins-select">
                         <select name="scanType" id="scanTypeList" class="jenkins-select__input">
                             <option value="-1">Select a Scan Type</option>
-                            <option value="Standard">Standard</option>
-                            <option value="Workflow-driven">Workflow-Driven</option>
+                            <option value="Standard">Website</option>
+                            <option value="Workflow-driven">Workflow-driven</option>
                             <option value="API">API</option>
                         </select>
                     </div>

@@ -63,7 +63,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
     ) throws Exception {
         try {
 
-            if (selectedScanType.equals(FodEnums.DastScanType.Workflow.toString()) || selectedScanType.equals(FodEnums.DastScanType.Standard.toString())) {
+            if (selectedScanType.equals(FodEnums.DastScanType.Workflow.toString()) || selectedScanType.equals(FodEnums.DastScanType.Website.toString())) {
                 dastSharedBuildStep = new DastScanSharedBuildStep(overrideGlobalConfig, username, tenantId,
                         personalAccessToken, userSelectedRelease,
                         webSiteUrl, dastEnv,
@@ -112,7 +112,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
             dastSharedBuildStep.SetFodApiConnection(apiConnection);
 
-            if (FodEnums.DastScanType.Standard.toString().equalsIgnoreCase(selectedScanType)) {
+            if (FodEnums.DastScanType.Website.toString().equalsIgnoreCase(selectedScanType)) {
 
                 dastSharedBuildStep.SaveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicy,

@@ -46,7 +46,7 @@
         color: red;
         }
         .req-field {
-        border: 1px solid red;
+        border: 2px solid red;
         }
         .uploadedFileDetails {
         display: inline-block;

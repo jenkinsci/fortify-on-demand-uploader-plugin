@@ -547,8 +547,9 @@ public class FortifyDastPipeline extends FortifyStep {
             Utils.logger(logger, "Invalid arguments:\n\t" + String.join("\n\t", errors));
             throw new IllegalArgumentException("Invalid arguments:\n\t" + String.join("\n\t", errors));
         }
+
         switch (this.scanType) {
-            case "Standard":
+            case "Website":
                 saveWebSiteScanSettings(workspace, logger, dastScanSharedBuildStep);
                 break;
             case "Workflow-driven":
@@ -822,7 +823,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
         dastScanSharedBuildStep.SaveReleaseSettingsForWebSiteScan(releaseId, assessmentTypeId,
                 entitlementId
-                , entitlementFrequency, String.valueOf(loginMacroFileId),
+                , entitlementFrequency, loginMacroFileId,
                 selectedDynamicTimeZone,
                 scanPolicy,
                 webSiteUrl
@@ -980,9 +981,9 @@ public class FortifyDastPipeline extends FortifyStep {
 
             DastScanSharedBuildStep dastScanSharedBuildStep = null;
 
-            if (Objects.equals(scanType, FodEnums.DastScanType.Standard.toString()) || Objects.equals(scanType, FodEnums.DastScanType.Workflow.toString())) {
+            if (Objects.equals(scanType, FodEnums.DastScanType.Website.toString()) || Objects.equals(scanType, FodEnums.DastScanType.Workflow.toString())) {
 
-                int loginFileId = 0;
+                Integer loginFileId = null;
                 if (!loginMacroFileId.isEmpty()) {
                     loginFileId = Integer.parseInt(loginMacroFileId);
                 }

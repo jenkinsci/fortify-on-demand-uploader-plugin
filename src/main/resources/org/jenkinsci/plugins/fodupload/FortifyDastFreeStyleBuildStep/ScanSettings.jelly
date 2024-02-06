@@ -31,7 +31,7 @@
                     <div class="fode-edit jenkins-select">
                         <select name="selectedScanType" id="scanTypeList" class="jenkins-select__input">
                             <option value="-1">Select a Scan Type</option>
-                            <option value="Standard">Standard</option>
+                            <option value="Standard">WebSite</option>
                             <option value="Workflow">Workflow-Driven</option>
                             <option value="API">API</option>
                         </select>
@@ -105,11 +105,11 @@
                             </f:entry>
                             <div class="sourceDetails openApiSourceControls">
                                 <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileds">
-                                  <!--  <div class="uploadedFileContainer openApiUploadedFileContainer">
+                                    <div class="uploadedFileContainer openApiUploadedFileContainer">
                                         <f:entry title="Uploaded File">
                                             <div class="uploadedFileDetails openApiFileDetails"/>
                                         </f:entry>
-                                    </div>-->
+                                    </div>
                                     <f:entry field="openApiFileSource"
                                              title="Please upload your OpenAPI specification json file. Supported extensions: *.json">
                                         <span id="openApiUploadContainer"
@@ -139,11 +139,11 @@
                     </f:entry>
                     <f:entry field="postman">
                         <div id="dast-postman" class="apiOptions fode-field spinner-container">
-                          <!--  <div class="uploadedFileContaine postmanUploadedFileContainer">
+                            <div class="uploadedFileContainer postmanUploadedFileContainer">
                                 <f:entry title="Uploaded File">
                                     <div class="uploadedFileDetails postmanFileDetails"/>
                                 </f:entry>
-                            </div>-->
+                            </div>
                             <f:entry field="postmanFile"
                                      title="Please upload the Postman collection. Supported extensions: *.json">
                                 <div id="dast-api-postman-upload" class="fode-field spinner-container sourceDetails">
@@ -174,11 +174,11 @@
                             </f:entry>
                             <div class="sourceDetails graphQLSourceControls">
                                 <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
-                                    <!--<div class="uploadedFileContainer graphQlUploadedFileContainer">
+                                    <div class="uploadedFileContainer graphQlUploadedFileContainer">
                                         <f:entry title="Uploaded File">
                                             <div class="uploadedFileDetails graphQlFileDetails"/>
                                         </f:entry>
-                                    </div>-->
+                                    </div>
                                     <f:entry field="graphQlUpload"
                                              title="Please upload the introspection query schema file. Supported extensions: *.json">
                                         <span id="graphQlUploadContainer"
@@ -217,13 +217,13 @@
                     </f:entry>
                     <f:entry field="grpc">
                         <div id="dast-grpc" class="apiOptions fode-field spinner-container">
-                            <!--<div class="uploadedFileContainer grpcUploadedFileContainer">
+                            <div class="uploadedFileContainer grpcUploadedFileContainer">
                                 <div class="uploadedFileContainer">
-                                   <f:entry title="Uploaded File">
-                                       <div class="uploadedFileDetails grpcFileDetails"/>
-                                  </f:entry>
-                               </div>
-                            </div>-->
+                                    <f:entry title="Uploaded File">
+                                        <div class="uploadedFileDetails grpcFileDetails"/>
+                                    </f:entry>
+                                </div>
+                            </div>
                             <f:entry field="grpcupload" title="Please upload the proto file: *.proto">
                                 <div id="dast-grpc-upload" class="fode-field spinner-container">
                                     <span id="grpcUploadContainer" class="fode-field spinner-container uploadContainer">
@@ -284,7 +284,7 @@
             </div>
         </f:entry>
         <f:entry>
-            <div id="dast-standard-scan-scope" class="fode-field spinner-container">
+            <div id="restrictScan" class="fode-field spinner-container">
                 <f:booleanRadio field="scanScope" true="Restrict scan to URL directories and subdirectories"
                                 false="Scan entire host"/>
             </div>
@@ -310,17 +310,23 @@
         </f:entry>
 
         <f:entry title="Scan Policy">
-            <div id="dast-standard-scan-policy" class="fode-field spinner-container">
-                <select name="scanPolicy" id="scanPolicy">
-                    <option value="Standard">Standard</option>
-                    <option value="CriticalsAndHighs">Critical And Highs</option>
-                    <option value="PassiveScan">Passive Scan</option>
-                </select>
+            <div id="dast-scan-policy-outer-row" class="fode-field spinner-container">
+                <div id="dast-scan-policy-row">
+                    <select name="scanPolicy" id="scanPolicy">
+                        <option value="Standard">Standard</option>
+                        <option value="CriticalsAndHighs">Critical And Highs</option>
+                        <option value="PassiveScan">Passive Scan</option>
+                    </select>
+                </div>
             </div>
-            <div id="dast-api-scan-policy-apiType" class="fode-field spinner-container">
+
+        </f:entry>
+        <f:entry title="Scan Policy">
+            <div id="dast-api-scan-policy-outer-row" class="fode-field spinner-container">
                 <div value="API">API</div>
             </div>
         </f:entry>
+
         <f:entry>
             <div id="dast-timeBox-scan">
 
@@ -345,7 +351,7 @@
                                  checked="${instance.webSiteNetworkAuthSettingEnabled}" inline="true">
 
                     <f:entry title="Network Authentication Type">
-                        <div id="ddlNetworkAuthTypeRow"
+                        <div id="networkAuthTypeRow"
                              class="fode-field spinner-container dast-scan-setting dast-standard-scan dast-workflow-scan">
                             <div class="fode-edit jenkins-select">
                                 <select name="selectedNetworkAuthType" id="ddlNetworkAuthType"
@@ -404,22 +410,22 @@
                 </f:optionalBlock>
             </div>
             <f:entry>
-            <div class="fode-field spinner-container" id="login-macro-row">
-                <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
-                                 title="Login Macro"
-                                 checked="${instance.webSiteLoginMacroEnabled}" inline="true">
-                    <f:entry
-                            title="Please upload the login macro file. Supported extension: *.webmacro">
-                        <span id="loginMacroUploadContainer" class="fode-field spinner-container">
-                            <input accept=".webmacro" id="loginFileMacro" type="File" name="loginFileMacro"/>
-                            <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
-                            <h6 id="loginMacroUploadMessage" hidden="true" name="loginMacroUploadMessage"/>
-                            <input type="text" hidden="true" name="loginMacroId" id="loginMacroId"/>
-                        </span>
-                    </f:entry>
+                <div class="fode-field spinner-container" id="login-macro-row">
+                    <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
+                                     title="Login Macro"
+                                     checked="${instance.webSiteLoginMacroEnabled}" inline="true">
+                        <f:entry
+                                title="Please upload the login macro file. Supported extension: *.webmacro">
+                            <span id="loginMacroUploadContainer" class="fode-field spinner-container">
+                                <input accept=".webmacro" id="loginFileMacro" type="File" name="loginFileMacro"/>
+                                <input type="button" value="Upload" id="btnUploadLoginMacroFile"/>
+                                <h6 id="loginMacroUploadMessage" hidden="true" name="loginMacroUploadMessage"/>
+                                <input type="text" hidden="true" name="loginMacroId" id="loginMacroId"/>
+                            </span>
+                        </f:entry>
 
-                </f:optionalBlock>
-            </div>
+                    </f:optionalBlock>
+                </div>
             </f:entry>
         </f:entry>
     </f:section>

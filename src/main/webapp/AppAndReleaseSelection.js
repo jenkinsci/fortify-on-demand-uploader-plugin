@@ -12,7 +12,9 @@ const nwAuthSetting = 'dast-networkAuth-setting';
 const loginAuthSetting = 'dast-login-macro';
 const dastApiSetting = 'dast-api-setting';
 const dastApiScanTypeSpecificControls = 'dast-api-specific-controls';
-
+const dastTimeBoxScanIdentifier = 'dast-timebox-scan';
+const  dastScanPolicyIdentifier ='dast-scan-policy';
+const dastApiScanPolicyIdentifier ='dast-scan-api-policy';
 class AppAndReleaseSelection {
 
     constructor() {
@@ -318,7 +320,8 @@ class AppAndReleaseSelection {
         const loginMacro = closestRow('#login-macro-row');
         const commonWebScopeSetting = closestRow('#dast-common-scope');
         const commonWebScopeSettingAttr = closestRow('#dast-common-scope-attr');
-        const commonScanPolicy = closestRow('#dast-standard-scan-policy');
+        const commonScanPolicy = closestRow('#dast-scan-policy-row');
+        const apiScanPolicyRow =closestRow('#dast-api-scan-policy-outer-row')
         const apiScanRow =closestRow('#dast-api-scan-block');
 
         releaseIdRow.addClass('releaseIdView');
@@ -344,10 +347,11 @@ class AppAndReleaseSelection {
         dastWrkFlowAllowedHost.addClass(dastWorkFlowSetting);
         dastExcludeUrl.addClass(dastWebSiteSetting);
         dastSiteUrlRow.addClass(dastWebSiteSetting);
-        dastWebSiteTimeBoxScan.addClass(dastWebSiteSetting);
+        dastWebSiteTimeBoxScan.addClass(dastTimeBoxScanIdentifier);
         commonWebScopeSetting.addClass(dastCommonScopeSetting);
         commonWebScopeSettingAttr.addClass(dastCommonScopeSetting);
-        commonScanPolicy.addClass(dastCommonScopeSetting);
+        commonScanPolicy.addClass(dastScanPolicyIdentifier);
+        apiScanPolicyRow.addClass(dastApiScanPolicyIdentifier);
         apiScanRow.addClass(dastApiSetting);
         <!--Scope sections-->
 

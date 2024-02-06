@@ -29,14 +29,14 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
         this.exclusionsList = exclusionsList;
     }
 
-    public void setLoginMacroFileId(int loginMacroFileId) {
+    public void setLoginMacroFileId(Integer loginMacroFileId) {
         this.loginMacroFileId = loginMacroFileId;
     }
     public void setPolicy(String policy) {
         this.policy = policy;
     }
     String policy;
-    int loginMacroFileId;
+    Integer loginMacroFileId;
     public void setRequestLoginMacroFileCreation(boolean requestLoginMacroFileCreation) {
         this.requestLoginMacroFileCreation = requestLoginMacroFileCreation;
     }

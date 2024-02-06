@@ -50,7 +50,7 @@ public class GetDastScanSettingResponse {
     public Policy policy;
     public Website websiteAssessment;
     public API apiAssessment;
-    public ExclusionDTO[] exclusionsList;
+
     public WorkflowdrivenAssessment workflowdrivenAssessment;
     public int loginMacroFileId;
     public boolean requiresSiteAuthentication;

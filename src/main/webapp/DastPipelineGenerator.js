@@ -6,6 +6,7 @@ const dastScanSetting = 'dast-scan-setting';
 const dastWebSiteSettingIdentifier = 'dast-standard-setting';
 const dastWorkFlowSettingIdentifier = 'dast-workflow-setting';
 const dastCommonScopeSettingIdentifier = 'dast-common-scan-scope';
+const dastTimeBoxScanIdentifier = 'dast-timebox-scan'
 const nwAuthSetting = 'dast-networkAuth-setting';
 const loginAuthSetting = 'dast-login-macro';
 const requestFalsePos = closestRow('#requestFalsePositiveRemovalRow');
@@ -37,8 +38,15 @@ const commonWebScopeSettingAttr = closestRow('#dast-common-scope-attr');
 const commonScanPolicy = closestRow('#dast-standard-scan-policy');
 const apiSettingRowEntry = closestRow('#dast-api-scan-block');
 
+
+//copied from AppAndRelease
+
+
+
+//-------------------------------------------------------------------------
+
 const DastScanTypeEnum = Object.freeze({
-    Standard: 'Standard',
+    Standard: 'Website',
     WorkflowDriven: 'Workflow-driven',
     Api: 'API',
 });
@@ -238,7 +246,7 @@ class DastPipelineGenerator {
         dastScanTyperow.addClass(dastScanSetting);
         dastStandardScope.addClass(dastScanSetting);
         dastEnv.addClass(dastScanSetting);
-        dastTimeZone.addClass(dastScanSetting);
+        dastTimeZone.addClass(dastApiSetting);
         networkAuth.addClass(nwAuthSetting);
         loginMacro.addClass(loginAuthSetting);
 
@@ -248,7 +256,7 @@ class DastPipelineGenerator {
         dastExcludeUrl.addClass(dastWebSiteSettingIdentifier);
         dastSiteUrlRow.addClass(dastWebSiteSettingIdentifier);
         apiSettingRowEntry.addClass(dastApiSetting);
-        dastWebSiteTimeBoxScan.addClass(dastWebSiteSettingIdentifier);
+        dastWebSiteTimeBoxScan.addClass(dastTimeBoxScanIdentifier);
         commonWebScopeSetting.addClass(dastCommonScopeSettingIdentifier);
         commonWebScopeSettingAttr.addClass(dastCommonScopeSettingIdentifier);
         commonScanPolicy.addClass(dastCommonScopeSettingIdentifier);
@@ -524,10 +532,11 @@ class DastPipelineGenerator {
     }
 
     setNetworkSettings() {
-        if (this.scanSettings.networkAuthenticationSettings) {
+        if (this.scanSettings && this.scanSettings.networkAuthenticationSettings) {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
             jq('#networkPasswordRow').find('input')
                 .val(this.scanSettings.networkAuthenticationSettings.password);
+            jq('#networkAuthTypeRow').find('select').val(this.scanSettings.networkAuthenticationSettings.networkAuthenticationType);
             if (jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').prop('checked') === false &&
             this.scanSettings.networkAuthenticationSettings.userName) {
                 jq('#webSiteNetworkAuthSettingEnabledRow').find('input:checkbox:first').trigger('click');
@@ -663,6 +672,15 @@ class DastPipelineGenerator {
         }
     }
 
+    setExcludeUrlList()
+    {
+        if (this.scanSettings && this.scanSettings.websiteAssessment)
+        {
+
+        }
+    }
+
+
     scanTypeUserControlVisibility(scanType, isVisible) {
         if (isVisible) {
             this.commonScopeSettingVisibility(false);
@@ -674,6 +692,7 @@ class DastPipelineGenerator {
                     jq('#requestFalsePositiveRemovalRow').show();
                     jq('#loginMacroFileCreationRow').show();
                     this.websiteScanSettingsVisibility(isVisible);
+                    this.timeBoxScanSettingVisibility(true);
                     this.workflowScanSettingVisibility(false);
                     this.apiScanSettingVisibility(false);
                     this.networkAuthSettingVisibility(isVisible);
@@ -690,6 +709,7 @@ class DastPipelineGenerator {
                     jq('#requestFalsePositiveRemovalRow').show();
                     jq('#loginMacroFileCreationRow').hide();
                     this.commonScopeSettingVisibility(false);
+                    this.timeBoxScanSettingVisibility(true);
                     this.networkAuthSettingVisibility(true);
                     this.loginMacroSettingsVisibility(false);
                     this.workflowScanSettingVisibility(false);
@@ -706,6 +726,7 @@ class DastPipelineGenerator {
                     jq('.redundantPageDetection').hide();
                     jq('#requestFalsePositiveRemovalRow').show();
                     jq('#loginMacroFileCreationRow').hide();
+                    this.timeBoxScanSettingVisibility(false);
                     this.apiScanSettingVisibility(false);
                     this.commonScopeSettingVisibility(isVisible);
                     this.loginMacroSettingsVisibility(false);
@@ -910,6 +931,8 @@ class DastPipelineGenerator {
     }
 
     onScanTypeChanged() {
+
+
         this.resetAuthSettings();
         let selectedScanTypeValue = jq('#scanTypeList').val();
         if (!selectedScanTypeValue) {
@@ -932,21 +955,43 @@ class DastPipelineGenerator {
     setScanPolicy() {
         if (this.scanSettings && this.scanSettings.policy) {
             let selectedScanPolicyType = this.scanSettings.policy;
-            let ScanPolicy = ["Standard", "Critical and high", "Passive", "API Scan"]
+            let ScanPolicy = ["Standard", "Criticals and highs", "Passive Scan"]
             let scanPolicySel = jq('#dast-standard-scan-policy').find('select');
             let currValSelected = false;
             scanPolicySel.find('option').not(':first').remove();
             scanPolicySel.find('option').first().prop('selected', true);
 
             for (let p of ScanPolicy) {
-
-                if (selectedScanPolicyType !== undefined && selectedScanPolicyType.toLowerCase() === p.toLowerCase()) {
+                if (selectedScanPolicyType &&
+                    selectedScanPolicyType.toLowerCase().trim() === p.toLowerCase().split(" ").join("")) {
                     currValSelected = true;
-                    scanPolicySel.append(`<option value="${p}" selected>${p}</option>`);
+                    if (currValSelected && selectedScanPolicyType.toLowerCase() === 'CriticalsAndHighs'.toLowerCase()) {
+                        scanPolicySel.append(`<option value='${selectedScanPolicyType}'>${p}</option>`);
+                        scanPolicySel.val(selectedScanPolicyType);
+                    }
+                    else if(currValSelected &&selectedScanPolicyType.toLowerCase() ==='PassiveScan'.toLowerCase())
+                    {
+                         scanPolicySel.append(`<option value="${selectedScanPolicyType}" >${p}</option>`);
+                        scanPolicySel.val(selectedScanPolicyType);
+                    }
+                    else {
+                        scanPolicySel.append(`<option value="${selectedScanPolicyType}" >${p}</option>`);
+                        scanPolicySel.val(selectedScanPolicyType);
+                    }
                 } else {
-                    scanPolicySel.append(`<option value="${p}">${p}</option>`);
+                    if (p.toLowerCase().split(" ").join("") === 'CriticalsAndHighs'.toLowerCase()) {
+                        scanPolicySel.append(`<option value="CriticalsAndHighs">${p}</option>`);
+                    }
+                    else if(p==='PassiveScan')
+                    {
+                        scanPolicySel.append(`<option value="PassiveScan">${p}</option>`)
+                    }
+                    else {
+                        scanPolicySel.append(`<option value="${p}">${p}</option>`);
+                    }
                 }
             }
+
         }
     }
 
@@ -1279,7 +1324,14 @@ class DastPipelineGenerator {
            }
         }
     }
-
+    timeBoxScanSettingVisibility(isVisible)
+    {
+        if(isVisible) {
+            jq('.dast-timebox-scan').show();
+        }
+        else
+            jq('.dast-timebox-scan').hide();
+    }
     setGrpcSettings(grpcSettings) {
         jq('#apiTypeList').val('grpc');
         this.onApiTypeChanged();

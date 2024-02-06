@@ -350,12 +350,13 @@ public class FodEnums {
     }
 
     public enum DastEnvironmentType {
-        Internal,
-        External
+        External,
+        Internal
+
     }
 
     public enum DastScanType {
-        Standard("Standard"),
+        Website("Website"),
         Workflow("Workflow-driven"),
         API("API");
         private final String _val;
@@ -368,8 +369,8 @@ public class FodEnums {
             switch (this._val) {
                 case "Workflow-driven":
                     return "Workflow-driven";
-                case "Standard":
-                    return "Standard";
+                case "Website":
+                    return "Website";
                 case "API":
                     return "API";
                 default:
@@ -386,8 +387,8 @@ public class FodEnums {
     public enum DastPolicy {
 
         Standard("Standard"),
-        Critical_and_high("Critical and high"),
-        Passive("Passive");
+        Critical_and_high("CriticalsAndHighs"),
+        Passive("PassiveScan");
 
         private final String _val;
 
@@ -397,9 +398,9 @@ public class FodEnums {
 
         public int getInteger() {
             switch (this._val) {
-                case "Passive":
+                case "PassiveScan":
                     return 3;
-                case "Critical_and_high":
+                case "CriticalsAndHighs":
                     return 2;
                 case "Standard":
                     return 1;
@@ -429,7 +430,7 @@ public class FodEnums {
             switch (this._val) {
                 case "Standard":
                     return "Standard";
-                case "Critical and high":
+                case "CriticalsAndHighs":
                     return "Critical and high";
                 case "Passive":
                     return "Passive";

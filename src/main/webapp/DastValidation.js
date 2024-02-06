@@ -1,5 +1,6 @@
 const fileUploadSuccess = "File uploaded successfully."
 const fileUploadFailed = "File upload failed. Please try again!"
+const invalidWorkflowMacroFile = "Invalid workflow macro: uploaded workflow macro does not contain a valid host."
 const inValidResponse = "Invalid response,";
 const allowedFileExtensions = ["burp","har","webmacro"];
 const jsonExtension = ["json"];
