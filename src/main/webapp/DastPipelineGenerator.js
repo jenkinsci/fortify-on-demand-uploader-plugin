@@ -715,6 +715,7 @@ class DastPipelineGenerator {
                     this.workflowScanSettingVisibility(false);
                     this.websiteScanSettingsVisibility(false);
                     this.directoryAndSubdirectoriesScopeVisibility(false);
+                    this.networkAuthSettingVisibility(true);
                     this.timeboxScanVisibility(isVisible);
                     this.apiScanSettingVisibility(isVisible);
                     break;
