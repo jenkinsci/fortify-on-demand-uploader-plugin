@@ -256,7 +256,6 @@ class DastPipelineGenerator {
         dastScanTyperow.addClass(dastScanSetting);
         dastStandardScope.addClass(dastScanSetting);
         dastEnv.addClass(dastScanSetting);
-        //dastTimeZone.addClass(dastApiSetting);
         networkAuth.addClass(nwAuthSetting);
         loginMacro.addClass(loginAuthSetting);
 
