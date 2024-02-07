@@ -571,7 +571,7 @@
                                      checked="${instance.webSiteNetworkAuthSettingEnabled}" inline="true">
 
                         <f:entry title="Network Authentication Type">
-                            <div id="ddlNetworkAuthTypeRow">
+                            <div id="networkAuthTypeRow">
                                 <div class="fode-edit jenkins-select">
                                     <select name="networkAuthType" id="ddlNetworkAuthType"
                                             class="setting-input">

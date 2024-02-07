@@ -13,24 +13,12 @@ public class GetDastScanSettingResponse {
         Internal,
         External,
     }
-
     public enum EntitlementFrequencyTypes {
         SingleScan,
         Subscription
     }
-
     public EntitlementFrequencyTypes entitlementFrequencyType;
-
-    public enum ScanTypes {
-        Static,
-        Dynamic,
-        Mobile,
-        Monitoring,
-        Network,
-        OpenSource,
-    }
-
-    public ScanTypes scanType;
+    public String scanType;
 
     public enum Policy {
         Standard,
@@ -42,15 +30,12 @@ public class GetDastScanSettingResponse {
     public enum ApiSource {
         FileId,
         Url
-
     }
-
     public int timeBoxInHours;
 
     public Policy policy;
     public Website websiteAssessment;
     public API apiAssessment;
-
     public WorkflowdrivenAssessment workflowdrivenAssessment;
     public int loginMacroFileId;
     public boolean requiresSiteAuthentication;
@@ -69,15 +54,5 @@ public class GetDastScanSettingResponse {
         public String fileName;
         public String fileType;
     }
-    public enum DayOfWeekTypes {
-        Sunday,
-        Monday,
-        Tuesday,
-        Wednesday,
-        Thursday,
-        Friday,
-        Saturday
-    }
-
 
 }

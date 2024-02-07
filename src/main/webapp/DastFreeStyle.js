@@ -177,7 +177,7 @@ class DastFreeStyle {
     }
 
     timeBoxScanSettingVisibility(isVisible) {
-        debugger;
+
         if (isVisible) {
             jq('.dast-timebox-scan').show();
         } else
@@ -220,7 +220,7 @@ class DastFreeStyle {
     }
 
     workflowScanSettingVisibility(isVisible) {
-        debugger;
+
         let workflowScanSettingRows = jq('.dast-workflow-setting');
         if (!isVisible) {
             workflowScanSettingRows.hide();
@@ -457,7 +457,6 @@ class DastFreeStyle {
                         this.setWorkflowDrivenScanSetting();
                         this.setApiScanSetting();
                         this.setRestrictScan();
-                        jq('#ddlNetworkAuthType').val(networkAuthTypes);
                         this.onNetworkAuthTypeLoad();
                         this.onNetworkAuthTypeChanged();
                         this.setNetworkSettings();
@@ -560,10 +559,9 @@ class DastFreeStyle {
     }
 
     setExcludeUrlList() {
-        debugger;
+
         if (this.scanSettings && this.scanSettings.websiteAssessment) {
             jq('#listStandardScanTypeExcludedUrl').empty();
-
 
         }
     }
@@ -695,7 +693,7 @@ class DastFreeStyle {
     }
 
     setNetworkSettings() {
-        debugger;
+
         if (this.scanSettings && this.scanSettings.networkAuthenticationSettings) {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
             jq('#networkPasswordRow').find('input').val(this.scanSettings.networkAuthenticationSettings.password);
@@ -740,14 +738,26 @@ class DastFreeStyle {
 
 
     setScanType() {
-        if (this.scanSettings) {
+
+        if (this.scanSettings && this.scanSettings.scanType) {
             let selectedScanType;
-            if (this.scanSettings.websiteAssessment) {
-                selectedScanType = DastScanTypeEnum.Standard;
-            } else if (this.scanSettings.workflowdrivenAssessment) {
-                selectedScanType = DastScanTypeEnum.WorkflowDriven;
-            } else if (this.scanSettings.apiAssessment) {
-                selectedScanType = DastScanTypeEnum.Api;
+
+            switch (this.scanSettings.scanType) {
+                case DastScanTypeEnum.Standard:
+                {
+                    selectedScanType = DastScanTypeEnum.Standard;
+                    break;
+                }
+                case "WorkflowDriven" : {
+                    selectedScanType = DastScanTypeEnum.WorkflowDriven;
+                    break;
+                }
+                case DastScanTypeEnum.Api : {
+                        selectedScanType = DastScanTypeEnum.Api;
+                        break;
+                    }
+                default:
+                    throw ("Invalid Scan Type Passed");
             }
             let scanSel = jq('#scanTypeList');
             let currValSelected = false;
@@ -851,7 +861,7 @@ class DastFreeStyle {
     }
 
     setRestrictScan() {
-        debugger;
+
         if (this.scanSettings && this.scanSettings.restrictToDirectoryAndSubdirectories) {
             {
                 //  jq('#restrictScan').prop('checked', this.scanSettings.restrictToDirectoryAndSubdirectories);
@@ -860,12 +870,12 @@ class DastFreeStyle {
     }
 
     setScanPolicy() {
-        debugger;
+
         if (this.scanSettings && this.scanSettings.policy) {
             let selectedScanPolicyType = this.scanSettings.policy;
             let ScanPolicy = ["Standard", "Criticals and highs", "Passive Scan"]
-            let scanPolicySel = jq('#dast-standard-scan-policy').find('select');
-           scanPolicySel.find('option').not(':first').remove();
+            let scanPolicySel = jq('#dast-scan-policy-row').find('select');
+            scanPolicySel.find('option').remove();
             scanPolicySel.find('option').first().prop('selected', true);
             let currValSelected = false;
 
@@ -874,31 +884,24 @@ class DastFreeStyle {
                     selectedScanPolicyType.toLowerCase().trim() === p.toLowerCase().split(" ").join("")) {
                     currValSelected = true;
                     if (currValSelected && selectedScanPolicyType.toLowerCase() === 'CriticalsAndHighs'.toLowerCase()) {
-                        scanPolicySel.append(`<option value='${selectedScanPolicyType}'>${p}</option>`);
-                        scanPolicySel.val(selectedScanPolicyType);
+                        scanPolicySel.append(`<option value='${selectedScanPolicyType}' selected>${p}</option>`);
                     }
                     else if(currValSelected &&selectedScanPolicyType.toLowerCase() ==='PassiveScan'.toLowerCase())
                     {
-                        // setTimeout(_ => {
-                        //     apSel.find('option').first().prop('selected', true);
-                        //     apSel.prop('disabled', true);
-                        // }, 50);
-                        scanPolicySel.append(`<option value="${selectedScanPolicyType}">${p}</option>`);
-                        scanPolicySel.val(selectedScanPolicyType);
+                        scanPolicySel.append(`<option value="${selectedScanPolicyType}" selected>${p}</option>`);
                     }
-                    else {
-                        scanPolicySel.append(`<option value="${selectedScanPolicyType}" >${p}</option>`);
-                        scanPolicySel.val(selectedScanPolicyType);
+                    else if(currValSelected &&selectedScanPolicyType.toLowerCase() ==='Standard'.toLowerCase()){
+                        scanPolicySel.append(`<option value="${selectedScanPolicyType}" selected>${p}</option>`);
                     }
                 } else {
                     if (p.toLowerCase().split(" ").join("") === 'CriticalsAndHighs'.toLowerCase()) {
-                        scanPolicySel.append(`<option value="CriticalsAndHighs">${p}</option>`);
+                        scanPolicySel.append(`<option value="CriticalsAndHighs" >${p}</option>`);
                     }
-                    else if(p==='PassiveScan')
+                    else if(p==='Passive Scan')
                     {
                         scanPolicySel.append(`<option value="PassiveScan">${p}</option>`)
                     }
-                    else {
+                    else if(p==='Standard') {
                         scanPolicySel.append(`<option value="${p}">${p}</option>`);
                     }
                 }
@@ -983,7 +986,7 @@ class DastFreeStyle {
         ).catch((err) => {
                 console.log('err' + err);
                 handleSpinner(ctl, true);
-                debugger;
+
                 if (err.toString().includes(invalidWorkflowMacroFile)) {
                     handleUploadStatusMessage(msgCtl, invalidWorkflowMacroFile, false);
                 } else
@@ -1103,7 +1106,7 @@ class DastFreeStyle {
             }
         } else {
             if (excludedUrls) {
-                debugger;
+
                 let urls = excludedUrls.split(',');
                 urls.forEach((entry) => {
                     if (entry === event.target.name) {
@@ -1246,7 +1249,7 @@ class DastFreeStyle {
     }
 
     onExcludeUrlBtnClick() {
-        debugger;
+
         let excludedUrl = jq('#standardScanExcludedUrlText').val();
         if (excludedUrl) {
             jq('#listStandardScanTypeExcludedUrl').append("<li> <input type='checkbox' id=' " + excludedUrl +
