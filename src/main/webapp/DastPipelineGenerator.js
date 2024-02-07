@@ -715,6 +715,7 @@ class DastPipelineGenerator {
 
 
     scanTypeUserControlVisibility(scanType, isVisible) {
+    if (isVisible != null || isVisible !== undefined) {
             this.commonScopeSettingVisibility(false);
             this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy");
             switch (scanType) {
@@ -783,6 +784,7 @@ class DastPipelineGenerator {
                     jq('#dast-api-scan-policy-apiType').hide();
                     break;
             }
+        }
     }
 
     resetAuthSettings() {
