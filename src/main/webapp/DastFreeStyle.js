@@ -375,7 +375,6 @@ class DastFreeStyle {
             jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
             jq('#graphQlSchemeTypeList').change(_ => this.onGraphQlSchemeTypeChanged());
             jq('#grpcSchemeTypeList').change(_ => this.onGrpcSchemeTypeChanged());
-            jq('#dastEnvList').change(_ => this.onEntitlementChanged());
 
             this.uiLoaded = true;
         }
@@ -851,9 +850,6 @@ class DastFreeStyle {
        validateDropdown ('#grpcSchemeTypeList');
     }
 
-    onEntitlementChanged () {
-       validateDropdown('#dastEnvList');
-    }
     setRestrictScan() {
         debugger;
         if (this.scanSettings && this.scanSettings.restrictToDirectoryAndSubdirectories) {
@@ -887,7 +883,7 @@ class DastFreeStyle {
                         //     apSel.find('option').first().prop('selected', true);
                         //     apSel.prop('disabled', true);
                         // }, 50);
-                        scanPolicySel.append(`<option value="${selectedScanPolicyType}" >${p}</option>`);
+                        scanPolicySel.append(`<option value="${selectedScanPolicyType}">${p}</option>`);
                         scanPolicySel.val(selectedScanPolicyType);
                     }
                     else {

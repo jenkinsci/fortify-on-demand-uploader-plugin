@@ -227,9 +227,8 @@
                     <f:entry title="Environment Facing">
                       <div class="fode-edit jenkins-select">
                         <select name="envFacing" id="envFacingList" class="setting-input">
-                            <option value="-1">(Choose one)</option>
-                            <option value="Internal">Internal</option>
                             <option value="External">External</option>
+                            <option value="Internal">Internal</option>
                         </select>
                       </div>
                     </f:entry>

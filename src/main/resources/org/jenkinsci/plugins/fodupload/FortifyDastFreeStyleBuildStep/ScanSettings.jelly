@@ -44,9 +44,8 @@
                 <div class="fode-field spinner-container" id="dast-scan-setting-evn">
                     <f:entry title="Environment Facing">
                         <select name="dastEnv" id="dastEnvList" class="jenkins-select__input">
-                            <option value="-1">(Choose one)</option>
-                            <option value="Internal">Internal</option>
                             <option value="External">External</option>
+                            <option value="Internal">Internal</option>
                         </select>
                     </f:entry>
                 </div>

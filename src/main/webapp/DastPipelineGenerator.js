@@ -332,7 +332,6 @@ class DastPipelineGenerator {
             jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
             jq('#graphQlSchemeTypeList').change(_ => this.onGraphQlSchemeTypeChanged());
             jq('#grpcSchemeTypeList').change(_ => this.onGrpcSchemeTypeChanged());
-            jq('#envFacingList').change(_ => this.onEntitlementChanged());
 
             setOnblurEventForPipeline();
             this.uiLoaded = true;
@@ -1232,7 +1231,6 @@ class DastPipelineGenerator {
                             this.onTimeZoneChanged();
                             this.onNetworkAuthTypeChanged();
                             validateRequiredFields(requiredFieldsPipeline);
-                            validateDropdown ('#envFacingList');
                             validateDropdown('#scanTypeList');
                             fields.removeClass('spinner');
                         }
@@ -1619,9 +1617,6 @@ class DastPipelineGenerator {
         validateDropdown ('#grpcSchemeTypeList');
     }
 
-    onEntitlementChanged () {
-       validateDropdown ('#envFacingList');
-    }
 
     populateHiddenFields() {
         // Auth

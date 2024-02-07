@@ -983,7 +983,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
             if (Objects.equals(scanType, FodEnums.DastScanType.Website.toString()) || Objects.equals(scanType, FodEnums.DastScanType.Workflow.toString())) {
 
-                Integer loginFileId = null;
+                Integer loginFileId = 0;
                 if (!loginMacroFileId.isEmpty()) {
                     loginFileId = Integer.parseInt(loginMacroFileId);
                 }
