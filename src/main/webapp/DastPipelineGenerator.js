@@ -56,6 +56,16 @@ const DastApiScanTypeEnum = Object.freeze({
     gRPC:'grpc',
     GraphQl:'graphQl'
 });
+const DastEnvFacingEnum = Object.freeze({
+    Internal: 'Internal',
+    External: 'External'
+});
+
+const DastAPISchemeTypeEnum = Object.freeze({
+    'HTTP':'http',
+    'HTTPS':'https',
+    'HTTP and HTTPS': 'http,https'
+})
 class DastPipelineGenerator {
     constructor() {
         this.api = new Api(null, descriptor);
@@ -246,7 +256,6 @@ class DastPipelineGenerator {
         dastScanTyperow.addClass(dastScanSetting);
         dastStandardScope.addClass(dastScanSetting);
         dastEnv.addClass(dastScanSetting);
-        dastTimeZone.addClass(dastApiSetting);
         networkAuth.addClass(nwAuthSetting);
         loginMacro.addClass(loginAuthSetting);
 
@@ -321,6 +330,8 @@ class DastPipelineGenerator {
             jq('.fodp-row-screc').hide();
             jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
             jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
+            jq('#graphQlSchemeTypeList').change(_ => this.onGraphQlSchemeTypeChanged());
+            jq('#grpcSchemeTypeList').change(_ => this.onGrpcSchemeTypeChanged());
 
             setOnblurEventForPipeline();
             this.uiLoaded = true;
@@ -405,6 +416,7 @@ class DastPipelineGenerator {
             jq('#overrideReleaseSettings').prop('checked', false);
             jq('#releaseSelectionValue').hide();
             this.autoProvMode = true;
+            validateRequiredFieldsById(requiredFieldsPipelineById)
             jq('.fodp-row-autoProv').show();
         } else {
             jq('.fodp-row-relid').show();
@@ -488,7 +500,9 @@ class DastPipelineGenerator {
                         this.onLoadTimeZone();
                         this.onTimeZoneChanged();
                         /*'set the scan type based on the scan setting get response'*/
+                        this.onScanTypeChanged();
                         this.setScanType();
+                        this.setEnvFacing();
                         //Set scan policy from the response.
                         this.setScanPolicy();
                         //Set the Website assessment scan type specific settings.
@@ -511,7 +525,7 @@ class DastPipelineGenerator {
                         //Enable scan Type right after assessment Type drop populated.
                         this.scanTypeVisibility(true);
                         validateRequiredFields(requiredFieldsPipeline);
-                        this.onScanTypeChanged();
+
                     } else {
                         await this.onAssessmentChanged(false);
                         this.showMessage('Failed to retrieve scan settings from API', true);
@@ -603,6 +617,23 @@ class DastPipelineGenerator {
             }
         }
     }
+    setEnvFacing() {
+        if(this.scanSettings) {
+
+        let ctl = jq('#envFacingList');
+        ctl.find('option').not(':first').remove();
+        ctl.find('option').first().prop('selected', true);
+        let envFacing = this.scanSettings.dynamicScanEnvironmentFacingType;
+
+        for (let s of Object.keys(DastEnvFacingEnum)) {
+           let at = DastEnvFacingEnum[s];
+             if (envFacing && at && (envFacing.toLowerCase() === at.toLowerCase())) {
+                  ctl.append(`<option value="${at}" selected>${at}</option>`);
+             }
+             else { ctl.append(`<option value="${at}">${at}</option>`); }
+           }
+        }
+    }
 
     setScanType() {
         if (this.scanSettings) {
@@ -682,7 +713,7 @@ class DastPipelineGenerator {
 
 
     scanTypeUserControlVisibility(scanType, isVisible) {
-        if (isVisible) {
+    if (isVisible != null || isVisible !== undefined) {
             this.commonScopeSettingVisibility(false);
             this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy");
             switch (scanType) {
@@ -932,9 +963,8 @@ class DastPipelineGenerator {
     }
 
     onScanTypeChanged() {
-
-
         this.resetAuthSettings();
+        jq('.dast-common-scan-scope').show();
         let selectedScanTypeValue = jq('#scanTypeList').val();
         if (!selectedScanTypeValue) {
             //Reset All ScanTypes Controls
@@ -1194,11 +1224,15 @@ class DastPipelineGenerator {
                                 let nt = this.networkAuthTypes[ts];
                                 networkAuthTypeSel.append(`<option value="${nt.text}" >${nt.text}</option>`);
                             }
-                            this.scanTypeUserControlVisibility('allTypes', false);
-                            this.apiTypeUserControlVisibility(null, false);
-                            jq('.fodp-row-autoProv').show();
-                            fields.removeClass('spinner');
 
+                            jq('.fodp-row-autoProv').show();
+                            this.apiTypeUserControlVisibility(null, false);
+                            this.scanTypeUserControlVisibility('allTypes', false);
+                            this.onTimeZoneChanged();
+                            this.onNetworkAuthTypeChanged();
+                            validateRequiredFields(requiredFieldsPipeline);
+                            validateDropdown('#scanTypeList');
+                            fields.removeClass('spinner');
                         }
                     );
 
@@ -1311,7 +1345,7 @@ class DastPipelineGenerator {
         jq('#' + inputId).trigger('click');
         jq('#dast-graphQL-api-host input').val(graphQlSettings.host);
         jq('#dast-graphQL-api-servicePath input').val(graphQlSettings.servicePath);
-        jq('#dast-graphQL-schemeType input').val(graphQlSettings.schemeType);
+        this.setApiSchemeType('#graphQlSchemeTypeList', graphQlSettings.schemeType);
         if (graphQlSettings.sourceType === 'Url') {
             jq('#dast-graphQL-url input').val(graphQlSettings.sourceUrn);
         }
@@ -1345,7 +1379,7 @@ class DastPipelineGenerator {
            }
         jq('#dast-grpc-api-host input').val(grpcSettings.host);
         jq('#dast-grpc-api-servicePath input').val(grpcSettings.servicePath);
-        jq('#dast-grpc-schemeType input').val(grpcSettings.schemeType);
+        this.setApiSchemeType('#grpcSchemeTypeList', grpcSettings.schemeType);
     }
 
     setPostmanSettings(postmanSettings) {
@@ -1359,6 +1393,20 @@ class DastPipelineGenerator {
            });
        }
     }
+
+    setApiSchemeType (controlId, schemeType) {
+            let ctl = jq(controlId);
+            ctl.find('option').not(':first').remove();
+            ctl.find('option').first().prop('selected', true);
+            let selectedScheme = schemeType;
+            for (let item of Object.keys(DastAPISchemeTypeEnum)) {
+                let val= DastAPISchemeTypeEnum[item];
+                if (selectedScheme && (selectedScheme.toLowerCase() === val.toLowerCase())) {
+                    ctl.append(`<option value="${val}" selected>${item}</option>`);
+                }
+                else { ctl.append(`<option value="${val}">${item}</option>`); }
+            }
+        }
 
     apiTypeUserControlVisibility(apiType, isVisible) {
         if (isVisible) {
@@ -1402,8 +1450,10 @@ class DastPipelineGenerator {
     }
 
     graphQlScanVisibility(isVisible) {
-        if (isVisible)
+        if (isVisible) {
             jq('#dast-graphQL').closest('.tr').show();
+            validateDropdown('#graphQlSchemeTypeList');
+           }
         else{
             jq('#dast-graphQL').closest('.tr').hide();
 
@@ -1414,8 +1464,10 @@ class DastPipelineGenerator {
     }
 
     grpcScanVisibility(isVisible) {
-        if (isVisible)
+        if (isVisible) {
             jq('#dast-grpc').closest('.tr').show();
+             validateDropdown('#grpcSchemeTypeList');
+         }
         else{
         jq('#dast-grpc').closest('.tr').hide();
         jq('#dast-openApi').closest('.tr').hide()
@@ -1512,6 +1564,7 @@ class DastPipelineGenerator {
             this.apiTypeUserControlVisibility(selectedApiTypeValue, true);
             jq('.dast-api-specific-controls').show();
             validateDropdown('#apiTypeList');
+
         }
     }
 
@@ -1555,6 +1608,15 @@ class DastPipelineGenerator {
     onNetworkAuthTypeChanged() {
         validateDropdown('#ddlNetworkAuthType');
     }
+
+    onGraphQlSchemeTypeChanged () {
+        validateDropdown('#graphQlSchemeTypeList');
+    }
+
+    onGrpcSchemeTypeChanged () {
+        validateDropdown ('#grpcSchemeTypeList');
+    }
+
 
     populateHiddenFields() {
         // Auth
