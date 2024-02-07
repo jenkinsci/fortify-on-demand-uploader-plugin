@@ -43,7 +43,11 @@
             <f:entry>
                 <div class="fode-field spinner-container" id="dast-scan-setting-evn">
                     <f:entry title="Environment Facing">
-                        <f:select field="dastEnv"/>
+                        <select name="dastEnv" id="dastEnvList" class="jenkins-select__input">
+                            <option value="-1">(Choose one)</option>
+                            <option value="Internal">Internal</option>
+                            <option value="External">External</option>
+                        </select>
                     </f:entry>
                 </div>
             </f:entry>
@@ -200,7 +204,12 @@
                             </div>
                             <f:entry title="Scheme Type">
                                 <div id="dast-graphQL-schemeType" class="fode-field spinner-container">
-                                    <f:textbox field="graphQLSchemeType" name="graphQLSchemeType"/>
+                                    <select name="graphQLSchemeType" id="graphQlSchemeTypeList" class="jenkins-select__input">
+                                        <option value="-1">(Choose One)</option>
+                                        <option value="http">HTTP</option>
+                                        <option value="https">HTTPS</option>
+                                        <option value="http,https">HTTP and HTTPS</option>
+                                    </select>
                                 </div>
                             </f:entry>
                             <f:entry title="API Host">
@@ -237,7 +246,12 @@
                             </f:entry>
                             <f:entry title="SchemeType">
                                 <div id="dast-grpc-schemeType" class="fode-field spinner-container">
-                                    <f:textbox field="grpcSchemeType" name="grpcSchemeType"/>
+                                    <select name="grpcSchemeType" id="grpcSchemeTypeList" class="jenkins-select__input">
+                                        <option value="-1">(Choose One)</option>
+                                        <option value="http">HTTP</option>
+                                        <option value="https">HTTPS</option>
+                                        <option value="http,https">HTTP and HTTPS</option>
+                                    </select>
                                 </div>
                             </f:entry>
                             <f:entry title="API Host">
@@ -355,7 +369,7 @@
                              class="fode-field spinner-container dast-scan-setting dast-standard-scan dast-workflow-scan">
                             <div class="fode-edit jenkins-select">
                                 <select name="selectedNetworkAuthType" id="ddlNetworkAuthType"
-                                        class="jenkins-select__input">
+                                            class="jenkins-select__input">
                                     <option value="0">Select a Network Authentication Type</option>
                                 </select>
                             </div>

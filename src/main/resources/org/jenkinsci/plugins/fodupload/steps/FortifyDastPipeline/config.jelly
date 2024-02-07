@@ -211,9 +211,9 @@
             <f:entry title="Scan Type">
                 <div id="dastScanType" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
                     <div class="fode-edit jenkins-select">
-                        <select name="scanType" id="scanTypeList" class="jenkins-select__input">
+                        <select name="scanType" id="scanTypeList" class="setting-input">
                             <option value="-1">Select a Scan Type</option>
-                            <option value="Standard">Website</option>
+                            <option value="Website">Website</option>
                             <option value="Workflow-driven">Workflow-driven</option>
                             <option value="API">API</option>
                         </select>
@@ -225,7 +225,13 @@
                 <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv"
                      id="dast-scan-setting-evn">
                     <f:entry title="Environment Facing">
-                        <f:select field="envFacing"/>
+                      <div class="fode-edit jenkins-select">
+                        <select name="envFacing" id="envFacingList" class="setting-input">
+                            <option value="-1">(Choose one)</option>
+                            <option value="Internal">Internal</option>
+                            <option value="External">External</option>
+                        </select>
+                      </div>
                     </f:entry>
                 </div>
             </f:entry>
@@ -235,7 +241,7 @@
                 <div id="timezone" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
                     <div class="fode-edit jenkins-select">
                         <select name="selectedDynamicTimeZone" id="timeZoneStackSelectList"
-                                class="jenkins-select__input">
+                                class="setting-input">
                             <option value="-1">Select a Time Zone</option>
                         </select>
                     </div>
@@ -326,7 +332,7 @@
                      id="dast-api-scan-block">
                     <div id="dast-api-scan" class="fode-field spinner-container">
                         <div class="fode-edit jenkins-select">
-                            <select name="selectedApiType" id="apiTypeList" class="jenkins-select__input">
+                            <select name="selectedApiType" id="apiTypeList" class="setting-input">
                                 <option value="-1">Select a API Type</option>
                                 <option value="openApi">OpenAPI</option>
                                 <option value="graphQl">GraphQL</option>
@@ -459,7 +465,12 @@
                                 </div>
                                 <f:entry title="Scheme Type">
                                     <div id="dast-graphQL-schemeType" class="fode-field spinner-container">
-                                        <f:textbox field="graphQLSchemeType" name="graphQLSchemeType"/>
+                                        <select name="graphQLSchemeType" id="graphQlSchemeTypeList" class="setting-input">
+                                            <option value="-1">(Choose One)</option>
+                                            <option value="http">HTTP</option>
+                                            <option value="https">HTTPS</option>
+                                            <option value="http,https">HTTP and HTTPS</option>
+                                        </select>
                                     </div>
                                 </f:entry>
                                 <f:entry title="API Host">
@@ -496,7 +507,12 @@
                                 </div>
                                 <f:entry title="SchemeType">
                                     <div id="dast-grpc-schemeType" class="fode-field spinner-container">
-                                        <f:textbox field="grpcSchemeType" name="grpcSchemeType"/>
+                                        <select name="grpcSchemeType" id="grpcSchemeTypeList" class="setting-input">
+                                            <option value="-1">(Choose One)</option>
+                                            <option value="http">HTTP</option>
+                                            <option value="https">HTTPS</option>
+                                            <option value="http,https">HTTP and HTTPS</option>
+                                        </select>
                                     </div>
                                 </f:entry>
                                 <f:entry title="API Host">
@@ -559,7 +575,7 @@
                             <div id="ddlNetworkAuthTypeRow">
                                 <div class="fode-edit jenkins-select">
                                     <select name="networkAuthType" id="ddlNetworkAuthType"
-                                            class="jenkins-select__input">
+                                            class="setting-input">
                                         <option value="0">Select a Network Authentication Type</option>
                                     </select>
                                 </div>

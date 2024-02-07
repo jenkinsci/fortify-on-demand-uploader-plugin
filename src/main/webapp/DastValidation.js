@@ -12,12 +12,10 @@ const requiredFieldsFreestyle = ['webSiteUrl',
                                  'networkAuthPassword',
                                  'openApiUrl',
                                  'graphQLUrl',
-                                 'graphQLSchemeType',
                                  'graphQlApiHost',
                                  'graphQlApiServicePath',
                                  'grpcApiHost',
                                  'grpcApiServicePath',
-                                 'grpcSchemeType',
                                  'scanTimeBox'];
 
 const requiredFieldsPipeline = ['webSiteUrl',
@@ -25,13 +23,17 @@ const requiredFieldsPipeline = ['webSiteUrl',
                                 'networkAuthPassword',
                                 'openApiUrl',
                                 'graphQLUrl',
-                                'graphQLSchemeType',
                                 'graphQlApiHost',
                                 'graphQlApiServicePath',
-                                'grpcSchemeType',
+                                'graphQLFilePath',
                                 'grpcApiHost',
                                 'grpcApiServicePath',
+                                'grpcFilePath',
                                 'scanTimeBox'];
+
+const requiredFieldsPipelineById = ['#autoProvOwner',
+                                    '#autoProvAppName',
+                                    '#autoProvRelName'];
 
 
      function setOnblurEventForFreestyle () {
@@ -45,11 +47,11 @@ const requiredFieldsPipeline = ['webSiteUrl',
              jq('[name="openApiUrl"]').blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
 
              //graphQl fields
-             jq('[name="graphQLUrl"],[name="graphQLSchemeType"], [name="graphQlApiServicePath"],[name="graphQlApiHost"]')
+             jq('[name="graphQLUrl"], [name="graphQlApiServicePath"],[name="graphQlApiHost"]')
                .blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
 
              //grpc fields
-             jq('[name="grpcApiHost"],[name="grpcSchemeType"], [name="grpcApiServicePath"]').blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
+             jq('[name="grpcApiHost"], [name="grpcApiServicePath"]').blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
 
      }
 
@@ -64,11 +66,11 @@ const requiredFieldsPipeline = ['webSiteUrl',
              jq('[name="openApiUrl"]').blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
 
              //graphQl fields
-             jq('[name="graphQLUrl"],[name="graphQLSchemeType"], [name="graphQlApiServicePath"],[name="graphQlApiHost"]')
+             jq('[name="graphQLUrl"],[name="graphQlApiServicePath"],[name="graphQlApiHost"], [name="graphQLFilePath"]')
                 .blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
 
              //grpc fields
-             jq('[name="grpcSchemeType"],[name="grpcApiHost"], [name="grpcApiServicePath"]').blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
+             jq('[name="grpcApiHost"], [name="grpcApiServicePath"]').blur(_ => this.validateTextbox("[name='" + event.target.name + "']"));
 
              jq('[name="workflowMacroFilePath"], [name="loginMacroFilePath"]').blur(_ => this.validateFileExtension("[name='" + event.target.name + "']", allowedFileExtensions));
 
@@ -77,6 +79,8 @@ const requiredFieldsPipeline = ['webSiteUrl',
              jq('[name="grpcFilePath"]').blur(_ => this.validateFileExtension("[name='" + event.target.name + "']", protoExtension));
 
              jq('#autoProvOwner').blur(_ => this.validateTextbox('#autoProvOwner'));
+             jq('#autoProvAppName').blur(_ => this.validateTextbox('#autoProvAppName'));
+             jq('#autoProvRelName').blur(_ => this.validateTextbox('#autoProvRelName'));
           }
 
      function handleUploadStatusMessage (id, message, success) {
@@ -120,6 +124,12 @@ const requiredFieldsPipeline = ['webSiteUrl',
      function validateRequiredFields (requiredFields) {
        jq.each(requiredFields, function(index, val) {
         validateTextbox('[name="' + val + '"]');
+        });
+     }
+
+     function validateRequiredFieldsById (requiredFieldIds) {
+        jq.each(requiredFieldIds, function(index, val) {
+        validateTextbox(val);
         });
      }
 

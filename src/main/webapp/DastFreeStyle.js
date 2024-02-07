@@ -25,6 +25,17 @@ const DastApiScanTypeEnum = Object.freeze({
     GraphQl: 'graphQl'
 });
 
+const DastEnvFacingEnum = Object.freeze({
+    Internal: 'Internal',
+    External: 'External'
+});
+
+const DastAPISchemeTypeEnum = Object.freeze({
+    'HTTP':'http',
+    'HTTPS':'https',
+    'HTTP and HTTPS': 'http,https'
+})
+
 class DastFreeStyle {
     constructor() {
 
@@ -362,6 +373,10 @@ class DastFreeStyle {
             jq('#loginMacroFileCreationRow').hide();
             jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
             jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
+            jq('#graphQlSchemeTypeList').change(_ => this.onGraphQlSchemeTypeChanged());
+            jq('#grpcSchemeTypeList').change(_ => this.onGrpcSchemeTypeChanged());
+            jq('#dastEnvList').change(_ => this.onEntitlementChanged());
+
             this.uiLoaded = true;
         }
         if (!this.uiLoaded) {
@@ -430,6 +445,7 @@ class DastFreeStyle {
                         this.onLoadTimeZone();
                         this.onTimeZoneChanged();
                         this.setScanType();
+                        this.setEnvFacing();
                         this.onScanTypeChanged();
                         this.setScanPolicy();
                         this.setTimeBoxScan();
@@ -593,7 +609,7 @@ class DastFreeStyle {
         jq('#' + inputId).trigger('click');
         jq('#dast-graphQL-api-host input').val(graphQlSettings.host);
         jq('#dast-graphQL-api-servicePath input').val(graphQlSettings.servicePath);
-        jq('#dast-graphQL-schemeType input').val(graphQlSettings.schemeType);
+        this.setApiSchemeType('#graphQlSchemeTypeList', graphQlSettings.schemeType);
         if (graphQlSettings.sourceType === 'Url') {
             jq('#dast-graphQL-url input').val(graphQlSettings.sourceUrn);
         } else if (graphQlSettings.sourceType === 'FileId') {
@@ -619,7 +635,7 @@ class DastFreeStyle {
         }
         jq('#dast-grpc-api-host input').val(grpcSettings.host);
         jq('#dast-grpc-api-servicePath input').val(grpcSettings.servicePath);
-        jq('#dast-grpc-schemeType input').val(grpcSettings.schemeType);
+        this.setApiSchemeType('#grpcSchemeTypeList', grpcSettings.schemeType);
     }
 
     setPostmanSettings(postmanSettings) {
@@ -633,6 +649,20 @@ class DastFreeStyle {
             });
         }
     }
+
+    setApiSchemeType (controlId, schemeType) {
+            let ctl = jq(controlId);
+            ctl.find('option').not(':first').remove();
+            ctl.find('option').first().prop('selected', true);
+            let selectedScheme = schemeType;
+            for (let item of Object.keys(DastAPISchemeTypeEnum)) {
+                let val= DastAPISchemeTypeEnum[item];
+                if (selectedScheme && (selectedScheme.toLowerCase() === val.toLowerCase())) {
+                    ctl.append(`<option value="${val}" selected>${item}</option>`);
+                }
+                else { ctl.append(`<option value="${val}">${item}</option>`); }
+            }
+        }
 
     setSelectedEntitlementValue(entitlements) {
         let currValSelected = false;
@@ -690,6 +720,25 @@ class DastFreeStyle {
         if (ctl.prop('checked') === true)
             ctl.trigger('click');
     }
+
+    setEnvFacing() {
+        if (this.scanSettings) {
+
+        let ctl = jq('#dastEnvList');
+        ctl.find('option').not(':first').remove();
+        ctl.find('option').first().prop('selected', true);
+        let envFacing = this.scanSettings.dynamicScanEnvironmentFacingType;
+
+        for (let s of Object.keys(DastEnvFacingEnum)) {
+           let at = DastEnvFacingEnum[s];
+             if (envFacing && at && (envFacing.toLowerCase() === at.toLowerCase())) {
+                  ctl.append(`<option value="${at}" selected>${at}</option>`);
+             }
+             else { ctl.append(`<option value="${at}">${at}</option>`); }
+           }
+        }
+    }
+
 
     setScanType() {
         if (this.scanSettings) {
@@ -794,6 +843,17 @@ class DastFreeStyle {
         validateDropdown('#ddlNetworkAuthType');
     }
 
+    onGraphQlSchemeTypeChanged() {
+       validateDropdown('#graphQlSchemeTypeList');
+    }
+
+    onGrpcSchemeTypeChanged() {
+       validateDropdown ('#grpcSchemeTypeList');
+    }
+
+    onEntitlementChanged () {
+       validateDropdown('#dastEnvList');
+    }
     setRestrictScan() {
         debugger;
         if (this.scanSettings && this.scanSettings.restrictToDirectoryAndSubdirectories) {
@@ -1155,8 +1215,10 @@ class DastFreeStyle {
     }
 
     graphQlScanVisibility(isVisible) {
-        if (isVisible)
+        if (isVisible) {
             jq('#dast-graphQL').closest('.tr').show();
+            validateDropdown('#graphQlSchemeTypeList');
+          }
         else
             jq('#dast-graphQL').closest('.tr').hide();
 
@@ -1166,8 +1228,10 @@ class DastFreeStyle {
     }
 
     grpcScanVisibility(isVisible) {
-        if (isVisible)
+        if (isVisible) {
             jq('#dast-grpc').closest('.tr').show();
+            validateDropdown('#grpcSchemeTypeList');
+        }
         else
             jq('#dast-grpc').closest('.tr').hide();
         jq('#dast-openApi').closest('.tr').hide()
