@@ -453,11 +453,7 @@ public class DastScanSharedBuildStep {
                 dynamicScanSetupReqModel.setLoginMacroFileCreationDetails(loginMacroDetails);
             }
             dynamicScanSetupReqModel.setRequestFalsePositiveRemoval(requestFalsePositiveRemoval);
-            if (scanScope) //if true => Restrict scan to URL directories and subdirectories
-                dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(scanScope);
-            else
-                dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(true);
-
+            dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(scanScope);
             dynamicScanSetupReqModel.setDynamicSiteUrl(webSiteAssessmentUrl);
 
             if (!isNullOrEmpty(excludedUrlList)) {

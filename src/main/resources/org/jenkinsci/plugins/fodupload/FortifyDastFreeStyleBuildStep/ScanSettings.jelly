@@ -297,9 +297,13 @@
             </div>
         </f:entry>
         <f:entry>
-            <div id="restrictScan" class="fode-field spinner-container">
-                <f:booleanRadio field="scanScope" true="Restrict scan to URL directories and subdirectories"
-                                false="Scan entire host"/>
+            <div id="dast-standard-scan-scope" class="fode-field spinner-container website-scan-restriction-options">
+                <input type="radio" id="radScanEntireHost" name="standardScanRestrictionOption"/>
+                    <label for="radScanEntireHost">Scan Entire Host</label>
+                        <span style="margin-left:5px"></span>
+                <input type="radio" id="radScanDirAndSubDir" name="standardScanRestrictionOption" />
+                    <label for="radScanDirAndSubDir">Restrict scan to URL directories and subdirectories</label>
+                <input type="label" hidden="true" name="scanScope" id="standardScanScopeRestriction" value="true"/>
             </div>
             <div id="dast-common-scope-attr"
                  class="fode-field spinner-container redundantPageDetection">

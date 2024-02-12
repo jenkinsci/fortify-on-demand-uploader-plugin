@@ -37,6 +37,9 @@ const commonWebScopeSetting = closestRow('#dast-common-scope');
 const commonWebScopeSettingAttr = closestRow('#dast-common-scope-attr');
 const commonScanPolicy = closestRow('#dast-standard-scan-policy');
 const apiSettingRowEntry = closestRow('#dast-api-scan-block');
+const standardScanScopeRestriction = '#standardScanScopeRestriction';
+
+
 
 
 //copied from AppAndRelease
@@ -55,10 +58,6 @@ const DastApiScanTypeEnum = Object.freeze({
     Postman:'postman',
     gRPC:'grpc',
     GraphQl:'graphQl'
-});
-const DastEnvFacingEnum = Object.freeze({
-    Internal: 'Internal',
-    External: 'External'
 });
 
 const DastAPISchemeTypeEnum = Object.freeze({
@@ -332,6 +331,7 @@ class DastPipelineGenerator {
             jq('#ddlNetworkAuthType').change(_ => this.onNetworkAuthTypeChanged());
             jq('#graphQlSchemeTypeList').change(_ => this.onGraphQlSchemeTypeChanged());
             jq('#grpcSchemeTypeList').change(_ => this.onGrpcSchemeTypeChanged());
+            jq('#dast-standard-scan-scope input').change(_ => this.onStandardScanRestrictionOptionChanged (event.target.id));
 
             setOnblurEventForPipeline();
             this.uiLoaded = true;
@@ -503,6 +503,8 @@ class DastPipelineGenerator {
                         this.onScanTypeChanged();
                         this.setScanType();
                         this.setEnvFacing();
+                         /*Set restrict scan value from response to UI */
+                        this.setStandardScanRestrictions();
                         //Set scan policy from the response.
                         this.setScanPolicy();
                         //Set the Website assessment scan type specific settings.
@@ -511,8 +513,6 @@ class DastPipelineGenerator {
                         this.setTimeBoxScan();
                         this.setWorkflowDrivenScanSetting();
                         this.setApiScanSetting();
-                        /*Set restrict scan value from response to UI */
-                        this.setRestrictScan();
                         /*Set network settings from response. */
                         this.onNetworkAuthTypeLoad();
                         this.onNetworkAuthTypeChanged();
@@ -618,22 +618,31 @@ class DastPipelineGenerator {
         }
     }
     setEnvFacing() {
-        if(this.scanSettings) {
+        if (this.scanSettings) {
+           let selectedVal = this.scanSettings.dynamicScanEnvironmentFacingType;
+           let items = jq('#envFacingList').find('option');
 
-        let ctl = jq('#envFacingList');
-        ctl.find('option').not(':first').remove();
-        ctl.find('option').first().prop('selected', true);
-        let envFacing = this.scanSettings.dynamicScanEnvironmentFacingType;
-
-        for (let s of Object.keys(DastEnvFacingEnum)) {
-           let at = DastEnvFacingEnum[s];
-             if (envFacing && at && (envFacing.toLowerCase() === at.toLowerCase())) {
-                  ctl.append(`<option value="${at}" selected>${at}</option>`);
-             }
-             else { ctl.append(`<option value="${at}">${at}</option>`); }
+           for(let item of items) {
+             if (item.value.toLowerCase() == selectedVal.toLowerCase())
+             item.setAttribute('selected', 'selected');
            }
         }
     }
+
+     setStandardScanRestrictions () {
+        debugger;
+             if (this.scanSettings) {
+                 let selectedVal = this.scanSettings.restrictToDirectoryAndSubdirectories;
+                 if(selectedVal) {
+                    jq('#radScanDirAndSubDir').prop('checked', true);
+                    jq(standardScanScopeRestriction).val(true);
+                 }
+                 else {
+                        jq('#radScanEntireHost').prop('checked', true);
+                        jq(standardScanScopeRestriction).val(false);
+                    }
+                 }
+             }
 
     setScanType() {
         if (this.scanSettings && this.scanSettings.scanType) {
@@ -987,13 +996,6 @@ class DastPipelineGenerator {
         }
     }
 
-    setRestrictScan() {
-        if (this.scanSettings && this.scanSettings.restrictToDirectoryAndSubdirectories) {
-            {
-                jq('#restrictScan').prop('checked', this.scanSettings.restrictToDirectoryAndSubdirectories);
-            }
-        }
-    }
 
     setScanPolicy() {
         if (this.scanSettings && this.scanSettings.policy) {
@@ -1627,6 +1629,17 @@ class DastPipelineGenerator {
     onGrpcSchemeTypeChanged () {
         validateDropdown ('#grpcSchemeTypeList');
     }
+
+    onStandardScanRestrictionOptionChanged (id) {
+            debugger;
+               switch(id.toLowerCase())
+               {
+                 case 'radscandirandsubdir':  jq(standardScanScopeRestriction).val(true);
+                                              break;
+                 case 'radscanentirehost' :   jq(standardScanScopeRestriction).val(false);
+                                              break;
+               }
+        }
 
 
     populateHiddenFields() {
