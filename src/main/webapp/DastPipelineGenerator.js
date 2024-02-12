@@ -39,9 +39,6 @@ const commonScanPolicy = closestRow('#dast-standard-scan-policy');
 const apiSettingRowEntry = closestRow('#dast-api-scan-block');
 const standardScanScopeRestriction = '#standardScanScopeRestriction';
 
-
-
-
 //copied from AppAndRelease
 
 

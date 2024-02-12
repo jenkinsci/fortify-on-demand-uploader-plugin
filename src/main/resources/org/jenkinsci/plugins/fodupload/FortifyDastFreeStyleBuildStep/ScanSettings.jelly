@@ -297,7 +297,7 @@
             </div>
         </f:entry>
         <f:entry>
-            <div id="dast-standard-scan-scope" class="fode-field spinner-container website-scan-restriction-options">
+            <div id="dast-standard-scan-scope" class="fode-field spinner-container">
                 <input type="radio" id="radScanEntireHost" name="standardScanRestrictionOption"/>
                     <label for="radScanEntireHost">Scan Entire Host</label>
                         <span style="margin-left:5px"></span>
