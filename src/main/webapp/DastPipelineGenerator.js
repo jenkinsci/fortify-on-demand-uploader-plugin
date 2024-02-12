@@ -627,7 +627,6 @@ class DastPipelineGenerator {
     }
 
      setStandardScanRestrictions () {
-        debugger;
              if (this.scanSettings) {
                  let selectedVal = this.scanSettings.restrictToDirectoryAndSubdirectories;
                  if(selectedVal) {
@@ -1628,7 +1627,6 @@ class DastPipelineGenerator {
     }
 
     onStandardScanRestrictionOptionChanged (id) {
-            debugger;
                switch(id.toLowerCase())
                {
                  case 'radscandirandsubdir':  jq(standardScanScopeRestriction).val(true);

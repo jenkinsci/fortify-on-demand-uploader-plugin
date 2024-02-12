@@ -453,6 +453,8 @@ public class DastScanSharedBuildStep {
                 dynamicScanSetupReqModel.setLoginMacroFileCreationDetails(loginMacroDetails);
             }
             dynamicScanSetupReqModel.setRequestFalsePositiveRemoval(requestFalsePositiveRemoval);
+
+            /* if scanScope is false then Scan Entire Host is set and if true scope is restricted to Directories and sub-directories. */
             dynamicScanSetupReqModel.setRestrictToDirectoryAndSubdirectories(scanScope);
             dynamicScanSetupReqModel.setDynamicSiteUrl(webSiteAssessmentUrl);
 
