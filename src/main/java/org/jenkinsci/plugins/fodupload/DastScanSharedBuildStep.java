@@ -618,7 +618,9 @@ public class DastScanSharedBuildStep {
                                                   String scanEnvironment,
                                                   boolean requireNetworkAuth,
                                                   String networkAuthUserName, String networkAuthPassword,
-                                                  String networkAuthType, String openApiSourceType, String sourceUrn, String openApiKey, boolean requestFalsePositiveRemoval)
+                                                  String networkAuthType, String openApiSourceType,
+                                                  String sourceUrn, String openApiKey,
+                                                  boolean requestFalsePositiveRemoval, String scanTimeBox)
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
@@ -652,6 +654,10 @@ public class DastScanSharedBuildStep {
             } else {
                 dastOpenApiScanSetupReqModel.setSourceUrn(sourceUrn);
             }
+            if (!Utils.isNullOrEmpty(scanTimeBox))
+                dastOpenApiScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(scanTimeBox));
+            else
+                dastOpenApiScanSetupReqModel.setTimeBoxInHours(null);
 
             PutDastScanSetupResponse response = dynamicController.putDastOpenApiScanSettings(Integer.parseInt(userSelectedRelease),
                     dastOpenApiScanSetupReqModel);
@@ -678,7 +684,8 @@ public class DastScanSharedBuildStep {
                                                   boolean requireNetworkAuth,
                                                   String networkAuthUserName, String networkAuthPassword,
                                                   String networkAuthType, String sourceUrn, String sourceType,
-                                                  String schemeType, String host, String servicePath, boolean requestFalsePositiveRemoval)
+                                                  String schemeType, String host, String servicePath,
+                                                  boolean requestFalsePositiveRemoval, String scanTimeBox)
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
@@ -708,6 +715,11 @@ public class DastScanSharedBuildStep {
             dastGraphQlScanSetupReqModel.setHost(host);
             dastGraphQlScanSetupReqModel.setSourceUrn(sourceUrn);
 
+            if (!Utils.isNullOrEmpty(scanTimeBox))
+                dastGraphQlScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(scanTimeBox));
+            else
+                dastGraphQlScanSetupReqModel.setTimeBoxInHours(null);
+
             PutDastScanSetupResponse response = dynamicController.putDastGraphQLScanSettings(Integer.parseInt(userSelectedRelease),
                     dastGraphQlScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
@@ -730,7 +742,9 @@ public class DastScanSharedBuildStep {
                                                String scanEnvironment,
                                                String networkAuthUserName, String networkAuthPassword,
                                                String networkAuthType,
-                                               String grpcFileId, String schemeType, String host, String servicePath, boolean requestFalsePositiveRemoval)
+                                               String grpcFileId, String schemeType, String host,
+                                               String servicePath, boolean requestFalsePositiveRemoval,
+                                               String scanTimeBox)
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId());
@@ -765,6 +779,12 @@ public class DastScanSharedBuildStep {
                 dastgrpcScanSetupReqModel.setFileId(Integer.parseInt(grpcFileId));
             }
 
+            if (!Utils.isNullOrEmpty(scanTimeBox))
+                dastgrpcScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(scanTimeBox));
+            else
+                dastgrpcScanSetupReqModel.setTimeBoxInHours(null);
+
+
             PutDastScanSetupResponse response = dynamicController.putDastGrpcScanSettings(Integer.parseInt(userSelectedRelease),
                     dastgrpcScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
@@ -787,7 +807,8 @@ public class DastScanSharedBuildStep {
                                                   String timeZone,
                                                   String scanEnvironment,
                                                   String networkAuthUserName, String networkAuthPassword,
-                                                  String networkAuthType, String postmanIdCollection, boolean requestFalsePositiveRemoval)
+                                                  String networkAuthType, String postmanIdCollection,
+                                                  boolean requestFalsePositiveRemoval, String scanTimeBox)
             throws Exception {
 
         DastScanController dynamicController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId());
@@ -818,6 +839,10 @@ public class DastScanSharedBuildStep {
             } else {
                 dastPostmanScanSetupReqModel.setCollectionFileIds(ConvertStringToIntArr(postmanIdCollection));
             }
+            if (!Utils.isNullOrEmpty(scanTimeBox))
+                dastPostmanScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(scanTimeBox));
+            else
+                dastPostmanScanSetupReqModel.setTimeBoxInHours(null);
 
             PutDastScanSetupResponse response = dynamicController.putDastPostmanScanSettings(Integer.parseInt(userSelectedRelease),
                     dastPostmanScanSetupReqModel);

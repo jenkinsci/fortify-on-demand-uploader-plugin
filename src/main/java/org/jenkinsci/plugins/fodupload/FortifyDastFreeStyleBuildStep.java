@@ -137,7 +137,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
-                            openApiRadioSource, sourceUrn, openApiKey, requestFalsePositiveRemoval);
+                            openApiRadioSource, sourceUrn, openApiKey, requestFalsePositiveRemoval,scanTimeBox);
 
                 }
                 else if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
@@ -147,7 +147,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
-                            sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath, requestFalsePositiveRemoval);
+                            sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath, requestFalsePositiveRemoval, scanTimeBox);
 
                 } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
 
@@ -155,7 +155,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             dastEnv,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
-                            grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, requestFalsePositiveRemoval);
+                            grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, requestFalsePositiveRemoval, scanTimeBox);
 
                 } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
 
@@ -163,7 +163,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             dastEnv,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
-                            postmanFileId, requestFalsePositiveRemoval);
+                            postmanFileId, requestFalsePositiveRemoval, scanTimeBox);
                 } else {
 
                     throw new IllegalArgumentException("Not Valid Dast API Scan Type set for releaseId: " + userSelectedRelease);

@@ -7,6 +7,7 @@ public class PutDastAutomatedGraphQlReqModel extends PutDastScanSetupReqModel {
     public String Host;
 
     public String ServicePath;
+    Integer timeBoxInHours;
 
     public void setSourceType(String sourceType){
         this.SourceType = FodEnums.ApiSourceType.valueOf(sourceType);
@@ -22,6 +23,9 @@ public class PutDastAutomatedGraphQlReqModel extends PutDastScanSetupReqModel {
     }
     public void setSchemeType(String scheme){
         this.SchemeType = scheme;
+    }
+    public void setTimeBoxInHours(Integer timeBoxInHours) {
+        this.timeBoxInHours = timeBoxInHours;
     }
 
 

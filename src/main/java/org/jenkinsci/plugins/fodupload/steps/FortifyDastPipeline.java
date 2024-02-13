@@ -884,7 +884,7 @@ public class FortifyDastPipeline extends FortifyStep {
                     entitlementFrequency, selectedDynamicTimeZone,
                     enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
                     networkAuthUserName, networkAuthPassword, networkAuthType,
-                    openApiRadioSource, sourceUrn, openApiKey, requestFalsePositiveRemoval);
+                    openApiRadioSource, sourceUrn, openApiKey, requestFalsePositiveRemoval, scanTimeBox);
 
         } else if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
             if(FodEnums.ApiSourceType.valueOf(graphQlRadioSource) == FodEnums.ApiSourceType.FileId) {
@@ -912,7 +912,7 @@ public class FortifyDastPipeline extends FortifyStep {
                     entitlementFrequency, selectedDynamicTimeZone,
                     enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
                     networkAuthUserName, networkAuthPassword, networkAuthType,
-                    sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath, requestFalsePositiveRemoval);
+                    sourceUrn, graphQlRadioSource, graphQLSchemeType, graphQlApiHost, graphQlApiServicePath, requestFalsePositiveRemoval, scanTimeBox);
 
         } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
 
@@ -934,7 +934,7 @@ public class FortifyDastPipeline extends FortifyStep {
                     entitlementFrequency, selectedDynamicTimeZone,
                     envFacing,
                     networkAuthUserName, networkAuthPassword, networkAuthType,
-                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, requestFalsePositiveRemoval);
+                    grpcFileId, grpcSchemeType, grpcApiHost, grpcApiServicePath, requestFalsePositiveRemoval, scanTimeBox);
 
         } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
 
@@ -958,7 +958,7 @@ public class FortifyDastPipeline extends FortifyStep {
                     entitlementFrequency, selectedDynamicTimeZone,
                     envFacing,
                     networkAuthUserName, networkAuthPassword, networkAuthType,
-                    postmanFileId, requestFalsePositiveRemoval);
+                    postmanFileId, requestFalsePositiveRemoval, scanTimeBox);
         } else {
             throw new IllegalArgumentException("Not Valid Dast API Scan Type set for releaseId: " + releaseId);
         }
