@@ -8,6 +8,7 @@ public class PutDastAutomatedGrpcReqModel extends PutDastScanSetupReqModel {
     String SchemeType;
     String Host;
     String ServicePath;
+    Integer timeBoxInHours;
 
     public void setFileId(Integer fileId) {
         this.FileId = fileId;
@@ -23,6 +24,9 @@ public class PutDastAutomatedGrpcReqModel extends PutDastScanSetupReqModel {
 
     public void setSchemeType(String scheme) {
         this.SchemeType = scheme;
+    }
+    public void setTimeBoxInHours(Integer timeBoxInHours) {
+        this.timeBoxInHours = timeBoxInHours;
     }
 
 }
