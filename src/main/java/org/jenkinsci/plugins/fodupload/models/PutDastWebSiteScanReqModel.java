@@ -23,9 +23,9 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
         this.timeBoxInHours = timeBoxInHours;
     }
     Integer timeBoxInHours;
-    List<ExcludedUrl> exclusionsList;
+    List<ExclusionDTO> exclusionsList;
 
-    public void setExclusionsList(List<ExcludedUrl> exclusionsList) {
+    public void setExclusionsList(List<ExclusionDTO> exclusionsList) {
         this.exclusionsList = exclusionsList;
     }
 

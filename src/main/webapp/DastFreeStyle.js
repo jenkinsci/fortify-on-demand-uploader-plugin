@@ -534,7 +534,7 @@ class DastFreeStyle {
                 jq('#listWorkflowDrivenAllowedHostUrl').empty();
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].fileId);
                 this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro[0].allowedHosts.forEach((item, index, arr) => {
-                        console.log(item);
+                        
                         let ident = arr[index];
                         jq('#listWorkflowDrivenAllowedHostUrl').append("<li>" + "<input type='checkbox' id=' " + arr[index] +
                             " ' checked='checked' name='" + arr[index] + "'>" + arr[index] + "</li>");
@@ -558,8 +558,29 @@ class DastFreeStyle {
 
     setExcludeUrlList() {
 
-        if (this.scanSettings && this.scanSettings.websiteAssessment) {
+        if (this.scanSettings && this.scanSettings.websiteAssessment && this.scanSettings.websiteAssessment.exclusionsList) {
             jq('#listStandardScanTypeExcludedUrl').empty();
+
+            this.scanSettings.websiteAssessment.exclusionsList.forEach((item, index, arr)=>
+            {
+                console.log(item.value);
+
+                jq('#listStandardScanTypeExcludedUrl').append("<li> <input type='checkbox' id=' " + item.value +
+                    " ' checked='checked' name='" + item.value + "'>" + item.value + "</li>");
+
+                jq('#listStandardScanTypeExcludedUrl').show();
+
+                let urlsList = jq('#excludedUrls').val();
+                if (urlsList) {
+                    if (urlsList !== '' && item.value !== '') {
+                        urlsList = urlsList + "," + item.value;
+                        jq('#excludedUrls').val(urlsList);
+                    } else
+                        jq('#excludedUrls').val(item.value);
+                } else
+                    jq('#excludedUrls').val(item.value);
+
+            });
 
         }
     }

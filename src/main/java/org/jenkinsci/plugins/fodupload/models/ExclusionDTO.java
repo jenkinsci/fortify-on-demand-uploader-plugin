@@ -1,5 +1,5 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-public class ExcludedUrl {
+public class ExclusionDTO {
     public String value;
 }
