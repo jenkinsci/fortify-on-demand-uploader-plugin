@@ -44,6 +44,12 @@ public class PutDastScanSetupReqModel implements Serializable {
 
     int assessmentTypeId;
 
+    public void setRequiresNetworkAuthentication(boolean requiresNetworkAuthentication) {
+        this.requiresNetworkAuthentication = requiresNetworkAuthentication;
+    }
+
+    public boolean requiresNetworkAuthentication;
+
     public class NetworkAuthentication {
 
         public void setUserName(String userName) {
@@ -63,12 +69,6 @@ public class PutDastScanSetupReqModel implements Serializable {
         }
 
         public String networkAuthenticationType;
-
-        public void setRequiresNetworkAuthentication(boolean requiresNetworkAuthentication) {
-            this.requiresNetworkAuthentication = requiresNetworkAuthentication;
-        }
-
-        boolean requiresNetworkAuthentication;
 
     }
 

@@ -420,7 +420,7 @@ public class DastScanSharedBuildStep {
                     dynamicScanSetupReqModel.setTimeBoxInHours(null);
             } catch (NumberFormatException exception) {
                 // Should warn not throw in front end.
-                throw new IllegalArgumentException(" Invalid excludedUrl for TimeBox Scan");
+                throw new IllegalArgumentException(" Invalid value for TimeBox Scan");
             }
             if (!Utils.isNullOrEmpty(scanPolicy))
                 dynamicScanSetupReqModel.setPolicy(scanPolicy);
@@ -433,7 +433,7 @@ public class DastScanSharedBuildStep {
                 PutDastScanSetupReqModel.NetworkAuthentication networkSetting = dynamicScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkSetting.setPassword(networkAuthPassword);
                 networkSetting.setUserName(networkAuthUserName);
-                networkSetting.setRequiresNetworkAuthentication(true);
+                dynamicScanSetupReqModel.setRequiresNetworkAuthentication(true);
                 networkSetting.setNetworkAuthenticationType(networkAuthType);
                 dynamicScanSetupReqModel.setNetworkAuthenticationSettings(networkSetting);
             }
@@ -539,7 +539,7 @@ public class DastScanSharedBuildStep {
                 PutDastScanSetupReqModel.NetworkAuthentication networkAuthentication = dastWorkflowScanSetupReqModel.getNetworkAuthenticationSettings();
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
-                networkAuthentication.setRequiresNetworkAuthentication(true);
+                dastWorkflowScanSetupReqModel.setRequiresNetworkAuthentication(true);
                 networkAuthentication.setNetworkAuthenticationType(networkAuthType);
                 dastWorkflowScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
@@ -643,7 +643,7 @@ public class DastScanSharedBuildStep {
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
                 networkAuthentication.setNetworkAuthenticationType((networkAuthType));
-                networkAuthentication.setRequiresNetworkAuthentication(true);
+                dastOpenApiScanSetupReqModel.setRequiresNetworkAuthentication(true);
                 dastOpenApiScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
             dastOpenApiScanSetupReqModel.setSourceType(openApiSourceType);
@@ -707,7 +707,7 @@ public class DastScanSharedBuildStep {
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
                 networkAuthentication.setNetworkAuthenticationType((networkAuthType));
-                networkAuthentication.setRequiresNetworkAuthentication(true);
+                dastGraphQlScanSetupReqModel.setRequiresNetworkAuthentication(true);
                 dastGraphQlScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
             dastGraphQlScanSetupReqModel.setSourceType(sourceType);
@@ -770,7 +770,7 @@ public class DastScanSharedBuildStep {
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
                 networkAuthentication.setNetworkAuthenticationType((networkAuthType));
-                networkAuthentication.setRequiresNetworkAuthentication(true);
+                dastgrpcScanSetupReqModel.setRequiresNetworkAuthentication(true);
                 dastgrpcScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
             int fileId = Integer.parseInt(grpcFileId);
@@ -833,7 +833,7 @@ public class DastScanSharedBuildStep {
                 networkAuthentication.setPassword(networkAuthPassword);
                 networkAuthentication.setUserName(networkAuthUserName);
                 networkAuthentication.setNetworkAuthenticationType((networkAuthType));
-                networkAuthentication.setRequiresNetworkAuthentication(true);
+                dastPostmanScanSetupReqModel.setRequiresNetworkAuthentication(true);
                 dastPostmanScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
             if (postmanIdCollection == null) {

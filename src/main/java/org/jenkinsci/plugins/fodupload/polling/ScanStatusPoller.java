@@ -2,10 +2,13 @@ package org.jenkinsci.plugins.fodupload.polling;
 
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
+import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
 import org.jenkinsci.plugins.fodupload.models.AnalysisStatusTypeEnum;
+import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.response.LookupItemsModel;
 import org.jenkinsci.plugins.fodupload.models.response.PollingSummaryDTO;
 import org.jenkinsci.plugins.fodupload.models.response.PollingSummaryPauseDetail;
+import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -39,10 +42,10 @@ public class ScanStatusPoller {
     /**
      * Polls the release status
      *
-     * @param releaseId release id
-     * @param scanId scan id of the release
+     * @param releaseId     release id
+     * @param scanId        scan id of the release
      * @param correlationId correlation id related to scan id
-     * at_return true if status is completed | cancelled.
+     *                      at_return true if status is completed | cancelled.
      * @throws java.io.IOException  in certain cases
      * @throws InterruptedException in certain cases
      */
@@ -54,21 +57,21 @@ public class ScanStatusPoller {
         boolean finished = false;
         int counter = 1;
         LookupItemsController lookupItemsController = new LookupItemsController(this.apiConnection, logger, correlationId);
-        List<LookupItemsModel> analysisStatusTypes =  lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
+        List<LookupItemsModel> analysisStatusTypes = lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
         StatusPollerThread pollerThread = null;
 
         // Create a list of values that will be used to break the loop if found
         // This way if any of this changes we don't need to redo the keys or something
         List<String> complete = new ArrayList<>();
-        
+
         if (analysisStatusTypes != null) {
             for (LookupItemsModel item : analysisStatusTypes) {
                 if (item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Completed.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Canceled.name()) || item.getText().equalsIgnoreCase(AnalysisStatusTypeEnum.Waiting.name()))
                     complete.add(item.getValue());
             }
         }
-        
-        try{
+
+        try {
             while (!finished) {
                 if (analysisStatusTypes == null) {
                     analysisStatusTypes = lookupItemsController.getLookupItems(APILookupItemTypes.AnalysisStatusTypes);
@@ -93,8 +96,7 @@ public class ScanStatusPoller {
                 }
 
                 if (failCount < MAX_FAILS) {
-                    if(!pollerThread.fail && pollerThread.statusString != null)
-                    {
+                    if (!pollerThread.fail && pollerThread.statusString != null) {
                         failCount = 0;
                         logger.println(pollerThread.getName() + ") Poll Status: " + pollerThread.statusString);
 
@@ -118,7 +120,7 @@ public class ScanStatusPoller {
             }
         } catch (InterruptedException e) {
             logger.println("Polling was interrupted. Please contact your administrator if the interruption was not intentional.");
-            if(pollerThread.isAlive()){
+            if (pollerThread.isAlive()) {
                 pollerThread.interrupt();
             }
         }
@@ -133,13 +135,19 @@ public class ScanStatusPoller {
     private void printPassFail(PollingSummaryDTO release, int releaseId) {
 
         boolean isPassed = release.getPassFailStatus();
-        logger.println(String.format("Static Scan with id : %d Completed", release.getScanId()));
-        if(release.getOpenSourceScanId() > 0)
-        {
-            if(release.getOpenSourceStatusId() == 2)
-             logger.println(String.format("Open Source Scan with id : %d Completed", release.getOpenSourceScanId()));
+
+        if(release.getScanType() == 2)
+            logger.println(String.format("DAST Scan with id : %d Completed", release.getScanId()));
+        else if(release.getScanType() ==1)
+            logger.println(String.format("Static Scan with id : %d Completed", release.getScanId()));
+        else //fallback
+            logger.println(String.format("Scan with id : %d Completed", release.getScanId()));
+
+        if (release.getOpenSourceScanId() > 0) {
+            if (release.getOpenSourceStatusId() == 2)
+                logger.println(String.format("Open Source Scan with id : %d Completed", release.getOpenSourceScanId()));
             else
-             logger.println(String.format("Open Source Scan with id : %d Cancelled/Failed", release.getOpenSourceScanId()));
+                logger.println(String.format("Open Source Scan with id : %d Cancelled/Failed", release.getOpenSourceScanId()));
         }
         logger.println(String.format("Critical: %d", release.getIssueCountCritical()));
         logger.println(String.format("High:     %d", release.getIssueCountHigh()));
@@ -186,6 +194,47 @@ public class ScanStatusPoller {
             }
         }
     }
+
+    public void printScanSummary(ScanSummaryDTO scanSummaryDTO) {
+        if (scanSummaryDTO == null) {
+            logger.println("Unable to retrieve scan summary");
+        } else {
+            logger.println();
+            logger.println("Scan Summary");
+            logger.println(String.format("Application Name: %s", scanSummaryDTO.getApplicationName()));
+            logger.println(String.format("Release Name: %s", scanSummaryDTO.getReleaseName()));
+            logger.println(String.format("Release Id: %s", scanSummaryDTO.getReleaseId()));
+            logger.println(String.format("Scan Id: %s", scanSummaryDTO.getScanId()));
+            logger.println(String.format("Scan Type: %s", scanSummaryDTO.getScanType()));
+            logger.println(String.format("Assessment Type Id: %s", scanSummaryDTO.getAssessmentTypeName()));
+            logger.println(String.format("Analysis Status Type Id: %s", scanSummaryDTO.getAnalysisStatusType()));
+            logger.println(String.format("Scan Started Date & Time: %s", scanSummaryDTO.getStartedDatetime()));
+            logger.println(String.format("Scan Completed Date & Time: %s", scanSummaryDTO.getCompletedDateTime()));
+            logger.println(String.format("Is False Positive Challenge Enabled: %s", scanSummaryDTO.getIsFalsePositiveChallenge()));
+            logger.println(String.format("Is Remediation Scan: %s", scanSummaryDTO.getIsRemediationScan()));
+            logger.println(String.format("Is Remediation Scan: %s", scanSummaryDTO.getIsRemediationScan()));
+            logger.println(String.format("Entitlement Units Consumed: %s", scanSummaryDTO.getEntitlementUnitsConsumed()));
+            logger.println(String.format("Star Rating: %s", scanSummaryDTO.getStarRating()));
+            logger.println(String.format("Notes: %s", scanSummaryDTO.getNotes()));
+            logger.println(String.format("Scan Cancel Reason: %s", scanSummaryDTO.getCancelReason()));
+            logger.println(String.format("Scan Method Type Reason: %s", scanSummaryDTO.getScanMethodTypeName()));
+            logger.println(String.format("Scan Tool Used: %s", scanSummaryDTO.getScanTool()));
+            logger.println(String.format("Scan Tool Version: %s", scanSummaryDTO.getScanToolVersion()));
+            logger.println();
+            logger.println(String.format("Total Issues: %s", scanSummaryDTO.getTotalIssues()));
+            logger.println(String.format("Total Critical Issues Count: %s", scanSummaryDTO.getIssueCountCritical()));
+            logger.println(String.format("Total High Issues Count: %s", scanSummaryDTO.getIssueCountHigh()));
+            logger.println(String.format("Total Medium Issues Count: %s", scanSummaryDTO.getIssueCountMedium()));
+            logger.println(String.format("Total Low Issues Count: %s", scanSummaryDTO.getIssueCountLow()));
+       }
+    }
+
+    public ScanSummaryDTO GetScanSummary(int releaseId, int scanId) throws IOException {
+        ReleaseController releaseController = new ReleaseController(this.apiConnection, this.logger, "");
+
+        return releaseController.getRelease(releaseId, scanId);
+    }
+
 }
 
 

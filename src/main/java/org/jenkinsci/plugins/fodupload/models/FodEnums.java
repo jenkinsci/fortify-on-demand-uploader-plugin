@@ -361,8 +361,8 @@ public class FodEnums {
         API("API");
         private final String _val;
 
-        DastScanType(String val){
-            this._val =val;
+        DastScanType(String val) {
+            this._val = val;
         }
 
         public String toString() {
@@ -381,8 +381,6 @@ public class FodEnums {
         }
 
     }
-
-
 
     public enum DastPolicy {
 
@@ -494,8 +492,8 @@ public class FodEnums {
         Postman("postman");
         private final String _val;
 
-        DastApiType(String val){
-            this._val =val;
+        DastApiType(String val) {
+            this._val = val;
         }
 
         public String toString() {
@@ -514,19 +512,21 @@ public class FodEnums {
             }
 
         }
+
         public String getValue() {
             return this._val;
         }
 
     }
+
     public enum ApiSourceType {
         FileId("FileId"),
         Url("Url");
 
         private final String _val;
 
-        ApiSourceType(String val){
-            this._val =val;
+        ApiSourceType(String val) {
+            this._val = val;
         }
 
         public String toString() {
@@ -543,8 +543,5 @@ public class FodEnums {
         }
 
     }
-
-
-
 
 }

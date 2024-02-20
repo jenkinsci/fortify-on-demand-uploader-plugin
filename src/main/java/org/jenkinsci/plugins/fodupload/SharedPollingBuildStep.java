@@ -9,6 +9,7 @@ import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.BsiToken;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
+import org.jenkinsci.plugins.fodupload.models.response.ScanSummaryDTO;
 import org.jenkinsci.plugins.fodupload.polling.PollReleaseStatusResult;
 import org.jenkinsci.plugins.fodupload.polling.ScanStatusPoller;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -84,9 +85,8 @@ public class SharedPollingBuildStep {
             } catch (NumberFormatException ex) {
                 return FormValidation.error("Could not parse Release ID.");
             }
-        }
-        else {
-             if (bsiToken != null && !bsiToken.isEmpty()) {
+        } else {
+            if (bsiToken != null && !bsiToken.isEmpty()) {
                 return FormValidation.ok();
             }
 
@@ -180,7 +180,7 @@ public class SharedPollingBuildStep {
                 ACL.SYSTEM,
                 null,
                 null
-                );
+        );
         return items;
     }
 
@@ -192,41 +192,32 @@ public class SharedPollingBuildStep {
 
         final PrintStream logger = taskListener.getLogger();
         boolean isRemoteAgent = workspace.isRemote();
-        
+
         // check to see if sensitive fields are encrypte. If not halt scan and recommend encryption.
-        if(authModel != null)
-        {
-            if(authModel.getOverrideGlobalConfig() == true){
-                if(!Utils.isCredential(authModel.getPersonalAccessToken()))
-                {
+        if (authModel != null) {
+            if (authModel.getOverrideGlobalConfig() == true) {
+                if (!Utils.isCredential(authModel.getPersonalAccessToken())) {
                     run.setResult(Result.UNSTABLE);
                     logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
-                    return ;
+                    return;
                 }
-            }
-            else
-            {
-                if(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey())
-                {
-                    if(!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret()))
-                    {
+            } else {
+                if (GlobalConfiguration.all().get(FodGlobalDescriptor.class).getAuthTypeIsApiKey()) {
+                    if (!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalClientSecret())) {
                         run.setResult(Result.UNSTABLE);
                         logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates");
-                        return ;
+                        return;
                     }
-                }
-                else
-                {
-                     if( !Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken()) )
-                    {
+                } else {
+                    if (!Utils.isCredential(GlobalConfiguration.all().get(FodGlobalDescriptor.class).getOriginalPersonalAccessToken())) {
                         run.setResult(Result.UNSTABLE);
                         logger.println("Credentials must be re-entered for security purposes. Please update on the global configuration and/or post-build actions and then save your updates.");
-                        return ;
-                    }      
+                        return;
+                    }
                 }
             }
         }
-        
+
         Result currentResult = run.getResult();
         if (Result.FAILURE.equals(currentResult)
                 || Result.ABORTED.equals(currentResult)
@@ -237,7 +228,7 @@ public class SharedPollingBuildStep {
         }
 
         // Magic numbers are awful but this eliminates most null errors.
-        if(scanId == -1) {
+        if (scanId == -1) {
             logger.println("Error: Unable to retrieve scan ID. Exiting FOD scan.");
             run.setResult(Result.UNSTABLE);
             return;
@@ -266,7 +257,7 @@ public class SharedPollingBuildStep {
                 logger.println("Invalid release ID or BSI Token");
                 return;
             }
- 
+
             if (releaseIdNum > 0 && this.getBsiToken() != null && !this.getBsiToken().isEmpty()) {
                 logger.println("Warning: The BSI Token will be ignored since Release ID was entered.");
             }
@@ -278,12 +269,12 @@ public class SharedPollingBuildStep {
 
                 // if the polling fails, crash the build
                 if (!result.isPollingSuccessful()) {
-                    if(result.isScanUploadAccepted()) {
+                    if (result.isScanUploadAccepted()) {
                         run.setResult(Result.UNSTABLE);
                     } else {
                         run.setResult(Result.FAILURE);
                     }
-                    
+
                     return;
                 }
 
@@ -306,6 +297,8 @@ public class SharedPollingBuildStep {
                             break;
                     }
                 }
+                ScanSummaryDTO summaryDTO = poller.GetScanSummary(Integer.parseInt(releaseId), scanId);
+                poller.printScanSummary(summaryDTO);
             } else {
                 logger.println("Failed to authenticate");
                 run.setResult(Result.FAILURE);
@@ -347,10 +340,10 @@ public class SharedPollingBuildStep {
 
     public AuthenticationModel getAuthModel() {
         AuthenticationModel displayModel = new AuthenticationModel(authModel.getOverrideGlobalConfig(),
-                                                                   authModel.getUsername(),
-                                                                   authModel.getPersonalAccessToken(),
-                                                                   authModel.getTenantId() );
-       
+                authModel.getUsername(),
+                authModel.getPersonalAccessToken(),
+                authModel.getTenantId());
+
         return displayModel;
     }
 

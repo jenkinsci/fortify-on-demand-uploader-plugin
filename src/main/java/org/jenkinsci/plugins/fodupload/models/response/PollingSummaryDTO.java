@@ -17,8 +17,9 @@ public class PollingSummaryDTO {
     private Boolean PassFailStatus;
     private String PassFailReasonType;
     private PollingSummaryPauseDetail[] PauseDetails;
+    private int ScanType;
 
-    
+    public int getScanType(){return  ScanType;};
     public int getScanId() {
         return ScanId;
     };
