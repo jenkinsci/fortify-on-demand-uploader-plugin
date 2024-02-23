@@ -83,6 +83,7 @@ class DastFreeStyle {
                     this.directoryAndSubdirectoriesScopeVisibility(isVisible);
                     this.loginMacroSettingsVisibility(isVisible);
                     this.setDefaultValuesForSelectBasedOnScanType(scanType, "dast-standard-scan-policy")
+                    jq('.workloadUploadedFileContainer').hide();
                     break;
                 }
                 case DastScanTypeEnum.Api: {
@@ -99,6 +100,7 @@ class DastFreeStyle {
                     this.workflowScanSettingVisibility(false);
                     this.websiteScanSettingsVisibility(false);
                     this.directoryAndSubdirectoriesScopeVisibility(false);
+                    jq('.workloadUploadedFileContainer').hide();
                     break;
                 }
                 case DastScanTypeEnum.WorkflowDriven:
@@ -705,7 +707,7 @@ class DastFreeStyle {
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro.fileId);
             this.scanSettings.fileDetails.forEach((item, index, arr) => {
                 jq('#workflowMacroFileDetail').text(item.fileName);
-                jq('.uploadedFileContainer').show();
+                jq('.workloadUploadedFileContainer').show();
             });
         }
     }
