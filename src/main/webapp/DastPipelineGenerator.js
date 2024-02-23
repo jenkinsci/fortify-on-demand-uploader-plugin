@@ -1358,15 +1358,7 @@ class DastPipelineGenerator {
         if (openApiSettings.sourceType === 'Url') {
             jq('#dast-openApi-url input').val(openApiSettings.sourceUrn);
         }
-        else if(openApiSettings.sourceType === 'FileId') {
-           if (this.scanSettings && this.scanSettings.fileDetails) {
-               this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                   jq('.openApiFileDetails').text(item.fileName);
-                   jq('#openApiFileId').val(item.fileId);
-                   jq('.uploadedFileContainer').show();
-               });
-           }
-        }
+        //In pipeline file is uploaded as part of every build action. Last uploaded file name is not displayed.
     }
 
     setGraphQlSettings(graphQlSettings) {
@@ -1380,15 +1372,7 @@ class DastPipelineGenerator {
         if (graphQlSettings.sourceType === 'Url') {
             jq('#dast-graphQL-url input').val(graphQlSettings.sourceUrn);
         }
-        else if(graphQlSettings.sourceType === 'FileId') {
-            if (this.scanSettings && this.scanSettings.fileDetails) {
-               this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                   jq('.graphQlFileDetails').text(item.fileName);
-                   jq('#graphQLFileId').val(item.fileId);
-                   jq('.uploadedFileContainer').show();
-               });
-           }
-        }
+        //In pipeline file is uploaded as part of every build action. Last uploaded file name is not displayed.
     }
     timeBoxScanSettingVisibility(isVisible)
     {
@@ -1401,13 +1385,7 @@ class DastPipelineGenerator {
     setGrpcSettings(grpcSettings) {
         jq('#apiTypeList').val('grpc');
         this.onApiTypeChanged();
-            if (this.scanSettings && this.scanSettings.fileDetails) {
-               this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                   jq('.grpcFileDetails').text(item.fileName);
-                   jq('#grpcFileId').val(item.fileId);
-                   jq('.uploadedFileContainer').show();
-               });
-           }
+
         jq('#dast-grpc-api-host input').val(grpcSettings.host);
         jq('#dast-grpc-api-servicePath input').val(grpcSettings.servicePath);
         this.setApiSchemeType('#grpcSchemeTypeList', grpcSettings.schemeType);
@@ -1416,13 +1394,6 @@ class DastPipelineGenerator {
     setPostmanSettings(postmanSettings) {
         jq('#apiTypeList').val('postman');
         this.onApiTypeChanged();
-        if (this.scanSettings && this.scanSettings.fileDetails) {
-           this.scanSettings.fileDetails.forEach((item, index, arr) => {
-               jq('.postmanFileDetails').text(item.fileName);
-               jq('#openApiFileId').val(item.fileId);
-               jq('.uploadedFileContainer').show();
-           });
-       }
     }
 
     setApiSchemeType (controlId, schemeType) {
@@ -1603,7 +1574,7 @@ class DastPipelineGenerator {
         jq('.openApiSourceControls').hide();
         jq('.graphQLSourceControls').hide();
         jq('.apiOptions').show();
-        jq('.sourceTypeFileds').hide();
+        jq('.sourceTypeFileId').hide();
         jq('.uploadMessage').text('');
         jq('#dast-openApi-filePath').hide();
         jq('.graphQlFilePath').hide();

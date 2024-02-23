@@ -374,7 +374,7 @@
                                         </f:entry>
                                     </div>
                                     <div id="dast-api-openApi-upload"
-                                         class="fode-field spinner-container sourceTypeFileds">
+                                         class="fode-field spinner-container sourceTypeFileId">
                                         <f:entry field="openApiFileSource"
                                                  title="Please upload your OpenAPI specification json file. Supported extensions: *.json">
                                             <span class="uploadContainer">
@@ -390,7 +390,7 @@
                                         </f:entry>
                                     </div>
                                     <div id="dast-openApi-url"
-                                         class="fode-field spinner-container fodp-row-autoProv sourceTypeFileds">
+                                         class="fode-field spinner-container fodp-row-autoProv sourceTypeFileId">
                                         <f:entry field="openApiUrlSource"
                                                  title="Please provide a URL to your OpenAPI specification">
                                             <f:textbox field="openApiUrl" name="openApiUrl"/>
@@ -456,7 +456,7 @@
                                         </f:entry>
                                     </div>
                                     <div id="dast-graphQL-url"
-                                         class="fode-field spinner-container sourceTypeFileds">
+                                         class="fode-field spinner-container sourceTypeFileId">
                                         <f:entry field="graphQlUrl"
                                                  title="GraphQL uses an introspection to query the schema hence introspection needs to be turned on.">
                                             <f:textbox field="graphQLurl" name="graphQLUrl"/>

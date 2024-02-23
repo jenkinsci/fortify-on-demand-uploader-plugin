@@ -140,7 +140,6 @@ class DastFreeStyle {
 
     resetLoginMacroSettings() {
         jq('#loginMacroId').val(undefined);
-        jq('#webSiteLoginMacroEnabled').find('input:checkbox:first').trigger('click');
     }
 
     loginMacroSettingsVisibility(isVisible) {
@@ -365,6 +364,7 @@ class DastFreeStyle {
             jq('#btnUploadPostmanFile, #btnUploadOpenApiFile, #btnUploadgraphQLFile, #btnUploadgrpcFile').click(_ => this.onFileUpload(event));
             jq('.fode-row-screc').hide();
             jq('.uploadedFileContainer').hide();
+            jq('.workloadUploadedFileContainer').hide();
             jq('#requestFalsePositiveRemovalRow').hide();
             jq('#loginMacroFileCreationRow').hide();
             jq('#timeZoneStackSelectList').change(_ => this.onTimeZoneChanged());
@@ -373,7 +373,6 @@ class DastFreeStyle {
             jq('#grpcSchemeTypeList').change(_ => this.onGrpcSchemeTypeChanged());
             jq('#dast-standard-scan-scope input').change(_ => this.onStandardScanRestrictionOptionChanged (event.target.id));
             setOnblurEventForFreestyle();
-
             this.uiLoaded = true;
         }
         if (!this.uiLoaded) {
@@ -460,7 +459,7 @@ class DastFreeStyle {
                         this.setNetworkSettings();
                         this.setLoginMacroCreationDetails();
                         this.setFalsePositiveFlagRequest();
-                        this.setPatchUploadFileId();
+                        this.setFileDetailForLoginAndWorkflow();
                         this.scanSettingsVisibility(true);
                         this.scanTypeVisibility(true);
                         validateRequiredFields(requiredFieldsFreestyle);
@@ -473,7 +472,6 @@ class DastFreeStyle {
                 .catch((reason) => {
                     console.error("error in scan settings: " + reason);
                 })
-
         } else {
             await this.onAssessmentChanged(false);
             if (releaseChangedPayload.mode === ReleaseSetMode.releaseSelect) this.showMessage('Select a release'); else this.showMessage('Enter a release id');
@@ -557,19 +555,13 @@ class DastFreeStyle {
     }
 
     setExcludeUrlList() {
-
         if (this.scanSettings && this.scanSettings.websiteAssessment && this.scanSettings.websiteAssessment.exclusionsList) {
             jq('#listStandardScanTypeExcludedUrl').empty();
-
             this.scanSettings.websiteAssessment.exclusionsList.forEach((item, index, arr)=>
             {
-                console.log(item.value);
-
                 jq('#listStandardScanTypeExcludedUrl').append("<li> <input type='checkbox' id=' " + item.value +
                     " ' checked='checked' name='" + item.value + "'>" + item.value + "</li>");
-
                 jq('#listStandardScanTypeExcludedUrl').show();
-
                 let urlsList = jq('#excludedUrls').val();
                 if (urlsList) {
                     if (urlsList !== '' && item.value !== '') {
@@ -581,7 +573,6 @@ class DastFreeStyle {
                     jq('#excludedUrls').val(item.value);
 
             });
-
         }
     }
 
@@ -610,7 +601,7 @@ class DastFreeStyle {
         } else if (openApiSettings.sourceType === 'FileId') {
             if (this.scanSettings && this.scanSettings.fileDetails) {
                 this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                    jq('.openApiFileDetails').text(item.fileName);
+                    jq('#openApiFileDetails').text(item.fileName);
                     jq('#openApiFileId').val(item.fileId);
                     jq('.uploadedFileContainer').show();
                 });
@@ -631,7 +622,7 @@ class DastFreeStyle {
         } else if (graphQlSettings.sourceType === 'FileId') {
             if (this.scanSettings && this.scanSettings.fileDetails) {
                 this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                    jq('.graphQlFileDetails').text(item.fileName);
+                    jq('#graphQlFileDetails').text(item.fileName);
                     jq('#graphQLFileId').val(item.fileId);
                     jq('.uploadedFileContainer').show();
                 });
@@ -644,7 +635,7 @@ class DastFreeStyle {
         this.onApiTypeChanged();
         if (this.scanSettings && this.scanSettings.fileDetails) {
             this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                jq('.grpcFileDetails').text(item.fileName);
+                jq('#grpcFileDetails').text(item.fileName);
                 jq('#grpcFileId').val(item.fileId);
                 jq('.uploadedFileContainer').show();
             });
@@ -659,8 +650,8 @@ class DastFreeStyle {
         this.onApiTypeChanged();
         if (this.scanSettings && this.scanSettings.fileDetails) {
             this.scanSettings.fileDetails.forEach((item, index, arr) => {
-                jq('.postmanFileDetails').text(item.fileName);
-                jq('#openApiFileId').val(item.fileId);
+                jq('#postmanFileDetails').text(item.fileName);
+                jq('#postmanFileId').val(item.fileId);
                 jq('.uploadedFileContainer').show();
             });
         }
@@ -700,19 +691,26 @@ class DastFreeStyle {
         }
     }
 
-    setPatchUploadFileId() {
+    setFileDetailForLoginAndWorkflow() {
         if (this.scanSettings &&
             this.scanSettings.loginMacroFileId && this.scanSettings.loginMacroFileId > 0) {
             jq('#loginMacroId').val(this.scanSettings.loginMacroFileId);
-        }
-        if (this.scanSettings.workflowdrivenAssessment && this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro) {
+            this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                jq('#loginMacroFileDetail').text(item.fileName);
+                jq('.uploadedFileContainer').show();
+            });
+            jq('[name="webSiteLoginMacroEnabled"]').trigger('click');
+        } else if (this.scanSettings.workflowdrivenAssessment && this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro) {
             if (this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro.fileId > 0)
                 jq('#workflowMacroId').val(this.scanSettings.workflowdrivenAssessment.workflowDrivenMacro.fileId);
+            this.scanSettings.fileDetails.forEach((item, index, arr) => {
+                jq('#workflowMacroFileDetail').text(item.fileName);
+                jq('.uploadedFileContainer').show();
+            });
         }
     }
 
     setNetworkSettings() {
-
         if (this.scanSettings && this.scanSettings.networkAuthenticationSettings) {
             jq('#networkUsernameRow').find('input').val(this.scanSettings.networkAuthenticationSettings.userName);
             jq('#networkPasswordRow').find('input').val(this.scanSettings.networkAuthenticationSettings.password);
@@ -763,10 +761,8 @@ class DastFreeStyle {
          }
 
     setScanType() {
-
         if (this.scanSettings && this.scanSettings.scanType) {
             let selectedScanType;
-
             switch (this.scanSettings.scanType) {
                 case DastScanTypeEnum.Standard:
                 {
@@ -801,7 +797,6 @@ class DastFreeStyle {
                 }
             }
         }
-
     }
 
     onLoadTimeZone() {
@@ -843,7 +838,6 @@ class DastFreeStyle {
     }
 
     onScanTypeChanged() {
-
         this.resetAuthSettings();
         jq('#apiTypeList').prop('selectedIndex', 0);
         let selectedScanTypeValue = jq('#scanTypeList').val();
@@ -857,7 +851,6 @@ class DastFreeStyle {
     }
 
     apiScanSettingVisibility(isVisible) {
-
         let apiScanSettingRows = jq('.' + dastApiSetting);
         jq('.' + dastApiScanTypeSpecificControls).hide();
         if (!isVisible) {
@@ -867,7 +860,6 @@ class DastFreeStyle {
             validateDropdown('#apiTypeList');
         }
     }
-
 
     onTimeZoneChanged() {
         validateDropdown('#timeZoneStackSelectList');
@@ -897,7 +889,6 @@ class DastFreeStyle {
 
 
     setScanPolicy() {
-
         if (this.scanSettings && this.scanSettings.policy) {
             let selectedScanPolicyType = this.scanSettings.policy;
             let ScanPolicy = ["Standard", "Criticals and highs", "Passive Scan"]
@@ -956,6 +947,7 @@ class DastFreeStyle {
                     jq('#loginMacroId').val(res.fileId);
                     handleSpinner(ctl, true);
                     handleUploadStatusMessage(msgCtl, fileUploadSuccess, true);
+                    jq('.uploadedFileDetails').text(res.fileName);
                 } else {
                     handleUploadStatusMessage(msgCtl, inValidResponse + "error =" + res.message, false);
                 }
@@ -980,6 +972,8 @@ class DastFreeStyle {
                 if (res && res.fileId > 0) {
                     jq('#workflowMacroId').val(res.fileId)
                     handleUploadStatusMessage(msgCtl, fileUploadSuccess, true);
+                    jq('.workloadUploadedFileContainer').show();
+                    jq('.uploadedFileDetails').text(res.fileName);
                 } else {
                     handleUploadStatusMessage(msgCtl, inValidResponse + "error =" + res.message, false);
                     return;
@@ -1178,7 +1172,7 @@ class DastFreeStyle {
         jq('.openApiSourceControls').hide();
         jq('.graphQLSourceControls').hide();
         jq('.apiOptions').show();
-        jq('.sourceTypeFileds').hide();
+        jq('.sourceTypeFileId').hide();
         jq('.uploadMessage').text('');
         if (id === 'openApiInputFile') {
             jq('.openApiSourceControls').show()

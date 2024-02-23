@@ -107,10 +107,10 @@
                                        id="openApiRadioSource"/>
                             </f:entry>
                             <div class="sourceDetails openApiSourceControls">
-                                <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileds">
+                                <div id="dast-api-openApi-upload" class="fode-field spinner-container sourceTypeFileId">
                                     <div class="uploadedFileContainer openApiUploadedFileContainer">
                                         <f:entry title="Uploaded File">
-                                            <div class="uploadedFileDetails openApiFileDetails"/>
+                                            <div class="uploadedFileDetails" id="openApiFileDetails"/>
                                         </f:entry>
                                     </div>
                                     <f:entry field="openApiFileSource"
@@ -125,7 +125,7 @@
                                         </span>
                                     </f:entry>
                                 </div>
-                                <div id="dast-openApi-url" class="fode-field spinner-container sourceTypeFileds">
+                                <div id="dast-openApi-url" class="fode-field spinner-container sourceTypeFileId">
                                     <f:entry field="openApiUrlSource"
                                              title="Please provide a URL to your OpenAPI specification">
                                         <f:textbox field="openApiurl" name="openApiUrl"/>
@@ -144,7 +144,7 @@
                         <div id="dast-postman" class="apiOptions fode-field spinner-container">
                             <div class="uploadedFileContainer postmanUploadedFileContainer">
                                 <f:entry title="Uploaded File">
-                                    <div class="uploadedFileDetails postmanFileDetails"/>
+                                    <div class="uploadedFileDetails" id="postmanFileDetails"/>
                                 </f:entry>
                             </div>
                             <f:entry field="postmanFile"
@@ -176,10 +176,10 @@
                                        id="graphQlRadioSource"/>
                             </f:entry>
                             <div class="sourceDetails graphQLSourceControls">
-                                <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileds">
+                                <div id="dast-api-graphQL-upload" class="fode-field spinner-container sourceTypeFileId">
                                     <div class="uploadedFileContainer graphQlUploadedFileContainer">
                                         <f:entry title="Uploaded File">
-                                            <div class="uploadedFileDetails graphQlFileDetails"/>
+                                            <div class="uploadedFileDetails" id="graphQlFileDetails"/>
                                         </f:entry>
                                     </div>
                                     <f:entry field="graphQlUpload"
@@ -193,7 +193,7 @@
                                         </span>
                                     </f:entry>
                                 </div>
-                                <div id="dast-graphQL-url" class="fode-field spinner-container sourceTypeFileds">
+                                <div id="dast-graphQL-url" class="fode-field spinner-container sourceTypeFileId">
                                     <f:entry field="graphQlUrl"
                                              title="GraphQL uses an introspection to query the schema hence introspection needs to be turned on.">
                                         <f:textbox field="graphQLurl" name="graphQLUrl"/>
@@ -228,7 +228,7 @@
                             <div class="uploadedFileContainer grpcUploadedFileContainer">
                                 <div class="uploadedFileContainer">
                                     <f:entry title="Uploaded File">
-                                        <div class="uploadedFileDetails grpcFileDetails"/>
+                                        <div class="uploadedFileDetails" id="grpcFileDetails"/>
                                     </f:entry>
                                 </div>
                             </div>
@@ -272,6 +272,11 @@
     <!-- Scope Settings -->
     <f:section title="Scope">
         <!-- workflow scan !-->
+        <div class="workloadUploadedFileContainer">
+        <f:entry title="Uploaded File">
+            <div class="uploadedFileDetails" id="workflowMacroFileDetail"/>
+        </f:entry>
+        </div>
         <f:entry title="Please upload the workflow driven macro file. Supported extensions: *.har, *.webmacro, *.burp">
             <div id="dast-workflow-macro-upload" class="fode-field spinner-container dast-workflow-scan">
                 <span>
@@ -281,6 +286,7 @@
                         name="workflowMacroUploadStatusMessage"/>
                     <input type="label" hidden="true" value="" name="workflowMacroId" id="workflowMacroId"/>
                     <input type="label" value="" hidden="true" name="workflowMacroHosts" id="workflowMacroHosts"/>
+
                 </span>
             </div>
         </f:entry>
@@ -431,6 +437,10 @@
                     <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
                                      title="Login Macro"
                                      checked="${instance.webSiteLoginMacroEnabled}" inline="true">
+
+                        <f:entry title="Uploaded File">
+                            <div class="uploadedFileDetails" id="loginMacroFileDetail"/>
+                        </f:entry>
                         <f:entry
                                 title="Please upload the login macro file. Supported extension: *.webmacro">
                             <span id="loginMacroUploadContainer" class="fode-field spinner-container">
