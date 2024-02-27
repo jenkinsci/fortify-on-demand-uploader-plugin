@@ -311,8 +311,10 @@ class PipelineGenerator {
                 });
             switch (val) {
                 case _scanCentralBuildTypes.MSBuild:
+                case _scanCentralBuildTypes.DotNet:
                     if (this.overrideServerSettings || this.autoProvMode) {
                         closestRow(jq('#technologyStackForm')).show();
+                        jq('.fodp-row-sc-msbuild').show();
                         let currVal = this.techStacks[jq('#technologyStackSelect').val()];
                         if (!currVal || !this.isDotNetStack(currVal)) jq('#technologyStackSelect').val(techStackConsts.none);
                         techStackFilter = this.isDotNetStack;
@@ -672,6 +674,7 @@ class PipelineGenerator {
                 ssbf = jq('#scanCentralBuildFileInput').val();
                 break;
             case _scanCentralBuildTypes.MSBuild:
+            case _scanCentralBuildTypes.DotNet:
                 ssbc = jq('#scanCentralBuildCommandInput').val();
                 ssbf = jq('#scanCentralBuildFileInput').val();
                 break;

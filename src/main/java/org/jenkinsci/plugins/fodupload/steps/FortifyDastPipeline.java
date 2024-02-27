@@ -1080,7 +1080,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
                 CreateApplicationResponse createApplicationResponse = applicationsController.createApplication(newAppReqModel);
 
-                if(!createApplicationResponse.getSuccess() || createApplicationResponse.getReleaseId() <0)
+                if(!createApplicationResponse.getSuccess() ||  createApplicationResponse.getReleaseId() <0)
                 {
                     throw  new Exception(String.format("Fortify OnDemand Failed to create application and release, error(s): %s",
                             String.join("," ,createApplicationResponse.getErrors())));

@@ -207,6 +207,19 @@ class PayloadPackagingImpl {
                             throw new IOException("Build File is a required field for msbuild build type. Please fill in the .sln file name in the current source folder ");
                         }
                         break;
+                    case DotNet:
+                        scanCentralPackageCommandList.add("dotnet");
+                        if (!Utils.isNullOrEmpty(job.getScanCentralBuildCommand())) {
+                            scanCentralPackageCommandList.add("--build-command");
+                            scanCentralPackageCommandList.add(transformMsBuildCommand(job.getScanCentralBuildCommand()));
+                        }
+                        if (!Utils.isNullOrEmpty(job.getScanCentralBuildFile())) {
+                            scanCentralPackageCommandList.add("--build-file");
+                            scanCentralPackageCommandList.add("\"" + job.getScanCentralBuildFile() + "\"");
+                        } else {
+                            throw new IOException("Build File is a required field for msbuild build type. Please fill in the .sln file name in the current source folder ");
+                        }
+                        break;
                     case Python:
                         scanCentralPackageCommandList.add("none");
                         if (!Utils.isNullOrEmpty(job.getScanCentralVirtualEnv())) {

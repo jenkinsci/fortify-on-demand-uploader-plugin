@@ -250,7 +250,6 @@ class DastFreeStyle {
 
     populateAssessmentsDropdown() {
         let atsel = jq(`#ddAssessmentType`);
-
         atsel.find('option').remove();
         jq(`#entitlementSelectList`).find('option').remove();
 
@@ -263,6 +262,7 @@ class DastFreeStyle {
     }
 
     async onAssessmentChanged(skipAuditPref) {
+    debugger;
         let atval = jq('#ddAssessmentType').val();
         let entsel = jq('#entitlementSelectList');
         let at = this.assessments ? this.assessments[atval] : null;
@@ -349,7 +349,6 @@ class DastFreeStyle {
     async loadEntitlementSettings(releaseChangedPayload) {
         if (releaseChangedPayload && releaseChangedPayload.mode === ReleaseSetMode.releaseId
             && numberOrNull(releaseChangedPayload.releaseId) > 0) {
-
             //Register the all Event on change here After the LoadEntitlement triggered from AppSelection.js
             jq('#ddAssessmentType')
                 .change(_ => this.onAssessmentChanged());
@@ -388,7 +387,6 @@ class DastFreeStyle {
         let rows = jq(fodeRowSelector);
         rows.hide();
         this.hideMessages();
-
         let releaseId = releaseChangedPayload ? releaseChangedPayload.releaseId : null;
         let fields = jq('.fode-field.spinner-container');
         releaseId = numberOrNull(releaseId);
@@ -739,12 +737,14 @@ class DastFreeStyle {
 
     setEnvFacing() {
         if (this.scanSettings) {
-           let selectedVal = this.scanSettings.dynamicScanEnvironmentFacingType;
-           let items = jq('#dastEnvList').find('option');
-           for(let item of items) {
-             if (item.value.toLowerCase() == selectedVal.toLowerCase())
-             item.setAttribute('selected', 'selected');
-           }
+            let selectedVal = this.scanSettings.dynamicScanEnvironmentFacingType;
+            let items = jq('#dastEnvList').find('option');
+            if (selectedVal) {
+                for (let item of items) {
+                    if (item.value.toLowerCase() == selectedVal.toLowerCase())
+                        item.setAttribute('selected', 'selected');
+                }
+            }
         }
     }
 

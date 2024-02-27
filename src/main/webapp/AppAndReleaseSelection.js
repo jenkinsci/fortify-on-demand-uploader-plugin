@@ -289,7 +289,6 @@ class AppAndReleaseSelection {
         this.onReleaseMethodSelection();
         jq('#releaseTypeSelectList').off('change').change(() => this.onReleaseMethodSelection());
         jq('#releaseIdField').off('change').change(_ => this.onReleaseIdFieldChanged());
-
         subscribeToEvent('authInfoChanged', () => this.onCredsChanged());
         subscribeToEvent('dialogSelectedApplication', e => this.onAppSelectedFromDialog(e.detail.applicationId, e.detail.applicationName, e.detail.hasMicroservices));
         subscribeToEvent('dialogSelectedMicroservice', e => this.onMicroserviceSelectedFromDialog(e.detail.microserviceId, e.detail.microserviceName));

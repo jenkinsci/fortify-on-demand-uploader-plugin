@@ -26,6 +26,7 @@ const _scanCentralBuildTypes = {
     "Gradle": "Gradle",
     "Maven": "Maven",
     "MSBuild": "MSBuild",
+    "DotNet":"DotNet",
     "PHP": "PHP",
     "Python": "Python",
     "Go": "Go"

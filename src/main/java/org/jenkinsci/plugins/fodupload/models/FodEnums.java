@@ -262,6 +262,7 @@ public class FodEnums {
         Gradle,
         Maven,
         MSBuild,
+        DotNet,
         PHP,
         Go,
         Python;
