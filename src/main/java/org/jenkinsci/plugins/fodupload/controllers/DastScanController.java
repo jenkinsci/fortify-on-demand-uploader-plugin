@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.reflect.TypeToken;
+import groovy.lang.Tuple2;
 import hudson.FilePath;
 import okhttp3.*;
 import org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants;
@@ -284,6 +285,62 @@ public class DastScanController extends ControllerBase {
             ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
             ((FodDastApiResponse) fodApiResponse).reason = response.bodyContent();
             return (T) fodApiResponse;
+        }
+    }
+
+    public Tuple2<Integer,Integer>upsertApplicationAndRelease(final CreateApplicationModel appModel) throws Exception {
+        ReleaseController relCntr = new ReleaseController(apiConnection, logger, correlationId);
+        Integer releaseId = relCntr.getReleaseIdByName(appModel.getApplicationName(), appModel.getReleaseName(), appModel.getHasMicroservices(), appModel.getReleaseMicroserviceName());
+
+        if (releaseId != null) {
+            println("Existing release found matching " + appModel.getApplicationName() + " " + appModel.getReleaseName());
+            return new Tuple2<>(releaseId,0);
+        }
+
+        println("Provisioning application and release");
+
+        PostReleaseWithUpsertApplicationModel model = new PostReleaseWithUpsertApplicationModel();
+
+        model.setApplicationName(appModel.getApplicationName());
+        model.setApplicationType(appModel.getApplicationType().getStringValue());
+        model.setReleaseName(appModel.getReleaseName());
+        model.setOwnerId(appModel.getOwnerId());
+        model.setBusinessCriticalityType(appModel.getBusinessCriticalityType().getStringValue());
+        model.setSdlcStatusType(appModel.getSdlcStatusType().getStringValue());
+
+        if (appModel.getHasMicroservices()) {
+            model.setHasMicroservices(appModel.getHasMicroservices());
+            model.setReleaseMicroserviceName(appModel.getReleaseMicroserviceName());
+            ArrayList<String> microserviceArray = new ArrayList<>();
+            microserviceArray.add(appModel.getReleaseMicroserviceName());
+            model.setMicroservices(microserviceArray);
+        }
+            //add code to map attributes
+        HttpUrl.Builder builder = HttpUrl.parse(apiConnection.getApiUrl()).newBuilder()
+                .addPathSegments("/api/v3/releases/releaseWithUpsertApplication");
+
+        String requestContent = Json.getInstance().toJson(model);
+        Request request = new Request.Builder()
+                .url(builder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .post(RequestBody.create(MediaType.parse("application/json"), requestContent))
+                .build();
+
+        println("Submitting application and release model");
+
+        ResponseContent response = apiConnection.request(request);
+
+        if (response.code() < 300) {
+            PostReleaseWithUpsertApplicationResponseModel result = apiConnection.parseResponse(response, new TypeToken<PostReleaseWithUpsertApplicationResponseModel>() {
+            }.getType());
+
+            if (result.getSuccess()) {
+                println("Provisioning successful. Release Id: " + result.getReleaseId());
+                return new Tuple2<>(result.getReleaseId(), result.getApplicationId());
+            } else throw new Exception("Failed to create application and/or release: \n" + String.join("\n", result.getErrors()));
+        } else {
+            throw new Exception("Failed to create application and/or release: \n" + response.bodyContent());
         }
     }
 
