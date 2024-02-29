@@ -252,17 +252,25 @@ class DastFreeStyle {
         let atsel = jq(`#ddAssessmentType`);
         atsel.find('option').remove();
         jq(`#entitlementSelectList`).find('option').remove();
-
         for (let k of Object.keys(this.assessments)) {
             let at = this.assessments[k];
             if (at.assessmentCategory === 'DAST_Automated') {
-                atsel.append(`<option value="${at.id}">${at.name}</option>`);
+                atsel.append(`<option value="${at.id}" >${at.name}</option>`);
+                this.selectDastAutomatedOption(at);
             }
         }
     }
 
+    selectDastAutomatedOption = (assessment) => {
+        setTimeout(()=>
+        {
+            jq("#ddAssessmentType option[value='"+assessment.id+ "']").attr('selected', 'selected');
+           this.onAssessmentChanged();
+        },10);
+    }
+
     async onAssessmentChanged(skipAuditPref) {
-    debugger;
+
         let atval = jq('#ddAssessmentType').val();
         let entsel = jq('#entitlementSelectList');
         let at = this.assessments ? this.assessments[atval] : null;
@@ -433,7 +441,6 @@ class DastFreeStyle {
                         let timeZoneId = this.scanSettings.timeZone;
                         this.populateAssessmentsDropdown();
                         jq('#ddAssessmentType').val(assessmentId);
-                        await this.onAssessmentChanged(true);
                         jq('#entitlementFreqType').val(this.scanSettings.entitlementFrequencyType);
                         await this.onEntitlementChanged(false);
                         this.setSelectedEntitlementValue(entp);
@@ -464,13 +471,12 @@ class DastFreeStyle {
                         this.scanTypeVisibility(true);
                         validateRequiredFields(requiredFieldsFreestyle);
                     } else {
-                        await this.onAssessmentChanged(false);
                         this.showMessage('Failed to retrieve scan settings from API', true);
                         rows.hide();
                     }
                 })
                 .catch((reason) => {
-                    console.error("error in scan settings: " + reason);
+                    console.error("error while populating scan settings: " + reason);
                 })
         } else {
             await this.onAssessmentChanged(false);

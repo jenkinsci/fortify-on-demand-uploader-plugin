@@ -25,6 +25,7 @@ public class ValidationUtils {
                 if (techStack != 7) return ScanCentralValidationResult.Mismatched;
                 break;
             case "MSBuild":
+            case "DotNet":
                 if (techStack != 1 && techStack != 23) return ScanCentralValidationResult.Mismatched;
                 break;
             case "PHP":
