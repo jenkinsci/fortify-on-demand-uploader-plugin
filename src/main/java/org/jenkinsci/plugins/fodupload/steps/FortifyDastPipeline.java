@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload.steps;
 
 import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import groovy.lang.Tuple2;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -1078,15 +1079,11 @@ public class FortifyDastPipeline extends FortifyStep {
                         SDLCStatusType.fromInteger(Integer.parseInt(this.getSdlcStatus())),
                         false, microservices, "");
 
-                CreateApplicationResponse createApplicationResponse = applicationsController.createApplication(newAppReqModel);
 
-                if(!createApplicationResponse.getSuccess() ||  createApplicationResponse.getReleaseId() <0)
-                {
-                    throw  new Exception(String.format("Fortify OnDemand Failed to create application and release, error(s): %s",
-                            String.join("," ,createApplicationResponse.getErrors())));
-                }
-                this.releaseId = createApplicationResponse.getReleaseId().toString();
-                this.applicationId = createApplicationResponse.getApplicationId().toString();
+                DastScanController dynamicController = new DastScanController(apiConnection, null, Utils.createCorrelationId());
+                Tuple2<Integer, Integer> ids= dynamicController.upsertApplicationAndRelease(newAppReqModel);
+                this.releaseId = ids.get(0).toString();
+                this.applicationId = ids.get(1).toString();
                 dastScanSharedBuildStep.getModel().set_releaseIdFromAutoProv(this.releaseId);
             }
             else if(!this.getReleaseId().isEmpty() && this.getReleaseName().isEmpty()) {
