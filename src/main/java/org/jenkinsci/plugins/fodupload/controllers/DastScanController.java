@@ -4,7 +4,6 @@ import com.google.gson.reflect.TypeToken;
 import groovy.lang.Tuple2;
 import hudson.FilePath;
 import okhttp3.*;
-import org.codehaus.groovy.ast.expr.TupleExpression;
 import org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants;
 import org.jenkinsci.plugins.fodupload.FodApi.DastScanPayloadUpload;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
