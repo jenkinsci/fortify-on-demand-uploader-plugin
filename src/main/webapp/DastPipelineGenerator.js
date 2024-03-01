@@ -338,7 +338,10 @@ class DastPipelineGenerator {
     }
 
     onAssignMeClick() {
-        if (this.currentSession) jq('#autoProvOwner').val(this.currentSession.userId);
+        if (this.currentSession){
+          jq('#autoProvOwner').val(this.currentSession.userId);
+          this.populateHiddenFields();
+        }
     }
 
     async onEntitlementChanged(skipAuditPref) {
@@ -618,11 +621,12 @@ class DastPipelineGenerator {
     setEnvFacing() {
         if (this.scanSettings) {
            let selectedVal = this.scanSettings.dynamicScanEnvironmentFacingType;
-           let items = jq('#envFacingList').find('option');
-
-           for(let item of items) {
-             if (item.value.toLowerCase() == selectedVal.toLowerCase())
-             item.setAttribute('selected', 'selected');
+            if(selectedVal) {
+               let items = jq('#envFacingList').find('option');
+               for(let item of items) {
+                 if (item.value.toLowerCase() == selectedVal.toLowerCase())
+                 item.setAttribute('selected', 'selected');
+               }
            }
         }
     }
