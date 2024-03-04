@@ -4,6 +4,17 @@ const ReleaseSetMode = Object.freeze({
     releaseSelect: 2
 });
 
+const dastScanSetting = 'dast-scan-setting';
+const dastWebSiteSetting = 'dast-standard-setting';
+const dastWorkFlowSetting = 'dast-workflow-setting';
+const dastCommonScopeSetting = 'dast-common-scan-scope';
+const nwAuthSetting = 'dast-networkAuth-setting';
+const loginAuthSetting = 'dast-login-macro';
+const dastApiSetting = 'dast-api-setting';
+const dastApiScanTypeSpecificControls = 'dast-api-specific-controls';
+const dastTimeBoxScanIdentifier = 'dast-timebox-scan';
+const  dastScanPolicyIdentifier ='dast-scan-policy';
+const dastApiScanPolicyIdentifier ='dast-scan-api-policy';
 class AppAndReleaseSelection {
 
     constructor() {
@@ -17,6 +28,19 @@ class AppAndReleaseSelection {
         jq('.bsiTokenView').hide();
         jq('.appAndReleaseNameView').hide();
         jq('#appAndReleaseNameErrorView').hide();
+        jq('.openApiSourceControls').hide();
+        jq('.graphQLSourceControls').hide();
+        jq('.dast-scan-setting').hide();
+        jq('.dast-standard-setting').hide();
+        jq('.dast-workflow-setting').hide();
+        jq('.dast-common-scan-scope').hide();
+        jq('.dast-login-macro').hide();
+        jq('.dast-networkAuth-setting').hide();
+        jq('.dast-api-setting').hide();
+        jq('dast-api-specific-controls').hide();
+        jq('#requestFalsePositiveRemovalRow').hide();
+         jq('#loginMacroFileCreationRow').hide();
+
     }
 
     onReleaseIdFieldChanged() {
@@ -108,7 +132,11 @@ class AppAndReleaseSelection {
             }
             jq('#releaseSelectView').show();
             this.selectRelease(release.releaseId, release.releaseName);
-            dispatchEvent('releaseChanged', {releaseId: release.releaseId, releaseName: release.releaseName, mode: ReleaseSetMode.releaseSelect});
+            dispatchEvent('releaseChanged', {
+                releaseId: release.releaseId,
+                releaseName: release.releaseName,
+                mode: ReleaseSetMode.releaseSelect
+            });
         } else {
             this.resetSelectApplication();
             this.resetSelectRelease();
@@ -131,8 +159,10 @@ class AppAndReleaseSelection {
     }
 
     resetSelectMicroservice() {
-        jq('#selectedMicroservice')[0].innerText = 'Select a microservice';
-        jq('[name="userSelectedMicroservice"]').val(null);
+        if (jq('#selectedMicroservice') !== undefined && jq('#selectedMicroservice')[0] !== undefined) {
+            jq('#selectedMicroservice')[0].innerText = 'Select a microservice';
+            jq('[name="userSelectedMicroservice"]').val(null);
+        }
     }
 
     showApiRetrievalError() {
@@ -259,7 +289,6 @@ class AppAndReleaseSelection {
         this.onReleaseMethodSelection();
         jq('#releaseTypeSelectList').off('change').change(() => this.onReleaseMethodSelection());
         jq('#releaseIdField').off('change').change(_ => this.onReleaseIdFieldChanged());
-
         subscribeToEvent('authInfoChanged', () => this.onCredsChanged());
         subscribeToEvent('dialogSelectedApplication', e => this.onAppSelectedFromDialog(e.detail.applicationId, e.detail.applicationName, e.detail.hasMicroservices));
         subscribeToEvent('dialogSelectedMicroservice', e => this.onMicroserviceSelectedFromDialog(e.detail.microserviceId, e.detail.microserviceName));
@@ -275,6 +304,24 @@ class AppAndReleaseSelection {
         const applicationSelectRow = closestRow('#application-entry');
         const microserviceSelectRow = closestRow('#microservice-entry');
         const releaseSelectRow = closestRow('#release-entry');
+        const dastAssessmentrow = closestRow('#dastAssessmentTypeForm');
+        const dastEntitlementrow = closestRow('#dastEntitlementForm');
+        const dastScanTyperow = closestRow('#dastScanType');
+        const dastSiteUrlRow = closestRow('#dast-standard-site-url');
+        const dastEnv = closestRow('#dast-scan-setting-evn')
+        const dastTimeZone = closestRow('#timezone');
+        const dastWrkFlowMacroUpload = closestRow('#dast-workflow-macro-upload');
+        const dastWrkFlowAllowedHost = closestRow('#listWorkflowDrivenAllowedHostUrl');
+        const dastStandardScope = closestRow('#dast-standard-scan-scope');
+        const dastExcludeUrl = closestRow('#standardScanTypeExcludeUrlsRow');
+        const dastWebSiteTimeBoxScan = closestRow('#dast-timeBox-scan');
+        const networkAuth = closestRow('#webSiteNetworkAuthSettingEnabledRow')
+        const loginMacro = closestRow('#login-macro-row');
+        const commonWebScopeSetting = closestRow('#dast-common-scope');
+        const commonWebScopeSettingAttr = closestRow('#dast-common-scope-attr');
+        const commonScanPolicy = closestRow('#dast-scan-policy-row');
+        const apiScanPolicyRow =closestRow('#dast-api-scan-policy-outer-row')
+        const apiScanRow =closestRow('#dast-api-scan-block');
 
         releaseIdRow.addClass('releaseIdView');
         bsiTokenRow.addClass('bsiTokenView');
@@ -285,6 +332,28 @@ class AppAndReleaseSelection {
         applicationSelectRow.prop('id', 'applicationSelectView');
         microserviceSelectRow.prop('id', 'microserviceSelectView');
         releaseSelectRow.prop('id', 'releaseSelectView');
+        dastEntitlementrow.addClass(dastScanSetting);
+        dastAssessmentrow.addClass(dastScanSetting);
+        dastScanTyperow.addClass(dastScanSetting);
+        dastStandardScope.addClass(dastScanSetting);
+        dastEnv.addClass(dastScanSetting);
+        dastTimeZone.addClass(dastScanSetting);
+        networkAuth.addClass(nwAuthSetting);
+        loginMacro.addClass(loginAuthSetting);
+
+        <!--Scan Specific Scope Sections-->
+        dastWrkFlowMacroUpload.addClass(dastWorkFlowSetting);
+        dastWrkFlowAllowedHost.addClass(dastWorkFlowSetting);
+        dastExcludeUrl.addClass(dastWebSiteSetting);
+        dastSiteUrlRow.addClass(dastWebSiteSetting);
+        dastWebSiteTimeBoxScan.addClass(dastTimeBoxScanIdentifier);
+        commonWebScopeSetting.addClass(dastCommonScopeSetting);
+        commonWebScopeSettingAttr.addClass(dastCommonScopeSetting);
+        commonScanPolicy.addClass(dastScanPolicyIdentifier);
+        apiScanPolicyRow.addClass(dastApiScanPolicyIdentifier);
+        apiScanRow.addClass(dastApiSetting);
+        <!--Scope sections-->
+
     }
 }
 

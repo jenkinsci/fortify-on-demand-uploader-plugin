@@ -1,9 +1,5 @@
 package org.jenkinsci.plugins.fodupload.models;
 
-import org.apache.commons.lang.enums.EnumUtils;
-
-import java.util.Arrays;
-
 public class FodEnums {
 
     public enum APILookupItemTypes {
@@ -39,7 +35,9 @@ public class FodEnums {
         PassFailReasonTypes,
         DynamicScanWebServiceTypes,
         TechnologyTypes,
-        LanguageLevels
+        LanguageLevels,
+
+        NetworkAuthenticationType
     }
 
     public enum GrantType {CLIENT_CREDENTIALS, PASSWORD}
@@ -264,6 +262,7 @@ public class FodEnums {
         Gradle,
         Maven,
         MSBuild,
+        DotNet,
         PHP,
         Go,
         Python;
@@ -305,6 +304,243 @@ public class FodEnums {
                 default:
                     return 0;
             }
+        }
+
+    }
+
+    public enum DastScanFileTypes {
+        OpenAPIDefinition("OpenAPIDefinition"),
+        GraphQLDefinition("GraphQLDefinition"),
+        GRPCDefinition("GRPCDefinition"),
+        WorkflowDrivenMacro("WorkflowDrivenMacro"),
+        LoginMacro("LoginMacro"),
+        PostmanCollection("PostmanCollection");
+        private final String _val;
+
+        public static DastScanFileTypes fromInt(int val) {
+            switch (val) {
+                case 7:
+                    return PostmanCollection;
+                case 6:
+                    return LoginMacro;
+                case 5:
+                    return WorkflowDrivenMacro;
+                case 4:
+                    return GRPCDefinition;
+
+                case 3:
+                    return GraphQLDefinition;
+
+                case 2:
+                    return OpenAPIDefinition;
+                case 1:
+                    return OpenAPIDefinition;
+
+            }
+            return null;
+        }
+
+        DastScanFileTypes(String val) {
+            this._val = val;
+        }
+
+        public String getValue() {
+            return this._val;
+        }
+
+    }
+
+    public enum DastEnvironmentType {
+        External,
+        Internal
+
+    }
+
+    public enum DastScanType {
+        Website("Website"),
+        Workflow("Workflow-driven"),
+        API("API");
+        private final String _val;
+
+        DastScanType(String val) {
+            this._val = val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "Workflow-driven":
+                    return "Workflow-driven";
+                case "Website":
+                    return "Website";
+                case "API":
+                    return "API";
+                default:
+                    return "none";
+
+            }
+
+        }
+
+    }
+
+    public enum DastPolicy {
+
+        Standard("Standard"),
+        Critical_and_high("CriticalsAndHighs"),
+        Passive("PassiveScan");
+
+        private final String _val;
+
+        DastPolicy(String val) {
+            this._val = val;
+        }
+
+        public int getInteger() {
+            switch (this._val) {
+                case "PassiveScan":
+                    return 3;
+                case "CriticalsAndHighs":
+                    return 2;
+                case "Standard":
+                    return 1;
+            }
+            return 0;
+        }
+
+        public static DastPolicy fromInt(int val) {
+            switch (val) {
+
+                case 3:
+                    return Passive;
+
+                case 2:
+                    return Critical_and_high;
+                case 1:
+                default:
+                    return Standard;
+            }
+        }
+
+        public String getValue() {
+            return this._val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "Standard":
+                    return "Standard";
+                case "CriticalsAndHighs":
+                    return "Critical and high";
+                case "Passive":
+                    return "Passive";
+
+            }
+            return null;
+        }
+    }
+
+    public enum DastReleaseType {
+        UseReleaseId("UseReleaseId"),
+        UseAppAndReleaseName("UseAppAndReleaseName");
+        private final String _val;
+
+        DastReleaseType(String val) {
+            this._val = val;
+        }
+
+        public static DastReleaseType fromInt(int val) {
+            switch (val) {
+                case 2:
+                    return UseAppAndReleaseName;
+                case 1:
+                default:
+                    return UseReleaseId;
+
+            }
+        }
+
+        public String getValue() {
+            return this._val;
+        }
+
+        public int getInteger() {
+            switch (this._val) {
+                case "UseAppAndReleaseName":
+                    return 2;
+                case "UseReleaseId":
+                default:
+                    return 1;
+            }
+        }
+
+        public String toString() {
+            switch (this._val) {
+
+                case "UseAppAndReleaseName":
+                    return "Application and Release Options";
+                case "UseReleaseId":
+                default:
+                    return "Release ID";
+
+            }
+        }
+    }
+
+    public enum DastApiType {
+        OpenApi("openApi"),
+        Grpc("grpc"),
+        GraphQL("graphQl"),
+        Postman("postman");
+        private final String _val;
+
+        DastApiType(String val) {
+            this._val = val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "openApi":
+                    return "openApi";
+                case "graphQl":
+                    return "graphQl";
+                case "grpc":
+                    return "grpc";
+                case "postman":
+                    return "postman";
+                default:
+                    return "none";
+
+            }
+
+        }
+
+        public String getValue() {
+            return this._val;
+        }
+
+    }
+
+    public enum ApiSourceType {
+        FileId("FileId"),
+        Url("Url");
+
+        private final String _val;
+
+        ApiSourceType(String val) {
+            this._val = val;
+        }
+
+        public String toString() {
+            switch (this._val) {
+                case "FileId":
+                    return "FileId";
+                case "Url":
+                    return "Url";
+                default:
+                    return "none";
+
+            }
+
         }
 
     }

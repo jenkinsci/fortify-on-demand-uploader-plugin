@@ -2,6 +2,8 @@ package org.jenkinsci.plugins.fodupload.FodApi;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
@@ -10,6 +12,7 @@ import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.TokenCacheManager;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.GrantType;
 import org.jenkinsci.plugins.fodupload.models.JobModel;
+import org.jenkinsci.plugins.fodupload.models.PatchDastScanFileUploadReq;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -30,7 +33,6 @@ public class FodApiConnection {
     private String token;
     private GrantType grantType;
     private String scope;
-
     private String id;
     private String secret;
 
@@ -65,7 +67,8 @@ public class FodApiConnection {
         if (executeOnRemoteAgent) {
             _launcher = launcher;
             client = new RemoteAgentClient(CONNECTION_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, proxy, _launcher, _httpLogger);
-        } else client = new ServerClient(Utils.CreateOkHttpClient(CONNECTION_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, proxy), _httpLogger);
+        } else
+            client = new ServerClient(Utils.CreateOkHttpClient(CONNECTION_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, proxy), _httpLogger);
     }
 
     /**
@@ -168,7 +171,8 @@ public class FodApiConnection {
     public <T> T requestTyped(Request request, Type t) throws IOException {
         ResponseContent res = this.request(request);
 
-        return this.parseResponse(res, t);
+        T result = this.parseResponse(res, t);
+        return result;
     }
 
     public <T> T requestTyped(HttpRequest request, Type t) throws IOException {
@@ -182,8 +186,15 @@ public class FodApiConnection {
 
         if (content == null)
             throw new IOException("Unexpected body to be null");
+        else {
+            try {
+                return Json.getInstance().fromJson(content, t);
+            } catch (JsonSyntaxException ex) {
+                String bodyContent = "{\"content\":" + content + "}";
+                return Json.getInstance().fromJson(bodyContent, t);
+            }
+        }
 
-        return Json.getInstance().fromJson(content, t);
     }
 
     public ScanPayloadUpload getScanPayloadUploadInstance(JobModel uploadRequest, String correlationId, String fragUrl, PrintStream logger) throws IOException {
@@ -191,6 +202,16 @@ public class FodApiConnection {
             return new ScanPayloadUploadLocal(((ServerClient) this.client).client(), getTokenFromCache(), uploadRequest, correlationId, fragUrl, logger);
         } else {
             return new ScanPayloadUploadRemote(uploadRequest, correlationId, fragUrl, getTokenFromCache(), CONNECTION_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, proxy, _launcher, logger);
+        }
+    }
+
+    public DastScanPayloadUpload getDastScanPayloadUploadInstance(FilePath uploadFile, String releaseId, String apiUri, String correlationId,
+                                                                  PrintStream logger) throws IOException {
+        if (this.client instanceof ServerClient) {
+            return new DastScanPayloadUploadLocal(((ServerClient) this.client).client(), releaseId, getTokenFromCache(), apiUri, uploadFile, correlationId, logger);
+        } else {
+            return new DastScanPayloadUploadRemote(releaseId, getTokenFromCache(), uploadFile, apiUri,
+                    correlationId, logger, CONNECTION_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, proxy, _launcher);
         }
     }
 

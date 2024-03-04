@@ -749,6 +749,7 @@ public class FortifyStaticAssessment extends FortifyStep {
             case "Maven":
                 return new Tuple2<>(scanCentral, 7);
             case "MSBuild":
+            case "DotNet":
                 return null;
             case "PHP":
                 return new Tuple2<>(scanCentral, 9);

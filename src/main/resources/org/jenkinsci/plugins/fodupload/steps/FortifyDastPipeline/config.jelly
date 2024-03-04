@@ -1,0 +1,694 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+         xmlns:f="/lib/form">
+    <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+    <style>
+        #fodp-error {
+        color: red;
+        }
+        .fodp-row-screc {
+        color: red;
+        }
+        .fodp-row-screc #technologyScanCentralRec {
+        font-size: 85%
+        }
+        .fode-row-hidden {
+        display: none;
+        }
+        .spinner select {
+        display: none;
+        }
+        .spinner button {
+        display: none;
+        }
+        .spinner a {
+        display: none;
+        }
+        .spinner input {
+        display: none;
+        }
+        .fodp-field-row select.setting-input,
+        .fodp-field-row input.setting-input,
+        .fodp-bound select.setting-input {
+        width: 240px;
+        }
+        input.fodp-autoProvAttr {
+        width: 120px !important;
+        }
+        ul.fodp-autoProvAttr li {
+        }
+        #releaseSelection{
+        width: 125px;
+        margin-right: 10px;
+        }
+        #releaseSelectionValue{
+        width: calc(100% - 135px);
+        }
+        #releaseLookup {
+        margin-left: 110px;
+        }
+        #autoProvAttr > li > span {
+        cursor: pointer;
+        margin-right: 25px;
+        }
+        #autoProvAttr > li {
+        list-style-type: none;
+        }
+        #autoProvOwnerAssignMe {
+        margin-left: 5px;
+        }
+        .error-msg {
+        color: red;
+        }
+        .req-field {
+        border: 1px solid red;
+        }
+        .uploadedFileDetails {
+        display: inline-block;
+        border-radius: 74px;
+        background-color: #efefef;
+        padding-left: 10px;
+        padding-right: 10px;
+        }
+        .reqFalsePositiveWarn{
+        color:red;
+        }
+    </style>
+    <f:section title="Authentication - Select to override global authentication settings">
+        <f:block>
+
+            <f:optionalBlock name="overrideGlobalConfig" field="overrideGlobalConfig"
+                             title="Configure Personal Access Token"
+                             checked="${instance.overrideGlobalConfig}" inline="true">
+                <f:entry title="Username" field="usernameStaplerOnly">
+                    <div id="fodp-authUser">
+                        <f:textbox/>
+                    </div>
+                </f:entry>
+                <f:entry title="Personal Access Token" field="personalAccessTokenSelect"
+                         help="/plugin/fortify-on-demand-uploader/help-personalAccessToken.html">
+                    <div id="fodp-authPAT">
+                        <c:select/>
+                    </div>
+                </f:entry>
+                <f:entry title="Tenant ID" field="tenantIdStaplerOnly">
+                    <div id="fodp-authTenant">
+                        <f:textbox/>
+                    </div>
+                </f:entry>
+                <f:validateButton title="${%Test Connection}" progress="${%Testing connection to Fortify on Demand...}"
+                                  method="testPersonalAccessTokenConnection"
+                                  with="usernameStaplerOnly,personalAccessTokenSelect,tenantIdStaplerOnly"/>
+            </f:optionalBlock>
+        </f:block>
+    </f:section>
+    <f:section title="Release Selection">
+        <f:block>
+            <div id="releaseSelectioForm" class="spinner-container">
+                <div>
+                    <select id="releaseSelection" class="setting-input" value="0">
+                        <option value="0">Release Id</option>
+                        <option value="2">Auto Provision</option>
+                    </select>
+                    <input type="text" id="releaseSelectionValue" class="setting-input"/>
+                </div>
+
+            </div>
+            <div id="autoProvForm">
+                <f:entry title="Application Name">
+                    <div class="fodp-field fodp-row-autoProv">
+                        <input type="textbox" id="autoProvAppName" class="setting-input"/>
+                    </div>
+                </f:entry>
+                <f:entry title="Business Criticality">
+                    <div class="fodp-field fodp-row-autoProv">
+                        <select id="autoProvBussCrit" class="setting-input">
+                            <option value="1">High</option>
+                            <option value="2">Medium</option>
+                            <option value="3">Low</option>
+                        </select>
+                    </div>
+                </f:entry>
+                <f:entry title="Application Type">
+                    <div class="fodp-field fodp-row-autoProv">
+                        <select id="autoProvAppType" class="setting-input">
+                            <option value="1">Web</option>
+
+                        </select>
+                    </div>
+                </f:entry>
+                <f:entry title="Attributes">
+                    <div class="fodp-field fodp-row-autoProv">
+                        <!--                        <input type="textbox" id="autoProvAttr" class="setting-input"/>-->
+                        <input type="textbox" id="autoProvAttrKey" placeholder="Key"
+                               class="setting-input fodp-autoProvAttr"/>
+                        <input type="textbox" id="autoProvAttrValue" placeholder="Value"
+                               class="setting-input fodp-autoProvAttr"/>
+                        <span class="yui-button yui-push-button primary">
+                            <span class="first-child">
+                                <button type="button" id="autoProvAttrAdd">Add</button>
+                            </span>
+                        </span>
+                        <ul id="autoProvAttr" class="fodp-autoProvAttr">
+
+                        </ul>
+                    </div>
+                </f:entry>
+
+                <f:entry title="Release Name">
+                    <div class="fodp-field fodp-row-autoProv">
+                        <input type="textbox" id="autoProvRelName" class="setting-input"/>
+                    </div>
+                </f:entry>
+                <f:entry title="SDLC Status">
+                    <div class="fodp-field fodp-row-autoProv">
+                        <select id="autoProvSdlc" class="setting-input">
+                            <option value="1">Production</option>
+                            <option value="2">QA</option>
+                            <option value="3">Development</option>
+                            <option value="3">Retired</option>
+                        </select>
+                    </div>
+                </f:entry>
+                <f:entry title="Owner Id">
+                    <div class="fodp-field fodp-row-autoProv">
+                        <input type="textbox" id="autoProvOwner" class="setting-input"/>
+                        <a href="#" id="autoProvOwnerAssignMe" style="display: none">Assign To Me</a>
+                    </div>
+                </f:entry>
+            </div>
+        </f:block>
+    </f:section>
+    <div id="dastScanDetails">
+        <f:section title="Entitlement Options">
+            <f:block>
+                <div id="fodp-msg" style="display: none">Select a release</div>
+                <div id="fodp-error" style="display: none">Error</div>
+            </f:block>
+            <f:entry title="Override Release Settings">
+                <div id="overrideReleaseSettingsForm" class="fodp-field fodp-checkbox fodp-row-relid">
+                    <input type="checkbox" value="false" id="overrideReleaseSettings"/>
+                </div>
+            </f:entry>
+            <f:entry title="Assessment Type">
+                <div id="assessmentTypeForm" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+                    <select id="assessmentTypeSelect" class="setting-input">
+                        <option value="-1">Select an Assessment Type</option>
+                    </select>
+                </div>
+            </f:entry>
+            <f:entry title="Entitlement">
+                <div id="entitlementForm" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+                    <select id="entitlementSelect" class="setting-input">
+                        <option value="-1">Select an Entitlement</option>
+                    </select>
+                </div>
+            </f:entry>
+        </f:section>
+        <f:section title="Scan Settings">
+            <!-- Dynamic Scan Type -->
+            <f:entry title="Scan Type">
+                <div id="dastScanType" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+                    <div class="fode-edit jenkins-select">
+                        <select name="scanType" id="scanTypeList" class="setting-input">
+                            <option value="-1">Select a Scan Type</option>
+                            <option value="Website">Website</option>
+                            <option value="Workflow-driven">Workflow-driven</option>
+                            <option value="API">API</option>
+                        </select>
+                    </div>
+                </div>
+            </f:entry>
+            <!-- Dynamic Scan Environment -->
+            <f:entry>
+                <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv"
+                     id="dast-scan-setting-evn">
+                    <f:entry title="Environment Facing">
+                      <div class="fode-edit jenkins-select">
+                        <select name="envFacing" id="envFacingList" class="setting-input">
+                            <option value="External">External</option>
+                            <option value="Internal">Internal</option>
+                        </select>
+                      </div>
+                    </f:entry>
+                </div>
+            </f:entry>
+
+            <!-- TimeZone DropDown -->
+            <f:entry title="TimeZone">
+                <div id="timezone" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+                    <div class="fode-edit jenkins-select">
+                        <select name="selectedDynamicTimeZone" id="timeZoneStackSelectList"
+                                class="setting-input">
+                            <option value="-1">Select a Time Zone</option>
+                        </select>
+                    </div>
+                </div>
+            </f:entry>
+
+            <f:entry>
+                <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv"
+                     id="requestFalsePositiveRemovalRow">
+                    <f:checkbox title="Request False Positive Removal" field="requestFalsePositiveRemoval"/>
+                    <div class="reqFalsePositiveWarn">This service consumes 1 assessment unit. One or both of login
+                        macro generation and false positive removal consume a total of 1 assessment unit.
+                    </div>
+                </div>
+            </f:entry>
+
+        </f:section>
+        <f:section title="Scope">
+            <div class="scopeContainer">
+                <f:entry>
+                    <div id="dast-workflow-macro-upload"
+                         class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv dast-workflow-setting">
+
+                        <f:entry
+                                title="Please provide the workflow driven macro file path. Supported extensions: *.har, *.webmacro, *.burp">
+                            <f:textbox name="workflowMacroFilePath" field="workflowMacroFilePath"/>
+                            <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are *.har,
+                                *.webmacro, *.burp
+                            </p>
+                        </f:entry>
+                    </div>
+                </f:entry>
+                <div class="dast-workflow-setting">
+                <f:entry title="Allowed Hosts">
+                    <div class="fodp-field spinner-container fodp-row-relid-ovr dast-workflow-setting"
+                         id="allowedHostRow">
+                        <ul id="listWorkflowDrivenAllowedHostUrl" name="listWorkflowDrivenAllowedHostUrl"
+                        >
+                        </ul>
+                    </div>
+                </f:entry>
+                </div>
+                <div class="dast-standard-setting">
+                    <f:entry title="Dynamic Site URL">
+                        <div id="dast-standard-site-url"
+                             class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv dast-standard-setting">
+                            <f:textbox field="webSiteUrl" name="webSiteUrl"/>
+                        </div>
+                    </f:entry>
+                </div>
+                <f:entry>
+                    <div id="dast-standard-scan-scope" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+                        <input type="radio" id="radScanEntireHost" name="standardScanRestrictionOption"/>
+                            <label for="radScanEntireHost">Scan Entire Host</label>
+                                <span style="margin-left:5px"></span>
+                        <input type="radio" id="radScanDirAndSubDir" name="standardScanRestrictionOption" />
+                            <label for="radScanDirAndSubDir">Restrict scan to URL directories and subdirectories</label>
+                        <input type="label" hidden="true" name="scanScope" id="standardScanScopeRestriction" value="true"/>
+                    </div>
+
+                    <div id="dast-common-scope-attr"
+                         class="redundantPageDetection fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+
+                        <f:checkbox title="Enable redundant page detection" field="enableRedundantPageDetection"
+                                    id="enableRedundantPageDetection">
+                        </f:checkbox>
+                    </div>
+                </f:entry>
+                <div class="dast-standard-setting">
+                    <f:entry title="Exclude URLs">
+                        <div id="standardScanTypeExcludeUrlsRow"
+                             class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv dast-standard-setting">
+                            <span>
+                                <input type="text" id="standardScanExcludedUrlText" class="setting-input"
+                                       placeholder="Exclude URL"/>
+
+                                <input type="button" id="btnAddExcludeUrl" value="Add"
+                                       class="btn-add-exclude-url"/>
+
+                            </span>
+                            <ul id="listStandardScanTypeExcludedUrl" name="listStandardScanTypeExcludedUrl"/>
+                        </div>
+                    </f:entry>
+                </div>
+            </div>
+            <!---API Section -->
+            <div class="dast-api-setting">
+            <f:entry title="Api Type">
+                <div class="dast-api-setting fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv"
+                     id="dast-api-scan-block">
+                    <div id="dast-api-scan" class="fode-field spinner-container">
+                        <div class="fode-edit jenkins-select">
+                            <select name="selectedApiType" id="apiTypeList" class="setting-input">
+                                <option value="-1">Select a API Type</option>
+                                <option value="openApi">OpenAPI</option>
+                                <option value="graphQl">GraphQL</option>
+                                <option value="grpc">GRPC</option>
+                                <option value="postman">Postman</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="dast-api-specific-controls">
+                        <f:entry field="openApi">
+                            <div id="dast-openApi"
+                                 class="apiOptions fode-field spinner-container fodp-row-autoProv">
+                                <f:entry field="openApiSource">
+                                    <input type="radio" class="sourceOptions openApi_file" id="openApiInputFile"
+                                           name="openApiInput" value="FileId"/>
+                                    <label for="openApiInputFile">File</label>
+                                    <input type="radio" class="sourceOptions openApi_url" id="openApiInputUrl"
+                                           name="openApiInput" value="Url"/>
+                                    <label for="openApiInputUrl">URL to the OpenAPI specification</label>
+                                    <input type="label" hidden="true" name="openApiRadioSource"
+                                           id="openApiRadioSource"/>
+                                </f:entry>
+                                <div class="sourceDetails openApiSourceControls">
+                                    <!--                                        <div class="uploadedFileContainer openApiUploadedFileContainer">-->
+                                    <!--                                            <f:entry title="Uploaded File">-->
+                                    <!--                                                <div class="uploadedFileDetails openApiFileDetails"/>-->
+                                    <!--                                            </f:entry>-->
+                                    <!--                                        </div>-->
+                                    <div id="dast-openApi-filePath"
+                                         class="dastPipelineFilePath openApiFilePath fode-field spinner-container fodp-row-autoProv">
+                                        <f:entry
+                                                title="Please provide the OpenAPI file path. Supported extension: *.json">
+                                            <f:textbox field="openApiFilePath" name="openApiFilePath"/>
+                                            <p style="color:red" hidden="true" class="allowed-extension">Allowed
+                                                extensions are *.json
+                                            </p>
+                                        </f:entry>
+                                    </div>
+                                    <div id="dast-api-openApi-upload"
+                                         class="fode-field spinner-container sourceTypeFileId">
+                                        <f:entry field="openApiFileSource"
+                                                 title="Please upload your OpenAPI specification json file. Supported extensions: *.json">
+                                            <span class="uploadContainer">
+                                                <input accept=".json" id="openApiFile" type="File"
+                                                       name="openApiFile"/>
+                                                <input type="button" value="Upload" id="btnUploadOpenApiFile"
+                                                       class="dastFileUploadButton"/>
+                                                <input type="label" hidden="true" name="openApiFileId"
+                                                       id="openApiFileId"/>
+                                                <span class="uploadMessage" id="openApiUploadMessage"
+                                                      style="color: red;"/>
+                                            </span>
+                                        </f:entry>
+                                    </div>
+                                    <div id="dast-openApi-url"
+                                         class="fode-field spinner-container fodp-row-autoProv sourceTypeFileId">
+                                        <f:entry field="openApiUrlSource"
+                                                 title="Please provide a URL to your OpenAPI specification">
+                                            <f:textbox field="openApiUrl" name="openApiUrl"/>
+                                        </f:entry>
+                                    </div>
+
+                                    <f:entry field="apikey" title="API Key">
+                                        <div id="dast-openApi-api-key"
+                                             class="fode-field fodp-row-autoProv spinner-container">
+                                            <f:textbox field="openApiKey" name="openApiKey"/>
+                                        </div>
+                                    </f:entry>
+                                </div>
+                            </div>
+                        </f:entry>
+                        <f:entry field="postman">
+                            <div id="dast-postman" class="apiOptions fode-field spinner-container">
+                                <!--                                    <div class="uploadedFileContainer postmanUploadedFileContainer">-->
+                                <!--                                        <f:entry title="Uploaded File">-->
+                                <!--                                            <div class="uploadedFileDetails postmanFileDetails"/>-->
+                                <!--                                        </f:entry>-->
+                                <!--                                    </div>-->
+                                <div class="dastPipelineFilePath postmanFilePath fode-field spinner-container fodp-row-autoProv">
+                                    <f:entry
+                                            title="Please provide the postman file path. Supported extension: *.json">
+                                        <span class="uploadContainer">
+                                            <f:textbox field="postmanFilePath" name="postmanFilePath"/>
+                                        </span>
+                                        <p style="color:red" hidden="true" class="allowed-extension">Allowed
+                                            extensions
+                                            are *.json
+                                        </p>
+                                    </f:entry>
+                                </div>
+                            </div>
+                        </f:entry>
+                        <f:entry field="graphQL">
+                            <div id="dast-graphQL"
+                                 class="apiOptions fode-field spinner-container fodp-row-autoProv">
+                                <f:entry field="graphQlSource">
+                                    <input type="radio" class="sourceOptions graphql_file" id="graphQlInputFile"
+                                           name="graphQlInput" value="FileId"/>
+                                    <label for="graphQlFile">File</label>
+                                    <input type="radio" class="sourceOptions graphQl_url" id="graphQlInputUrl"
+                                           name="graphQlInput" value="Url"/>
+                                    <label for="graphQlUrl">URL</label>
+                                    <input type="label" hidden="true" name="graphQlRadioSource"
+                                           id="graphQlRadioSource"/>
+                                </f:entry>
+                                <div class="sourceDetails graphQLSourceControls fodp-row-autoProv">
+                                    <div class="dastPipelineFilePath graphQlFilePath fode-field spinner-container">
+                                        <!--                                            <div class="uploadedFileContainer graphQlUploadedFileContainer">-->
+                                        <!--                                                <f:entry title="Uploaded File">-->
+                                        <!--                                                    <div class="uploadedFileDetails graphQlFileDetails"/>-->
+                                        <!--                                                </f:entry>-->
+                                        <!--                                            </div>-->
+                                        <f:entry
+                                                title="Please provide the graphQL file path. Supported extension: *.json">
+                                            <f:textbox field="graphQLFilePath" name="graphQLFilePath"/>
+                                            <p style="color:red" hidden="true" class="allowed-extension">Allowed
+                                                extensions are *.json
+                                            </p>
+                                        </f:entry>
+                                    </div>
+                                    <div id="dast-graphQL-url"
+                                         class="fode-field spinner-container sourceTypeFileId">
+                                        <f:entry field="graphQlUrl"
+                                                 title="GraphQL uses an introspection to query the schema hence introspection needs to be turned on.">
+                                            <f:textbox field="graphQLurl" name="graphQLUrl"/>
+                                        </f:entry>
+                                    </div>
+
+                                </div>
+                                <f:entry title="Scheme Type">
+                                    <div id="dast-graphQL-schemeType" class="fode-field spinner-container">
+                                        <select name="graphQLSchemeType" id="graphQlSchemeTypeList" class="setting-input">
+                                            <option value="-1">(Choose One)</option>
+                                            <option value="http">HTTP</option>
+                                            <option value="https">HTTPS</option>
+                                            <option value="http,https">HTTP and HTTPS</option>
+                                        </select>
+                                    </div>
+                                </f:entry>
+                                <f:entry title="API Host">
+                                    <div id="dast-graphQL-api-host" class="fode-field spinner-container">
+                                        <f:textbox field="graphQlApiHost" name="graphQlApiHost"/>
+                                    </div>
+                                </f:entry>
+                                <f:entry title="API ServicePath">
+                                    <div id="dast-graphQL-api-servicePath" class="fode-field spinner-container">
+                                        <f:textbox field="graphQlApiServicePath" name="graphQlApiServicePath"/>
+                                    </div>
+                                </f:entry>
+                            </div>
+                        </f:entry>
+                        <f:entry field="grpc">
+                            <div id="dast-grpc" class="apiOptions fode-field spinner-container">
+                                <div class="dastPipelineFilePath grpcFilePath fode-field spinner-container">
+                                    <!--                                        <div class="uploadedFileContainer grpcUploadedFileContainer">-->
+                                    <!--                                            <f:entry title="Uploaded File">-->
+                                    <!--                                                <div class="uploadedFileDetails grpcFileDetails"/>-->
+                                    <!--                                            </f:entry>-->
+                                    <!--                                        </div>-->
+                                    <div class="dastPipelineFilePath grpcFilePath fode-field spinner-container">
+                                        <f:entry
+                                                title="Please provide the grpc file path. Supported extension: *.proto">
+                                            <span class="uploadContainer">
+                                                <f:textbox field="grpcFilePath" name="grpcFilePath"/>
+                                            </span>
+                                            <p style="color:red" hidden="true" class="allowed-extension">Allowed
+                                                extensions are *.proto
+                                            </p>
+                                        </f:entry>
+                                    </div>
+                                </div>
+                                <f:entry title="SchemeType">
+                                    <div id="dast-grpc-schemeType" class="fode-field spinner-container">
+                                        <select name="grpcSchemeType" id="grpcSchemeTypeList" class="setting-input">
+                                            <option value="-1">(Choose One)</option>
+                                            <option value="http">HTTP</option>
+                                            <option value="https">HTTPS</option>
+                                            <option value="http,https">HTTP and HTTPS</option>
+                                        </select>
+                                    </div>
+                                </f:entry>
+                                <f:entry title="API Host">
+                                    <div id="dast-grpc-api-host" class="fode-field spinner-container">
+                                        <f:textbox field="grpcApiHost" name="grpcApiHost"/>
+                                    </div>
+                                </f:entry>
+                                <f:entry title="API ServicePath">
+                                    <div id="dast-grpc-api-servicePath" class="fode-field spinner-container">
+                                        <f:textbox field="grpcApiServicePath" name="grpcApiServicePath"/>
+                                    </div>
+                                </f:entry>
+                            </div>
+
+                        </f:entry>
+
+                    </div>
+                </div>
+            </f:entry>
+            </div>
+
+            <f:entry title="Scan Policy">
+                <div id="dast-standard-scan-policy" class="fode-field spinner-container fodp-row-autoProv">
+                    <select name="scanPolicy" id="scanPolicy">
+                        <option value="Standard">Standard</option>
+                        <option value="CriticalsAndHighs">Critical And Highs</option>
+                        <option value="PassiveScan">Passive Scan</option>
+                    </select>
+                </div>
+                <div id="dast-api-scan-policy-apiType" class="fode-field spinner-container">
+                    <div value="API">API</div>
+                </div>
+            </f:entry>
+            <f:entry>
+                <div id="dast-timeBox-scan" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
+
+                    <f:optionalBlock field="timeBoxChecked" name="timeBoxChecked" title="Timebox Scan Duration (Hours)"
+                                     checked="${instance.timeBoxChecked}}" inline="true">
+                        <div>
+                            <f:textbox name="scanTimeBox" field="scanTimeBox"/>
+                            <t:help tooltip="Allowed Values are between 1(hr) and 24 (hrs)"/>
+                        </div>
+                    </f:optionalBlock>
+
+                </div>
+            </f:entry>
+            <f:entry>
+
+            </f:entry>
+        </f:section>
+        <f:section title="Authentication">
+            <f:entry>
+                <div class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv"
+                     id="webSiteNetworkAuthSettingEnabledRow">
+                    <f:optionalBlock name="webSiteNetworkAuthSettingEnabled" field="webSiteNetworkAuthSettingEnabled"
+                                     title="Network Authentication Required"
+                                     checked="${instance.webSiteNetworkAuthSettingEnabled}" inline="true">
+
+                        <f:entry title="Network Authentication Type">
+                            <div id="networkAuthTypeRow">
+                                <div class="fode-edit jenkins-select">
+                                    <select name="networkAuthType" id="ddlNetworkAuthType"
+                                            class="setting-input">
+                                        <option value="0">Select a Network Authentication Type</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </f:entry>
+
+                        <f:entry title="Network Username">
+                            <div id="networkUsernameRow">
+                                <f:textbox name="networkAuthUserName"/>
+                            </div>
+                        </f:entry>
+                        <f:entry title="Network Password">
+                            <div id="networkPasswordRow">
+                                <f:password name="networkAuthPassword"/>
+                            </div>
+                        </f:entry>
+
+                    </f:optionalBlock>
+                </div>
+                <div class="fode-field spinner-container"
+                     id="loginMacroFileCreationRow">
+                    <f:optionalBlock name="requestLoginMacroFileCreation" field="requestLoginMacroFileCreation"
+                                     title="Request Login Macro File Creation"
+                                     checked="${instance.requestLoginMacroFileCreation}" inline="true">
+                        <span class="reqFalsePositiveWarn">This service consumes 1 assessment unit. One or both of login
+                            macro generation and false positive removal consume a total of 1 assessment unit.
+                        </span>
+                        <f:entry title="Primary Username">
+                            <div id="loginMacroPrimaryUsernameRow">
+                                <f:textbox name="loginMacroPrimaryUserName"/>
+                            </div>
+                        </f:entry>
+                        <f:entry title="Primary Password">
+                            <div id="loginMacroPrimaryPasswordRow">
+                                <f:password name="loginMacroPrimaryPassword"/>
+                            </div>
+                        </f:entry>
+
+                        <f:entry title="Secondary Username">
+                            <div id="loginMacroSecondaryUsernameRow">
+                                <f:textbox name="loginMacroSecondaryUsername"/>
+                            </div>
+                        </f:entry>
+                        <f:entry title="Secondary Password">
+                            <div id="loginMacroSecondaryPasswordRow">
+                                <f:password name="loginMacroSecondaryPassword"/>
+                            </div>
+                        </f:entry>
+
+                    </f:optionalBlock>
+                </div>
+                <div class="fodp-field spinner-container fodp-row-relid-ovr" id="login-macro-row">
+                    <f:optionalBlock name="webSiteLoginMacroEnabled" field="webSiteLoginMacroEnabled"
+                                     title="Login Macro"
+                                     checked="${instance.webSiteLoginMacroEnabled}" inline="true">
+                        <f:entry
+                                title="Please provide file path for the login macro file. Supported extension: *.webmacro">
+                            <span>
+                                <f:textbox name="loginMacroFilePath" field="loginMacroFilePath"/>
+                                <p style="color:red" hidden="true" class="allowed-extension">Allowed extensions are
+                                    *.har, *.webmacro, *.burp
+                                </p>
+
+                                <input type="label" hidden="true" value="" name="loginMacroFileId"
+                                       id="loginMacroFileId"/>
+
+                            </span>
+                            <!--                            <div class="uploadedFileContainer loginMacroUploadedFileContainer">-->
+                            <!--                                <f:entry title="Uploaded File">-->
+                            <!--                                    <div class="uploadedFileDetails loginMacroFileDetails"/>-->
+                            <!--                                </f:entry>-->
+                            <!--                            </div>-->
+                        </f:entry>
+
+                    </f:optionalBlock>
+                </div>
+            </f:entry>
+
+        </f:section>
+    </div>
+
+    <div id="hiddenFields" class="fode-row-hidden">
+        <input type="text" name="releaseId" id="releaseId"/>
+        <input type="text" hidden="true" name="entitlementId" id="entitlementId"/>
+        <input type="text" hidden="true" name="entitlementFrequency" id="entitlementFrequency"/>
+        <input type="text" name="assessmentTypeId" id="assessmentTypeId"/>
+        <input type="text" name="auditPreference" id="auditPreference"/>
+        <input type="text" name="username" id="username"/>
+        <input type="text" name="personalAccessToken" id="personalAccessToken"/>
+        <input type="text" name="tenantId" id="tenantId"/>
+        <input type="text" name="applicationName" id="applicationName"/>
+        <input type="text" name="applicationType" id="applicationType"/>
+        <input type="text" name="releaseName" id="releaseName"/>
+        <input type="text" name="owner" id="owner"/>
+        <input type="text" name="attributes" id="attributes"/>
+        <input type="text" name="businessCriticality" id="businessCriticality"/>
+        <input type="text" name="sdlcStatus" id="sdlcStatus"/>
+        <input type="text" name="workflowMacroHosts" id="workflowMacroHosts"/>
+        <input type="text" name="workflowMacroId" id="workflowMacroId"/>
+    </div>
+    <!--Script-->
+    <script>
+        var descriptor =
+        <st:bind value="${descriptor}"/>
+    </script>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Common.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Styling.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Auth.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastValidation.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastPipelineGenerator.js"/>
+    <input type="textbox" hidden="true" name="excludedUrls" id="excludedUrls"/>
+
+    <!--Script -->
+</j:jelly>

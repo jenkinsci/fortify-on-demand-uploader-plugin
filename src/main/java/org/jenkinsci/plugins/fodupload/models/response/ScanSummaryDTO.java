@@ -12,7 +12,7 @@ public class ScanSummaryDTO {
     private String assessmentTypeName;
     private int analysisStatusTypeId;
     private String analysisStatusType;
-    private String startedDatetime;
+    private String startedDateTime;
     private String completedDateTime;
     private int totalIssues;
     private int issueCountCritical;
@@ -79,7 +79,7 @@ public class ScanSummaryDTO {
     }
 
     public String getStartedDatetime() {
-        return startedDatetime != null ? startedDatetime : "";
+        return startedDateTime != null ? startedDateTime : "";
     }
 
     public String getCompletedDateTime() {

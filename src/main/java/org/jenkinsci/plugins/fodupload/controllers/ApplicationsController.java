@@ -1,7 +1,10 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.reflect.TypeToken;
-import okhttp3.*;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.Json;
@@ -199,7 +202,22 @@ public class ApplicationsController extends ControllerBase {
             return new CreateApplicationResponse(0, 0, 0, false, Utils.unauthorizedServerResponseErrors());
         }
         else if (response.code() >= 400) {
-            return new CreateApplicationResponse(0, 0, 0, false, Utils.unexpectedServerResponseErrors());
+            if(!response.bodyContent().isEmpty())
+            {
+                GenericErrorResponse genericErrorResponse = apiConnection.parseResponse(response, new TypeToken<GenericErrorResponse>(){}.getType());
+                List<String> errors = new ArrayList<>();
+
+                genericErrorResponse.getErrors().forEach(x -> {
+                    String message = x.getMessage();
+                    if (errorCodesMap.containsKey(message)) {
+                        message = errorCodesMap.get(message);
+                    }
+                    errors.add(message);
+                });
+
+                return new CreateApplicationResponse(0, 0, 0, false, errors);
+            }
+             return new CreateApplicationResponse(0, 0, 0, false, Utils.unexpectedServerResponseErrors());
         }
         else {
             GenericErrorResponse genericErrorResponse = apiConnection.parseResponse(response, new TypeToken<GenericErrorResponse>(){}.getType());

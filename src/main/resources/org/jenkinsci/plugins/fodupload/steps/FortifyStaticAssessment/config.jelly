@@ -275,6 +275,7 @@
                     <option id="Gradle" value="Gradle">Gradle</option>
                     <option id="Maven" value="Maven">Maven</option>
                     <option id="MSBuild" value="MSBuild">MSBuild</option>
+                    <option id="DotNet" value="DotNet">DotNet</option>
                     <option id="PHP" value="PHP">PHP</option>
                     <option id="Python" value="Python">Python</option>
                     <option id="Go" value="Go">Go</option>

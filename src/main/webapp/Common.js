@@ -7,6 +7,7 @@
  * @param {string|Object} selector
  * at_return {jQueryExtended}
  * */
+
 /** @type {jQueryFunc} */
 const jq = jQuery;
 
@@ -25,6 +26,7 @@ const _scanCentralBuildTypes = {
     "Gradle": "Gradle",
     "Maven": "Maven",
     "MSBuild": "MSBuild",
+    "DotNet":"DotNet",
     "PHP": "PHP",
     "Python": "Python",
     "Go": "Go"
@@ -65,24 +67,36 @@ function debounce(func, wait, immediate) {
     };
 };
 
-function getEntitlementDropdownValue(id, freq) {
-    return `${id}-${freq}`;
+function getEntitlementDropdownValue(id, freqId, freq) {
+    if (freq && freq !=='')
+        return `${id}-${freqId}-${freq}`;
+    else
+        return `${id}-${freqId}`;
 }
 
 function parseEntitlementDropdownValue(val) {
+
     let entitlementId = '';
     let frequencyId = '';
+    let frequencyType = '';
 
     if (val) {
         let spl = val.split('-');
 
         if (spl.length === 2) {
             entitlementId = numberOrNull(spl[0]);
+            if (isNaN(spl[1]))
+                frequencyType = spl[1];
+            else
+                frequencyId = numberOrNull(spl[1]);
+        }
+        if (spl.length === 3) {
+            entitlementId = numberOrNull(spl[0]);
             frequencyId = numberOrNull(spl[1]);
+            frequencyType = spl[2];
         }
     }
-
-    return { entitlementId, frequencyId };
+    return {entitlementId, frequencyId, frequencyType};
 }
 
 function spinAndWait(fn) {
@@ -100,7 +114,7 @@ function spinAndWait(fn) {
 
 function closestRow(selector) {
     let jqe = selector instanceof jQuery ? selector : jq(selector);
-    let tr =  jqe.closest('tr');
+    let tr = jqe.closest('tr');
 
     if (tr.length == 0) {
         tr = jqe.closest('.tr');
@@ -110,7 +124,7 @@ function closestRow(selector) {
 }
 
 function nextRow(elem) {
-    return elem.is('tr') ? elem.next('tr') : elem.next('.tr') ;
+    return elem.is('tr') ? elem.next('tr') : elem.next('.tr');
 }
 
 function getValidationErrRow(row) {
@@ -139,7 +153,7 @@ function createDialog(dialog) {
 }
 
 function isNullOrEmpty(str) {
-    if (typeof str === 'string' && str !== ''&& str !== ' ') return str.trim() ? false : true;
+    if (typeof str === 'string' && str !== '' && str !== ' ') return str.trim() ? false : true;
 
     return !str;
 }
@@ -171,10 +185,12 @@ class Dialog {
                     modal: true,
                     visible: false,
                     keylisteners: [
-                        new YAHOO.util.KeyListener(document, {keys:27}, {
-                            fn:(function() {window[this._dialogId].dialog.hide();}),
-                            scope:document,
-                            correctScope:false
+                        new YAHOO.util.KeyListener(document, {keys: 27}, {
+                            fn: (function () {
+                                window[this._dialogId].dialog.hide();
+                            }),
+                            scope: document,
+                            correctScope: false
                         })
                     ]
                 });
@@ -238,11 +254,11 @@ const _guidTsFn = (performance && performance.now) ? _guidTsFnPreferred : _guidT
 function newGuid() {
     let ts = _guidTsFn();
 
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         let r = Math.random() * 16;//random number between 0 and 16
 
-        r = (ts + r)%16 | 0;
-        ts = Math.floor(ts/16);
+        r = (ts + r) % 16 | 0;
+        ts = Math.floor(ts / 16);
 
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
@@ -258,7 +274,7 @@ function partitionArray(arr, elementsPerPartition) {
 }
 
 function numberOrNull(str) {
-    if (typeof(str) === "number") return str;
+    if (typeof (str) === "number") return str;
 
     let res = Number(str);
 

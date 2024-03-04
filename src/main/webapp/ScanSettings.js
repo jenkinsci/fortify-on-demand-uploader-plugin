@@ -36,7 +36,6 @@ class ScanSettings {
 
         for (let k of Object.keys(this.assessments)) {
             let at = this.assessments[k];
-
             atsel.append(`<option value="${at.id}">${at.name}</option>`);
         }
     }
@@ -273,13 +272,15 @@ class ScanSettings {
 
             switch (val) {
                 case _scanCentralBuildTypes.MSBuild:
+                case _scanCentralBuildTypes.DotNet:
                     closestRow(jq('#technologyStackForm')).show();
                     let currVal = this.techStacks[jq('#technologyStackSelectList').val()];
+                    jq('.fode-row-sc-msbuild').show();
 
                     if (!currVal || !this.isDotNetStack(currVal)) jq('#technologyStackSelectList').val(techStackConsts.none);
                     techStackFilter = this.isDotNetStack;
                     break;
-                case _scanCentralBuildTypes.Maven:
+
                 case _scanCentralBuildTypes.Gradle:
                     jq('#technologyStackSelectList').val(techStackConsts.java);
                     break;

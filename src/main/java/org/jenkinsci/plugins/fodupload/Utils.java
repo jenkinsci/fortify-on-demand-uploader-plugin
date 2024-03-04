@@ -6,7 +6,6 @@ import hudson.FilePath;
 import hudson.security.ACL;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,10 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.http.HttpStatus;
@@ -225,6 +222,7 @@ public class Utils {
         return s != null ? decrypt(s.getSecret()) : id;
     }
 
+
     public static Boolean isUnauthorizedResponse(ResponseContent response) {
         return response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED;
     }
@@ -299,5 +297,13 @@ public class Utils {
 
     public static boolean traceLogging() {
         return _traceLogging;
+    }
+
+    public static void logger(PrintStream printStream ,String msg)
+    {
+        if(printStream!=null)
+        {  //job's log will have Fortify string as part of msg for ease identification from other plugin msg.
+            printStream.printf("Fortify on demand: %s%n",msg);
+        }
     }
 }
