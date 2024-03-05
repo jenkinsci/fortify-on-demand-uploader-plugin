@@ -173,8 +173,8 @@ class Dialog {
                 var div = document.createElement("DIV");
                 document.body.appendChild(div);
                 div.innerHTML = "<div id='" + this._dialogId + "'><div id='abc' class='bd'></div></div>";
-                window[this._dialogId].body = $(this._dialogId);
-                window[this._dialogId].body.innerHTML = $(this._formId).innerHTML;
+                window[this._dialogId].body = document.getElementById(this._dialogId);
+                window[this._dialogId].body.innerHTML = document.getElementById(this._formId).innerHTML;
                 jq('#' + this._dialogId).prepend('<div class="hd"><span id="dialogTitle"></span> <span class="spinner" id="dialogSpinner" style="display: none;"></span></div>');
                 jq('#' + this._dialogId).prepend('<div class="mask" id="modal_mask" style="z-index: 1000; height: 100%; width: 100%; display: none;"> </div>');
                 window[this._dialogId].dialog = new YAHOO.widget.Panel(window[this._dialogId].body, {
