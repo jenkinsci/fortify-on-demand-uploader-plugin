@@ -79,6 +79,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                                      boolean scanCentralSkipBuild,
                                      String scanCentralBuildCommand,
                                      String scanCentralBuildFile,
+                                     String scanCentralExcludeFiles,
                                      String scanCentralBuildToolVersion,
                                      String scanCentralVirtualEnv,
                                      String scanCentralRequirementFile) throws IllegalArgumentException, FormValidation {
@@ -133,7 +134,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
         if (saveSettingsToFod) {
             if (Utils.tryParseInt(releaseId) <= 0) invalidFields.add("releaseId");
             if (Utils.tryParseInt(userSelectedAssessmentType) <= 0) invalidFields.add("userSelectedAssessmentType");
-            if (Utils.tryParseInt(userSelectedEntitlementId) <= 0) invalidFields.add("userSelectedEntitlementId");
+            if (Utils.tryParseInt(userSelectedEntitlementId) < 0) invalidFields.add("userSelectedEntitlementId");
             if (Utils.tryParseInt(userSelectedFrequencyType) <= 0) invalidFields.add("userSelectedFrequencyType");
 
             // Except .NET . Java , Python all other languages has no language levels
@@ -178,6 +179,7 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
                 scanCentralSkipBuild,
                 scanCentralBuildCommand,
                 scanCentralBuildFile,
+                scanCentralExcludeFiles,
                 scanCentralBuildToolVersion,
                 scanCentralVirtualEnv,
                 scanCentralRequirementFile);
@@ -377,6 +379,10 @@ public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildSt
 
     public String getScanCentralBuildFile() {
         return sharedBuildStep.getModel().getScanCentralBuildFile();
+    }
+
+    public String getScanCentralExcludeFiles() {
+        return sharedBuildStep.getModel().getScanCentralExcludeFiles();
     }
 
     public String getScanCentralBuildToolVersion() {
