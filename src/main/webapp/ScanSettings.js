@@ -266,7 +266,7 @@ class ScanSettings {
                 .each((i, e) => {
                     let jqe = jq(e);
 
-                    if (jqe.hasClass(scClass)) jqe.show();
+                    if (jqe.hasClass(scClass) || jqe.hasClass('fode-row-sc-all')) jqe.show();
                     else jqe.hide();
                 });
 
@@ -280,7 +280,7 @@ class ScanSettings {
                     if (!currVal || !this.isDotNetStack(currVal)) jq('#technologyStackSelectList').val(techStackConsts.none);
                     techStackFilter = this.isDotNetStack;
                     break;
-
+                case _scanCentralBuildTypes.Maven:
                 case _scanCentralBuildTypes.Gradle:
                     jq('#technologyStackSelectList').val(techStackConsts.java);
                     break;

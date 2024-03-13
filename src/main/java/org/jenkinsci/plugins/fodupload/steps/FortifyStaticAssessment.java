@@ -76,6 +76,7 @@ public class FortifyStaticAssessment extends FortifyStep {
     private String scanCentralSkipBuild;
     private String scanCentralBuildCommand;
     private String scanCentralBuildFile;
+    private String scanCentralExcludeFiles;
     private String scanCentralBuildToolVersion;
     private String scanCentralVirtualEnv;
     private String scanCentralRequirementFile;
@@ -255,6 +256,15 @@ public class FortifyStaticAssessment extends FortifyStep {
     @DataBoundSetter
     public void setScanCentralBuildFile(String scanCentralBuildFile) {
         this.scanCentralBuildFile = scanCentralBuildFile;
+    }
+
+    public String getScanCentralExcludeFiles() {
+        return scanCentralExcludeFiles;
+    }
+
+    @DataBoundSetter
+    public void setScanCentralExcludeFiles(String scanCentralExcludeFiles) {
+        this.scanCentralExcludeFiles = scanCentralExcludeFiles;
     }
 
     @SuppressWarnings("unused")
@@ -490,6 +500,7 @@ public class FortifyStaticAssessment extends FortifyStep {
                 scanCentralSkipBuild != null && scanCentralSkipBuild.equalsIgnoreCase("true"),
                 scanCentralBuildCommand,
                 scanCentralBuildFile,
+                scanCentralExcludeFiles,
                 scanCentralBuildToolVersion,
                 scanCentralVirtualEnv,
                 scanCentralRequirementFile,
@@ -567,6 +578,7 @@ public class FortifyStaticAssessment extends FortifyStep {
                 scanCentralSkipBuild != null && scanCentralSkipBuild.equalsIgnoreCase("true"),
                 scanCentralBuildCommand,
                 scanCentralBuildFile,
+                scanCentralExcludeFiles,
                 scanCentralBuildToolVersion,
                 scanCentralVirtualEnv,
                 scanCentralRequirementFile,
@@ -657,6 +669,7 @@ public class FortifyStaticAssessment extends FortifyStep {
                     !Utils.isNullOrEmpty(scanCentral) ||
                     !Utils.isNullOrEmpty(scanCentralBuildCommand) ||
                     !Utils.isNullOrEmpty(scanCentralBuildFile) ||
+                    !Utils.isNullOrEmpty(scanCentralExcludeFiles) ||
                     !Utils.isNullOrEmpty(scanCentralBuildToolVersion) ||
                     !Utils.isNullOrEmpty(scanCentralIncludeTests) ||
                     !Utils.isNullOrEmpty(scanCentralRequirementFile) ||
@@ -680,8 +693,7 @@ public class FortifyStaticAssessment extends FortifyStep {
                         scanCentral = t.getFirst();
                         techStack = t.getSecond();
                     }
-                }
-                else if (vres == ValidationUtils.ScanCentralValidationResult.ScanCentralRequired)
+                } else if (vres == ValidationUtils.ScanCentralValidationResult.ScanCentralRequired)
                     scanCentral = getScanCentralForTechStack(techStack);
                 else if (vres == ValidationUtils.ScanCentralValidationResult.NoSelection) {
                     if (releaseIdInt != null) {

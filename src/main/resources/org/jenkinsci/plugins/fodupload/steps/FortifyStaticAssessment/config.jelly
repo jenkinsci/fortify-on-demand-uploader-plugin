@@ -301,6 +301,12 @@
             </div>
         </f:entry>
 
+        <f:entry title="Exclude Files" help="/plugin/fortify-on-demand-uploader/help-scanCentral-excludeFile.html">
+            <div id="excludeFilesForm" class="fodp-field spinner-container fodp-row-sc fodp-row-sc-all">
+                <input type="text" id="scanCentralExcludeFilesInput" class="setting-input"/>
+            </div>
+        </f:entry>
+
         <f:entry title="Version" help="/plugin/fortify-on-demand-uploader/help-scanCentral-version.html">
             <div id="buildToolVersionForm" class="fodp-field spinner-container fodp-row-sc fodp-row-sc-php">
                 <input type="text" id="scanCentralBuildToolVersionInput" class="setting-input"/>
@@ -381,6 +387,7 @@
             <input type="text" name="scanCentralSkipBuild" id="scanCentralSkipBuild"/>
             <input type="text" name="scanCentralBuildCommand" id="scanCentralBuildCommand"/>
             <input type="text" name="scanCentralBuildFile" id="scanCentralBuildFile"/>
+            <input type="text" name="scanCentralExcludeFiles" id="scanCentralExcludeFiles"/>
             <input type="text" name="scanCentralBuildToolVersion" id="scanCentralBuildToolVersion"/>
             <input type="text" name="scanCentralVirtualEnv" id="scanCentralVirtualEnv"/>
             <input type="text" name="scanCentralRequirementFile" id="scanCentralRequirementFile"/>

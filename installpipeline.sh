@@ -1,13 +1,39 @@
 hoststr=localhost:8080
-javaexe="~/.jdks/corretto-1.8.0_322/bin/java.exe"
+javaexe=''
 
-if [ $# -eq 0 ]
+if [ $# != 0 ]
 then
-  echo "Host not supplied, using $hoststr"
-else
-  hoststr=$1
+  prevArg=''
+  for a in "$@"
+  do
+      if [ $a == '-h' ]
+      then
+        prevArg='-h'
+      elif [ $a == '-j' ]
+      then
+        prevArg='-j'
+      elif [ $prevArg == '-h' ]
+      then
+        hoststr=$a
+      elif [ $prevArg == '-j' ]
+      then
+        javaexe=$a
+      fi
+  done
 fi
 
+if [[ $javaexe == "" ]]
+then
+  echo 'Must provide java path'
+  echo ''
+  echo 'Example:'
+  echo -e '\t./installpipeline.sh -j ~/.jdks/corretto-1.8.0_402/bin/java.exe'
+  exit 1
+fi
+
+
+echo Host: $hoststr
+echo Java: $javaexe
 
 
 $javaexe -jar jenkins-cli.jar -s http://$hoststr/jenkins/ -webSocket install-plugin https://updates.jenkins.io/download/plugins/pipeline-milestone-step/1.3.1/pipeline-milestone-step.hpi && \
