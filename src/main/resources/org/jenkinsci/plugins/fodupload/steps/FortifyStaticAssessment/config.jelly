@@ -275,6 +275,7 @@
                     <option id="Gradle" value="Gradle">Gradle</option>
                     <option id="Maven" value="Maven">Maven</option>
                     <option id="MSBuild" value="MSBuild">MSBuild</option>
+                    <option id="DotNet" value="DotNet">DotNet</option>
                     <option id="PHP" value="PHP">PHP</option>
                     <option id="Python" value="Python">Python</option>
                     <option id="Go" value="Go">Go</option>
@@ -297,6 +298,12 @@
         <f:entry title="Build File" help="/plugin/fortify-on-demand-uploader/help-scanCentral-buildFile.html">
             <div id="buildFileForm" class="fodp-field spinner-container fodp-row-sc fodp-row-sc-gradle fodp-row-sc-maven fodp-row-sc-msbuild">
                 <input type="text" id="scanCentralBuildFileInput" class="setting-input"/>
+            </div>
+        </f:entry>
+
+        <f:entry title="Exclude Files" help="/plugin/fortify-on-demand-uploader/help-scanCentral-excludeFile.html">
+            <div id="excludeFilesForm" class="fodp-field spinner-container fodp-row-sc fodp-row-sc-all">
+                <input type="text" id="scanCentralExcludeFilesInput" class="setting-input"/>
             </div>
         </f:entry>
 
@@ -380,6 +387,7 @@
             <input type="text" name="scanCentralSkipBuild" id="scanCentralSkipBuild"/>
             <input type="text" name="scanCentralBuildCommand" id="scanCentralBuildCommand"/>
             <input type="text" name="scanCentralBuildFile" id="scanCentralBuildFile"/>
+            <input type="text" name="scanCentralExcludeFiles" id="scanCentralExcludeFiles"/>
             <input type="text" name="scanCentralBuildToolVersion" id="scanCentralBuildToolVersion"/>
             <input type="text" name="scanCentralVirtualEnv" id="scanCentralVirtualEnv"/>
             <input type="text" name="scanCentralRequirementFile" id="scanCentralRequirementFile"/>

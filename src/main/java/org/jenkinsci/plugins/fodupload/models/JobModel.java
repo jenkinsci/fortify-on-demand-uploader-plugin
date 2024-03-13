@@ -31,6 +31,7 @@ public class JobModel implements Serializable {
     private boolean scanCentralSkipBuild;
     private String scanCentralBuildCommand;
     private String scanCentralBuildFile;
+    private String scanCentralExcludeFiles;
     private String scanCentralBuildToolVersion;
     private String scanCentralVirtualEnv;
     private String scanCentralRequirementFile;
@@ -73,6 +74,7 @@ public class JobModel implements Serializable {
      * @param scanCentralSkipBuild          Desc
      * @param scanCentralBuildCommand       Desc
      * @param scanCentralBuildFile          Desc
+     * @param scanCentralExcludeFiles       Desc
      * @param scanCentralBuildToolVersion   Desc
      * @param scanCentralVirtualEnv         Desc
      * @param scanCentralRequirementFile    Desc
@@ -93,6 +95,7 @@ public class JobModel implements Serializable {
                     boolean scanCentralSkipBuild,
                     String scanCentralBuildCommand,
                     String scanCentralBuildFile,
+                    String scanCentralExcludeFiles,
                     String scanCentralBuildToolVersion,
                     String scanCentralVirtualEnv,
                     String scanCentralRequirementFile,
@@ -131,6 +134,7 @@ public class JobModel implements Serializable {
         this.scanCentralSkipBuild = scanCentralSkipBuild;
         this.scanCentralBuildCommand = scanCentralBuildCommand;
         this.scanCentralBuildFile = scanCentralBuildFile;
+        this.scanCentralExcludeFiles = scanCentralExcludeFiles;
         this.scanCentralBuildToolVersion = scanCentralBuildToolVersion;
         this.scanCentralVirtualEnv = scanCentralVirtualEnv;
         this.scanCentralRequirementFile = scanCentralRequirementFile;
@@ -230,6 +234,8 @@ public class JobModel implements Serializable {
         return scanCentralBuildFile;
     }
 
+    public String getScanCentralExcludeFiles() {return scanCentralExcludeFiles;}
+
     public String getScanCentralBuildToolVersion() {
         return scanCentralBuildToolVersion;
     }
@@ -241,6 +247,7 @@ public class JobModel implements Serializable {
     public String getScanCentralRequirementFile() {
         return scanCentralRequirementFile;
     }
+
     public Boolean getIsPipeline() {
         return isPipeline;
     }
@@ -273,25 +280,45 @@ public class JobModel implements Serializable {
         return openSourceScan;
     }
 
-    public Boolean getAutoProvision() { return autoProvision; }
+    public Boolean getAutoProvision() {
+        return autoProvision;
+    }
 
-    public String getApplicationName() { return applicationName; }
+    public String getApplicationName() {
+        return applicationName;
+    }
 
-    public String getApplicationType() { return applicationType; }
+    public String getApplicationType() {
+        return applicationType;
+    }
 
-    public String getReleaseName() { return releaseName; }
+    public String getReleaseName() {
+        return releaseName;
+    }
 
-    public Integer getOwner() { return owner; }
+    public Integer getOwner() {
+        return owner;
+    }
 
-    public String getAttributes() { return attributes; }
+    public String getAttributes() {
+        return attributes;
+    }
 
-    public String getBusinessCriticality() { return businessCriticality; }
+    public String getBusinessCriticality() {
+        return businessCriticality;
+    }
 
-    public String getSdlcStatus() { return sdlcStatus; }
+    public String getSdlcStatus() {
+        return sdlcStatus;
+    }
 
-    public String getMicroserviceName() { return microserviceName; }
+    public String getMicroserviceName() {
+        return microserviceName;
+    }
 
-    public Boolean getIsMicroservice() { return isMicroservice; }
+    public Boolean getIsMicroservice() {
+        return isMicroservice;
+    }
 
 
     // ToDo: This is outdated

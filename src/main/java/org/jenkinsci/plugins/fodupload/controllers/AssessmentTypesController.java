@@ -46,7 +46,7 @@ public class AssessmentTypesController extends ControllerBase {
                     .build();
             response = apiConnection.requestTyped(request, typeToken);
 
-            if (response.getItems().size() < 1) throw new IOException("Invalid API response, assessment-types page was empty");
+            if (response.getItems().isEmpty()) throw new IOException("Invalid API response, assessment-types page was empty");
 
             items.addAll(response.getItems());
         }
@@ -69,8 +69,26 @@ public class AssessmentTypesController extends ControllerBase {
         Type typeToken = new TypeToken<GenericListResponse<AssessmentTypeEntitlement>>() {
         }.getType();
         GenericListResponse<AssessmentTypeEntitlement> response = apiConnection.requestTyped(request, typeToken);
-        List<AssessmentTypeEntitlement> items = response.getItems();
 
-        return items;
+        return response.getItems();
+    }
+
+    public List<AssessmentTypeEntitlement> getDynamicAssessmentTypeEntitlements(Boolean isMicroservice) throws IOException {
+        HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
+                .addPathSegments("/api/v3/tenant-assessment-types")
+                .addQueryParameter("scanType", "dynamic")
+                .addQueryParameter("forMicroservice", isMicroservice != null ? isMicroservice.toString() : "false" );
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .addHeader("Accept", "application/json")
+                .addHeader("CorrelationId", getCorrelationId())
+                .get()
+                .build();
+        Type typeToken = new TypeToken<GenericListResponse<AssessmentTypeEntitlement>>() {
+        }.getType();
+        GenericListResponse<AssessmentTypeEntitlement> response = apiConnection.requestTyped(request, typeToken);
+
+        return response.getItems();
     }
 }

@@ -1,20 +1,28 @@
 package org.jenkinsci.plugins.fodupload.FodApi;
 
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import hudson.ProxyConfiguration;
 import okhttp3.*;
 import okio.Buffer;
 import org.apache.commons.io.IOUtils;
-
+import org.jenkinsci.plugins.fodupload.Json;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.FodDastApiResponse;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.PostDastStartScanResponse;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDastScanSetupResponse;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.error;
+import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class Utils {
+public class Utils {
 
     static String getRawBody(InputStream stream) throws IOException {
         if (stream == null) return null;
@@ -136,5 +144,102 @@ class Utils {
         }
 
         return null;
+    }
+
+
+    public static  <T> T ConvertHttpResponseIntoDastApiResponse(ResponseContent response, T fodApiResponse) throws IOException {
+        if (response.code() < 300) {
+            System.out.println("response code: " + response.code());
+            return parseHttpSuccessResponse(response, fodApiResponse);
+
+        } else {
+
+            return parseFailureResponse(response, fodApiResponse);
+
+        }
+    }
+
+    public static <T> T parseHttpSuccessResponse(ResponseContent response, Object fodApiResponse) throws IOException {
+        if (response.bodyContent()==null || response.bodyContent().isEmpty()) {
+            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
+            ((FodDastApiResponse) fodApiResponse).reason = response.message();
+            return (T) fodApiResponse;
+        } else {
+            return parseHttpBodyResponse(response, fodApiResponse);
+        }
+    }
+
+    public static  <T> T parseFailureResponse(ResponseContent response, Object fodApiResponse) throws IOException {
+        if (response.bodyContent() == null || response.bodyContent().isEmpty()) {
+            ((FodDastApiResponse) fodApiResponse).isSuccess = false;
+            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).reason = response.message();
+            error err = new error();
+            err.errorCode = response.code();
+            err.message = response.message();
+            ((FodDastApiResponse) fodApiResponse).errors = new ArrayList<>();
+            ((FodDastApiResponse) fodApiResponse).errors.add(err);
+            return (T) fodApiResponse;
+
+        } else {
+            T parsedResponse = parseHttpBodyResponse(response, fodApiResponse);
+            error err = new error();
+            err.errorCode =  ((FodDastApiResponse) parsedResponse).HttpCode;
+            err.message = ((FodDastApiResponse) parsedResponse).reason;
+            ((FodDastApiResponse) parsedResponse).errors = new ArrayList<>();
+            ((FodDastApiResponse) parsedResponse).errors.add(err);
+            return  parsedResponse;
+        }
+    }
+    private  static  <T> T parseHttpBodyResponse(ResponseContent response, Object fodApiResponse) throws IOException {
+
+        if (fodApiResponse instanceof PatchDastFileUploadResponse) {
+            T parsedResponse = parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
+            }.getType());
+            ((PatchDastFileUploadResponse) parsedResponse).isSuccess = response.isSuccessful();
+            ((PatchDastFileUploadResponse) parsedResponse).HttpCode = response.code();
+            ((PatchDastFileUploadResponse) parsedResponse).reason = response.bodyContent();
+            return parsedResponse;
+
+        } else if (fodApiResponse instanceof PutDastScanSetupResponse) {
+            T parsedResponse = parseResponse(response, new TypeToken<PutDastScanSetupResponse>() {
+            }.getType());
+            ((PutDastScanSetupResponse) parsedResponse).isSuccess = response.isSuccessful();
+            ((PutDastScanSetupResponse) parsedResponse).HttpCode = response.code();
+            ((PutDastScanSetupResponse) parsedResponse).reason = response.bodyContent();
+            return parsedResponse;
+
+        } else if (fodApiResponse instanceof PostDastStartScanResponse) {
+            T parsedResponse = parseResponse(response, new TypeToken<PostDastStartScanResponse>() {
+            }.getType());
+
+            ((PostDastStartScanResponse) parsedResponse).isSuccess = response.isSuccessful();
+            ((PostDastStartScanResponse) parsedResponse).HttpCode = response.code();
+            ((PostDastStartScanResponse) parsedResponse).reason = response.bodyContent();
+            return  parsedResponse;
+
+        } else {
+            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
+            ((FodDastApiResponse) fodApiResponse).reason = response.bodyContent();
+            return (T) fodApiResponse;
+        }
+    }
+
+    private static  <T> T parseResponse(ResponseContent response, Type t) throws IOException {
+        String content = response.bodyContent();
+
+        if (content == null)
+            throw new IOException("Unexpected body to be null");
+        else {
+            try {
+                return Json.getInstance().fromJson(content, t);
+            } catch (JsonSyntaxException ex) {
+                String bodyContent = "{\"content\":" + content + "}";
+                return Json.getInstance().fromJson(bodyContent, t);
+            }
+        }
+
     }
 }

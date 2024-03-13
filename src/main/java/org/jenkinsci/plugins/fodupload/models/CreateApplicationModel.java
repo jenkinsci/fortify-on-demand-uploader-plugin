@@ -17,11 +17,11 @@ public class CreateApplicationModel {
         this.applicationType = applicationType;
         this.releaseName = releaseName;
         this.ownerId = ownerId;
-        this.attributes = attributes.clone();
+        this.attributes = attributes !=null?attributes.clone():null;
         this.businessCriticalityType = businessCriticalityType;
         this.sdlcStatusType = sdlcStatusType;
         this.hasMicroservices = hasMicroservices;
-        this.microservices = microservices.clone();
+        this.microservices = microservices!=null? microservices.clone():null;
         this.ownerId = ownerId;
         this.releaseMicroserviceName = releaseMicroserviceName;
     }

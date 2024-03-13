@@ -1,0 +1,113 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <style>
+        .spinner select {
+        display: none;
+        }
+
+        .spinner button {
+        display: none;
+        }
+
+        .spinner a {
+        display: none;
+        }
+
+        .spinner input {
+        display: none;
+        }
+
+        .spinner .createLink {
+        display: none;
+        }
+
+        div[descriptorid="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"] select {
+        width: 240px;
+        }
+
+        .createLink {
+        padding-left: 10px;
+        }
+
+        .flex-container {
+        display: flex;
+        flex-wrap: wrap;
+        }
+
+        .btn-add-exclude-url
+        {
+        margin: 5px;
+        }
+        .flex-item {
+        margin: 10px;
+        }
+        .error-msg {
+        color: red;
+        }
+        .req-field {
+        border: 2px solid red;
+        }
+        .uploadedFileDetails {
+        display: inline-block;
+        border-radius: 74px;
+        background-color: #efefef;
+        padding-left: 10px;
+        padding-right: 10px;
+        }
+        .reqFalsePositiveWarn{
+        color:red;
+        }
+    </style>
+
+    <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+
+    <f:section title="Authentication - Select to override global authentication settings">
+        <f:optionalBlock name="overrideGlobalConfig" field="overrideGlobalConfig"
+                         title="Configure Personal Access Token" inline="true">
+            <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/AuthenticationOverride.jelly"
+                        class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
+        </f:optionalBlock>
+    </f:section>
+
+    <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/AppAndReleaseSelection.jelly"
+                class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
+
+
+    <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/AppAndReleaseSelectionForm.jelly"
+                class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
+
+
+    <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/ScanSettings.jelly"
+                class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
+
+    <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/CreateApplicationForm.jelly"
+                class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
+
+    <st:include page="/org/jenkinsci/plugins/fodupload/FortifyDastFreeStyleBuildStep/CreateReleaseForm.jelly"
+                class="org.jenkinsci.plugins.fodupload.FortifyDastFreeStyleBuildStep"/>
+
+
+    <!-- Script Section -->
+
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Common.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Styling.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Auth.js"/>
+
+    <script>
+        var descriptor =
+        <st:bind value="${descriptor}"/>
+        var instance =
+        <st:bind value="${instance}"/>
+
+    </script>
+
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelection.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ApplicationCreationDialog.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/ReleaseCreationDialog.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/AppAndReleaseSelectionDialog.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastValidation.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastFreeStyle.js"/>
+
+</j:jelly>

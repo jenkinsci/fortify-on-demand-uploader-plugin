@@ -126,8 +126,10 @@ class Api {
         return new Promise((res, rej) => {
             this.descriptor.retrieveStaticScanSettings(releaseId, customAuth, async t => {
                 const responseJSON = JSON.parse(t.responseJSON);
-
-                return res(responseJSON);
+                if (responseJSON)
+                    return res(responseJSON);
+                else
+                    rej();
             });
         });
     }
@@ -135,11 +137,12 @@ class Api {
     getAssessmentTypeEntitlements(releaseId, customAuth) {
         return new Promise((res, rej) => {
             this.descriptor.retrieveAssessmentTypeEntitlements(releaseId, customAuth, async t => {
-                const responseJSON = JSON.parse(t.responseJSON);
-
-                if (responseJSON === null) return res(null);
-
-                return res(this._mutateAssessmentEntitlements(responseJSON));
+                if (!t.responseJSON)
+                    rej("Failed to retrieve AssessmentType settings.");
+                else {
+                    let responseJSON = JSON.parse(t.responseJSON);
+                    return res(this._mutateAssessmentEntitlements(responseJSON));
+                }
             });
         });
     }
@@ -170,7 +173,7 @@ class Api {
         });
     }
 
-    _mutateAssessmentEntitlements(responseJSON){
+    _mutateAssessmentEntitlements(responseJSON) {
         if (Array.isArray(responseJSON) && responseJSON.length > 0) {
             let assessments = {};
 
@@ -183,7 +186,8 @@ class Api {
                         id: ae.assessmentTypeId,
                         name: ae.name,
                         entitlements: {},
-                        entitlementsSorted: []
+                        entitlementsSorted: [],
+                        assessmentCategory: ae.assessmentCategory
                     };
                     assessments[ae.assessmentTypeId] = assessment;
                 }
@@ -214,13 +218,27 @@ class Api {
         return null;
     }
 
-    getReleaseEntitlementSettings(releaseId, customAuth) {
+    getReleaseEntitlementSettings(releaseId, customAuth, isDast) {
         return new Promise((res, rej) => {
-            this.descriptor.retrieveStaticScanSettings(releaseId, customAuth, async t => {
-                const responseJSON = JSON.parse(t.responseJSON);
+            if (isDast) {
+                this.descriptor.retrieveDynamicScanSettings(releaseId, customAuth, async t => {
+                    if (!t) {
+                        rej("Failed to retrieve DAST scan settings.");
+                    }
+                    const responseJSON = JSON.parse(t.responseJSON);
+                    if (!responseJSON) {
+                        rej("Error while parsing DAST scan settings into json.");
+                    } else
+                        return res(responseJSON);
+                });
+            } else {
+                this.descriptor.retrieveStaticScanSettings(releaseId, customAuth, async t => {
+                    const responseJSON = JSON.parse(t.responseJSON);
 
-                return res(responseJSON);
-            });
+                    return res(responseJSON);
+                });
+            }
+
         });
     }
 
@@ -264,7 +282,97 @@ class Api {
         });
     }
 
-    //</editor-fold>
+//-----------DAST Scan Settings----------------------------
+    getTimeZoneStacks(customAuth) {
+        return new Promise((res, rej) => {
+            let timeZones;
+
+            let ttprom = new Promise((ttres, ttrej) => {
+                this.descriptor.retrieveLookupItems('TimeZones', customAuth, t => {
+                    timeZones = JSON.parse(t.responseJSON);
+                    res(timeZones);
+                    ttres();
+                });
+            });
+
+        });
+    }
+    getNetworkAuthType(customAuth) {
+
+        return new Promise((res, reject) => {
+
+            this.descriptor.retrieveLookupItems("NetworkAuthenticationType", customAuth, async result => {
+                if (!result ||! result.responseJSON) {
+                    return reject("Error Network Authentication type not retrieved");
+                }
+                return res((JSON.parse(result.responseJSON)));
+            })
+        });
+
+    }
+
+    patchSetupManifestFile(releaseId, customAuth, file, fileType) {
+
+        return new Promise((accept, reject) => {
+            let fileReader = new FileReader();
+            let fileContent = fileReader.readAsBinaryString(file);
+            fileReader.onload = () => {
+                fileContent = fileReader.result;
+                this.descriptor.DastManifestFileUpload(releaseId, customAuth, fileContent, fileType,file.name, async res => {
+
+                    if (res.responseJSON  && res.responseJSON.isSuccess ===true){
+                    res.responseJSON.fileName = file.name;
+                        return accept(res.responseJSON);
+                        }
+                    else
+                        return reject(res.responseJSON.reason);
+                })
+            };
+        });
+    }
+
+//-----------------------DAST Scan Settings-------------
+
+    _modifyDynamicAssessmentEntitlements(responseJSON) {
+        if (Array.isArray(responseJSON) && responseJSON.length > 0) {
+            let assessments = {};
+
+            for (let ae of responseJSON) {
+                if (ae.isRemediation) continue;
+                let assessment = assessments[ae.assessmentTypeId];
+
+                if (!assessment) {
+                    assessment = {
+                        id: ae.assessmentTypeId, name: ae.name, entitlements: {}, entitlementsSorted: []
+                    };
+                    assessments[ae.assessmentTypeId] = assessment;
+                }
+                let entitlement = {
+                    id: ae.entitlementId,
+                    frequency: ae.frequencyType,
+                    frequencyId: ae.frequencyTypeId,
+                    units: ae.units,
+                    unitsAvailable: ae.unitsAvailable,
+                    isBundledAssessment: ae.isBundledAssessment,
+                    parentAssessmentTypeId: ae.parentAssessmentTypeId,
+                    description: ae.entitlementDescription,
+                    sortValue: (ae.frequencyType === 'Subscription' ? 0 : 1).toString() + '_' + ae.entitlementDescription.toLowerCase()
+                };
+
+                assessment.entitlements[ae.entitlementId] = entitlement;
+                assessment.entitlementsSorted.push(entitlement);
+
+            }
+            for (let k of Object.keys(assessments)) {
+                assessments[k].entitlementsSorted = assessments[k].entitlementsSorted.sort((a, b) => a.sortValue < b.sortValue ? -1 : 0);
+            }
+            return assessments;
+        }
+
+        return null;
+    }
+
+//</editor-fold>
 
     isAuthError(err) {
         return err == this.failedToAuthMessage;
