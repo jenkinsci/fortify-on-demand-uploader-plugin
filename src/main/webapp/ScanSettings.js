@@ -280,7 +280,7 @@ class ScanSettings {
                     if (!currVal || !this.isDotNetStack(currVal)) jq('#technologyStackSelectList').val(techStackConsts.none);
                     techStackFilter = this.isDotNetStack;
                     break;
-
+                case _scanCentralBuildTypes.Maven:
                 case _scanCentralBuildTypes.Gradle:
                     jq('#technologyStackSelectList').val(techStackConsts.java);
                     break;
