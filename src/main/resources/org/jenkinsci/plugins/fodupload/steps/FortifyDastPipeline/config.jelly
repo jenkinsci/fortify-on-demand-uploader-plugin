@@ -294,10 +294,10 @@
                 <f:entry>
                     <div id="dast-standard-scan-scope" class="fodp-field spinner-container fodp-row-relid-ovr fodp-row-autoProv">
                         <input type="radio" id="radScanEntireHost" name="standardScanRestrictionOption"/>
-                            <label for="radScanEntireHost">Scan Entire Host</label>
+                            <label class="attach-previous">Scan Entire Host</label>
                                 <span style="margin-left:5px"></span>
                         <input type="radio" id="radScanDirAndSubDir" name="standardScanRestrictionOption" />
-                            <label for="radScanDirAndSubDir">Restrict scan to URL directories and subdirectories</label>
+                            <label class="attach-previous">Restrict scan to URL directories and subdirectories</label>
                         <input type="label" hidden="true" name="scanScope" id="standardScanScopeRestriction" value="true"/>
                     </div>
 
@@ -350,10 +350,10 @@
                                 <f:entry field="openApiSource">
                                     <input type="radio" class="sourceOptions openApi_file" id="openApiInputFile"
                                            name="openApiInput" value="FileId"/>
-                                    <label for="openApiInputFile">File</label>
+                                    <label class="attach-previous">File</label>
                                     <input type="radio" class="sourceOptions openApi_url" id="openApiInputUrl"
                                            name="openApiInput" value="Url"/>
-                                    <label for="openApiInputUrl">URL to the OpenAPI specification</label>
+                                    <label class="attach-previous">URL to the OpenAPI specification</label>
                                     <input type="label" hidden="true" name="openApiRadioSource"
                                            id="openApiRadioSource"/>
                                 </f:entry>
@@ -433,10 +433,10 @@
                                 <f:entry field="graphQlSource">
                                     <input type="radio" class="sourceOptions graphql_file" id="graphQlInputFile"
                                            name="graphQlInput" value="FileId"/>
-                                    <label for="graphQlFile">File</label>
+                                    <label class="attach-previous">File</label>
                                     <input type="radio" class="sourceOptions graphQl_url" id="graphQlInputUrl"
                                            name="graphQlInput" value="Url"/>
-                                    <label for="graphQlUrl">URL</label>
+                                    <label class="attach-previous">URL</label>
                                     <input type="label" hidden="true" name="graphQlRadioSource"
                                            id="graphQlRadioSource"/>
                                 </f:entry>
