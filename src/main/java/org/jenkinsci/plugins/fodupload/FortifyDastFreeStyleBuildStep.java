@@ -12,6 +12,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.CharEncoding;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.controllers.*;
@@ -28,7 +29,6 @@ import org.kohsuke.stapler.verb.POST;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -376,7 +376,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                         throw new IllegalArgumentException("Dast Manifest upload file type is not set for the release Id: " + releaseId);
                 }
 
-                patchDastScanFileUploadReq.Content = fileContent.getBytes(StandardCharsets.UTF_8);
+                patchDastScanFileUploadReq.Content = fileContent.getBytes(CharEncoding.UTF_8);
                 patchDastScanFileUploadReq.fileName = fileName;
                 return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
 
