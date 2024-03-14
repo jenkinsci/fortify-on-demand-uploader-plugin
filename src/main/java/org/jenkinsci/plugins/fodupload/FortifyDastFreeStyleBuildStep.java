@@ -28,6 +28,7 @@ import org.kohsuke.stapler.verb.POST;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -375,7 +376,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                         throw new IllegalArgumentException("Dast Manifest upload file type is not set for the release Id: " + releaseId);
                 }
 
-                patchDastScanFileUploadReq.Content = fileContent.getBytes();
+                patchDastScanFileUploadReq.Content = fileContent.getBytes(StandardCharsets.UTF_8);
                 patchDastScanFileUploadReq.fileName = fileName;
                 return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
 

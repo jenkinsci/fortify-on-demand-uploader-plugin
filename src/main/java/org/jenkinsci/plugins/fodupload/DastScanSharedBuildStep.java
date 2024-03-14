@@ -24,6 +24,7 @@ import org.kohsuke.stapler.verb.POST;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -591,7 +592,7 @@ public class DastScanSharedBuildStep {
             default:
                 throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
         }
-        patchDastScanFileUploadReq.Content = fileContent.getBytes();
+        patchDastScanFileUploadReq.Content = fileContent.getBytes(StandardCharsets.UTF_8);
         return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
     }
 

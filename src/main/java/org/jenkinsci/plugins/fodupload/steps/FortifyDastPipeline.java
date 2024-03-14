@@ -1226,7 +1226,7 @@ public class FortifyDastPipeline extends FortifyStep {
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
                 AssessmentTypesController assessments = new AssessmentTypesController(apiConnection, null, Utils.createCorrelationId());
                 AssessmentTypeEntitlementsForAutoProv result = null;
-                DastScanController dastScanController = new DastScanController(apiConnection, null, Utils.createCorrelationId());
+
                 return Utils.createResponseViewModel(assessments.getDynamicAssessmentTypeEntitlements(false));
 
             } catch (Exception e) {
