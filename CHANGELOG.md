@@ -1,9 +1,15 @@
 # Changelog
 ## Version 8.0 (03-13-2024)
-- Added support for DAST Automated assessments. For freestyle projects, the Fortify on Demand Dynamic Assessment post-build action has been added. For pipelines, the fodDynamicAssessment task has been added.
+- Added support for DAST Automated assessments (technology preview). For freestyle projects, the Fortify on Demand Dynamic Assessment post-build action has been added. For pipelines, the fodDynamicAssessment task has been added.
 - Added support for polling for DAST Automated scan results.
-- Added **dotnet** as a **ScanCentral Build Type** option.
-**Important**: Fortify on Demand Jenkins Plugin version 8.0 supports up to Jenkins version 2.346.1. Some UI components, including application and release fields, do not load in versions greater than 2.346.1.
+- Added **dotnet** as a **ScanCentral Build Type** value.
+- Added **Exclude Files** field for packaging with Fortify ScanCentral SAST.
+
+**Important**: 
+The DAST Automated asssessment task is a technology preview. The following are known limitations:
+- Fortify on Demand Jenkins Plugin 8.0 supports up to Jenkins 2.346.1. Some UI components, including application and release fields, do not load in versions greater than 2.346.1.
+- (Website scan) Selection of **Enable redundant page detection** is not retained.
+- (Website scan) Excluded URLs are not applied in pipelines.
 
 ## Version 7.2 (08-08-2023)
 - Added support for new technology stacks.
