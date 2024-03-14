@@ -50,7 +50,7 @@ public class PutDastScanSetupReqModel implements Serializable {
 
     public boolean requiresNetworkAuthentication;
 
-    public class NetworkAuthentication {
+    public class NetworkAuthentication implements Serializable {
 
         public void setUserName(String userName) {
             this.userName = userName;

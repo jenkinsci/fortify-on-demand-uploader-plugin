@@ -10,6 +10,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.CharEncoding;
 import org.jenkinsci.plugins.fodupload.Config.FodGlobalConstants;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
@@ -591,7 +592,7 @@ public class DastScanSharedBuildStep {
             default:
                 throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
         }
-        patchDastScanFileUploadReq.Content = fileContent.getBytes();
+        patchDastScanFileUploadReq.Content = fileContent.getBytes(CharEncoding.UTF_8);
         return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
     }
 
