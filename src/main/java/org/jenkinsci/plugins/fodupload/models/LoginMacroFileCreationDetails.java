@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload.models;
 
 public class LoginMacroFileCreationDetails {
     public String primaryUsername;
+    @SuppressWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     public String primaryPassword;
 
     public void setPrimaryUsername(String primaryUsername) {

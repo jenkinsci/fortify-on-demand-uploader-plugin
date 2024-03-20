@@ -24,6 +24,7 @@ public class DastScanJobModel {
     {
         return this.workflowMacroFilePath;
     }
+    @SuppressWarnings("URF_UNREAD_FIELD")
     String excludedUrlList;
     int workflowMacroFileId;
     String dastEnv;

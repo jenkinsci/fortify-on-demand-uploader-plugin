@@ -31,7 +31,7 @@ public class DastScanController extends ControllerBase {
         super(apiConnection, logger, correlationId);
     }
 
-    public PutDastScanSetupResponse SaveDastWebSiteScanSettings(final Integer releaseId, PutDastWebSiteScanReqModel settings) throws IOException {
+    public PutDastScanSetupResponse saveDastWebSiteScanSettings(final Integer releaseId, PutDastWebSiteScanReqModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
 
@@ -50,7 +50,7 @@ public class DastScanController extends ControllerBase {
         return putDynamicScanSetupResponse;
     }
 
-    public PutDastScanSetupResponse SaveDastWorkflowDrivenScanSettings(final Integer releaseId, PutDastWorkflowDrivenScanReqModel settings) throws IOException {
+    public PutDastScanSetupResponse saveDastWorkflowDrivenScanSettings(final Integer releaseId, PutDastWorkflowDrivenScanReqModel settings) throws IOException {
 
         String requestContent = Json.getInstance().toJson(settings);
 
@@ -70,7 +70,7 @@ public class DastScanController extends ControllerBase {
         return putDastScanSetupResponse;
     }
 
-    public PatchDastFileUploadResponse DastFileUpload(PatchDastScanFileUploadReq requestModel) throws Exception {
+    public PatchDastFileUploadResponse dastFileUpload(PatchDastScanFileUploadReq requestModel) throws Exception {
 
         try {
             HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
@@ -100,7 +100,7 @@ public class DastScanController extends ControllerBase {
     }
 
 
-    public PatchDastFileUploadResponse DastFileUpload(FilePath payload, PrintStream logger,
+    public PatchDastFileUploadResponse dastFileUpload(FilePath payload, PrintStream logger,
                                                       PatchDastScanFileUploadReq requestModel) throws Exception {
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder()
                 .addQueryParameter("dastFileType", (requestModel.dastFileType.getValue()))
@@ -114,7 +114,7 @@ public class DastScanController extends ControllerBase {
     }
 
 
-    public PostDastStartScanResponse StartDastScan(Integer releaseId) throws IOException {
+    public PostDastStartScanResponse startDastScan(Integer releaseId) throws IOException {
 
         HttpUrl.Builder urlBuilder = apiConnection.urlBuilder().addPathSegments(String.format(FodGlobalConstants.FodDastApiEndpoint.DastStartScanAPi, releaseId));
         Request request = new Request.Builder()

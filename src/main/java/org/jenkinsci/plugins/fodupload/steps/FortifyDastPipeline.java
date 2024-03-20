@@ -21,7 +21,6 @@ import org.jenkinsci.plugins.fodupload.actions.CrossBuildAction;
 import org.jenkinsci.plugins.fodupload.controllers.*;
 import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.AssessmentTypeEntitlementsForAutoProv;
-import org.jenkinsci.plugins.fodupload.models.response.CreateApplicationResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -537,11 +536,11 @@ public class FortifyDastPipeline extends FortifyStep {
         }
         List<String> errors =null;
         if(!this.getReleaseId().isEmpty() && this.getReleaseName().isEmpty()) {
-            errors = dastScanSharedBuildStep.ValidateModel();
+            errors = dastScanSharedBuildStep.validateModel();
         }
         else if(!this.getApplicationName().isEmpty()&& !this.getReleaseName().isEmpty())
         {
-            errors = dastScanSharedBuildStep.ValidateForAutoProv();
+            errors = dastScanSharedBuildStep.validateForAutoProv();
         }
 
         if (errors !=null && !errors.isEmpty()) {
@@ -804,7 +803,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
         if (loginMacroFilePath != null && loginMacroFilePath.length() > 1) {
 
-            PatchDastFileUploadResponse patchUploadResponse = dastScanSharedBuildStep.DastManifestFileUpload(workspace, loginMacroFilePath, printStream, FodEnums.DastScanFileTypes.LoginMacro
+            PatchDastFileUploadResponse patchUploadResponse = dastScanSharedBuildStep.dastManifestFileUpload(workspace, loginMacroFilePath, printStream, FodEnums.DastScanFileTypes.LoginMacro
                     , dastScanSharedBuildStep.getFodApiConnection());
 
             if (patchUploadResponse == null || !patchUploadResponse.isSuccess || patchUploadResponse.fileId <= 0) {
@@ -822,7 +821,7 @@ public class FortifyDastPipeline extends FortifyStep {
             requireLoginMacro = true;
         }
 
-        dastScanSharedBuildStep.SaveReleaseSettingsForWebSiteScan(releaseId, assessmentTypeId,
+        dastScanSharedBuildStep.saveReleaseSettingsForWebSiteScan(releaseId, assessmentTypeId,
                 entitlementId
                 , entitlementFrequency, loginMacroFileId,
                 selectedDynamicTimeZone,
@@ -838,7 +837,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
         if (this.workflowMacroFilePath != null && this.workflowMacroFilePath.length() > 2) {
 
-            PatchDastFileUploadResponse patchDastFileUploadResponse = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.workflowMacroFilePath, printStream, FodEnums.DastScanFileTypes.WorkflowDrivenMacro
+            PatchDastFileUploadResponse patchDastFileUploadResponse = dastScanSharedBuildStep.dastManifestFileUpload(workspace, this.workflowMacroFilePath, printStream, FodEnums.DastScanFileTypes.WorkflowDrivenMacro
                     , dastScanSharedBuildStep.getFodApiConnection());
 
             if (patchDastFileUploadResponse == null || !patchDastFileUploadResponse.isSuccess || patchDastFileUploadResponse.fileId <= 0) {
@@ -856,7 +855,7 @@ public class FortifyDastPipeline extends FortifyStep {
                 this.workflowMacroHosts = String.join(",", patchDastFileUploadResponse.hosts);
             }
         }
-        dastScanSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(releaseId, assessmentTypeId, entitlementId, entitlementFrequency, workflowMacroId, this.workflowMacroHosts,
+        dastScanSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(releaseId, assessmentTypeId, entitlementId, entitlementFrequency, workflowMacroId, this.workflowMacroHosts,
                 selectedDynamicTimeZone, scanPolicy,  envFacing,networkAuthUserName, networkAuthPassword, networkAuthType, requestFalsePositiveRemoval);
     }
 
@@ -866,7 +865,7 @@ public class FortifyDastPipeline extends FortifyStep {
         String sourceUrn = null;
         if (FodEnums.DastApiType.OpenApi.toString().equalsIgnoreCase(selectedApiType)) {
             if(FodEnums.ApiSourceType.valueOf(openApiRadioSource) == FodEnums.ApiSourceType.FileId) {
-                PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.openApiFilePath,
+                PatchDastFileUploadResponse response = dastScanSharedBuildStep.dastManifestFileUpload(workspace, this.openApiFilePath,
                         printStream, FodEnums.DastScanFileTypes.OpenAPIDefinition , dastScanSharedBuildStep.getFodApiConnection());
 
                 if (response == null || !response.isSuccess || response.fileId <= 0) {
@@ -897,7 +896,7 @@ public class FortifyDastPipeline extends FortifyStep {
                     throw new Exception(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
                 }
 
-                PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.graphQLFilePath,
+                PatchDastFileUploadResponse response = dastScanSharedBuildStep.dastManifestFileUpload(workspace, this.graphQLFilePath,
                         printStream, FodEnums.DastScanFileTypes.GraphQLDefinition, dastScanSharedBuildStep.getFodApiConnection());
 
                 if (response == null || !response.isSuccess || response.fileId <= 0) {
@@ -909,7 +908,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
                 sourceUrn = graphQLUrl;
             }
-            dastScanSharedBuildStep.SaveReleaseSettingsForGraphQlScan(releaseId, assessmentTypeId, entitlementId,
+            dastScanSharedBuildStep.saveReleaseSettingsForGraphQlScan(releaseId, assessmentTypeId, entitlementId,
                     entitlementFrequency, selectedDynamicTimeZone,
                     enableRedundantPageDetection, envFacing, !networkAuthType.isEmpty(),
                     networkAuthUserName, networkAuthPassword, networkAuthType,
@@ -923,7 +922,7 @@ public class FortifyDastPipeline extends FortifyStep {
                 printStream.printf("FilePath for the Payload not constructed for releaseId %s%n", releaseId);
                 throw new Exception(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
             }
-            PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.grpcFilePath,
+            PatchDastFileUploadResponse response = dastScanSharedBuildStep.dastManifestFileUpload(workspace, this.grpcFilePath,
                     printStream, FodEnums.DastScanFileTypes.GRPCDefinition, dastScanSharedBuildStep.getFodApiConnection());
 
             if (response == null || !response.isSuccess || response.fileId <= 0) {
@@ -931,7 +930,7 @@ public class FortifyDastPipeline extends FortifyStep {
             }
             grpcFileId = String.valueOf(response.fileId);
 
-            dastScanSharedBuildStep.SaveReleaseSettingsForGrpcScan(releaseId, assessmentTypeId, entitlementId,
+            dastScanSharedBuildStep.saveReleaseSettingsForGrpcScan(releaseId, assessmentTypeId, entitlementId,
                     entitlementFrequency, selectedDynamicTimeZone,
                     envFacing,
                     networkAuthUserName, networkAuthPassword, networkAuthType,
@@ -946,7 +945,7 @@ public class FortifyDastPipeline extends FortifyStep {
                 throw new Exception(String.format("FilePath for the Payload not constructed for releaseId %s%n", releaseId));
             }
 
-            PatchDastFileUploadResponse response = dastScanSharedBuildStep.DastManifestFileUpload(workspace, this.postmanFilePath,
+            PatchDastFileUploadResponse response = dastScanSharedBuildStep.dastManifestFileUpload(workspace, this.postmanFilePath,
                     printStream, FodEnums.DastScanFileTypes.PostmanCollection, dastScanSharedBuildStep.getFodApiConnection());
 
             if (response == null || !response.isSuccess || response.fileId <= 0) {
@@ -955,7 +954,7 @@ public class FortifyDastPipeline extends FortifyStep {
             }
 
             postmanFileId = String.valueOf(response.fileId);
-            dastScanSharedBuildStep.SaveReleaseSettingsForPostmanScan(releaseId, assessmentTypeId, entitlementId,
+            dastScanSharedBuildStep.saveReleaseSettingsForPostmanScan(releaseId, assessmentTypeId, entitlementId,
                     entitlementFrequency, selectedDynamicTimeZone,
                     envFacing,
                     networkAuthUserName, networkAuthPassword, networkAuthType,
@@ -1045,7 +1044,7 @@ public class FortifyDastPipeline extends FortifyStep {
             boolean overrideGlobalAuthConfig = !Utils.isNullOrEmpty(username);
             List<String> errors = null;
 
-            errors = dastScanSharedBuildStep.ValidateAuthModel(overrideGlobalAuthConfig, username, tenantId, personalAccessToken);
+            errors = dastScanSharedBuildStep.validateAuthModel(overrideGlobalAuthConfig, username, tenantId, personalAccessToken);
 
             if (errors.isEmpty()) {
                 AuthenticationModel authModel = new AuthenticationModel(overrideGlobalAuthConfig,
@@ -1060,7 +1059,7 @@ public class FortifyDastPipeline extends FortifyStep {
             if (apiConnection == null) {
                 throw new Exception("Fod API Connection not created.");
             }
-            dastScanSharedBuildStep.SetFodApiConnection(apiConnection);
+            dastScanSharedBuildStep.setFodApiConnection(apiConnection);
             dastScanSharedBuildStep.setLogger(printStream);
 
             if (!this.getReleaseName().isEmpty() && this.getReleaseId().isEmpty()) {
