@@ -1,8 +1,11 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class PostReleaseWithUpsertApplicationModel {
     private String applicationName;
     private String applicationDescription;

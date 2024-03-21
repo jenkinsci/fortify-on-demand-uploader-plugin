@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class LoginMacroFileCreationDetails {
     public String primaryUsername;
     @SuppressWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")

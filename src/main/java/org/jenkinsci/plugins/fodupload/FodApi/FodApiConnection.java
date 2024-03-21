@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.fodupload.FodApi;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
@@ -48,6 +49,7 @@ public class FodApiConnection {
      * @param secret  apiConnection secret
      * @param baseUrl apiConnection baseUrl
      */
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public FodApiConnection(final String id, final String secret, final String baseUrl, final String apiUrl, final GrantType grantType, final String scope, boolean executeOnRemoteAgent, Launcher launcher, PrintStream logger) {
         this.id = id;
         this.secret = secret;

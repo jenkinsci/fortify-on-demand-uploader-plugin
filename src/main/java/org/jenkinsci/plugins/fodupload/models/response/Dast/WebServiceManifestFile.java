@@ -1,7 +1,9 @@
 package org.jenkinsci.plugins.fodupload.models.response.Dast;
 
-import java.util.Date;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import java.util.Date;
+@SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
 public class WebServiceManifestFile {
     public String getWebServiceFileType() {
         return webServiceFileType;

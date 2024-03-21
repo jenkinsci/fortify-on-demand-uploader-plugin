@@ -39,7 +39,7 @@ import java.util.*;
 import static org.jenkinsci.plugins.fodupload.Utils.logger;
 import static org.jenkinsci.plugins.fodupload.models.FodEnums.APILookupItemTypes;
 
-@SuppressFBWarnings("unused")
+@SuppressFBWarnings({"UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class FortifyDastPipeline extends FortifyStep {
     private static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
     private final String correlationId = UUID.randomUUID().toString();
