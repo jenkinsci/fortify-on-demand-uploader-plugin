@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.reflect.TypeToken;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Tuple2;
 import hudson.FilePath;
 import okhttp3.*;
@@ -70,6 +71,7 @@ public class DastScanController extends ControllerBase {
         return putDastScanSetupResponse;
     }
 
+   @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public PatchDastFileUploadResponse dastFileUpload(PatchDastScanFileUploadReq requestModel) throws Exception {
 
         try {

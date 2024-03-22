@@ -1181,6 +1181,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
+        @SuppressFBWarnings("REC_CATCH_EXCEPTION")
         public String retrieveCurrentUserSession(JSONObject authModelObject) {
             try {
 
@@ -1219,6 +1220,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
+        @SuppressFBWarnings("REC_CATCH_EXCEPTION")
         public String retrieveAssessmentTypeEntitlementsForAutoProv(String appName, String relName, Boolean isMicroservice, String microserviceName, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
@@ -1236,6 +1238,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
+        @SuppressFBWarnings("REC_CATCH_EXCEPTION")
         public String retrieveDynamicScanSettings(Integer releaseId, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
@@ -1251,6 +1254,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
+        @SuppressFBWarnings("REC_CATCH_EXCEPTION")
         public String retrieveAuditPreferences(Integer releaseId, Integer assessmentType, Integer frequencyType, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
@@ -1266,6 +1270,7 @@ public class FortifyDastPipeline extends FortifyStep {
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
+        @SuppressFBWarnings("REC_CATCH_EXCEPTION")
         public String retrieveLookupItems(String type, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
