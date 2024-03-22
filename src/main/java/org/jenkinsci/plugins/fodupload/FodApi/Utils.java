@@ -2,15 +2,16 @@ package org.jenkinsci.plugins.fodupload.FodApi;
 
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.ProxyConfiguration;
 import okhttp3.*;
 import okio.Buffer;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.Json;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.Error;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.FodDastApiResponse;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.PostDastStartScanResponse;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.PutDastScanSetupResponse;
-import org.jenkinsci.plugins.fodupload.models.response.Dast.error;
 import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 
 public class Utils {
 
@@ -34,7 +36,7 @@ public class Utils {
         return content;
     }
 
-    static OkHttpClient CreateOkHttpClient(int connectionTimeout, int writeTimeout, int readTimeout, ProxyConfiguration proxy) {
+    static OkHttpClient createOkHttpClient(int connectionTimeout, int writeTimeout, int readTimeout, ProxyConfiguration proxy) {
         OkHttpClient.Builder baseClient = new OkHttpClient().newBuilder()
                 .connectTimeout(connectionTimeout, TimeUnit.SECONDS)
                 .writeTimeout(writeTimeout, TimeUnit.SECONDS)
@@ -58,6 +60,7 @@ public class Utils {
         return proxyClient.build();
     }
 
+    @SuppressFBWarnings("Nm - NM_METHOD_NAMING_CONVENTION")
     static ResponseContent ResponseContentFromOkHttp3(Response response) throws IOException {
         ResponseContent resp = new ResponseContent(response.body().byteStream(), response.isSuccessful(), response.code(), response.message());
 
@@ -65,6 +68,7 @@ public class Utils {
         return resp;
     }
 
+    @SuppressFBWarnings("Nm - NM_METHOD_NAMING_CONVENTION")
     static HttpRequest OkHttpRequestToHttpRequest(Request request) throws IOException {
         HttpRequest.Verb verb;
 
@@ -98,6 +102,7 @@ public class Utils {
         throw new IOException("Unsupported Content-Type: " + request.body().contentType().toString());
     }
 
+    @SuppressFBWarnings("Nm - NM_METHOD_NAMING_CONVENTION")
     static <T extends HttpRequest> Request HttpRequestToOkHttpRequest(T request) {
         Request.Builder r = new Request.Builder()
                 .url(request.url());
@@ -147,7 +152,8 @@ public class Utils {
     }
 
 
-    public static  <T> T ConvertHttpResponseIntoDastApiResponse(ResponseContent response, T fodApiResponse) throws IOException {
+
+    public static  <T> T convertHttpResponseIntoDastApiResponse(ResponseContent response, T fodApiResponse) throws IOException {
         if (response.code() < 300) {
             System.out.println("response code: " + response.code());
             return parseHttpSuccessResponse(response, fodApiResponse);
@@ -161,7 +167,7 @@ public class Utils {
 
     public static <T> T parseHttpSuccessResponse(ResponseContent response, Object fodApiResponse) throws IOException {
         if (response.bodyContent()==null || response.bodyContent().isEmpty()) {
-            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).httpCode = response.code();
             ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
             ((FodDastApiResponse) fodApiResponse).reason = response.message();
             return (T) fodApiResponse;
@@ -173,9 +179,9 @@ public class Utils {
     public static  <T> T parseFailureResponse(ResponseContent response, Object fodApiResponse) throws IOException {
         if (response.bodyContent() == null || response.bodyContent().isEmpty()) {
             ((FodDastApiResponse) fodApiResponse).isSuccess = false;
-            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).httpCode = response.code();
             ((FodDastApiResponse) fodApiResponse).reason = response.message();
-            error err = new error();
+            Error err = new Error();
             err.errorCode = response.code();
             err.message = response.message();
             ((FodDastApiResponse) fodApiResponse).errors = new ArrayList<>();
@@ -184,8 +190,8 @@ public class Utils {
 
         } else {
             T parsedResponse = parseHttpBodyResponse(response, fodApiResponse);
-            error err = new error();
-            err.errorCode =  ((FodDastApiResponse) parsedResponse).HttpCode;
+            Error err = new Error();
+            err.errorCode =  ((FodDastApiResponse) parsedResponse).httpCode;
             err.message = ((FodDastApiResponse) parsedResponse).reason;
             ((FodDastApiResponse) parsedResponse).errors = new ArrayList<>();
             ((FodDastApiResponse) parsedResponse).errors.add(err);
@@ -198,7 +204,7 @@ public class Utils {
             T parsedResponse = parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
             }.getType());
             ((PatchDastFileUploadResponse) parsedResponse).isSuccess = response.isSuccessful();
-            ((PatchDastFileUploadResponse) parsedResponse).HttpCode = response.code();
+            ((PatchDastFileUploadResponse) parsedResponse).httpCode = response.code();
             ((PatchDastFileUploadResponse) parsedResponse).reason = response.bodyContent();
             return parsedResponse;
 
@@ -206,7 +212,7 @@ public class Utils {
             T parsedResponse = parseResponse(response, new TypeToken<PutDastScanSetupResponse>() {
             }.getType());
             ((PutDastScanSetupResponse) parsedResponse).isSuccess = response.isSuccessful();
-            ((PutDastScanSetupResponse) parsedResponse).HttpCode = response.code();
+            ((PutDastScanSetupResponse) parsedResponse).httpCode = response.code();
             ((PutDastScanSetupResponse) parsedResponse).reason = response.bodyContent();
             return parsedResponse;
 
@@ -215,12 +221,12 @@ public class Utils {
             }.getType());
 
             ((PostDastStartScanResponse) parsedResponse).isSuccess = response.isSuccessful();
-            ((PostDastStartScanResponse) parsedResponse).HttpCode = response.code();
+            ((PostDastStartScanResponse) parsedResponse).httpCode = response.code();
             ((PostDastStartScanResponse) parsedResponse).reason = response.bodyContent();
             return  parsedResponse;
 
         } else {
-            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).httpCode = response.code();
             ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
             ((FodDastApiResponse) fodApiResponse).reason = response.bodyContent();
             return (T) fodApiResponse;

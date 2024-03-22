@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload.FodApi;
 
 import com.google.gson.Gson;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
 import hudson.remoting.RemoteOutputStream;
@@ -8,7 +9,7 @@ import hudson.remoting.VirtualChannel;
 import jenkins.security.MasterToSlaveCallable;
 import okhttp3.*;
 import org.apache.commons.httpclient.HttpStatus;
-import org.jenkinsci.plugins.fodupload.models.JobModel;
+import org.jenkinsci.plugins.fodupload.models.SastJobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
 import org.jenkinsci.plugins.fodupload.models.response.StartScanResponse;
@@ -26,10 +27,10 @@ public interface ScanPayloadUpload {
     StartScanResponse performUpload() throws IOException;
 }
 
-class ScanPayloadUploadImpl {
+final class ScanPayloadUploadImpl {
     private final static int CHUNK_SIZE = 1024 * 1024; //1MB
 
-    static StartScanResponse performUpload(JobModel uploadRequest, String correlationId, String fragUrl, String bearerToken, OkHttpClient client, PrintStream log) {
+    static StartScanResponse performUpload(SastJobModel uploadRequest, String correlationId, String fragUrl, String bearerToken, OkHttpClient client, PrintStream log) {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(org.jenkinsci.plugins.fodupload.Utils.getLogTimestampFormat());
         PostStartScanResponse scanStartedResponse = null;
         StartScanResponse scanResults = new StartScanResponse();
@@ -144,15 +145,15 @@ class ScanPayloadUploadImpl {
 
 }
 
-class ScanPayloadUploadLocal implements ScanPayloadUpload {
+final class ScanPayloadUploadLocal implements ScanPayloadUpload {
     private OkHttpClient _client;
-    private JobModel _uploadRequest;
+    private SastJobModel _uploadRequest;
     private String _correlationId;
     private String _fragUrl;
     private String _bearerToken;
     private PrintStream _logger;
 
-    ScanPayloadUploadLocal(OkHttpClient client, String bearerToken, JobModel uploadRequest, String correlationId, String fragUrl, PrintStream logger) {
+    ScanPayloadUploadLocal(OkHttpClient client, String bearerToken, SastJobModel uploadRequest, String correlationId, String fragUrl, PrintStream logger) {
         _client = client;
         _bearerToken = bearerToken;
         _uploadRequest = uploadRequest;
@@ -167,9 +168,9 @@ class ScanPayloadUploadLocal implements ScanPayloadUpload {
     }
 }
 
-class ScanPayloadUploadRemote extends MasterToSlaveCallable<StartScanResponse, IOException> implements ScanPayloadUpload {
+final class ScanPayloadUploadRemote extends MasterToSlaveCallable<StartScanResponse, IOException> implements ScanPayloadUpload {
     private static final long serialVersionUID = 1L;
-    private JobModel _uploadRequest;
+    private SastJobModel _uploadRequest;
     private String _correlationId;
     private String _fragUrl;
     private String _bearerToken;
@@ -180,7 +181,7 @@ class ScanPayloadUploadRemote extends MasterToSlaveCallable<StartScanResponse, I
     private transient VirtualChannel _channel;
     private RemoteOutputStream _logger;
 
-    ScanPayloadUploadRemote(JobModel uploadRequest, String correlationId, String fragUrl,
+    ScanPayloadUploadRemote(SastJobModel uploadRequest, String correlationId, String fragUrl,
                             String bearerToken, int connectionTimeout, int writeTimeout, int readTimeout, ProxyConfiguration proxy,
                             Launcher launcher, PrintStream logger) {
         _uploadRequest = uploadRequest;
@@ -202,7 +203,7 @@ class ScanPayloadUploadRemote extends MasterToSlaveCallable<StartScanResponse, I
 
     @Override
     public StartScanResponse call() throws IOException {
-        OkHttpClient client = Utils.CreateOkHttpClient(_connectionTimeout, _writeTimeout, _readTimeout, _proxy);
+        OkHttpClient client = Utils.createOkHttpClient(_connectionTimeout, _writeTimeout, _readTimeout, _proxy);
         PrintStream logger = new PrintStream(_logger, true, StandardCharsets.UTF_8.name());
 
         return ScanPayloadUploadImpl.performUpload(_uploadRequest, _correlationId, _fragUrl, _bearerToken, client, logger);

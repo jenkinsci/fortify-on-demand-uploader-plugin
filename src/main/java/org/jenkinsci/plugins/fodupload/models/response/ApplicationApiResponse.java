@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.List;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class ApplicationApiResponse {
     private int applicationId;
     private String applicationName;
@@ -47,11 +48,13 @@ public class ApplicationApiResponse {
     public Boolean getHasMicroservices() {
         return hasMicroservices;
     };
+
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public List<ApplicationAttributeExtended> getAttributes() {
         return attributes;
     };
 }
-
+@SuppressFBWarnings("EI_EXPOSE_REP")
 class ApplicationAttributeExtended {
     private String name;
     private int id;

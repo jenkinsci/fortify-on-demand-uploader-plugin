@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
 
 import static org.jenkinsci.plugins.fodupload.Utils.*;
 
-public class DastScanSharedBuildStep {
+@SuppressFBWarnings({"EI_EXPOSE_REP", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+public class DastScanSharedBuildStep  {
     private final DastScanJobModel model;
     private final AuthenticationModel authModel;
     public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
@@ -592,7 +593,7 @@ public class DastScanSharedBuildStep {
             default:
                 throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
         }
-        patchDastScanFileUploadReq.Content = fileContent.getBytes(CharEncoding.UTF_8);
+        patchDastScanFileUploadReq.content = fileContent.getBytes(CharEncoding.UTF_8);
         return dastScanController.dastFileUpload(patchDastScanFileUploadReq);
     }
 
@@ -878,7 +879,7 @@ public class DastScanSharedBuildStep {
         return null;
     }
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    @SuppressFBWarnings({"NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" ,"UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
     public void perform(Run<?, ?> build,
                         TaskListener listener, String correlationId, FodApiConnection apiConnection) throws IOException {
         final PrintStream logger = listener.getLogger();

@@ -297,7 +297,7 @@ public class SharedPollingBuildStep {
                             break;
                     }
                 }
-                ScanSummaryDTO summaryDTO = poller.GetScanSummary(Integer.parseInt(releaseId), scanId);
+                ScanSummaryDTO summaryDTO = poller.getScanSummary(Integer.parseInt(releaseId), scanId);
                 poller.printScanSummary(summaryDTO);
             } else {
                 logger.println("Failed to authenticate");

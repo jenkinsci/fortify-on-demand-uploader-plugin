@@ -15,7 +15,7 @@
     <packaging>hpi</packaging>
 
     <properties>
-        <jenkins.version>2.289</jenkins.version>
+        <jenkins.version>2.375</jenkins.version>
         <java.level>8</java.level>
         <jenkins-test-harness.version>2.47</jenkins-test-harness.version>
         <disabledTestInjection>true</disabledTestInjection>
@@ -220,7 +220,6 @@
                 <version>4.8.3.1</version>
                 <configuration>
                     <effort>Max</effort>
-                    <threshold>Low</threshold>
                     <failOnError>false</failOnError>
                     <maxHeap>1024</maxHeap>
                 </configuration>

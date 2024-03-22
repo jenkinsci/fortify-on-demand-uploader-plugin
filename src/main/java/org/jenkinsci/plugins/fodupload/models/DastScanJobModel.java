@@ -1,14 +1,15 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings({"CT_CONSTRUCTOR_THROW","URF_UNREAD_FIELD"})
 public class DastScanJobModel {
     private boolean overrideGlobalConfig;
     String username;
     String timeBoxScan;
-
     public String getAllowedHost() {
         return allowedHost;
     }
-
     String allowedHost;
     String personalAccessToken;
     String tenantId;
@@ -74,17 +75,18 @@ public class DastScanJobModel {
     Boolean requestFalsePositiveRemoval;
 
 
+    @SuppressFBWarnings("URF_UNREAD_FIELD")
     public DastScanJobModel(Boolean overrideGlobalConfig, String username, String personalAccessToken, String tenantId, String releaseId,
                             String webSiteUrl, String dastEnv, String scanTimebox,
                             boolean scanScope, String selectedScanType, String scanPolicy,
                             String selectedDynamicTimeZone,
                             boolean enableRedundantPageDetection,
                             String networkAuthUserName, String loginMacroFilePath,
-                            String workflowMacroFilePath,int loginMacroId,
+                            String workflowMacroFilePath, int loginMacroId,
                             String workflowMacroId, String allowedHost,
                             String networkAuthPassword, String assessmentTypeId,
                             String entitlementId, String entitlementFrequencyType,
-                            String selectedNetworkAuthType,boolean timeBoxChecked,
+                            String selectedNetworkAuthType, boolean timeBoxChecked,
                             boolean requestLoginMacroFileCreation, String loginMacroPrimaryUserName, String loginMacroPrimaryPassword,
                             String loginMacroSecondaryUsername, String loginMacroSecondaryPassword, boolean requestFalsePositiveRemoval,
                             String excludedUrlList){
@@ -343,10 +345,12 @@ public class DastScanJobModel {
         this.grpcFilePath = grpcFilePath;
     }
 
+    @SuppressFBWarnings("Nm - NM_CONFUSING")
     public String getGraphQlFilePath() {
         return graphQlFilePath;
     }
 
+    @SuppressFBWarnings("Nm - NM_CONFUSING")
     public void setGraphQlFilePath(String graphQlFilePath) {
         this.graphQlFilePath = graphQlFilePath;
     }
@@ -440,5 +444,6 @@ public class DastScanJobModel {
     public String getUserSelectedRelease() {
         return userSelectedRelease;
     }
+
 
 }

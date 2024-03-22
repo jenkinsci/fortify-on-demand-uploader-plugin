@@ -614,6 +614,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         }
     }
 
+    @SuppressFBWarnings("Nm - NM_METHOD_NAMING_CONVENTION")
     private List<String> ValidateAuthModel(boolean overrideGlobalAuth) throws FormValidation {
         List<String> errors = new ArrayList<>();
 
@@ -625,7 +626,7 @@ public class FortifyStaticAssessment extends FortifyStep {
         return errors;
     }
 
-
+    @SuppressFBWarnings("Nm - NM_METHOD_NAMING_CONVENTION")
     private List<String> ValidateModel(FodApiConnection api, PrintStream logger) throws FormValidation {
         List<String> errors = new ArrayList<>();
         boolean anyV7Params = false;

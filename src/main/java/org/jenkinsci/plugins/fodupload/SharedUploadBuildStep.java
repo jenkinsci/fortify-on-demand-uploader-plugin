@@ -10,35 +10,27 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
-import org.jenkinsci.plugins.fodupload.FodApi.HttpRequest;
 import org.jenkinsci.plugins.fodupload.controllers.ApplicationsController;
 import org.jenkinsci.plugins.fodupload.controllers.StaticScanController;
 import org.jenkinsci.plugins.fodupload.models.AuthenticationModel;
 import org.jenkinsci.plugins.fodupload.models.BsiToken;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
 import org.jenkinsci.plugins.fodupload.models.FodEnums.InProgressBuildResultType;
-import org.jenkinsci.plugins.fodupload.models.JobModel;
+import org.jenkinsci.plugins.fodupload.models.SastJobModel;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.verb.POST;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.jenkinsci.plugins.fodupload.Utils.FOD_URL_ERROR_MESSAGE;
 import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class SharedUploadBuildStep {
 
     public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
@@ -48,7 +40,7 @@ public class SharedUploadBuildStep {
     public static final String PERSONAL_ACCESS_TOKEN = "personalAccessToken";
     public static final String TENANT_ID = "tenantId";
 
-    private JobModel model;
+    private SastJobModel model;
     private AuthenticationModel authModel;
     private int scanId;
 
@@ -77,7 +69,7 @@ public class SharedUploadBuildStep {
                                  String scanCentralVirtualEnv,
                                  String scanCentralRequirementFile) {
 
-        model = new JobModel(releaseId,
+        model = new SastJobModel(releaseId,
                 bsiToken,
                 purchaseEntitlements,
                 entitlementPreference,
@@ -144,7 +136,7 @@ public class SharedUploadBuildStep {
                                  String microserviceName,
                                  Boolean isMicroservice) {
 
-        model = new JobModel(releaseId,
+        model = new SastJobModel(releaseId,
                 bsiToken,
                 purchaseEntitlements,
                 entitlementPreference,
@@ -581,15 +573,8 @@ public class SharedUploadBuildStep {
         return displayModel;
     }
 
-    public JobModel setModel(JobModel newModel) {
-        return model = newModel;
-    }
-
-    public AuthenticationModel setAuthModel(AuthenticationModel newAuthModel) {
-        return authModel = newAuthModel;
-    }
-
-    public JobModel getModel() {
+    @SuppressFBWarnings("EI_EXPOSE_REP")
+    public SastJobModel getModel() {
         return model;
     }
 

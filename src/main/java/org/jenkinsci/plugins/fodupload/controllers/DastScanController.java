@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload.controllers;
 
 import com.google.gson.reflect.TypeToken;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Tuple2;
 import hudson.FilePath;
 import okhttp3.*;
@@ -11,6 +12,7 @@ import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.Json;
 import org.jenkinsci.plugins.fodupload.models.*;
 import org.jenkinsci.plugins.fodupload.models.response.Dast.*;
+import org.jenkinsci.plugins.fodupload.models.response.Dast.Error;
 import org.jenkinsci.plugins.fodupload.models.response.PatchDastFileUploadResponse;
 
 import java.io.IOException;
@@ -70,6 +72,7 @@ public class DastScanController extends ControllerBase {
         return putDastScanSetupResponse;
     }
 
+   @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public PatchDastFileUploadResponse dastFileUpload(PatchDastScanFileUploadReq requestModel) throws Exception {
 
         try {
@@ -80,7 +83,7 @@ public class DastScanController extends ControllerBase {
             RequestBody requestBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
                     .addFormDataPart("file", requestModel.fileName,
-                            RequestBody.create(MediaType.parse("application/octet-stream"), requestModel.Content))
+                            RequestBody.create(MediaType.parse("application/octet-stream"), requestModel.content))
                     .build();
 
             Request request = new Request.Builder().url(urlBuilder.build())
@@ -225,7 +228,7 @@ public class DastScanController extends ControllerBase {
 
     private <T> T parseHttpSuccessResponse(ResponseContent response, Object fodApiResponse) throws IOException {
         if (response.bodyContent().isEmpty()) {
-            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).httpCode = response.code();
             ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
             ((FodDastApiResponse) fodApiResponse).reason = response.message();
             return (T) fodApiResponse;
@@ -237,9 +240,9 @@ public class DastScanController extends ControllerBase {
     private <T> T parseFailureResponse(ResponseContent response, Object fodApiResponse) throws IOException {
         if (response.bodyContent() == null || response.bodyContent().isEmpty()) {
             ((FodDastApiResponse) fodApiResponse).isSuccess = false;
-            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).httpCode = response.code();
             ((FodDastApiResponse) fodApiResponse).reason = response.message();
-            error err = new error();
+            Error err = new Error();
             err.errorCode = response.code();
             err.message = response.message();
             ((FodDastApiResponse) fodApiResponse).errors = new ArrayList<>();
@@ -259,7 +262,7 @@ public class DastScanController extends ControllerBase {
             T parsedResponse = apiConnection.parseResponse(response, new TypeToken<PatchDastFileUploadResponse>() {
             }.getType());
             ((PatchDastFileUploadResponse) parsedResponse).isSuccess = response.isSuccessful();
-            ((PatchDastFileUploadResponse) parsedResponse).HttpCode = response.code();
+            ((PatchDastFileUploadResponse) parsedResponse).httpCode = response.code();
             ((PatchDastFileUploadResponse) parsedResponse).reason = response.bodyContent();
             return parsedResponse;
 
@@ -267,7 +270,7 @@ public class DastScanController extends ControllerBase {
             T parsedResponse = apiConnection.parseResponse(response, new TypeToken<PutDastScanSetupResponse>() {
             }.getType());
             ((PutDastScanSetupResponse) parsedResponse).isSuccess = response.isSuccessful();
-            ((PutDastScanSetupResponse) parsedResponse).HttpCode = response.code();
+            ((PutDastScanSetupResponse) parsedResponse).httpCode = response.code();
             ((PutDastScanSetupResponse) parsedResponse).reason = response.bodyContent();
             return parsedResponse;
 
@@ -276,12 +279,12 @@ public class DastScanController extends ControllerBase {
             }.getType());
 
             ((PostDastStartScanResponse) parsedResponse).isSuccess = response.isSuccessful();
-            ((PostDastStartScanResponse) parsedResponse).HttpCode = response.code();
+            ((PostDastStartScanResponse) parsedResponse).httpCode = response.code();
             ((PostDastStartScanResponse) parsedResponse).reason = response.bodyContent();
             return parsedResponse;
 
         } else {
-            ((FodDastApiResponse) fodApiResponse).HttpCode = response.code();
+            ((FodDastApiResponse) fodApiResponse).httpCode = response.code();
             ((FodDastApiResponse) fodApiResponse).isSuccess = response.isSuccessful();
             ((FodDastApiResponse) fodApiResponse).reason = response.bodyContent();
             return (T) fodApiResponse;

@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class FodEnums {
 
     public enum APILookupItemTypes {
@@ -425,7 +427,7 @@ public class FodEnums {
             return this._val;
         }
 
-        @SuppressWarnings("NP_TOSTRING_COULD_RETURN_NULL")
+        @SuppressFBWarnings("NP_TOSTRING_COULD_RETURN_NULL")
         public String toString() {
             switch (this._val) {
                 case "Standard":

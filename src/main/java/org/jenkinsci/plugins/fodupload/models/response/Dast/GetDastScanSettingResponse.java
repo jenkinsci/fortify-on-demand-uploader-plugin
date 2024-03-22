@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.fodupload.models.response.Dast;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+@SuppressFBWarnings("UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD")
 public class GetDastScanSettingResponse {
 
     public int assessmentTypeId;
@@ -49,6 +51,7 @@ public class GetDastScanSettingResponse {
     public boolean hasUtilizedAdditionalServices;
     public boolean requestFalsePositiveRemoval;
 
+    @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC")
     public class  FileDetails{
         public int fileId;
         public String fileName;

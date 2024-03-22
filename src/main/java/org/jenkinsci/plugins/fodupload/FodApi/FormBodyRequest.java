@@ -1,7 +1,10 @@
 package org.jenkinsci.plugins.fodupload.FodApi;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.*;
 
+@SuppressFBWarnings("SE_NO_SERIALVERSIONID")
 public class FormBodyRequest extends HttpRequest {
     private final Hashtable<String, String> _body = new Hashtable<>();
 
