@@ -70,6 +70,7 @@ class DastScanPayloadUploadImpl {
         }
         return patchDastFileUploadResponse;
     }
+
     private static String getLogTimestamp(DateTimeFormatter dateFormat) {
         return dateFormat.format(LocalDateTime.now());
     }
@@ -101,7 +102,7 @@ class DastScanPayloadUploadLocal implements DastScanPayloadUpload {
 }
 
 class DastScanPayloadUploadRemote extends MasterToSlaveCallable<PatchDastFileUploadResponse, IOException> implements DastScanPayloadUpload {
-
+    private static final long serialVersionUID = 1L;
     private final String _releaseId;
     private final String _correlationId;
     private final String _bearerToken;

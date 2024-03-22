@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 import static org.jenkinsci.plugins.fodupload.Utils.FOD_URL_ERROR_MESSAGE;
 import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class SharedUploadBuildStep {
 
     public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();

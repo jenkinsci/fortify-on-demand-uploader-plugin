@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload.polling;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.controllers.LookupItemsController;
 import org.jenkinsci.plugins.fodupload.controllers.ReleaseController;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import static org.jenkinsci.plugins.fodupload.models.FodEnums.APILookupItemTypes;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class ScanStatusPoller {
 
     private final static int MAX_FAILS = 3;

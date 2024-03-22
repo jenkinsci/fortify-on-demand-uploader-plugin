@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import org.jenkinsci.plugins.fodupload.BsiTokenParser;
 import org.jenkinsci.plugins.fodupload.Utils;
@@ -10,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class JobModel implements Serializable {
     private static final long serialVersionUID = 1L;
     private transient static final BsiTokenParser tokenParser = new BsiTokenParser();

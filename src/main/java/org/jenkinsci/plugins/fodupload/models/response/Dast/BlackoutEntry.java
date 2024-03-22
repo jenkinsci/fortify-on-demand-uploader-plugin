@@ -1,7 +1,10 @@
 package org.jenkinsci.plugins.fodupload.models.response.Dast;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.List;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class BlackoutEntry {
     private String day;
     private List<HourBlock> hourBlocks;

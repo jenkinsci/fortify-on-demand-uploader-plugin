@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.fodupload.models;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.List;
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
     public void setDynamicSiteUrl(String dynamicSiteUrl) {
         this.dynamicSiteUrl = dynamicSiteUrl;

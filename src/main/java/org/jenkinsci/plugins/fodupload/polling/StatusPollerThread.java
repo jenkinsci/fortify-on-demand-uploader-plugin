@@ -12,6 +12,7 @@ import org.jenkinsci.plugins.fodupload.models.response.PollingSummaryDTO;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+@SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
 class StatusPollerThread extends Thread {
     public Boolean fail = false;
     public Boolean finished = false;

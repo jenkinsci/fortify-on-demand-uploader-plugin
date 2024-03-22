@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.List;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class ApplicationApiResponse {
     private int applicationId;
     private String applicationName;
@@ -51,7 +52,7 @@ public class ApplicationApiResponse {
         return attributes;
     };
 }
-
+@SuppressFBWarnings("EI_EXPOSE_REP")
 class ApplicationAttributeExtended {
     private String name;
     private int id;

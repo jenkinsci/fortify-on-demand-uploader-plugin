@@ -425,6 +425,7 @@ public class FodEnums {
             return this._val;
         }
 
+        @SuppressWarnings("NP_TOSTRING_COULD_RETURN_NULL")
         public String toString() {
             switch (this._val) {
                 case "Standard":
@@ -435,6 +436,7 @@ public class FodEnums {
                     return "Passive";
 
             }
+
             return null;
         }
     }

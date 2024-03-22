@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.List;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class EntitlementSettings {
     private Integer assessmentType;
     private List<LookupItemsModel> assessmentTypes;

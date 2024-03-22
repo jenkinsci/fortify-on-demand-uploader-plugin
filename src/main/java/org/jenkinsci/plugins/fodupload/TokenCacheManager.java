@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.fodupload;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.plugins.fodupload.FodApi.FormBodyRequest;
 import org.jenkinsci.plugins.fodupload.FodApi.HttpRequest;
 import org.jenkinsci.plugins.fodupload.FodApi.IHttpClient;
@@ -14,6 +15,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class TokenCacheManager {
 
     // delete tokens that are this much close to expiry (in seconds)
