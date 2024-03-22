@@ -4,7 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.io.Serializable;
 
-@SuppressFBWarnings("EI_EXPOSE_REP")
+@SuppressFBWarnings({"EI_EXPOSE_REP","PA_PUBLIC_PRIMITIVE_ATTRIBUTE"})
 public class PutDastScanSetupReqModel implements Serializable {
 
     public NetworkAuthentication getNetworkAuthenticationSettings() {

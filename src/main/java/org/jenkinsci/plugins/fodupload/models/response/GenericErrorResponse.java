@@ -4,7 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.List;
 
-@SuppressFBWarnings("EI_EXPOSE_REP")
+@SuppressFBWarnings({"EI_EXPOSE_REP","NP_UNWRITTEN_FIELD"})
 public class GenericErrorResponse {
     private List<ErrorResponse> errors;
 
