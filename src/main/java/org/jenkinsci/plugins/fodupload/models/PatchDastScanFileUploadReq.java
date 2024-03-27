@@ -8,6 +8,6 @@ public String releaseId;
 public String fileName;
 public FodEnums.DastScanFileTypes dastFileType;
 
-public byte[] Content;
+public byte[] content;
 
 }

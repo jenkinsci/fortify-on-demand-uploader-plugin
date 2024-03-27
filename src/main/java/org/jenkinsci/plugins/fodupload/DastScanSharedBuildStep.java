@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
 
 import static org.jenkinsci.plugins.fodupload.Utils.*;
 
-public class DastScanSharedBuildStep {
+@SuppressFBWarnings({"EI_EXPOSE_REP", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+public class DastScanSharedBuildStep  {
     private final DastScanJobModel model;
     private final AuthenticationModel authModel;
     public static final ThreadLocal<TaskListener> taskListener = new ThreadLocal<>();
@@ -122,7 +123,7 @@ public class DastScanSharedBuildStep {
         return this._fodApiConnection;
     }
 
-    public void SetFodApiConnection
+    public void setFodApiConnection
             (FodApiConnection apiConnection) {
         this._fodApiConnection = apiConnection;
     }
@@ -143,7 +144,7 @@ public class DastScanSharedBuildStep {
         return authModel;
     }
 
-    public List<String> ValidateAuthModel(boolean overrideGlobalAuth, String username, String tenantId, String personalAccessToken) throws FormValidation {
+    public List<String> validateAuthModel(boolean overrideGlobalAuth, String username, String tenantId, String personalAccessToken) throws FormValidation {
         List<String> errors = new ArrayList<>();
 
         if (overrideGlobalAuth && (Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(tenantId) || Utils.isNullOrEmpty(personalAccessToken))) {
@@ -153,7 +154,7 @@ public class DastScanSharedBuildStep {
         return errors;
     }
 
-    public List<String> ValidateForAutoProv() {
+    public List<String> validateForAutoProv() {
         List<String> errors = new ArrayList<>();
         //Check for mandate fields based on scan type.
         if (Utils.isNullOrEmpty(this.model.getSelectedScanType())) {
@@ -263,7 +264,7 @@ public class DastScanSharedBuildStep {
         return errors;
     }
 
-    public List<String> ValidateModel() {
+    public List<String> validateModel() {
 
         List<String> errors = new ArrayList<>();
 
@@ -382,7 +383,7 @@ public class DastScanSharedBuildStep {
         return errors;
     }
 
-    public void SaveReleaseSettingsForWebSiteScan(String userSelectedRelease, String assessmentTypeID,
+    public void saveReleaseSettingsForWebSiteScan(String userSelectedRelease, String assessmentTypeID,
                                                   String entitlementId, String entitlementFreq, String loginMacroId,
                                                   String timeZone, String scanPolicy, String webSiteAssessmentUrl,
                                                   boolean scanScope,
@@ -472,7 +473,7 @@ public class DastScanSharedBuildStep {
                 }
                 dynamicScanSetupReqModel.setExclusionsList(exclusionsLists);
             }
-            PutDastScanSetupResponse response = dynamicController.SaveDastWebSiteScanSettings(Integer.parseInt(userSelectedRelease),
+            PutDastScanSetupResponse response = dynamicController.saveDastWebSiteScanSettings(Integer.parseInt(userSelectedRelease),
                     dynamicScanSetupReqModel);
             if (response.isSuccess && response.errors == null) {
                 Utils.logger(_printStream, "Successfully saved settings for release id = " + userSelectedRelease);
@@ -491,7 +492,7 @@ public class DastScanSharedBuildStep {
     }
 
 
-    public void SaveReleaseSettingsForWorkflowDrivenScan(String userSelectedRelease, String assessmentTypeID,
+    public void saveReleaseSettingsForWorkflowDrivenScan(String userSelectedRelease, String assessmentTypeID,
                                                          String entitlementId, String entitlementFreq, String workflowMacroId,
                                                          String workflowMacroHosts,
                                                          String timeZone, String scanPolicy,
@@ -545,7 +546,7 @@ public class DastScanSharedBuildStep {
                 dastWorkflowScanSetupReqModel.setNetworkAuthenticationSettings(networkAuthentication);
             }
 
-            PutDastScanSetupResponse response = dynamicController.SaveDastWorkflowDrivenScanSettings(Integer.parseInt(userSelectedRelease),
+            PutDastScanSetupResponse response = dynamicController.saveDastWorkflowDrivenScanSettings(Integer.parseInt(userSelectedRelease),
                     dastWorkflowScanSetupReqModel);
 
             if (response.isSuccess && response.errors == null) {
@@ -561,7 +562,7 @@ public class DastScanSharedBuildStep {
         }
     }
 
-    public PatchDastFileUploadResponse DastManifestFileUpload(String fileContent, String fileType, String filename) throws Exception {
+    public PatchDastFileUploadResponse dastManifestFileUpload(String fileContent, String fileType, String filename) throws Exception {
 
         DastScanController dastScanController = new DastScanController(getFodApiConnection(), null, Utils.createCorrelationId()
         );
@@ -592,12 +593,12 @@ public class DastScanSharedBuildStep {
             default:
                 throw new IllegalArgumentException("Manifest upload file type is not set for the release: " + getModel().get_releaseId());
         }
-        patchDastScanFileUploadReq.Content = fileContent.getBytes(CharEncoding.UTF_8);
-        return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
+        patchDastScanFileUploadReq.content = fileContent.getBytes(CharEncoding.UTF_8);
+        return dastScanController.dastFileUpload(patchDastScanFileUploadReq);
     }
 
 
-    public PatchDastFileUploadResponse DastManifestFileUpload(FilePath workspace, String payLoadPath, PrintStream logger,
+    public PatchDastFileUploadResponse dastManifestFileUpload(FilePath workspace, String payLoadPath, PrintStream logger,
                                                               FodEnums.DastScanFileTypes fileType, FodApiConnection apiConnection) throws Exception {
 
         FilePath dastPayload = new FilePath(workspace, payLoadPath);
@@ -609,7 +610,7 @@ public class DastScanSharedBuildStep {
         PatchDastScanFileUploadReq patchDastScanFileUploadReq = new PatchDastScanFileUploadReq();
         patchDastScanFileUploadReq.releaseId = getModel().get_releaseId();
         patchDastScanFileUploadReq.dastFileType = fileType;
-        return dastScanController.DastFileUpload(dastPayload, logger, patchDastScanFileUploadReq);
+        return dastScanController.dastFileUpload(dastPayload, logger, patchDastScanFileUploadReq);
     }
 
     public void saveReleaseSettingsForOpenApiScan(String userSelectedRelease, String assessmentTypeID,
@@ -678,7 +679,7 @@ public class DastScanSharedBuildStep {
         }
     }
 
-    public void SaveReleaseSettingsForGraphQlScan(String userSelectedRelease, String assessmentTypeID,
+    public void saveReleaseSettingsForGraphQlScan(String userSelectedRelease, String assessmentTypeID,
                                                   String entitlementId, String entitlementFreq,
                                                   String timeZone,
                                                   boolean allowSameHostRedirect,
@@ -738,7 +739,7 @@ public class DastScanSharedBuildStep {
         }
     }
 
-    public void SaveReleaseSettingsForGrpcScan(String userSelectedRelease, String assessmentTypeID,
+    public void saveReleaseSettingsForGrpcScan(String userSelectedRelease, String assessmentTypeID,
                                                String entitlementId, String entitlementFreq,
                                                String timeZone,
                                                String scanEnvironment,
@@ -805,7 +806,7 @@ public class DastScanSharedBuildStep {
         }
     }
 
-    public void SaveReleaseSettingsForPostmanScan(String userSelectedRelease, String assessmentTypeID,
+    public void saveReleaseSettingsForPostmanScan(String userSelectedRelease, String assessmentTypeID,
                                                   String entitlementId, String entitlementFreq,
                                                   String timeZone,
                                                   String scanEnvironment,
@@ -841,7 +842,7 @@ public class DastScanSharedBuildStep {
                 throw new IllegalArgumentException(String.format("Postman Scan - one of the id is  not set for release Id={%s}"
                         , userSelectedRelease));
             } else {
-                dastPostmanScanSetupReqModel.setCollectionFileIds(ConvertStringToIntArr(postmanIdCollection));
+                dastPostmanScanSetupReqModel.setCollectionFileIds(convertStringToIntArr(postmanIdCollection));
             }
             if (!Utils.isNullOrEmpty(scanTimeBox))
                 dastPostmanScanSetupReqModel.setTimeBoxInHours(Integer.parseInt(scanTimeBox));
@@ -864,7 +865,7 @@ public class DastScanSharedBuildStep {
     }
 
 
-    public int[] ConvertStringToIntArr(String fileIds) {
+    public int[] convertStringToIntArr(String fileIds) {
 
         String[] postmanIds = fileIds.split(",");
 
@@ -878,7 +879,7 @@ public class DastScanSharedBuildStep {
         return null;
     }
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    @SuppressFBWarnings({"NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" ,"UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
     public void perform(Run<?, ?> build,
                         TaskListener listener, String correlationId, FodApiConnection apiConnection) throws IOException {
         final PrintStream logger = listener.getLogger();
@@ -926,8 +927,8 @@ public class DastScanSharedBuildStep {
             if (apiConnection != null) {
 
                 DastScanController dynamicController = new DastScanController(apiConnection, logger, Utils.createCorrelationId());
-                PostDastStartScanResponse response = dynamicController.StartDastScan(releaseId);
-                if (response.errors == null && response.scanId > 0) {
+                PostDastStartScanResponse response = dynamicController.startDastScan(releaseId);
+                if (response.errors == null && response.scanId != null && response.scanId > 0) {
                     build.setResult(Result.SUCCESS);
                     Utils.logger(logger, String.format("Dynamic scan successfully triggered for scan Id %d ", response.scanId));
                     this.scanId = response.scanId;

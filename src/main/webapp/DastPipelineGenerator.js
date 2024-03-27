@@ -503,6 +503,7 @@ class DastPipelineGenerator {
                         this.onScanTypeChanged();
                         this.setScanType();
                         this.setEnvFacing();
+                        this.setRedundantPageDetection();
                          /*Set restrict scan value from response to UI */
                         this.setStandardScanRestrictions();
                         //Set scan policy from the response.
@@ -630,7 +631,12 @@ class DastPipelineGenerator {
            }
         }
     }
-
+    setRedundantPageDetection() {
+        if (this.scanSettings && this.scanSettings.websiteAssessment &&
+            this.scanSettings.websiteAssessment.enableRedundantPageDetection) {
+            jq('#enableRedundantPageDetection').prop('checked', true);
+        }
+    }
      setStandardScanRestrictions () {
              if (this.scanSettings) {
                  let selectedVal = this.scanSettings.restrictToDirectoryAndSubdirectories;

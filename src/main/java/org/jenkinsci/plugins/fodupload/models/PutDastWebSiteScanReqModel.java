@@ -1,6 +1,9 @@
 package org.jenkinsci.plugins.fodupload.models;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.List;
-public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
+@SuppressFBWarnings({"EI_EXPOSE_REP", "SE_NO_SERIALVERSIONID"})
+public class PutDastWebSiteScanReqModel  extends PutDastScanSetupReqModel {
     public void setDynamicSiteUrl(String dynamicSiteUrl) {
         this.dynamicSiteUrl = dynamicSiteUrl;
     }
@@ -23,6 +26,7 @@ public class PutDastWebSiteScanReqModel extends PutDastScanSetupReqModel {
         this.timeBoxInHours = timeBoxInHours;
     }
     Integer timeBoxInHours;
+    @SuppressFBWarnings("SE_BAD_FIELD")
     List<ExclusionDTO> exclusionsList;
 
     public void setExclusionsList(List<ExclusionDTO> exclusionsList) {

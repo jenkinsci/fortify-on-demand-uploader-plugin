@@ -32,6 +32,7 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
 public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBuildStep {
 
     DastScanSharedBuildStep dastSharedBuildStep;
@@ -98,7 +99,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                 throw new IllegalArgumentException("Invalid Scan Type");
             }
 
-            List<String> error = dastSharedBuildStep.ValidateModel();
+            List<String> error = dastSharedBuildStep.validateModel();
             if (!error.isEmpty()) {
                 throw new IllegalArgumentException("Invalid save scan settings for release id: " + String.join(", ", error));
             }
@@ -111,11 +112,11 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                 throw new Exception("FOD API Connection not set.");
             }
 
-            dastSharedBuildStep.SetFodApiConnection(apiConnection);
+            dastSharedBuildStep.setFodApiConnection(apiConnection);
 
             if (FodEnums.DastScanType.Website.toString().equalsIgnoreCase(selectedScanType)) {
 
-                dastSharedBuildStep.SaveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                dastSharedBuildStep.saveReleaseSettingsForWebSiteScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, loginMacroId, selectedDynamicTimeZone, scanPolicy,
                         webSiteUrl, scanScope, enableRedundantPageDetection, dastEnv,
                         networkAuthUserName,
@@ -126,7 +127,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
             } else if (FodEnums.DastScanType.Workflow.toString().equalsIgnoreCase(selectedScanType)) {
 
-                dastSharedBuildStep.SaveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                dastSharedBuildStep.saveReleaseSettingsForWorkflowDrivenScan(userSelectedRelease, assessmentTypeId, entitlementId,
                         entitlementFrequencyType, workflowMacroId, workflowMacroHosts, selectedDynamicTimeZone, scanPolicy,
                         dastEnv,
                         networkAuthUserName, networkAuthPassword, selectedNetworkAuthType, requestFalsePositiveRemoval);
@@ -144,7 +145,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                 else if (FodEnums.DastApiType.GraphQL.toString().equalsIgnoreCase(selectedApiType)) {
 
                     String sourceUrn = graphQlRadioSource.equals("Url") ? graphQLUrl : graphQLFileId;
-                    dastSharedBuildStep.SaveReleaseSettingsForGraphQlScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                    dastSharedBuildStep.saveReleaseSettingsForGraphQlScan(userSelectedRelease, assessmentTypeId, entitlementId,
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             enableRedundantPageDetection, dastEnv, webSiteNetworkAuthSettingEnabled,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
@@ -152,7 +153,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
                 } else if (FodEnums.DastApiType.Grpc.toString().equalsIgnoreCase(selectedApiType)) {
 
-                    dastSharedBuildStep.SaveReleaseSettingsForGrpcScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                    dastSharedBuildStep.saveReleaseSettingsForGrpcScan(userSelectedRelease, assessmentTypeId, entitlementId,
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             dastEnv,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
@@ -160,7 +161,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
                 } else if (FodEnums.DastApiType.Postman.toString().equalsIgnoreCase(selectedApiType)) {
 
-                    dastSharedBuildStep.SaveReleaseSettingsForPostmanScan(userSelectedRelease, assessmentTypeId, entitlementId,
+                    dastSharedBuildStep.saveReleaseSettingsForPostmanScan(userSelectedRelease, assessmentTypeId, entitlementId,
                             entitlementFrequencyType, selectedDynamicTimeZone,
                             dastEnv,
                             networkAuthUserName, networkAuthPassword, selectedNetworkAuthType,
@@ -185,7 +186,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
             Utils.logger(listener.getLogger(), "Dast job model not constructed");
             throw new RuntimeException("Dast job model not constructed");
         } else {
-            dastSharedBuildStep.ValidateModel();
+            dastSharedBuildStep.validateModel();
             return true;
         }
     }
@@ -345,7 +346,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
-        public PatchDastFileUploadResponse DastManifestFileUpload(String releaseId, JSONObject authModelObject, String fileContent, String fileType, String fileName) throws FormValidation {
+        public PatchDastFileUploadResponse dastManifestFileUpload(String releaseId, JSONObject authModelObject, String fileContent, String fileType, String fileName) throws FormValidation {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
                 FodApiConnection apiConnection = ApiConnectionFactory.createApiConnection(authModel, false, null, null);
@@ -376,9 +377,9 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
                         throw new IllegalArgumentException("Dast Manifest upload file type is not set for the release Id: " + releaseId);
                 }
 
-                patchDastScanFileUploadReq.Content = fileContent.getBytes(CharEncoding.UTF_8);
+                patchDastScanFileUploadReq.content = fileContent.getBytes(CharEncoding.UTF_8);
                 patchDastScanFileUploadReq.fileName = fileName;
-                return dastScanController.DastFileUpload(patchDastScanFileUploadReq);
+                return dastScanController.dastFileUpload(patchDastScanFileUploadReq);
 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
@@ -388,6 +389,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
+        @SuppressFBWarnings("REC_CATCH_EXCEPTION")
         public String retrieveLookupItems(String type, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
@@ -403,6 +405,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
+        @SuppressFBWarnings("REC_CATCH_EXCEPTION")
         public String retrieveCurrentUserSession(JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
@@ -435,6 +438,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
+        @SuppressFBWarnings("REC_CATCH_EXCEPTION")
         public String retrieveAssessmentTypeEntitlements(Boolean isMicroservice, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);
@@ -449,6 +453,7 @@ public class FortifyDastFreeStyleBuildStep extends Recorder implements SimpleBui
 
         @SuppressWarnings("unused")
         @JavaScriptMethod
+        @SuppressFBWarnings("REC_CATCH_EXCEPTION")
         public String retrieveDynamicScanSettings(Integer releaseId, JSONObject authModelObject) {
             try {
                 AuthenticationModel authModel = Utils.getAuthModelFromObject(authModelObject);

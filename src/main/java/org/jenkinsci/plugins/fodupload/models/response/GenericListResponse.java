@@ -5,7 +5,7 @@ import java.util.List;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-@SuppressFBWarnings("UWF_UNWRITTEN_FIELD") //TotalCount is actually written just at runtime.
+@SuppressFBWarnings({"UWF_UNWRITTEN_FIELD", "EI_EXPOSE_REP"}) //TotalCount is actually written just at runtime.
 public class GenericListResponse<T> {
     private List<T> items = new ArrayList<>();
     private int totalCount;
@@ -14,6 +14,7 @@ public class GenericListResponse<T> {
         return totalCount;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public List<T> getItems() {
         return items;
     }

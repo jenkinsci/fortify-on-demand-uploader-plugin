@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class ApplicationAttributeModel {
     private Integer id;
     private String value;

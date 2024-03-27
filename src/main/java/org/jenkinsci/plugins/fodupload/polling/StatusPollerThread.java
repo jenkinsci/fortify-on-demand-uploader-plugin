@@ -12,11 +12,32 @@ import org.jenkinsci.plugins.fodupload.models.response.PollingSummaryDTO;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+@SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
 class StatusPollerThread extends Thread {
-    public Boolean fail = false;
-    public Boolean finished = false;
-    public String statusString;
-    public PollReleaseStatusResult result = new PollReleaseStatusResult();
+    private Boolean fail = false;
+
+    public Boolean getFail(){
+        return fail;
+    }
+
+    private Boolean finished = false;
+
+    public Boolean getFinished() {
+        return finished;
+    }
+
+    private String statusString;
+
+    public String getStatusString() {
+        return statusString;
+    }
+
+    private PollReleaseStatusResult result = new PollReleaseStatusResult();
+
+    public PollReleaseStatusResult getResult(){
+        return result;
+    }
+
     public PollingSummaryDTO pollingSummaryDTO = null;
     private PrintStream logger;
     private int releaseId;

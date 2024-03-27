@@ -7,7 +7,7 @@ import hudson.remoting.VirtualChannel;
 import java.io.IOException;
 import java.io.PrintStream;
 
-class RemoteAgentClient implements IHttpClient {
+final class RemoteAgentClient implements IHttpClient {
     private int _connectionTimeout;
     private int _writeTimeout;
     private int _readTimeout;

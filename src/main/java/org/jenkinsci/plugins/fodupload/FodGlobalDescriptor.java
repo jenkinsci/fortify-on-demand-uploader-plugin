@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.fodupload;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.Util;
@@ -30,6 +31,7 @@ import static org.jenkinsci.plugins.fodupload.Utils.isValidUrl;
 
 @Extension
 @Symbol("FodGlobal")
+
 public class FodGlobalDescriptor extends GlobalConfiguration {
     private static final String CLIENT_ID = "clientId";
     private static final String GLOBAL_AUTH_TYPE = "globalAuthType";
@@ -50,6 +52,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
     private String apiUrl;
     private String scanCentralPath;
 
+    @SuppressFBWarnings("MC - MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR")
     @DataBoundConstructor
     public FodGlobalDescriptor() {
         super();
@@ -91,6 +94,7 @@ public class FodGlobalDescriptor extends GlobalConfiguration {
         this.clientSecret = Util.fixEmptyAndTrim(clientSecret);
     }
 
+    @SuppressFBWarnings("Nm - NM_CONFUSING")
     @DataBoundSetter
     public void setUsername(String username) {
         this.username = Util.fixEmptyAndTrim(username);

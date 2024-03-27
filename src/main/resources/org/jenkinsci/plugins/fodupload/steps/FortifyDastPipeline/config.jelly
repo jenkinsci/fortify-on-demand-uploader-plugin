@@ -676,6 +676,7 @@
         <input type="text" name="sdlcStatus" id="sdlcStatus"/>
         <input type="text" name="workflowMacroHosts" id="workflowMacroHosts"/>
         <input type="text" name="workflowMacroId" id="workflowMacroId"/>
+        <input type="text" name="excludedUrls" id="excludedUrls"/>
     </div>
     <!--Script-->
     <script>
@@ -688,7 +689,5 @@
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/Api.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastValidation.js"/>
     <script type="text/javascript" src="${resURL}/plugin/fortify-on-demand-uploader/DastPipelineGenerator.js"/>
-    <input type="textbox" hidden="true" name="excludedUrls" id="excludedUrls"/>
-
-    <!--Script -->
+       <!--Script -->
 </j:jelly>

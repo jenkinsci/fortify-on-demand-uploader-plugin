@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.fodupload.FodApi;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings("SE_NO_SERIALVERSIONID")
 public class StringBodyRequest extends HttpRequest {
     private final String _body;
     private final String _contentType;

@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.fodupload.models.response;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class LookupItemsModel {
     private String value;
     private String text;

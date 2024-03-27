@@ -18,7 +18,8 @@ Usage instructions: https://www.microfocus.com/documentation/fortify-on-demand-j
 
 **Limitations**
 - The DAST Automated asssessment task is a technology preview. The following are known limitations:
-	- Fortify on Demand Jenkins Plugin 8.0 supports up to Jenkins 2.346.1. Some UI components, including application and release fields, do not load in versions greater than 2.346.1.
+	- Fortify on Demand Jenkins Plugin 8.0 supports up to Jenkins 2.401.x. Some UI components, including application and release fields, do not load in versions greater than 2.401.x.
+	- (API scan) For some supported Jenkins versions, file and URL fields do not load.
 	- (Website scan) Selection of **Enable redundant page detection** is not retained.
 	- (Website scan) Excluded URLs are not applied in pipelines.
 - The 2.0.9 (Obsolete) plugin version is slow to populate the pull down menu's in Redhat 7 machines.  Please wait a minute or two and the first field should populate.
