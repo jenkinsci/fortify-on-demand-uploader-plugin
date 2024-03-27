@@ -76,7 +76,6 @@ public class FortifyDastPipeline extends FortifyStep {
     private boolean enableRedundantPageDetection;
     private String networkAuthType;
     private String excludedUrls;
-
     public java.lang.String getSelectedApiType() {
         return selectedApiType;
     }
@@ -789,6 +788,15 @@ public class FortifyDastPipeline extends FortifyStep {
     @DataBoundSetter
     public void setAuditPreference(String auditPreference) {
         this.auditPreference = auditPreference;
+    }
+
+    @SuppressWarnings("unused")
+    public String getExcludedUrls()
+    {return  excludedUrls;}
+    @DataBoundSetter
+    public void setExcludedUrls(String excludedUrls)
+    {
+        this.excludedUrls =excludedUrls;
     }
 
     @Override
