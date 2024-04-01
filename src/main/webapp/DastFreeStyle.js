@@ -451,6 +451,7 @@ class DastFreeStyle {
                         this.setEnvFacing();
                         this.onScanTypeChanged();
                         this.setStandardScanRestrictions();
+                        this.setRedundantPageDetection();
                         this.setScanPolicy();
                         this.setTimeBoxScan();
                         this.setExcludeUrlList();
@@ -486,6 +487,12 @@ class DastFreeStyle {
         fields.removeClass('spinner');
     }
 
+    setRedundantPageDetection() {
+        if (this.scanSettings && this.scanSettings.websiteAssessment &&
+            this.scanSettings.websiteAssessment.enableRedundantPageDetection) {
+            jq('#enableRedundantPageDetection').prop('checked', true);
+        }
+    }
     setLoginMacroCreationDetails() {
         if (this.scanSettings && this.scanSettings.websiteAssessment && this.scanSettings.websiteAssessment.loginMacroFileCreationDetails) {
             jq('#loginMacroPrimaryUsernameRow').find('input').val(this.scanSettings.websiteAssessment.loginMacroFileCreationDetails.primaryUsername);

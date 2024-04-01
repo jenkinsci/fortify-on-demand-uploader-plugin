@@ -1,8 +1,11 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class PostReleaseWithUpsertApplicationModel {
     private String applicationName;
     private String applicationDescription;
@@ -81,10 +84,12 @@ public class PostReleaseWithUpsertApplicationModel {
         this.ownerId = ownerId;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public List<ApplicationAttributeModel> getAttributes() {
         return attributes;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setAttributes(List<ApplicationAttributeModel> attributes) {
         this.attributes = attributes;
     }
@@ -113,10 +118,12 @@ public class PostReleaseWithUpsertApplicationModel {
         this.hasMicroservices = hasMicroservices;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public List<String> getMicroservices() {
         return microservices;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setMicroservices(List<String> microservices) {
         this.microservices = microservices;
     }
@@ -129,10 +136,12 @@ public class PostReleaseWithUpsertApplicationModel {
         this.releaseMicroserviceName = releaseMicroserviceName;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public List<Integer> getUserGroupIds() {
         return userGroupIds;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setUserGroupIds(List<Integer> userGroupIds) {
         this.userGroupIds = userGroupIds;
     }

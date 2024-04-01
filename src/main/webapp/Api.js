@@ -318,7 +318,7 @@ class Api {
             let fileContent = fileReader.readAsBinaryString(file);
             fileReader.onload = () => {
                 fileContent = fileReader.result;
-                this.descriptor.DastManifestFileUpload(releaseId, customAuth, fileContent, fileType,file.name, async res => {
+                this.descriptor.dastManifestFileUpload(releaseId, customAuth, fileContent, fileType,file.name, async res => {
 
                     if (res.responseJSON  && res.responseJSON.isSuccess ===true){
                     res.responseJSON.fileName = file.name;

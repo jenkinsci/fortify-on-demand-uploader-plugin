@@ -1,17 +1,15 @@
 package org.jenkinsci.plugins.fodupload;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.Result;
-import hudson.model.Run;
 import hudson.remoting.RemoteOutputStream;
 import hudson.remoting.VirtualChannel;
-import jenkins.model.GlobalConfiguration;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.jenkinsci.plugins.fodupload.models.FodEnums;
-import org.jenkinsci.plugins.fodupload.models.JobModel;
+import org.jenkinsci.plugins.fodupload.models.SastJobModel;
 import org.jenkinsci.remoting.RoleChecker;
 
 import java.io.*;
@@ -28,14 +26,14 @@ public interface PayloadPackaging {
 
     boolean deletePayload() throws IOException, InterruptedException;
 
-    public static PayloadPackaging getInstance(JobModel model, String technologyStack, Boolean openSourceAnalysis, String globalSCPath, FilePath workspace, Launcher launcher, PrintStream logger) {
+    public static PayloadPackaging getInstance(SastJobModel model, String technologyStack, Boolean openSourceAnalysis, String globalSCPath, FilePath workspace, Launcher launcher, PrintStream logger) {
         if (workspace.isRemote()) return new PayloadPackagingRemote(model, technologyStack, openSourceAnalysis, globalSCPath, workspace, launcher, logger);
         else return new PayloadPackagingLocal(model, technologyStack, openSourceAnalysis, globalSCPath, workspace, logger);
     }
 }
 
-class PayloadPackagingImpl {
-    static FilePath performPackaging(JobModel model, String technologyStack, Boolean openSourceAnalysis, String globalSCPath, FilePath workspace, PrintStream logger) throws IOException {
+final class PayloadPackagingImpl {
+    static FilePath performPackaging(SastJobModel model, String technologyStack, Boolean openSourceAnalysis, String globalSCPath, FilePath workspace, PrintStream logger) throws IOException {
         logger.println("Starting ScanCentral Packaging for source @ " + model.getSrcLocation());
         FilePath srcLocation = new FilePath(workspace, model.getSrcLocation());
         File payload;
@@ -93,7 +91,7 @@ class PayloadPackagingImpl {
         return payload.delete();
     }
 
-    private static Path packageScanCentral(FilePath srcLocation, File scanCentralLocation, FilePath outputLocation, JobModel job, Boolean openSourceAnalysis, PrintStream logger) throws IOException {
+    private static Path packageScanCentral(FilePath srcLocation, File scanCentralLocation, FilePath outputLocation, SastJobModel job, Boolean openSourceAnalysis, PrintStream logger) throws IOException {
         BufferedReader stdInputVersion = null, stdInput = null;
         String scexec = SystemUtils.IS_OS_WINDOWS ? "scancentral.bat" : "scancentral";
 
@@ -365,16 +363,16 @@ class PayloadPackagingImpl {
     }
 }
 
-class PayloadPackagingLocal implements PayloadPackaging {
+final class PayloadPackagingLocal implements PayloadPackaging {
     private PrintStream _logger;
-    private JobModel _model;
+    private SastJobModel _model;
     private String _technologyStack;
     private Boolean _openSourceAnalysis;
     private FilePath _payload;
     private FilePath _workspace;
     private String _globalSCPath;
 
-    PayloadPackagingLocal(JobModel model, String technologyStack, Boolean openSourceAnalysis, String globalSCPath, FilePath workspace, PrintStream logger) {
+    PayloadPackagingLocal(SastJobModel model, String technologyStack, Boolean openSourceAnalysis, String globalSCPath, FilePath workspace, PrintStream logger) {
         _logger = logger;
         _model = model;
         _technologyStack = technologyStack;
@@ -395,18 +393,18 @@ class PayloadPackagingLocal implements PayloadPackaging {
     }
 }
 
-class PayloadPackagingRemote extends MasterToSlaveCallable<FilePath, IOException> implements PayloadPackaging {
+final class PayloadPackagingRemote extends MasterToSlaveCallable<FilePath, IOException> implements PayloadPackaging {
     private static final long serialVersionUID = 1L;
     private transient VirtualChannel _channel;
     private RemoteOutputStream _logger;
-    private JobModel _model;
+    private SastJobModel _model;
     private String _technologyStack;
     private Boolean _openSourceAnalysis;
     private FilePath _payload;
     private FilePath _workspace;
     private String _globalSCPath;
 
-    PayloadPackagingRemote(JobModel model, String technologyStack, Boolean openSourceAnalysis, String globalSCPath, FilePath workspace, Launcher launcher, PrintStream logger) {
+    PayloadPackagingRemote(SastJobModel model, String technologyStack, Boolean openSourceAnalysis, String globalSCPath, FilePath workspace, Launcher launcher, PrintStream logger) {
         _model = model;
         _technologyStack = technologyStack;
         _openSourceAnalysis = openSourceAnalysis;
@@ -449,6 +447,7 @@ class PayloadPackagingRemote extends MasterToSlaveCallable<FilePath, IOException
     }
 }
 
+@SuppressFBWarnings("SE_NO_SERIALVERSIONID")
 class RemotePayloadCleanup implements FilePath.FileCallable<Boolean> {
     private RemoteOutputStream _logger;
 
@@ -461,7 +460,10 @@ class RemotePayloadCleanup implements FilePath.FileCallable<Boolean> {
         PrintStream logger = new PrintStream(_logger, true, StandardCharsets.UTF_8.name());
 
         logger.println("Deleting remote file " + file.getAbsolutePath());
-        return file.delete();
+        Boolean res = file.delete();
+
+        logger.close();
+        return res;
     }
 
     @Override

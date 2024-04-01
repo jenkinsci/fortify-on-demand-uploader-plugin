@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.fodupload.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
 public class PutDastAutomatedGraphQlReqModel extends PutDastScanSetupReqModel {
     public FodEnums.ApiSourceType SourceType;
     public String SourceUrn;

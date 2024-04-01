@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.46</version>
-        <relativePath />
+        <version>4.80</version>
+        <relativePath/>
     </parent>
 
     <artifactId>fortify-on-demand-uploader</artifactId>
@@ -14,8 +14,7 @@
     <packaging>hpi</packaging>
 
     <properties>
-        <jenkins.version>2.289</jenkins.version>
-        <java.level>8</java.level>
+        <jenkins.version>2.375</jenkins.version>
         <jenkins-test-harness.version>2.47</jenkins-test-harness.version>
         <disabledTestInjection>true</disabledTestInjection>
         <skipTests>false</skipTests>
@@ -34,7 +33,9 @@
     </dependencyManagement>
     -->
     <name>Fortify on Demand</name>
-    <description>Gathers build artifacts and uploads them to the Fortify on Demand service with user-specified options.</description>
+    <description>Gathers build artifacts and uploads them to the Fortify on Demand service with user-specified
+        options.
+    </description>
     <url>https://github.com/jenkinsci/fortify-on-demand-uploader-plugin</url>
 
     <licenses>
@@ -45,8 +46,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:jenkinsci/fortify-on-demand-uploader-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/fortify-on-demand-uploader-plugin.git</developerConnection>
+        <connection>scm:git:https://github.com/jenkinsci/fortify-on-demand-uploader-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/fortify-on-demand-uploader-plugin.git
+        </developerConnection>
         <url>https://github.com/jenkinsci/fortify-on-demand-uploader-plugin</url>
         <tag>HEAD</tag>
     </scm>
@@ -172,7 +174,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
-            <version>3.8.1</version>
+            <version>3.9.6</version>
         </dependency>
     </dependencies>
 
@@ -206,11 +208,22 @@
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>
                 <artifactId>maven-hpi-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
                     <loggers>
                         <!-- for local pipeline testing -->
                         <org.jenkinsci.plugins.workflow>FINE</org.jenkinsci.plugins.workflow>
                     </loggers>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.8.3.1</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <failOnError>false</failOnError>
+                    <maxHeap>1024</maxHeap>
                 </configuration>
             </plugin>
         </plugins>

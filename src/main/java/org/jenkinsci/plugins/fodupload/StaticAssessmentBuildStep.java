@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  */
 
 @SuppressWarnings("unused")
-public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
+final public class StaticAssessmentBuildStep extends Recorder implements SimpleBuildStep {
 
     private static final BsiTokenParser tokenParser = new BsiTokenParser();
 

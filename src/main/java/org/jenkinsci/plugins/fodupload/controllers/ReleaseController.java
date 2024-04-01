@@ -5,13 +5,11 @@ import com.google.gson.reflect.TypeToken;
 
 import okhttp3.HttpUrl;
 import okhttp3.Request;
-import okhttp3.Response;
-import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
 import org.jenkinsci.plugins.fodupload.models.AuditPreferenceOptionsModel;
 import org.jenkinsci.plugins.fodupload.models.FodApiFilterList;
-import org.jenkinsci.plugins.fodupload.models.JobModel;
+import org.jenkinsci.plugins.fodupload.models.SastJobModel;
 import org.jenkinsci.plugins.fodupload.models.response.*;
 
 import java.io.IOException;
@@ -177,7 +175,7 @@ public class ReleaseController extends ControllerBase {
      * @param model JobModel
      *              at_return returns assessment type obj
      */
-    ReleaseAssessmentTypeDTO getAssessmentType(final JobModel model) throws IOException, URISyntaxException {
+    ReleaseAssessmentTypeDTO getAssessmentType(final SastJobModel model) throws IOException, URISyntaxException {
 
 
         FodApiFilterList filters = new FodApiFilterList()

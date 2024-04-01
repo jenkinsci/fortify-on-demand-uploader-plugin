@@ -3,9 +3,7 @@ package org.jenkinsci.plugins.fodupload.controllers;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import hudson.util.IOUtils;
 import okhttp3.*;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
 import org.jenkinsci.plugins.fodupload.FodApi.ResponseContent;
@@ -50,7 +48,7 @@ public class StaticScanController extends ControllerBase {
      *                      at_return true if the scan succeeded
      */
     @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "The intent of the catch-all is to make sure that the Jenkins user and logs show the plugin's problem in the build log.")
-    public StartScanResponse startStaticScan(Integer releaseId, final JobModel uploadRequest, final String notes) {
+    public StartScanResponse startStaticScan(Integer releaseId, final SastJobModel uploadRequest, final String notes) {
         try {
             println("Getting Assessment");
 
@@ -116,7 +114,7 @@ public class StaticScanController extends ControllerBase {
         return dateFormat.format(LocalDateTime.now());
     }
 
-    private void buildBsiRequest(final HttpUrl.Builder builder, final JobModel uploadRequest) {
+    private void buildBsiRequest(final HttpUrl.Builder builder, final SastJobModel uploadRequest) {
         builder
                 .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", uploadRequest.getBsiToken().getReleaseId()))
                 .addQueryParameter("entitlementPreferenceType", uploadRequest.getEntitlementPreference())
@@ -124,13 +122,13 @@ public class StaticScanController extends ControllerBase {
                 .addQueryParameter("bsiToken", uploadRequest.getBsiTokenOriginal());
     }
 
-    private void buildReleaseSettingsRequest(final HttpUrl.Builder builder, final Integer releaseId, final JobModel uploadRequest) {
+    private void buildReleaseSettingsRequest(final HttpUrl.Builder builder, final Integer releaseId, final SastJobModel uploadRequest) {
         builder
                 .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced-with-defaults", releaseId))
                 .addQueryParameter("remediationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType());
     }
 
-    private void buildPipelineRequest(final HttpUrl.Builder builder, final Integer releaseId, final JobModel uploadRequest) {
+    private void buildPipelineRequest(final HttpUrl.Builder builder, final Integer releaseId, final SastJobModel uploadRequest) {
         builder.addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced-with-defaults", releaseId));
 
         if (!Utils.isNullOrEmpty(uploadRequest.getAssessmentType())) builder.addQueryParameter("assessmentTypeId", uploadRequest.getAssessmentType());
@@ -156,7 +154,7 @@ public class StaticScanController extends ControllerBase {
             builder.addQueryParameter("remediationScanPreferenceType", uploadRequest.getRemediationScanPreferenceType());
     }
 
-    private Integer upsertApplicationAndRelease(final JobModel job) throws Exception {
+    private Integer upsertApplicationAndRelease(final SastJobModel job) throws Exception {
         ReleaseController relCntr = new ReleaseController(apiConnection, logger, correlationId);
         Integer releaseId = relCntr.getReleaseIdByName(job.getApplicationName(), job.getReleaseName(), job.getIsMicroservice(), job.getMicroserviceName());
 

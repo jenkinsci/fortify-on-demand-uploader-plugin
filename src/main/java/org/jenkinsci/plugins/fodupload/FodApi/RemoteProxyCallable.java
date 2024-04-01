@@ -42,7 +42,7 @@ class RemoteProxyCallable extends MasterToSlaveCallable<ResponseContent, IOExcep
     @Override
     public ResponseContent call() throws IOException {
         log("Remote http call:\n\tVerb: " + _request.verb() + "\n\tURL: " + _request.url());
-        OkHttpClient client = Utils.CreateOkHttpClient(_connectionTimeout, _writeTimeout, _readTimeout, _proxy);
+        OkHttpClient client = Utils.createOkHttpClient(_connectionTimeout, _writeTimeout, _readTimeout, _proxy);
         Request request = Utils.HttpRequestToOkHttpRequest(_request);
 
         return Utils.ResponseContentFromOkHttp3(client.newCall(request).execute());
