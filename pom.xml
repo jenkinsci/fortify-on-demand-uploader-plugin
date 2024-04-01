@@ -7,7 +7,7 @@
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <version>4.80</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <artifactId>fortify-on-demand-uploader</artifactId>
