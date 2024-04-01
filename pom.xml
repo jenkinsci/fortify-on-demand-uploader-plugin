@@ -2,12 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <version>4.80</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>fortify-on-demand-uploader</artifactId>
@@ -34,7 +33,9 @@
     </dependencyManagement>
     -->
     <name>Fortify on Demand</name>
-    <description>Gathers build artifacts and uploads them to the Fortify on Demand service with user-specified options.</description>
+    <description>Gathers build artifacts and uploads them to the Fortify on Demand service with user-specified
+        options.
+    </description>
     <url>https://github.com/jenkinsci/fortify-on-demand-uploader-plugin</url>
 
     <licenses>
@@ -46,7 +47,8 @@
 
     <scm>
         <connection>scm:git:https://github.com/jenkinsci/fortify-on-demand-uploader-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/fortify-on-demand-uploader-plugin.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/fortify-on-demand-uploader-plugin.git
+        </developerConnection>
         <url>https://github.com/jenkinsci/fortify-on-demand-uploader-plugin</url>
         <tag>HEAD</tag>
     </scm>
@@ -172,7 +174,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
-            <version>3.8.1</version>
+            <version>3.9.6</version>
         </dependency>
     </dependencies>
 
@@ -206,6 +208,7 @@
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>
                 <artifactId>maven-hpi-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
                     <loggers>
                         <!-- for local pipeline testing -->
