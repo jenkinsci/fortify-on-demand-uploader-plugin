@@ -168,7 +168,7 @@ final class PayloadPackagingImpl {
                     if (userScanCentralOpenSourceSupportVersion.compareTo(minScanCentralOpenSourceSupportVersion) < 0 && userScanCentralOpenSourceSupportVersion.compareTo(oldVersionScanCentralOpenSourceSupportVersionone) != 0) {
                         logger.println("Warning message : If you are submitting Debricked OSS scan. Scan might fail due to to missing required dependency files");
                     } else {
-                        scanCentralPackageCommandList.add("--oss");
+                        scanCentralPackageCommandList.add("-oss");
                     }
                 }
 
