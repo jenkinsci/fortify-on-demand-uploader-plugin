@@ -172,7 +172,7 @@ final class PayloadPackagingImpl {
                     }
                 }
 
-                scanCentralPackageCommandList.add("--bt");
+                scanCentralPackageCommandList.add("-bt");
 
                 switch (buildType) {
                     case Gradle:
@@ -265,7 +265,7 @@ final class PayloadPackagingImpl {
                     }
                 }
 
-                scanCentralPackageCommandList.add("--o");
+                scanCentralPackageCommandList.add("-o");
                 scanCentralPackageCommandList.add("\"" + outputZipFolderPath.toString() + "\"");
 
                 logger.println("Packaging ScanCentral\n" + String.join(" ", scanCentralPackageCommandList));
