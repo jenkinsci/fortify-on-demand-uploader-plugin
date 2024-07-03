@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>fortify-on-demand-uploader</artifactId>
-    <version>8.1-SNAPSHOT</version>
+    <version>8.0.2-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <properties>
