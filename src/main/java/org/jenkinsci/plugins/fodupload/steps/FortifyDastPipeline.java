@@ -11,7 +11,6 @@ import hudson.model.Result;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
-import org.apache.commons.fileupload.FileUploadException;
 import org.jenkinsci.plugins.fodupload.ApiConnectionFactory;
 import org.jenkinsci.plugins.fodupload.DastScanSharedBuildStep;
 import org.jenkinsci.plugins.fodupload.FodApi.FodApiConnection;
@@ -820,7 +819,7 @@ public class FortifyDastPipeline extends FortifyStep {
                 Utils.logger(printStream, String.format("Failed to upload login macro file %s for release Id:%s",
                         loginMacroFilePath, releaseId));
 
-                throw new FileUploadException(String.format("Failed to upload login macro file %s for release Id:%s",
+                throw new Exception(String.format("Failed to upload login macro file %s for release Id:%s",
                         loginMacroFilePath, releaseId));
             } else {
                 this.loginMacroFileId = String.valueOf(patchUploadResponse.fileId);
@@ -854,7 +853,7 @@ public class FortifyDastPipeline extends FortifyStep {
                 Utils.logger(printStream, String.format("Failed to upload workflow macro file %s for release Id:%s",
                         this.workflowMacroFilePath, releaseId));
 
-                throw new FileUploadException(String.format("Failed to upload workflow macro file %s for release Id:%s",
+                throw new Exception(String.format("Failed to upload workflow macro file %s for release Id:%s",
                         this.workflowMacroFilePath, releaseId));
             } else {
                 this.workflowMacroId = String.valueOf(patchDastFileUploadResponse.fileId);

@@ -8,7 +8,6 @@ import hudson.remoting.RemoteOutputStream;
 import hudson.remoting.VirtualChannel;
 import jenkins.security.MasterToSlaveCallable;
 import okhttp3.*;
-import org.apache.commons.httpclient.HttpStatus;
 import org.jenkinsci.plugins.fodupload.models.SastJobModel;
 import org.jenkinsci.plugins.fodupload.models.response.GenericErrorResponse;
 import org.jenkinsci.plugins.fodupload.models.response.PostStartScanResponse;
@@ -72,7 +71,7 @@ final class ScanPayloadUploadImpl {
                 // Get the response
                 Response response = client.newCall(request).execute();
 
-                if (response.code() == HttpStatus.SC_FORBIDDEN || response.code() == HttpStatus.SC_UNAUTHORIZED) {  // got logged out during polling so log back in
+                if (response.code() == 403 || response.code() == 401) {  // got logged out during polling so log back in
                     String raw = Utils.getRawBody(response.body().byteStream());
 
                     response.body().close();

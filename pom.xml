@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.80</version>
+        <version>4.88</version>
         <relativePath />
     </parent>
 
@@ -13,24 +13,24 @@
     <packaging>hpi</packaging>
 
     <properties>
-        <jenkins.version>2.375</jenkins.version>
-        <jenkins-test-harness.version>2.47</jenkins-test-harness.version>
+        <jenkins.baseline>2.462</jenkins.baseline>
+        <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <disabledTestInjection>true</disabledTestInjection>
         <skipTests>false</skipTests>
+        <spotbugs.effort>Max</spotbugs.effort>
+        <spotbugs.failOnError>false</spotbugs.failOnError>
     </properties>
-    <!--
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.263.x</artifactId>
-                <version>28</version>
+                <artifactId>bom-${jenkins.baseline}.x</artifactId>
+                <version>4228.v0a_71308d905b_</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
-    -->
     <name>Fortify on Demand</name>
     <description>Gathers build artifacts and uploads them to the Fortify on Demand service with user-specified
         options.
@@ -49,7 +49,7 @@
         <developerConnection>scm:git:git@github.com:jenkinsci/fortify-on-demand-uploader-plugin.git
         </developerConnection>
         <url>https://github.com/jenkinsci/fortify-on-demand-uploader-plugin</url>
-        <tag>fortify-on-demand-uploader-8.0.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <developers>
@@ -84,96 +84,69 @@
     </pluginRepositories>
 
     <dependencies>
-        <!-- for Configuration as a Code -->
         <dependency>
             <groupId>io.jenkins</groupId>
             <artifactId>configuration-as-code</artifactId>
-            <scope>compile</scope>
-            <version>1.47</version>
         </dependency>
-        <!-- for Configuration as a Code test-->
         <dependency>
             <groupId>io.jenkins.configuration-as-code</groupId>
             <artifactId>test-harness</artifactId>
             <scope>test</scope>
-            <version>1.47</version>
         </dependency>
-        <!-- for Jenkins Pipelines -->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>2.19</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>3.9.0</version>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>okhttp-api</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.squareup.okio/okio -->
         <dependency>
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio</artifactId>
-            <version>1.13.0</version>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>gson-api</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.7</version>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>commons-compress-api</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+            <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.3</version>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>apache-httpcomponents-client-4-api</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>commons-lang3-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>plain-credentials</artifactId>
-            <version>1.5</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
-            <version>2.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>structs</artifactId>
-            <version>1.19</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci</groupId>
             <artifactId>symbol-annotation</artifactId>
-            <version>1.22</version>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>jquery3-api</artifactId>
-            <version>3.5.1-2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
-            <version>3.9.6</version>
+            <version>3.9.10</version>
         </dependency>
     </dependencies>
 
@@ -213,16 +186,6 @@
                         <!-- for local pipeline testing -->
                         <org.jenkinsci.plugins.workflow>FINE</org.jenkinsci.plugins.workflow>
                     </loggers>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>4.8.3.1</version>
-                <configuration>
-                    <effort>Max</effort>
-                    <failOnError>false</failOnError>
-                    <maxHeap>1024</maxHeap>
                 </configuration>
             </plugin>
         </plugins>
